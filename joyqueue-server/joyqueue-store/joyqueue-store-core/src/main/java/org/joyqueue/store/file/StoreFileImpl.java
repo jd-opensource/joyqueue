@@ -25,7 +25,9 @@ import sun.misc.Cleaner;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -74,6 +76,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private boolean writeClosed = false;
     // 已完成刷盘，所有数据都安全的写入到磁盘上了
     private boolean flushClosed = false;
+    private String stackTrace = "";
 
     public StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength) {
         this.filePosition = filePosition;
@@ -333,6 +336,10 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     private void touch() {
         lastAccessTime = SystemClock.now();
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        new Throwable().printStackTrace(pw);
+        stackTrace = sw.toString();
     }
 
     /**
@@ -374,6 +381,10 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         }
     }
 
+    @Override
+    public String getStackTrace() {
+        return stackTrace;
+    }
 
     private int flushPageBuffer(FileChannel fileChannel) throws IOException {
         int flushEnd = writePosition;

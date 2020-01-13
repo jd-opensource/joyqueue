@@ -16,6 +16,7 @@
 package org.joyqueue.store.utils;
 
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
+import org.joyqueue.store.file.StoreFileImpl;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.format.Format;
 import org.joyqueue.toolkit.time.SystemClock;
@@ -103,30 +104,31 @@ public class PreloadBufferPool {
         return LoopThread.builder()
                 .name("DirectBufferPrintThread")
                 .sleepTime(printMetricInterval, printMetricInterval)
-                .doWork(() -> {
-                    long totalUsed = usedSize.get();
-                    long plUsed = bufferCache.values().stream().mapToLong(preLoadCache -> {
-                        long cached = preLoadCache.cache.size();
-                        long usedPreLoad = preLoadCache.onFlyCounter.get();
-                        long totalSize = preLoadCache.bufferSize * (cached + usedPreLoad);
-                        logger.info("PreloadCache usage: cached: {} * {} = {}, used: {} * {} = {}, total: {}",
-                                Format.formatSize(preLoadCache.bufferSize), cached, Format.formatSize(preLoadCache.bufferSize * cached),
-                                Format.formatSize(preLoadCache.bufferSize), usedPreLoad, Format.formatSize(preLoadCache.bufferSize * usedPreLoad),
-                                Format.formatSize(totalSize));
-                        return totalSize;
-                    }).sum();
-                    long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
-                    long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
-                    logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
-                            Format.formatSize(plUsed),
-                            Format.formatSize(directUsed),
-                            Format.formatSize(mmpUsed),
-                            Format.formatSize(totalUsed),
-                            Format.formatSize(maxMemorySize));
-
-                })
+                .doWork(this::printMetric)
                 .daemon(true)
                 .build();
+    }
+
+    private void printMetric() {
+        long totalUsed = usedSize.get();
+        long plUsed = bufferCache.values().stream().mapToLong(preLoadCache -> {
+            long cached = preLoadCache.cache.size();
+            long usedPreLoad = preLoadCache.onFlyCounter.get();
+            long totalSize = preLoadCache.bufferSize * (cached + usedPreLoad);
+            logger.info("PreloadCache usage: cached: {} * {} = {}, used: {} * {} = {}, total: {}",
+                    Format.formatSize(preLoadCache.bufferSize), cached, Format.formatSize(preLoadCache.bufferSize * cached),
+                    Format.formatSize(preLoadCache.bufferSize), usedPreLoad, Format.formatSize(preLoadCache.bufferSize * usedPreLoad),
+                    Format.formatSize(totalSize));
+            return totalSize;
+        }).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
+                Format.formatSize(plUsed),
+                Format.formatSize(directUsed),
+                Format.formatSize(mmpUsed),
+                Format.formatSize(totalUsed),
+                Format.formatSize(maxMemorySize));
     }
 
     private LoopThread buildPreloadThread() {
@@ -155,11 +157,15 @@ public class PreloadBufferPool {
      * 清除文件缓存页。LRU。
      */
     private void evict() {
+        printMetric();
+        logger.info("先清除过期数据...");
         // 先清除过期的
         Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
                 .filter(holder -> SystemClock.now() - holder.lastAccessTime() > cacheLifetimeMs)
                 .forEach(BufferHolder::evict);
 
+        printMetric();
+        logger.info("清理超过maxCount的缓存页...");
 
         // 清理超过maxCount的缓存页
         for (PreLoadCache preLoadCache : bufferCache.values()) {
@@ -173,10 +179,12 @@ public class PreloadBufferPool {
                 }
             }
         }
-
+        printMetric();
         // 清理使用中最旧的页面，直到内存占用率达标
 
         if (usedSize.get() > maxMemorySize * EVICT_RATIO) {
+            logger.info("清理使用中最旧的页面，直到内存占用率达标...");
+
             List<LruWrapper<BufferHolder>> sorted;
             sorted = Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
                     .filter(BufferHolder::isFree)
@@ -184,13 +192,27 @@ public class PreloadBufferPool {
                     .sorted(Comparator.comparing(LruWrapper::getLastAccessTime))
                     .collect(Collectors.toList());
 
+            logger.info("可清理的页面数量: {}, 大小：{}.",
+                    sorted.size(),
+                    Format.formatSize(sorted.stream().mapToLong(w -> w.get().size()).sum())
+            );
+
             while (usedSize.get() > maxMemorySize * EVICT_RATIO && !sorted.isEmpty()) {
                 LruWrapper<BufferHolder> wrapper = sorted.remove(0);
                 BufferHolder holder = wrapper.get();
                 if (holder.lastAccessTime() == wrapper.getLastAccessTime()) {
                     holder.evict();
+                } else {
+                    logger.warn("清理期间文件被访问, 文件: {}, StackTrace: {}.",
+                            ((StoreFileImpl)holder).file().getAbsolutePath(), holder.getStackTrace());
                 }
             }
+            logger.info("清理完成后的页面数量: {}, 大小：{}.",
+                    sorted.size(),
+                    Format.formatSize(sorted.stream().mapToLong(w -> w.get().size()).sum())
+            );
+
+            printMetric();
         }
 
 
@@ -324,7 +346,7 @@ public class PreloadBufferPool {
         directBufferHolders.remove(bufferHolder);
         int size = byteBuffer.capacity();
         PreLoadCache preLoadCache = bufferCache.get(size);
-        if (null != preLoadCache) {
+        if (null != preLoadCache && preLoadCache.cache.size() < preLoadCache.maxCount) {
             byteBuffer.clear();
             preLoadCache.cache.add(byteBuffer);
             preLoadCache.onFlyCounter.getAndDecrement();

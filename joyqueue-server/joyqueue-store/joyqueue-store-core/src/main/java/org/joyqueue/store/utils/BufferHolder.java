@@ -22,6 +22,8 @@ package org.joyqueue.store.utils;
  * Date: 2019-03-28
  */
 public interface BufferHolder extends Timed {
+    String getStackTrace();
+
     /**
      * Buffer大小
      */
