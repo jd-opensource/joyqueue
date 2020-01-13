@@ -115,8 +115,8 @@ public class PreloadBufferPool {
                                 Format.formatSize(totalSize));
                         return totalSize;
                     }).sum();
-                    long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
-                    long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+                    long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+                    long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
                     logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
                             Format.formatSize(plUsed),
                             Format.formatSize(directUsed),
