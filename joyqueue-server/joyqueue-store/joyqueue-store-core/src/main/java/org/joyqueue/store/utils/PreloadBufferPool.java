@@ -201,10 +201,14 @@ public class PreloadBufferPool {
                 LruWrapper<BufferHolder> wrapper = sorted.remove(0);
                 BufferHolder holder = wrapper.get();
                 if (holder.lastAccessTime() == wrapper.getLastAccessTime()) {
-                    holder.evict();
+                    boolean success = holder.evict();
+                    if(!success) {
+                        logger.warn("清理文件失败，文件: {}.",
+                                ((StoreFileImpl)holder).file().getAbsolutePath());
+                    }
                 } else {
-                    logger.warn("清理期间文件被访问, 文件: {}, StackTrace: {}.",
-                            ((StoreFileImpl)holder).file().getAbsolutePath(), holder.getStackTrace());
+                    logger.warn("清理期间文件被访问, 文件: {}.",
+                            ((StoreFileImpl)holder).file().getAbsolutePath());
                 }
             }
             logger.info("清理完成后的页面数量: {}, 大小：{}.",
@@ -346,9 +350,13 @@ public class PreloadBufferPool {
         directBufferHolders.remove(bufferHolder);
         int size = byteBuffer.capacity();
         PreLoadCache preLoadCache = bufferCache.get(size);
-        if (null != preLoadCache && preLoadCache.cache.size() < preLoadCache.maxCount) {
-            byteBuffer.clear();
-            preLoadCache.cache.add(byteBuffer);
+        if (null != preLoadCache ) {
+            if (preLoadCache.cache.size() < preLoadCache.maxCount) {
+                byteBuffer.clear();
+                preLoadCache.cache.add(byteBuffer);
+            } else {
+                destroyOne(byteBuffer);
+            }
             preLoadCache.onFlyCounter.getAndDecrement();
         } else {
             destroyOne(byteBuffer);
