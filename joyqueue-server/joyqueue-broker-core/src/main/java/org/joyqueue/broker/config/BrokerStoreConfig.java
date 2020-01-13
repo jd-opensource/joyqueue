@@ -17,7 +17,6 @@ package org.joyqueue.broker.config;
 
 import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
-
 import static org.joyqueue.toolkit.config.Property.APPLICATION_DATA_PATH;
 
 /**
@@ -31,7 +30,7 @@ public class BrokerStoreConfig {
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_END = 10 * 60 * 1000;
     public static final boolean DEFAULT_KEEP_UNCONSUMED = true;
     public static final int DEFAULT_FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD = 90;
-    public static final String DEFAULT_APPLICATION_DATA_PATH="/export/data";
+    public static final int DEFAULT_FORCE_CLEAN_WAL_BUFFER_FRACTION=1;
     private PropertySupplier propertySupplier;
 
 
@@ -47,8 +46,8 @@ public class BrokerStoreConfig {
         CLEAN_SCHEDULE_BEGIN("store.clean.schedule.begin", DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN, Type.LONG),
         CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG),
         FORCE_RESTORE("store.force.restore", true, Type.BOOLEAN),
-        APPLICATION_DATA_PATH("application.data.path",DEFAULT_APPLICATION_DATA_PATH,Type.STRING),
-        FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD("store.force.clean.wal.occupancy.fraction.threshold",DEFAULT_FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD,Type.INT);
+        FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD("store.force.clean.wal.occupancy.fraction.threshold",DEFAULT_FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD,Type.INT),
+        FORCE_CLEAN_WAL_BUFFER_FRACTION("store.force.clean.wal.buffer.fraction",DEFAULT_FORCE_CLEAN_WAL_BUFFER_FRACTION,Type.INT);
         private String name;
         private Object value;
         private Type type;
@@ -103,6 +102,12 @@ public class BrokerStoreConfig {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.FORCE_RESTORE);
     }
 
+    /**
+     * Once wal storage reach force clean threshold, at least clean storage fraction
+     **/
+    public int getForceCleanWALBufferFraction(){
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.FORCE_CLEAN_WAL_BUFFER_FRACTION);
+    }
     /**
      *
      *  Start to force clean consumed log threshold
