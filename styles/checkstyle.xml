@@ -48,12 +48,12 @@
         <property name="message" value="Code snippets longer than 76 characters get cut off when rendered in the docs"/>
     </module>
 
-    <module name="RegexpMultiline">
-        <property name="id" value="PrintStackTraceCheck"/>
-        <property name="format" value="printStackTrace"/>
-        <property name="fileExtensions" value="java"/>
-        <property name="message" value="Could not use printStackTrace."/>
-    </module>
+<!--    <module name="RegexpMultiline">-->
+<!--        <property name="id" value="PrintStackTraceCheck"/>-->
+<!--        <property name="format" value="printStackTrace"/>-->
+<!--        <property name="fileExtensions" value="java"/>-->
+<!--        <property name="message" value="Could not use printStackTrace."/>-->
+<!--    </module>-->
  <module name="RegexpMultiline">
         <property name="id" value="SystemClockCheck"/>
         <property name="format" value="System\.currentTimeMillis"/>
