@@ -18,6 +18,8 @@ package org.joyqueue.nsr.nameservice;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
@@ -34,13 +36,10 @@ import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.nsr.util.DCWrapper;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -70,10 +69,6 @@ public class NameServiceCacheManager extends Service {
     @Override
     protected void validate() throws Exception {
         nameServiceCacheDoubleCopy = new NameServiceCacheDoubleCopy(new File(config.getAllMetadataCacheFile()));
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(URLEncoder.encode("operator=UPDATE topic set partitions = ? where code = ?&params=[\"96\", \"ghx_test_0\"]"));
     }
 
     @Override

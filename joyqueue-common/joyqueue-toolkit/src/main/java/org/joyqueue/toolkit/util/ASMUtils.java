@@ -96,7 +96,7 @@ public class ASMUtils {
                 return new MethodVisitor(Opcodes.ASM6) {
                     @Override
                     public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
-                        if (!name.equals("this") && index <= targetMethod[0].getParameterTypes().length) {
+                        if (!name.equals("this") && (index - 1) <= targetMethod[0].getParameterTypes().length) {
                             result.put(name, convertType(descriptor));
                         }
                         super.visitLocalVariable(name, descriptor, signature, start, end, index);

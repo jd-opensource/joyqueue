@@ -15,14 +15,14 @@
  */
 package org.joyqueue.network.transport.command.support;
 
+import org.joyqueue.network.protocol.ExceptionHandlerProvider;
+import org.joyqueue.network.protocol.Protocol;
+import org.joyqueue.network.transport.RequestBarrier;
 import org.joyqueue.network.transport.command.CommandDispatcher;
 import org.joyqueue.network.transport.command.CommandDispatcherFactory;
 import org.joyqueue.network.transport.command.handler.CommandHandlerFactory;
 import org.joyqueue.network.transport.command.handler.ExceptionHandler;
 import org.joyqueue.network.transport.command.handler.filter.CommandHandlerFilterFactory;
-import org.joyqueue.network.protocol.ExceptionHandlerProvider;
-import org.joyqueue.network.protocol.Protocol;
-import org.joyqueue.network.transport.RequestBarrier;
 import org.joyqueue.network.transport.config.TransportConfig;
 
 /**
@@ -56,9 +56,11 @@ public class DefaultCommandDispatcherFactory implements CommandDispatcherFactory
 
     protected ExceptionHandler getExceptionHandler(Protocol protocol) {
         if (protocol instanceof ExceptionHandlerProvider) {
-            return ((ExceptionHandlerProvider) protocol).getExceptionHandler();
-        } else {
-            return this.exceptionHandler;
+            ExceptionHandler customExceptionHandler = ((ExceptionHandlerProvider) protocol).getExceptionHandler();
+            if (customExceptionHandler != null) {
+                return customExceptionHandler;
+            }
         }
+        return this.exceptionHandler;
     }
 }

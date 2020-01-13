@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,7 @@
 package org.joyqueue.broker.monitor.service.support;
 
 import com.sun.management.GcInfo;
+import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.election.ElectionService;
@@ -58,7 +59,7 @@ import java.util.Map;
 
 /**
  * BrokerMonitorInternalService
- *
+ * <p>
  * author: gaohaoxiang
  * date: 2018/10/15
  */
@@ -74,13 +75,14 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private ClusterManager clusterManager;
     private BrokerStartupInfo brokerStartupInfo;
     private JVMMonitorService jvmMonitorService;
+    private ArchiveManager archiveManager;
     private DefaultGCNotificationParser gcNotificationParser;
 
 
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
                                                StoreManagementService storeManagementService,
                                                NameService nameService, StoreService storeService,
-                                               ElectionService electionManager, ClusterManager clusterManager, BrokerStartupInfo brokerStartupInfo) {
+                                               ElectionService electionManager, ClusterManager clusterManager, BrokerStartupInfo brokerStartupInfo, ArchiveManager archiveManager) {
         this.brokerStat = brokerStat;
         this.consume = consume;
         this.storeManagementService = storeManagementService;
@@ -89,10 +91,11 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.electionService = electionManager;
         this.clusterManager = clusterManager;
         this.brokerStartupInfo = brokerStartupInfo;
-        this.jvmMonitorService=new GarbageCollectorMonitor();
-        this.gcNotificationParser=new DefaultGCNotificationParser();
+        this.jvmMonitorService = new GarbageCollectorMonitor();
+        this.gcNotificationParser = new DefaultGCNotificationParser();
         this.gcNotificationParser.addListener(new DefaultGCEventListener(brokerStat.getJvmStat()));
         this.jvmMonitorService.addGCEventListener(gcNotificationParser);
+        this.archiveManager = archiveManager;
 
     }
 
@@ -130,7 +133,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     // BrokerStatExt里所有对象单独生成bean，不能复用monitor的bean
     @Override
     public BrokerStatExt getExtendBrokerStat(long timeStamp) {
-        BrokerStatExt statExt=new BrokerStatExt(brokerStat);
+        BrokerStatExt statExt = new BrokerStatExt(brokerStat);
         statExt.setTimeStamp(timeStamp);
         getJVMState(); // update current jvm state and memory stat
         statExt.getBrokerStat().getJvmStat().getRecentSnapshot();
@@ -200,19 +203,21 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         // runtime memory usage state
         runtimeMemoryUsageState(statExt);
         runtimeStorageOccupy(brokerStat);
+        statExt.setArchiveConsumePending(archiveManager.getConsumeBacklogNum());
+        statExt.setArchiveProducePending(archiveManager.getSendBacklogNum());
+        statExt.setTopicArchiveProducePending(archiveManager.getSendBacklogNumByTopic());
         return statExt;
     }
 
     /**
-     *  Replica log max position snapshots
-     *
+     * Replica log max position snapshots
      **/
-    public void snapshotReplicaLag(){
-        Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
-        for(TopicStat topicStat:topicStatMap.values()){
-            Map<Integer, PartitionGroupStat> partitionGroupStatMap= topicStat.getPartitionGroupStatMap();
-            for(PartitionGroupStat partitionGroupStat:partitionGroupStatMap.values()){
-                StoreManagementService.PartitionGroupMetric partitionGroupMetric=storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(),partitionGroupStat.getPartitionGroup());
+    public void snapshotReplicaLag() {
+        Map<String, TopicStat> topicStatMap = brokerStat.getTopicStats();
+        for (TopicStat topicStat : topicStatMap.values()) {
+            Map<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
+            for (PartitionGroupStat partitionGroupStat : partitionGroupStatMap.values()) {
+                StoreManagementService.PartitionGroupMetric partitionGroupMetric = storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(), partitionGroupStat.getPartitionGroup());
                 partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
             }
         }
@@ -252,18 +257,17 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
 
 
     /**
-    * fill heap and non-heap memory usage state of current
-    *
-    **/
-   public void runtimeMemoryUsageState(BrokerStatExt brokerStatExt){
-       MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-       brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
-       brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
-   }
+     * fill heap and non-heap memory usage state of current
+     **/
+    public void runtimeMemoryUsageState(BrokerStatExt brokerStatExt) {
+        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+        brokerStatExt.setHeap(memoryMXBean.getHeapMemoryUsage());
+        brokerStatExt.setNonHeap(memoryMXBean.getNonHeapMemoryUsage());
+    }
 
     @Override
     public JVMStat getJVMState() {
-        JVMStat jvmStat=brokerStat.getJvmStat();
+        JVMStat jvmStat = brokerStat.getJvmStat();
         jvmStat.setMemoryStat(jvmMonitorService.memSnapshot());
         return jvmStat;
     }
@@ -275,13 +279,13 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     }
 
 
-   /**
-    *  store storage size
-    **/
-   public void runtimeStorageOccupy(BrokerStat stat){
-       double totalSpace=storeManagementService.totalSpace();
-       double freeSpace=storeManagementService.freeSpace();
-       int percentage=(int)((1-freeSpace/totalSpace)*100);
-       stat.setStoragePercent(percentage);
-   }
+    /**
+     * store storage size
+     **/
+    public void runtimeStorageOccupy(BrokerStat stat) {
+        double totalSpace = storeManagementService.totalSpace();
+        double freeSpace = storeManagementService.freeSpace();
+        int percentage = (int) ((1 - freeSpace / totalSpace) * 100);
+        stat.setStoragePercent(percentage);
+    }
 }

@@ -15,6 +15,7 @@
  */
 package org.joyqueue.server.retry.remote;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.network.command.CommandType;
@@ -36,7 +37,6 @@ import org.joyqueue.server.retry.remote.config.RemoteRetryConfig;
 import org.joyqueue.server.retry.remote.config.RemoteRetryConfigKey;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.config.PropertySupplier;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,7 +178,7 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
                     }
                 }
             } catch (Exception e) {
-                logger.error("--getRetry error--" + topic + "--" + app, e);
+                logger.error("getRetry exception, topic: {}, app: {}, index: {}, count: {}", topic, app, startIndex, count, e);
 //                throw new JoyQueueException(JoyQueueCode.CN_REQUEST_ERROR, e); 远程重试失败，不抛异常，仅记录日志
             } finally {
                 if (semaphore != null) {
@@ -209,7 +209,8 @@ public class RemoteMessageRetry implements MessageRetry<Long> {
             Command ack = sync(getRetryCountCommand);
 
             if (ack.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode()) {
-                throw new JoyQueueException(JoyQueueCode.RETRY_COUNT, "");
+                logger.error("countRetry exception, topic: {}, app: {}, code: {}", topic, app, ack.getHeader().getStatus());
+                return 0;
             }
 
             GetRetryCountAck payload = (GetRetryCountAck) ack.getPayload();

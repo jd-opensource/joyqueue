@@ -23,6 +23,7 @@ import org.joyqueue.broker.producer.Produce;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.security.Authentication;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -82,5 +83,9 @@ public interface Plugins {
      */
     ExtensionPoint<LimitRejectedStrategy, String> LIMIT_REJECTED_STRATEGY = new ExtensionPointLazy<>(LimitRejectedStrategy.class, SpiLoader.INSTANCE, null, null);
 
+    /**
+     * 跟踪器服务扩展点
+     */
+    ExtensionPoint<PointTracer, String> TRACERERVICE = new ExtensionPointLazy<>(PointTracer.class, SpiLoader.INSTANCE, null, null);
 
 }

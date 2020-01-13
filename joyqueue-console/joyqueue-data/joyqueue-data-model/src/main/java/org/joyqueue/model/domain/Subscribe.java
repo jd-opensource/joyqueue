@@ -72,4 +72,16 @@ public class Subscribe implements Serializable {
     public void setClientType(byte clientType) {
         this.clientType = clientType;
     }
+
+    @Override
+    public String toString() {
+        return "Subscribe{" +
+                "topic=" + topic +
+                ", app=" + app +
+                ", type=" + type +
+                ", clientType=" + clientType +
+                ", namespace=" + namespace +
+                ", subscribeGroup='" + subscribeGroup + '\'' +
+                '}';
+    }
 }

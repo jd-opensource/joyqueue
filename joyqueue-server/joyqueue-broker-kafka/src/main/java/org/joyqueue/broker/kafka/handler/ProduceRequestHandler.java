@@ -18,6 +18,7 @@ package org.joyqueue.broker.kafka.handler;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.kafka.KafkaAcknowledge;
@@ -53,7 +54,6 @@ import org.joyqueue.toolkit.delay.DelayedOperation;
 import org.joyqueue.toolkit.delay.DelayedOperationKey;
 import org.joyqueue.toolkit.delay.DelayedOperationManager;
 import org.joyqueue.toolkit.network.IpUtil;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +69,7 @@ import java.util.concurrent.TimeUnit;
  * author: gaohaoxiang
  * date: 2018/11/6
  */
+@org.joyqueue.network.protocol.annotation.ProduceHandler
 public class ProduceRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceRequestHandler.class);
@@ -124,6 +125,14 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             TopicConfig topicConfig = clusterManager.getTopicConfig(topic);
 
             for (ProduceRequest.PartitionRequest partitionRequest : entry.getValue()) {
+                if (producer == null) {
+                    buildPartitionResponse(partitionRequest.getPartition(), null, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode(), partitionRequest.getMessages(), partitionResponses);
+                    traffic.record(topic.getFullName(), 0);
+                    latch.countDown();
+                    isNeedDelay[0] = true;
+                    continue;
+                }
+
                 short checkCode = checkPartitionRequest(transport, produceRequest, partitionRequest, topic, producer, clientIp);
                 if (checkCode != KafkaErrorCode.NONE.getCode()) {
                     buildPartitionResponse(partitionRequest.getPartition(), null, checkCode, partitionRequest.getMessages(), partitionResponses);
@@ -239,7 +248,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             brokerMessages.add(brokerMessage);
         }
 
-        traffic.record(topic.getFullName(), partitionRequest.getMessages().size());
+        traffic.record(topic.getFullName(), (partitionRequest.getMessages() == null ? 0 : partitionRequest.getMessages().size()));
         producePartitionGroupRequest.getPartitions().add(partitionRequest.getPartition());
         producePartitionGroupRequest.getMessages().addAll(brokerMessages);
         producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);

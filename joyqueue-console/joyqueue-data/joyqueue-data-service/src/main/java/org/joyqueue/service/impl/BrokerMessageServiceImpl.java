@@ -18,18 +18,18 @@ package org.joyqueue.service.impl;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.joyqueue.async.BrokerMonitorClusterQuery;
 import org.joyqueue.async.BrokerClusterQuery;
+import org.joyqueue.async.BrokerMonitorClusterQuery;
 import org.joyqueue.async.RetrieveProvider;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.model.domain.Broker;
+import org.joyqueue.model.domain.SimplifiedBrokeMessage;
+import org.joyqueue.model.domain.Subscribe;
+import org.joyqueue.model.domain.SubscribeType;
 import org.joyqueue.monitor.BrokerMessageInfo;
 import org.joyqueue.monitor.RestResponse;
 import org.joyqueue.monitor.RestResponseCode;
-import org.joyqueue.model.domain.Subscribe;
-import org.joyqueue.model.domain.SubscribeType;
-import org.joyqueue.model.domain.Broker;
-import org.joyqueue.model.domain.SimplifiedBrokeMessage;
 import org.joyqueue.other.HttpRestService;
 import org.joyqueue.service.BrokerMessageService;
 import org.joyqueue.service.LeaderService;
@@ -167,7 +167,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         message.setBusinessId(m.getBusinessId());
         message.setBody(new String(m.getBody().getBytes(Charset.forName("utf-8"))));
         message.setAttributes(m.getAttributes());
-        message.setFlag(false);
+        message.setFlag(m.isAck());
         return message;
     }
 }

@@ -61,9 +61,9 @@ public class RequestHandler {
                 commandExecuteTask.run();
             }
         } catch (Throwable t) {
-            logger.error("command handler exception, transport: {}, request: {}", transport, request, t);
-
-            if (exceptionHandler != null) {
+            if (exceptionHandler == null) {
+                logger.error("command handler exception, transport: {}, request: {}", transport, request, t);
+            } else {
                 exceptionHandler.handle(transport, request, t);
             }
         }

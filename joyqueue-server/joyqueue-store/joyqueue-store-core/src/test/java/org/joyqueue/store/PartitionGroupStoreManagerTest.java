@@ -105,7 +105,7 @@ public class PartitionGroupStoreManagerTest {
         while (SystemClock.now() - t0 < timeout && store.rightPosition() < length) {
             Thread.sleep(10L);
         }
-
+        store.commit(store.rightPosition());
         for (int i = 0; i < partitions.length; i++) {
 
             for (long j = 0; j < store.getRightIndex(partitions[i]); j++) {
@@ -240,7 +240,7 @@ public class PartitionGroupStoreManagerTest {
 
             // 等待建索引都完成
             long t0 = SystemClock.now();
-            while (SystemClock.now() - t0 < timeout && store.indexPosition() < length) {
+            while (SystemClock.now() - t0 < timeout && (store.indexPosition() < length || store.commitPosition() < length)) {
                 Thread.sleep(10L);
             }
 
@@ -274,6 +274,7 @@ public class PartitionGroupStoreManagerTest {
         final EventFuture<WriteResult> future = new EventFuture<>();
         store.asyncWrite(QosLevel.RECEIVE, future,writeRequests);
 
+        store.commit(store.rightPosition());
 
         // 等待建索引都完成
         long t0 = SystemClock.now();
@@ -324,6 +325,7 @@ public class PartitionGroupStoreManagerTest {
             Thread.sleep(10L);
         }
 
+        store.commit(store.rightPosition());
         for (int i = 0; i < messages.size(); i++) {
             ByteBuffer writeBuffer = messages.get(i);
 
@@ -375,6 +377,7 @@ public class PartitionGroupStoreManagerTest {
         while (store.indexPosition() < store.rightPosition()) {
             Thread.sleep(1);
         }
+        store.commit(store.rightPosition());
 
         // 读消息，并验证
         for (int i = 0; i < messages.size(); i++) {
@@ -478,6 +481,7 @@ public class PartitionGroupStoreManagerTest {
 
         Assert.assertEquals(size, position);
         Assert.assertEquals(size, store.rightPosition());
+        store.commit(store.rightPosition());
 
         // 等待索引创建完成
         while (store.indexPosition() < store.rightPosition()) {
@@ -546,7 +550,7 @@ public class PartitionGroupStoreManagerTest {
         store.recover();
         store.start();
         store.enable();
-
+        store.commit(store.rightPosition());
         for (int i = 0; i < messages.size(); i++) {
             ByteBuffer writeBuffer = messages.get(i);
             writeBuffer.clear();
@@ -580,6 +584,7 @@ public class PartitionGroupStoreManagerTest {
 
         }
 
+        store.commit(store.rightPosition());
 
         // 等待建索引都完成
         long t0 = SystemClock.now();
@@ -641,7 +646,7 @@ public class PartitionGroupStoreManagerTest {
 
         destroyStore();
         recoverStore();
-
+        store.commit(store.rightPosition());
         for (int i = 0; i < messages.size(); i++) {
             ByteBuffer writeBuffer = messages.get(i);
             writeBuffer.clear();

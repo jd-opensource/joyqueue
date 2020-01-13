@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.network.protocol.support;
 
+import io.netty.channel.ChannelHandler;
 import org.joyqueue.broker.network.protocol.ProtocolHandlerPipelineFactory;
 import org.joyqueue.network.event.TransportEventHandler;
 import org.joyqueue.network.handler.ConnectionHandler;
@@ -22,7 +23,6 @@ import org.joyqueue.network.protocol.ChannelHandlerProvider;
 import org.joyqueue.network.protocol.Protocol;
 import org.joyqueue.network.transport.command.CommandDispatcher;
 import org.joyqueue.network.transport.command.CommandDispatcherFactory;
-import io.netty.channel.ChannelHandler;
 
 /**
  * DefaultProtocolHandlerPipelineFactory
@@ -48,7 +48,10 @@ public class DefaultProtocolHandlerPipelineFactory implements ProtocolHandlerPip
         ChannelHandler handlerPipeline = new DefaultProtocolHandlerPipeline(protocol, commandDispatcher, transportEventHandler, connectionHandler);
 
         if (protocol instanceof ChannelHandlerProvider) {
-            handlerPipeline = ((ChannelHandlerProvider) protocol).getChannelHandler(handlerPipeline);
+            ChannelHandler customHandlerPipeline = ((ChannelHandlerProvider) protocol).getChannelHandler(handlerPipeline);
+            if (customHandlerPipeline != null) {
+                return customHandlerPipeline;
+            }
         }
 
         return handlerPipeline;

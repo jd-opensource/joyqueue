@@ -30,6 +30,7 @@ import org.joyqueue.network.command.BooleanAck;
 import org.joyqueue.network.command.JoyQueueCommandType;
 import org.joyqueue.network.command.ProduceMessageCommitRequest;
 import org.joyqueue.network.command.ProduceMessageCommitResponse;
+import org.joyqueue.network.protocol.annotation.ProduceHandler;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.network.transport.Transport;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
  * author: gaohaoxiang
  * date: 2018/12/19
  */
+@ProduceHandler
 public class ProduceMessageCommitRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageCommitRequestHandler.class);

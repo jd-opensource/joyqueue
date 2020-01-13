@@ -17,6 +17,9 @@ package org.joyqueue.broker.protocol.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.network.traffic.Traffic;
@@ -39,6 +42,7 @@ import org.joyqueue.network.command.ProduceMessageAckData;
 import org.joyqueue.network.command.ProduceMessageAckItemData;
 import org.joyqueue.network.command.ProduceMessageData;
 import org.joyqueue.network.command.ProduceMessageRequest;
+import org.joyqueue.network.protocol.annotation.ProduceHandler;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.network.transport.Transport;
@@ -47,9 +51,6 @@ import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.response.BooleanResponse;
 import org.joyqueue.store.WriteResult;
 import org.joyqueue.toolkit.concurrent.EventListener;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +65,7 @@ import java.util.concurrent.TimeUnit;
  * author: gaohaoxiang
  * date: 2018/12/19
  */
+@ProduceHandler
 public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Type, JoyQueueContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessageRequestHandler.class);

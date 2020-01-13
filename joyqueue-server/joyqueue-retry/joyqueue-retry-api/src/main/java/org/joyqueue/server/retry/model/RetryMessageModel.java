@@ -113,7 +113,6 @@ public class RetryMessageModel {
                 ", app='" + app + '\'' +
                 ", partition=" + partition +
                 ", index=" + index +
-                ", brokerMessage=" + Arrays.toString(brokerMessage) +
                 ", exception=" + Arrays.toString(exception) +
                 ", sendTime=" + sendTime +
                 '}';

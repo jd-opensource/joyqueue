@@ -18,6 +18,7 @@ package org.joyqueue.broker.kafka.handler;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
@@ -41,6 +42,7 @@ import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
+import org.joyqueue.network.protocol.annotation.FetchHandler;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.transport.Transport;
@@ -50,7 +52,6 @@ import org.joyqueue.toolkit.delay.AbstractDelayedOperation;
 import org.joyqueue.toolkit.delay.DelayedOperation;
 import org.joyqueue.toolkit.delay.DelayedOperationKey;
 import org.joyqueue.toolkit.delay.DelayedOperationManager;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +66,7 @@ import java.util.Map;
  * author: gaohaoxiang
  * date: 2018/11/5
  */
+@FetchHandler
 public class FetchRequestHandler extends AbstractKafkaCommandHandler implements KafkaContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchRequestHandler.class);
@@ -111,6 +113,11 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
             for (FetchRequest.PartitionRequest partitionRequest : entry.getValue()) {
                 int partition = partitionRequest.getPartition();
 
+                if (consumer == null) {
+                    partitionResponses.add(new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
+                    continue;
+                }
+
                 if (currentBytes > maxBytes) {
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode()));
                     continue;
@@ -131,7 +138,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 currentBytes += partitionResponse.getBytes();
                 partitionResponses.add(partitionResponse);
-                traffic.record(topic.getFullName(), partitionResponse.getMessages().size());
+                traffic.record(topic.getFullName(), (partitionResponse.getMessages() == null ? 0 : partitionResponse.getMessages().size()));
             }
 
             fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);

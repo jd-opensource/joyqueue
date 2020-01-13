@@ -58,5 +58,8 @@ public enum SubscribeType implements EnumItem {
         return null;
     }
 
-
+    @Override
+    public String toString() {
+        return description;
+    }
 }

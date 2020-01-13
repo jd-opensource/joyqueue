@@ -45,7 +45,7 @@ public class BrokerCommandHandlerRegistrar {
 
     public static void register(BrokerContext brokerContext, DefaultCommandHandlerFactory commandHandlerFactory) {
         //  retry
-        RemoteRetryMessageHandler remoteRetryMessageHandler = new RemoteRetryMessageHandler(brokerContext.getRetryManager());
+        RemoteRetryMessageHandler remoteRetryMessageHandler = new RemoteRetryMessageHandler(brokerContext.getRetryManager(), brokerContext.getPropertySupplier());
         commandHandlerFactory.register(CommandType.PUT_RETRY, remoteRetryMessageHandler);
         commandHandlerFactory.register(CommandType.GET_RETRY, remoteRetryMessageHandler);
         commandHandlerFactory.register(CommandType.UPDATE_RETRY, remoteRetryMessageHandler);

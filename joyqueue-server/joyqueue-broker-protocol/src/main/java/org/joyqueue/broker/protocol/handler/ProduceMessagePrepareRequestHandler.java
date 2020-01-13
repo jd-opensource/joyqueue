@@ -15,14 +15,15 @@
  */
 package org.joyqueue.broker.protocol.handler;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
-import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.protocol.converter.CheckResultConverter;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.broker.producer.Produce;
+import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import org.joyqueue.broker.protocol.converter.CheckResultConverter;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
@@ -32,6 +33,7 @@ import org.joyqueue.network.command.BooleanAck;
 import org.joyqueue.network.command.JoyQueueCommandType;
 import org.joyqueue.network.command.ProduceMessagePrepareRequest;
 import org.joyqueue.network.command.ProduceMessagePrepareResponse;
+import org.joyqueue.network.protocol.annotation.ProduceHandler;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.network.session.TransactionId;
@@ -39,7 +41,6 @@ import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.response.BooleanResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * author: gaohaoxiang
  * date: 2018/12/19
  */
+@ProduceHandler
 public class ProduceMessagePrepareRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(ProduceMessagePrepareRequestHandler.class);

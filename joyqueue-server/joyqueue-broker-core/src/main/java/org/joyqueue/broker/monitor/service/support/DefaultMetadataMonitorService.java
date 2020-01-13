@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.monitor.service.MetadataMonitorService;
 import org.joyqueue.domain.Consumer;
@@ -43,7 +44,6 @@ import org.joyqueue.nsr.service.internal.TopicInternalService;
 import org.joyqueue.response.BooleanResponse;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.config.Property;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -270,10 +270,10 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
     }
 
     @Override
-    public List<String> getConfigsMetadata() {
-        List<String> result = Lists.newLinkedList();
+    public Map<String, String> getConfigsMetadata() {
+        Map<String, String> result = Maps.newHashMap();
         for (Property property : clusterManager.getPropertySupplier().getProperties()) {
-            result.add(String.valueOf(property.getValue()));
+            result.put(String.valueOf(property.getKey()), String.valueOf(property.getValue()));
         }
         return result;
     }

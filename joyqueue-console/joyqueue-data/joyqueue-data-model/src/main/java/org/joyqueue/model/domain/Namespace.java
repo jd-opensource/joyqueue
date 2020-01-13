@@ -58,4 +58,11 @@ public class Namespace extends BaseNsrModel {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return "Namespace{" +
+                "code='" + code + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

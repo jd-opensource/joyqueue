@@ -15,21 +15,23 @@
  */
 package org.joyqueue.broker.archive;
 
+import com.google.common.base.Preconditions;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.monitor.DefaultPointTracer;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.MessageLocation;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.lang.Close;
-import com.google.common.base.Preconditions;
 import org.joyqueue.toolkit.security.Md5;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -75,6 +73,8 @@ public class ConsumeArchiveService extends Service {
     // 负责删除已经归档本地文件
     private LoopThread cleanConsumeLogFileThread;
 
+    private PointTracer tracer;
+
     public ConsumeArchiveService(ArchiveConfig archiveConfig, ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
         this.archiveConfig = archiveConfig;
@@ -94,8 +94,12 @@ public class ConsumeArchiveService extends Service {
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
         this.readByteCounter = new AtomicInteger(0);
 
+        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
+        if (tracer == null){
+            tracer = new DefaultPointTracer();
+        }
         this.readConsumeLogThread = LoopThread.builder()
-                .sleepTime(0, 10)
+                .sleepTime(1, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")
                 .onException(e -> {
                     logger.error(e.getMessage(), e);
@@ -137,31 +141,35 @@ public class ConsumeArchiveService extends Service {
      */
     private void readAndWrite() throws JoyQueueException, InterruptedException {
         // 读信息，一次读指定条数
-        List<ConsumeLog> list = readConsumeLog(archiveConfig.getConsumeBatchNum());
-        if (list.size() > 0) {
-            long startTime = SystemClock.now();
+        int readBatchSize;
+        int batchSize=archiveConfig.getConsumeBatchNum();
+        do {
+            List<ConsumeLog> list = readConsumeLog(batchSize);
+            readBatchSize=list.size();
+            if (readBatchSize > 0) {
+                long startTime = SystemClock.now();
 
-            // 调用存储接口写数据
-            archiveStore.putConsumeLog(list);
+                // 调用存储接口写数据
+                archiveStore.putConsumeLog(list, tracer);
 
-            long endTime = SystemClock.now();
+                long endTime = SystemClock.now();
 
-            logger.debug("Write consumeLogs size:{} to archive store, and elapsed time {}ms", list.size(), endTime - startTime);
+                logger.debug("Write consumeLogs size:{} to archive store, and elapsed time {}ms", list.size(), endTime - startTime);
 
-            int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
-            if (consumeWriteDelay > 0) {
-                Thread.sleep(consumeWriteDelay);
-            }
+                int consumeWriteDelay = archiveConfig.getConsumeWriteDelay();
+                if (consumeWriteDelay > 0) {
+                    Thread.sleep(consumeWriteDelay);
+                }
 
-        } else {
-            if (repository.rFile != null && repository.rMap != null) {
-                logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString() );
             } else {
-                logger.debug("read file is null.");
+                if (repository.rFile != null && repository.rMap != null) {
+                    logger.debug("read file name {}, read position {}", repository.rFile.getName(), repository.rMap.toString());
+                } else {
+                    logger.debug("read file is null.");
+                }
+                break;
             }
-
-            Thread.sleep(100);
-        }
+        }while(readBatchSize==batchSize);
     }
 
     private void cleanAndRollWriteFile() {
@@ -358,6 +366,7 @@ public class ConsumeArchiveService extends Service {
             // 首次创建文件
             if (rwMap == null) {
                 newMappedRWFile();
+                // may notify reader
                 position = 0;
                 append(buffer);
             } else if (1 + position >= pageSize) {
@@ -411,6 +420,7 @@ public class ConsumeArchiveService extends Service {
          */
         private void mappedReadOnlyFile() {
             try {
+                closeCurrentReadFile();
                 rRaf = new RandomAccessFile(rFile, "r");
                 rFileChannel = rRaf.getChannel();
                 rMap = rFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, pageSize);
@@ -506,15 +516,40 @@ public class ConsumeArchiveService extends Service {
         @Override
         public void close() {
             try {
-                if (rFileChannel != null) rFileChannel.close();
-                if (rRaf != null) rRaf.close();
-
-                if (rwFileChannel != null) rwFileChannel.close();
-                if (rwRaf != null) rwRaf.close();
+                closeCurrentReadFile();
+                closeCurrentWriteFile();
             } catch (IOException e) {
                 logger.error("delete read file error.", e);
             }
         }
+
+        /**
+         * Close current read file
+         **/
+        public void closeCurrentReadFile() throws IOException {
+            if (rFileChannel != null) {
+                rFileChannel.close();
+            }
+            if (rRaf != null) {
+                rRaf.close();
+            }
+        }
+
+        /**
+         *
+         * Close current write file
+         *
+         **/
+
+        public void closeCurrentWriteFile() throws IOException {
+            if (rwFileChannel != null) {
+                rwFileChannel.close();
+            }
+            if (rwRaf != null) {
+                rwRaf.close();
+            }
+        }
+
 
         /**
          * 找下个被读的文件
@@ -541,7 +576,7 @@ public class ConsumeArchiveService extends Service {
                 String fileName = sorted.get(0);
                 File tempFile = new File(baseDir + fileName);
                 rFile = tempFile;
-
+                logger.debug("current read consume event file {}",tempFile);
                 return rFile;
             } else {
                 logger.debug("only one write file.");
@@ -593,7 +628,7 @@ public class ConsumeArchiveService extends Service {
         private List<String> getArchivedFileList() {
             // 没有调用到readOne方法，不会初始化rFile，防止空指针，加一下判断
             if (rFile == null) {
-                logger.info("Can not get archive file list cause by consume archive read file have no init.");
+                logger.debug("Can not get archive file list cause by consume archive read file have no init.");
                 return null;
             }
 
@@ -614,6 +649,9 @@ public class ConsumeArchiveService extends Service {
         public int getLocalFileNum() {
             File file = new File(baseDir);
             String[] list = file.list();
+            if (list == null){
+                return 0;
+            }
             return list.length;
         }
 

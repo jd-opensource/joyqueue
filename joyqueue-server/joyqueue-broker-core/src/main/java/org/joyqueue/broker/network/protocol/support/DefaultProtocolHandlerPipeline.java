@@ -73,7 +73,11 @@ public class DefaultProtocolHandlerPipeline extends ChannelInitializer {
 
         if (protocol instanceof CommandHandlerProvider) {
             ChannelHandler customHandler = ((CommandHandlerProvider) protocol).getCommandHandler(commandInvocation);
-            pipeline.addLast(customHandler);
+            if (customHandler != null) {
+                pipeline.addLast(customHandler);
+            } else {
+                pipeline.addLast(commandInvocation);
+            }
         } else {
             pipeline.addLast(commandInvocation);
         }

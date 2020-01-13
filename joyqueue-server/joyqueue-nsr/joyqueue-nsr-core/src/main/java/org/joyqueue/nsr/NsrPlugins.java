@@ -16,12 +16,13 @@
 package org.joyqueue.nsr;
 
 
-import org.joyqueue.nsr.network.NsrCommandHandler;
-import org.joyqueue.nsr.network.NsrPayloadCodec;
-import org.joyqueue.nsr.util.DCMatcher;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
 import com.jd.laf.extension.SpiLoader;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.nsr.network.NsrCommandHandler;
+import org.joyqueue.nsr.network.NsrPayloadCodec;
+import org.joyqueue.nsr.util.DCMatcher;
 
 /**
  * @author wylixiaobin
@@ -40,7 +41,10 @@ public interface NsrPlugins {
      * DCMatcher extensionPoint
      */
     ExtensionPoint<DCMatcher, String> DCMatchersPlugins = new ExtensionPointLazy<>(DCMatcher.class, SpiLoader.INSTANCE, null, null);
-
+    /**
+     * 跟踪器服务扩展点
+     */
+    ExtensionPoint<PointTracer, String> TRACERERVICE = new ExtensionPointLazy<>(PointTracer.class, SpiLoader.INSTANCE, null, null);
 
 
 }
