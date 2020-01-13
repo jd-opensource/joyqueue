@@ -270,7 +270,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
         return maxTerm;
     }
-//    恢复PartitionGroup时，PartitionGroupStoreManager#recoverIndices方法中，增加如下逻辑：
+    //    恢复PartitionGroup时，PartitionGroupStoreManager#recoverIndices方法中，增加如下逻辑：
 //
 //    读取checkpoint文件，检查每个分区的下一条索引序号是否大于等于checkpoint中记录的索引序号；
 //    如果是，使用checkpoint中记录的indexPosition继续恢复索引；
@@ -497,9 +497,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             IndexItem indexItem = indexItemList.get(i);
             // 如果索引的offset和上一条相同，说明它们是同一批消息，直接跳过即可
             if (null != lastIndexItem && indexItem.getOffset() == lastIndexItem.getOffset()) {
-                continue;
-            }
-            if (indexItem.getOffset() >= commitPosition()) {
                 continue;
             }
             try {
@@ -747,8 +744,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     void asyncWrite(QosLevel qosLevel, EventListener<WriteResult> eventListener, WriteRequest... writeRequests) {
         if(isDiskFull()) {
-            if (eventListener != null)
-                eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
+            try {
+                Thread.sleep(1000L);
+                if (eventListener != null)
+                    eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
+            } catch (InterruptedException ignored) {}
             return;
         }
         if (!enabled.get())
