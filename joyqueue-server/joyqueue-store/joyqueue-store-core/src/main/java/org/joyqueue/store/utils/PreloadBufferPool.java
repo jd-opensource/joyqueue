@@ -325,8 +325,12 @@ public class PreloadBufferPool {
         int size = byteBuffer.capacity();
         PreLoadCache preLoadCache = bufferCache.get(size);
         if (null != preLoadCache) {
-            byteBuffer.clear();
-            preLoadCache.cache.add(byteBuffer);
+            if(preLoadCache.cache.size() > preLoadCache.maxCount) {
+                byteBuffer.clear();
+                preLoadCache.cache.add(byteBuffer);
+            } else {
+                destroyOne(byteBuffer);
+            }
             preLoadCache.onFlyCounter.getAndDecrement();
         } else {
             destroyOne(byteBuffer);
