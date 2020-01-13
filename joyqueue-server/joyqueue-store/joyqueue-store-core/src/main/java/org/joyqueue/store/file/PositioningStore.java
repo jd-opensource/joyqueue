@@ -467,7 +467,7 @@ public class PositioningStore<T> implements Closeable {
             return list;
         } catch (Throwable t) {
             logger.warn("Exception on batchRead position {} of store {}, " +
-                    "leftPosition: {}, rightPosition: {}, flushPosition: {}.",
+                            "leftPosition: {}, rightPosition: {}, flushPosition: {}.",
                     pointer, base.getAbsolutePath(),
                     Format.formatWithComma(left()),
                     Format.formatWithComma(right()),
