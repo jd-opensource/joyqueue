@@ -316,6 +316,7 @@ public class PositioningStore<T> implements Closeable {
     public long appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
         if (null == writeStoreFile) writeStoreFile = createStoreFile(right());
         if (fileDataSize - writeStoreFile.writePosition() < byteBuffer.remaining()) {
+            writeStoreFile.closeWrite();
             writeStoreFile = createStoreFile(right());
         }
         return rightPosition.addAndGet(writeStoreFile.appendByteBuffer(byteBuffer));
@@ -327,6 +328,7 @@ public class PositioningStore<T> implements Closeable {
             writeLock.lock();
             if (null == writeStoreFile) writeStoreFile = createStoreFile(right());
             if (fileDataSize - writeStoreFile.writePosition() < serializer.size(t)) {
+                writeStoreFile.closeWrite();
                 writeStoreFile = createStoreFile(right());
             }
             return rightPosition.addAndGet(writeStoreFile.append(t));
@@ -384,12 +386,14 @@ public class PositioningStore<T> implements Closeable {
         if ((present = storeFileMap.putIfAbsent(position, storeFile)) != null) {
             storeFile = present;
         }
-        logger.info("Store file created, leftPosition: {}, rightPosition: {}, flushPosition: {}, base: {}.",
-                Format.formatWithComma(left()),
-                Format.formatWithComma(right()),
-                Format.formatWithComma(flushPosition()),
-                base.getAbsolutePath()
-        );
+        if (logger.isDebugEnabled()) {
+            logger.debug("Store file created, leftPosition: {}, rightPosition: {}, flushPosition: {}, base: {}.",
+                    Format.formatWithComma(left()),
+                    Format.formatWithComma(right()),
+                    Format.formatWithComma(flushPosition()),
+                    base.getAbsolutePath()
+            );
+        }
         return storeFile;
     }
 
@@ -565,11 +569,13 @@ public class PositioningStore<T> implements Closeable {
         File file = storeFile.file();
         if (file.exists()) {
             if (file.delete()) {
-                logger.info("Store file deleted, leftPosition: {}, rightPosition: {}, flushPosition: {}, store: {}.",
-                        Format.formatWithComma(left()),
-                        Format.formatWithComma(right()),
-                        Format.formatWithComma(flushPosition()),
-                        file.getAbsolutePath());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Store file deleted, leftPosition: {}, rightPosition: {}, flushPosition: {}, store: {}.",
+                            Format.formatWithComma(left()),
+                            Format.formatWithComma(right()),
+                            Format.formatWithComma(flushPosition()),
+                            file.getAbsolutePath());
+                }
             } else {
                 throw new IOException(String.format("Delete file %s failed!", file.getAbsolutePath()));
             }

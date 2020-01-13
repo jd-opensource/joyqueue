@@ -171,31 +171,14 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     public void recover() {
         try {
-
             logger.info("Recovering message store...");
             store.recover();
             logger.info("Recovering index store...");
             indexPosition = recoverPartitions();
-            long safeIndexPosition = indexPosition;
             logger.info("Recovering the checkpoint ...");
             indexPosition = recoverCheckpoint();
-            long checkPointIndexPosition = indexPosition;
             logger.info("Building indices ...");
-            try {
-                recoverIndices();
-            } catch (Throwable t) {
-                if (safeIndexPosition != indexPosition) {
-                    indexPosition = safeIndexPosition;
-                    logger.warn("Exception while recover indices using indexPosition {} from Checkpoint.json. " +
-                                    "Fall back safe index position {} and retry recover indices...",
-                            Format.formatWithComma(checkPointIndexPosition),
-                            Format.formatWithComma(safeIndexPosition), t);
-                    indexPosition = safeIndexPosition;
-                    recoverIndices();
-                } else {
-                    throw t;
-                }
-            }
+            recoverIndices();
         } catch (IOException e) {
             throw new StoreInitializeException(e);
         }
@@ -516,6 +499,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             if (null != lastIndexItem && indexItem.getOffset() == lastIndexItem.getOffset()) {
                 continue;
             }
+            if (indexItem.getOffset() >= commitPosition()) {
+                continue;
+            }
             try {
                 ByteBuffer log;
                 try {
@@ -580,7 +566,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     private long[] write(ByteBuffer... byteBuffers) throws IOException {
         long start = store.right();
-        Map<Short, Long> partitionSnapshot = createPartitionSnapshot();
         long position = start;
         long[] indices = new long[byteBuffers.length];
         try {
@@ -593,6 +578,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 IndexItem indexItem = IndexItem.parseMessage(byteBuffer, position);
                 Partition partition = partitionMap.get(indexItem.getPartition());
                 indices[i] = partition.store.right() / IndexItem.STORAGE_SIZE;
+
                 MessageParser.setLong(byteBuffer, MessageParser.INDEX, indices[i]);
                 indexItem.setIndex(indices[i]);
 
@@ -609,15 +595,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 flushLoopThread.wakeup();
             }
         } catch (Throwable t) {
-            onWriteException(start, partitionSnapshot , t);
+            onWriteException(start, t);
             throw t;
         }
         return indices;
-    }
-
-    private Map<Short, Long> createPartitionSnapshot() {
-        return partitionMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().store.right()));
     }
 
     private void writeIndex(IndexItem indexItem, PositioningStore<IndexItem> indexStore) throws IOException {
@@ -766,11 +747,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     void asyncWrite(QosLevel qosLevel, EventListener<WriteResult> eventListener, WriteRequest... writeRequests) {
         if(isDiskFull()) {
-            try {
-                Thread.sleep(1000L);
-                if (eventListener != null)
-                    eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
-            } catch (InterruptedException ignored) {}
+            if (eventListener != null)
+                eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
             return;
         }
         if (!enabled.get())
@@ -1056,10 +1034,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
 
     private void rollback(long position) throws IOException {
-        if(indexPosition > position) {
-            indexPosition = position;
-            flushCheckpoint();
-        }
+
         boolean clearIndexStore = position <= leftPosition() || position > rightPosition();
 
         // 如果store整个删除干净了，需要把index也删干净
@@ -1075,6 +1050,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
         store.setRight(position);
 
+        if(indexPosition < position) {
+            indexPosition = position;
+            flushCheckpoint();
+        }
 
     }
 
@@ -1153,7 +1132,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 throw new TimeoutException("Wait for flush timeout! The broker is too much busy to write data to disks.");
             }
             long start = store.right();
-            Map<Short, Long> partitionSnapshot = createPartitionSnapshot();
             int counter = 0;
             int size = byteBuffer.remaining();
             try {
@@ -1195,9 +1173,10 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     produceMetric.addCounter("WriteCount", counter);
 
                 }
+
                 return position;
             } catch (Throwable t) {
-                onWriteException(start, partitionSnapshot , t);
+                onWriteException(start, t);
                 throw t;
             }
         } finally {
@@ -1205,9 +1184,9 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
     }
 
-    private void onWriteException(long start, Map<Short, Long> partitionSnapshot, Throwable t) {
+    private void onWriteException(long start, Throwable t) {
         try {
-            rollback(start, partitionSnapshot);
+            setRightPosition(start);
         } catch (Throwable e) {
             logger.warn("Rollback failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, e);
         }
@@ -1218,32 +1197,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
         } else {
             logger.warn("Write failed, rollback to position: {}, topic={}, partitionGroup={}.", start, topic, partitionGroup, t);
-        }
-    }
-
-    private void rollback(long position, Map<Short, Long> partitionSnapshot) throws IOException{
-        stopFlushThread();
-        try {
-            // 回滚分区索引
-            partitionSnapshot.forEach((partition, snapshotPosition) -> {
-                try {
-                    partitionMap.get(partition).store.setRight(snapshotPosition);
-                } catch (Throwable e) {
-                    logger.warn("Rollback partition failed! " +
-                                    "topic: {}, group: {}, partition: {}, rollback position: {}, current position: {}, store: {}.",
-                            topic, partitionGroup, partition, snapshotPosition, partitionMap.get(partition).store.right(),
-                            base.getAbsoluteFile(), e);
-                }
-            });
-            // 回滚indexPosition
-            indexPosition = position;
-            try {
-                flushCheckpoint();
-            } catch (Throwable ignored){}
-            // 回滚commit log
-            store.setRight(position);
-        } finally {
-            startFlushThread();
         }
     }
 
