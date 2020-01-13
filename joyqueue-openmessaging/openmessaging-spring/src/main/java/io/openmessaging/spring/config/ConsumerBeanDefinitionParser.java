@@ -68,7 +68,7 @@ public class ConsumerBeanDefinitionParser implements BeanDefinitionParser {
         BeanDefinitionBuilder consumerBuilder = BeanDefinitionBuilder.rootBeanDefinition(ConsumerContainer.class)
                 .addConstructorArgValue(queueName)
                 .addConstructorArgReference(accessPoint)
-                .addConstructorArgReference(listenerBeanId);
+                .addConstructorArgValue(listenerBeanId);
 
         parserContext.getRegistry().registerBeanDefinition(id, consumerBuilder.getBeanDefinition());
         return consumerBuilder.getBeanDefinition();

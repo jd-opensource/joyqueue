@@ -21,6 +21,8 @@ import org.joyqueue.network.transport.command.handler.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.RejectedExecutionException;
+
 /**
  * KafkaExceptionHandler
  *
@@ -33,7 +35,11 @@ public class KafkaExceptionHandler implements ExceptionHandler {
 
     @Override
     public void handle(Transport transport, Command command, Throwable throwable) {
-        logger.error("kafka exception, command: {}, transport: {}", command, transport, throwable);
+    	if (throwable instanceof RejectedExecutionException) {
+    		logger.error("kafka exception, command: {}, transport: {}, exception: {}", command, transport, throwable.getMessage());
+    	} else {
+    		logger.error("kafka exception, command: {}, transport: {}", command, transport, throwable);
+    	}
         transport.stop();
     }
 }

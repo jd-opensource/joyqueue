@@ -18,14 +18,17 @@ package org.joyqueue.broker.protocol.handler;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
-import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.buffer.Serializer;
+import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.model.PullResult;
 import org.joyqueue.broker.helper.SessionHelper;
+import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.domain.Partition;
+import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.BrokerMessage;
@@ -44,7 +47,6 @@ import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.toolkit.lang.ListUtil;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +67,13 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
 
     private Consume consume;
     private MessageRetry retryManager;
+    private ClusterManager clusterManager;
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.consume = brokerContext.getConsume();
         this.retryManager = brokerContext.getRetryManager();
+        this.clusterManager = brokerContext.getClusterManager();
     }
 
     @Override
@@ -171,6 +175,12 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
     }
 
     protected void commitRetry(Connection connection, Consumer consumer, List<CommitAckData> data) throws JoyQueueException {
+        org.joyqueue.domain.Consumer subscribe = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+        if (subscribe.getConsumerPolicy() != null && subscribe.getConsumerPolicy().getRetry() != null && !subscribe.getConsumerPolicy().getRetry()) {
+            logger.warn("consumer retry is disabled, ignore retry, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+            return;
+        }
+
         for (CommitAckData ackData : data) {
             PullResult pullResult = consume.getMessage(consumer, ackData.getPartition(), ackData.getIndex(), 1);
             List<ByteBuffer> buffers = pullResult.getBuffers();

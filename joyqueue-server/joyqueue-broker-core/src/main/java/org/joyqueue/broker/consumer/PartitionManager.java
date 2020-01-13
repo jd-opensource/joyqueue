@@ -192,14 +192,8 @@ public class PartitionManager {
      */
     public boolean needPause(Consumer consumer) throws JoyQueueException {
         ConsumerPolicy consumerPolicy = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp());
-        // 允许连续出错的限制
-        int thresholdVal = consumerPolicy.getErrTimes();
-        boolean isNeedPause = false;
-        int times = counterService.getErrTimes(consumer);
-        if (times >= thresholdVal) {
-            isNeedPause = true;
-        }
-        return isNeedPause;
+        Boolean isNeedPause = consumerPolicy.getPaused();
+        return isNeedPause == null ? false : isNeedPause.booleanValue();
     }
 
     /**
@@ -248,7 +242,7 @@ public class PartitionManager {
      */
     protected boolean isRetry(Consumer consumer) throws JoyQueueException {
 
-        int randomBound = clusterManager.getRetryRandomBound();
+        int randomBound = clusterManager.getRetryRandomBound(consumer.getTopic(), consumer.getApp());
         if (randomBound <= 0) {
             return false;
         }

@@ -138,7 +138,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 currentBytes += partitionResponse.getBytes();
                 partitionResponses.add(partitionResponse);
-                traffic.record(topic.getFullName(), partitionResponse.getMessages().size());
+                traffic.record(topic.getFullName(), (partitionResponse.getMessages() == null ? 0 : partitionResponse.getMessages().size()));
             }
 
             fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);

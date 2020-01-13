@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.cluster.event.CompensateEvent;
 import org.joyqueue.broker.config.BrokerConfig;
+import org.joyqueue.broker.consumer.ConsumeConfigKey;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Consumer;
@@ -84,8 +85,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.joyqueue.broker.consumer.ConsumeConfigKey.RETRY_RANDOM_BOUND;
 
 /**
  * 集群管理
@@ -409,8 +408,30 @@ public class ClusterManager extends Service {
         return brokerContext.getPropertySupplier();
     }
 
-    public int getRetryRandomBound() {
-        return PropertySupplier.getValue(brokerContext.getPropertySupplier(), RETRY_RANDOM_BOUND);
+    public int getRetryRandomBound(String topic, String app) {
+        int topicRandomBound = doGetTopicRetryRandomBound(topic);
+        if (topicRandomBound != -1) {
+            return topicRandomBound;
+        }
+        int appRandomBound = doGetAppRetryRandomBound(app);
+        if (appRandomBound != -1) {
+            return appRandomBound;
+        }
+        return PropertySupplier.getValue(brokerContext.getPropertySupplier(), ConsumeConfigKey.RETRY_RANDOM_BOUND);
+    }
+
+    protected int doGetTopicRetryRandomBound(String topic) {
+        return PropertySupplier.getValue(brokerContext.getPropertySupplier(),
+                ConsumeConfigKey.RETRY_RANDOM_BOUND_TOPIC_PREFIX.getName() + topic,
+                ConsumeConfigKey.RETRY_RANDOM_BOUND_TOPIC_PREFIX.getType(),
+                ConsumeConfigKey.RETRY_RANDOM_BOUND_TOPIC_PREFIX.getValue());
+    }
+
+    protected int doGetAppRetryRandomBound(String app) {
+        return PropertySupplier.getValue(brokerContext.getPropertySupplier(),
+                ConsumeConfigKey.RETRY_RANDOM_BOUND_APP_PREFIX.getName() + app,
+                ConsumeConfigKey.RETRY_RANDOM_BOUND_APP_PREFIX.getType(),
+                ConsumeConfigKey.RETRY_RANDOM_BOUND_APP_PREFIX.getValue());
     }
 
     /**
@@ -598,9 +619,6 @@ public class ClusterManager extends Service {
                 logger.error("topic[{}] app[{}] cant't be write on broker [] in blacklist", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
                 return BooleanResponse.failed(JoyQueueCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
             }
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("checkWritable topicConfig[{}]", topicConfig);
         }
         Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
         if (CollectionUtils.isEmpty(partitionGroups)) {
@@ -997,7 +1015,7 @@ public class ClusterManager extends Service {
          */
 
         protected Consumer buildConsumeCache(TopicName topic, String app) {
-            logger.info("build consumer cache, topic: {}, app", topic, app);
+            logger.info("build consumer cache, topic: {}, app: {}", topic, app);
             Consumer consumerByTopic = nameService.getConsumerByTopicAndApp(topic, app);
             if (null != consumerByTopic) {
                 consumerCache.get(topic.getFullName()).put(app, new CacheConsumer(consumerByTopic, SystemClock.now()));
@@ -1006,7 +1024,7 @@ public class ClusterManager extends Service {
         }
 
         protected Consumer buildConsumeCache(Consumer consumer) {
-            logger.info("build consumer cache, topic: {}, app", consumer.getTopic(), consumer.getApp());
+            logger.info("build consumer cache, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
             consumerCache.get(consumer.getTopic().getFullName()).put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
             return consumer;
         }
@@ -1056,7 +1074,7 @@ public class ClusterManager extends Service {
          * @param app   应用
          */
         protected Producer buildProduceCache(TopicName topic, String app) {
-            logger.info("build producer cache, topic: {}, app", topic, app);
+            logger.info("build producer cache, topic: {}, app: {}", topic, app);
             Producer producerByTopic = nameService.getProducerByTopicAndApp(topic, app);
             if (null != producerByTopic) {
                 producerCache.get(topic.getFullName()).put(app, new CacheProducer(producerByTopic));
@@ -1065,7 +1083,7 @@ public class ClusterManager extends Service {
         }
 
         protected Producer buildProduceCache(Producer producer) {
-            logger.info("build producer cache, topic: {}, app", producer.getTopic(), producer.getApp());
+            logger.info("build producer cache, topic: {}, app: {}", producer.getTopic(), producer.getApp());
             producerCache.get(producer.getTopic().getFullName()).put(producer.getApp(), new CacheProducer(producer));
             return producer;
         }
