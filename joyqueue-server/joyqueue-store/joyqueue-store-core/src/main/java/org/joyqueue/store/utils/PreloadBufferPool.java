@@ -79,7 +79,7 @@ public class PreloadBufferPool {
     }
 
     private PreloadBufferPool() {
-        long printMetricInterval = Long.parseLong(System.getProperty(PRINT_METRIC_INTERVAL_MS_KEY,"0"));
+        long printMetricInterval = 10000L;
         this.cacheLifetimeMs = Long.parseLong(System.getProperty(CACHE_LIFE_TIME_MS_KEY,String.valueOf(DEFAULT_CACHE_LIFE_TIME_MS)));
         long maxMemorySize = Format.parseSize(System.getProperty(MAX_MEMORY_KEY), Math.round(VM.maxDirectMemory() * CACHE_RATIO));
 
@@ -115,8 +115,8 @@ public class PreloadBufferPool {
                                 Format.formatSize(totalSize));
                         return totalSize;
                     }).sum();
-                    long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
-                    long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+                    long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+                    long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
                     logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
                             Format.formatSize(plUsed),
                             Format.formatSize(directUsed),
