@@ -1,6 +1,6 @@
 {
   "name": "joyqueue-portal",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "JoyQueue web administration console",
   "author": "yuanchanglong, chenyanying3",
   "scripts": {
