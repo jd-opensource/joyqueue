@@ -1,0 +1,2 @@
+org.joyqueue.broker.consumer.converter.JoyQueueToInternalMessageConverter
+org.joyqueue.broker.consumer.converter.KafkaToInternalMessageConverter

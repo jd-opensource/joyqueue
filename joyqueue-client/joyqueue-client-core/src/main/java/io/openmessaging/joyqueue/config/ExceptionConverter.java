@@ -15,9 +15,9 @@
  */
 package io.openmessaging.joyqueue.config;
 
-import io.chubao.joyqueue.client.internal.exception.ClientException;
-import io.chubao.joyqueue.exception.JoyQueueCode;
-import io.chubao.joyqueue.network.transport.exception.TransportException;
+import org.joyqueue.client.internal.exception.ClientException;
+import org.joyqueue.exception.JoyQueueCode;
+import org.joyqueue.network.transport.exception.TransportException;
 import io.openmessaging.exception.OMSDestinationException;
 import io.openmessaging.exception.OMSMessageFormatException;
 import io.openmessaging.exception.OMSRuntimeException;

@@ -1,12 +1,10 @@
 <template>
   <div>
-    <div class="ml20 mt10">
-      <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID/标签" class="left"
-               style="width: 300px" @on-enter="getList">
-        <span slot="prepend">关键词</span>
-        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
-      </d-input>
-    </div>
+    <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID/标签" class="left"
+              style="width: 300px" @on-enter="getList">
+      <span slot="prepend">关键词</span>
+      <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+    </d-input>
     <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange">
     </my-table>
@@ -52,7 +50,8 @@ export default {
         colData: this.colData,
         btns: this.btns
       },
-      multipleSelection: []
+      multipleSelection: [],
+      selectedBrokers: []
     }
   },
   methods: {
@@ -63,6 +62,15 @@ export default {
     getListByGroup (brokerGroupId) {
       this.getListByGroupAndbrokers(brokerGroupId, undefined)
     },
+    onBrokerLoadComplete (val) {
+      this.$emit('on-broker-load-complete',val,tag=>{
+        for (let index = 0; index < tag.length; index++) {
+          let row = {}
+          Object.assign(row, tag[index])
+          this.$set(this.tableData.rowData, index, row)
+        }
+      })
+    },
     getListByGroupAndbrokers (brokerGroupId, brokers) {
       let query = {}
       if (!brokerGroupId) {
@@ -71,6 +79,7 @@ export default {
         }
       } else {
         this.searchData.brokerGroupId = brokerGroupId
+        this.selectedBrokers = brokers
         query = {
           keyword: this.searchData.keyword,
           brokerGroupId: this.searchData.brokerGroupId
@@ -107,7 +116,11 @@ export default {
             }
           }
         })
+        this.onBrokerLoadComplete(this.tableData.rowData)
       })
+    },
+    getList () {
+      this.getListByGroupAndbrokers(this.searchData.brokerGroupId,this.selectedBrokers)
     }
   },
   mounted () {
@@ -118,5 +131,4 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .label{text-align: right; line-height: 32px;}
-  .val{}
 </style>

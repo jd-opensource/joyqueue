@@ -16,4 +16,4 @@
 #
 
 
-exec $(dirname $0)/run-class.sh io.chubao.joyqueue.tools.ConsoleConsumer "$@"
+exec $(dirname $0)/run-class.sh org.joyqueue.tools.ConsoleConsumer "$@"

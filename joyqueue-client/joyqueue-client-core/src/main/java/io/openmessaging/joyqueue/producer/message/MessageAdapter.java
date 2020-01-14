@@ -15,7 +15,7 @@
  */
 package io.openmessaging.joyqueue.producer.message;
 
-import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.KeyValue;
 import io.openmessaging.consumer.MessageReceipt;
 import io.openmessaging.extension.ExtensionHeader;

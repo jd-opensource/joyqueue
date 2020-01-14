@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.producer.extension;
 
-import io.chubao.joyqueue.client.internal.metadata.domain.TopicMetadata;
-import io.chubao.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
+import org.joyqueue.client.internal.producer.MessageProducer;
 import io.openmessaging.joyqueue.extension.AbstractExtensionAdapter;
 
 /**

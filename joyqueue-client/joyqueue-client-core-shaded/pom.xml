@@ -16,13 +16,11 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-client</artifactId>
-        <groupId>io.chubao</groupId>
-        <version>4.1.2-SNAPSHOT</version>
+        <groupId>org.joyqueue</groupId>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,7 +28,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-client-core</artifactId>
         </dependency>
         <dependency>
@@ -68,39 +66,39 @@
                             <relocations>
                                 <relocation>
                                     <pattern>com.codahale</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.com.codahale</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.com.codahale</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.objectweb.asm</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.org.objectweb.asm</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.org.objectweb.asm</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.google</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.com.google</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.com.google</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>io.netty</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.io.netty</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.io.netty</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javax.inject</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.javax.inject</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.javax.inject</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javax.validation</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.javax.validation</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.javax.validation</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.aopalliance</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.org.aopalliance</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.org.aopalliance</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.org.apache</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.org.apache</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.jd.laf.extension</pattern>
-                                    <shadedPattern>io.chubao.joyqueue.shaded.com.jd.laf.extension</shadedPattern>
+                                    <shadedPattern>org.joyqueue.shaded.com.jd.laf.extension</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

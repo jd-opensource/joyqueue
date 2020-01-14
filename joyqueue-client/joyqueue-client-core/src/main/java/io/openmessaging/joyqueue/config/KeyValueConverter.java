@@ -15,12 +15,12 @@
  */
 package io.openmessaging.joyqueue.config;
 
-import io.chubao.joyqueue.client.internal.consumer.config.ConsumerConfig;
-import io.chubao.joyqueue.client.internal.nameserver.NameServerConfig;
-import io.chubao.joyqueue.client.internal.producer.config.ProducerConfig;
-import io.chubao.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import io.chubao.joyqueue.client.internal.transport.config.TransportConfig;
-import io.chubao.joyqueue.domain.QosLevel;
+import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
+import org.joyqueue.client.internal.nameserver.NameServerConfig;
+import org.joyqueue.client.internal.producer.config.ProducerConfig;
+import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import org.joyqueue.client.internal.transport.config.TransportConfig;
+import org.joyqueue.domain.QosLevel;
 import io.openmessaging.KeyValue;
 import io.openmessaging.joyqueue.domain.JoyQueueConsumerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueNameServerBuiltinKeys;

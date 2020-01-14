@@ -16,26 +16,24 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-docker</artifactId>
-        <groupId>io.chubao</groupId>
-        <version>4.1.2-SNAPSHOT</version>
+        <groupId>org.joyqueue</groupId>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>docker-server</artifactId>
     <dependencies>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-distribution-server</artifactId>
             <version>${project.parent.version}</version>
             <type>tar.gz</type>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-distribution-web</artifactId>
             <version>${project.parent.version}</version>
             <type>tar.gz</type>

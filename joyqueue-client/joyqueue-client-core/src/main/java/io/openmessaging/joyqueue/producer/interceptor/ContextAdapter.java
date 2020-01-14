@@ -15,7 +15,7 @@
  */
 package io.openmessaging.joyqueue.producer.interceptor;
 
-import io.chubao.joyqueue.client.internal.producer.interceptor.ProduceContext;
+import org.joyqueue.client.internal.producer.interceptor.ProduceContext;
 import io.openmessaging.KeyValue;
 import io.openmessaging.interceptor.Context;
 
