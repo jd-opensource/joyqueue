@@ -1,5 +1,6 @@
 package org.joyqueue.broker.store;
 
+import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.config.Configuration;
 import org.joyqueue.store.*;
 import org.joyqueue.store.message.MessageParser;
@@ -38,7 +39,7 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
             createTopic();
             cleaningStrategy.setSupplier(config);
             int forceCleanFraction= computeForceCleanFraction();
-            config.addProperty("store.force.clean.wal.occupancy.fraction.threshold",String.valueOf(forceCleanFraction));
+            config.addProperty(BrokerStoreConfig.BrokerStoreConfigKey.FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD.getName(),String.valueOf(forceCleanFraction));
             // update
             cleaningStrategy.setSupplier(config);
             totalStorageSize=cleaningStrategy.totalStorageSize();
@@ -137,13 +138,12 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
         ((Store)storeService).physicalDelete();
     }
 
-
     /**
      * 设置消息存储的最大时长
      *
      **/
     public void updateMessageExpireTime(long keeptime){
-        config.addProperty("store.max.store.time",String.valueOf(keeptime));
+        config.addProperty(BrokerStoreConfig.BrokerStoreConfigKey.MAX_STORE_TIME.getName(),String.valueOf(keeptime));
         cleaningStrategy.setSupplier(config);
     }
 

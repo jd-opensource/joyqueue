@@ -38,7 +38,7 @@ public class BrokerStoreConfig {
         this.propertySupplier = propertySupplier;
     }
 
-    private enum BrokerStoreConfigKey implements PropertyDef {
+    public enum BrokerStoreConfigKey implements PropertyDef {
         CLEAN_STRATEGY_CLASS("store.clean.strategy.class", DEFAULT_CLEAN_STRATEGY_CLASS, Type.STRING),
         MAX_STORE_SIZE("store.max.store.size", DEFAULT_MAX_STORE_SIZE, Type.LONG),
         MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
