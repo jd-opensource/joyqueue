@@ -874,13 +874,14 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
      * @return true if partition 的最早消息时间小于指定时间
      *
      **/
-    public boolean hasEarly(PositioningStore<IndexItem> indexStore,long time) throws IOException{
+    private  boolean hasEarly(PositioningStore<IndexItem> indexStore,long time) throws IOException{
         long left=indexStore.left();
         IndexItem item=indexStore.read(left);
         ByteBuffer message=store.read(item.getOffset());
         // message send time
         long clientTimestamp=MessageParser.getLong(message,MessageParser.CLIENT_TIMESTAMP);
-        if(clientTimestamp<time){
+        long offset=MessageParser.getInt(message,MessageParser.STORAGE_TIMESTAMP);
+        if(clientTimestamp+offset<time){
             return true;
         }else{
             return false;

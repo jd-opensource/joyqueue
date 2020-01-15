@@ -22,7 +22,6 @@ public class GlobalStorageLimitCleaningStrategy implements StoreCleaningStrategy
     private static final Logger LOG= LoggerFactory.getLogger(GlobalStorageLimitCleaningStrategy.class);
     private long forceCleanWALStorageSizeThreshold;
     private long stopCleanWALStorageSizeThreshold;
-    private int  forceCleanBufferFraction;
     private String applicationDataPath;
     private File applicationDataDirectory;
     private boolean keepUnconsumed;
@@ -75,15 +74,15 @@ public class GlobalStorageLimitCleaningStrategy implements StoreCleaningStrategy
     @Override
     public void setSupplier(PropertySupplier supplier) {
         BrokerStoreConfig brokerStoreConfig = new BrokerStoreConfig(supplier);
-        int forceCleanWALFractionThreshold= brokerStoreConfig.getForceCleanWALFractionThreshold();
+        int forceCleanWALFractionThreshold= brokerStoreConfig.getStoreDiskUsageMax();
+        int cleanWALUsageSafeThreshold= brokerStoreConfig.getStoreDiskUsageSafe();
         this.applicationDataPath= brokerStoreConfig.getApplicationDataPath();
-        this.forceCleanBufferFraction= brokerStoreConfig.getForceCleanWALBufferFraction();
         this.applicationDataDirectory=new File(this.applicationDataPath);
         this.totalStorageSize=totalStorageSize();
         this.keepUnconsumed = brokerStoreConfig.keepUnconsumed();
         this.maxStoreTime = brokerStoreConfig.getMaxStoreTime();
-        this.forceCleanWALStorageSizeThreshold= totalStorageSize*(forceCleanWALFractionThreshold)/100;
-        this.stopCleanWALStorageSizeThreshold= totalStorageSize*(forceCleanWALFractionThreshold-forceCleanBufferFraction)/100;
+        this.forceCleanWALStorageSizeThreshold= totalStorageSize*forceCleanWALFractionThreshold/100;
+        this.stopCleanWALStorageSizeThreshold= totalStorageSize*cleanWALUsageSafeThreshold/100;
     }
 
     /**

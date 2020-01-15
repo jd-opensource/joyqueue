@@ -29,8 +29,8 @@ public class BrokerStoreConfig {
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 5 * 60 * 1000;
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_END = 10 * 60 * 1000;
     public static final boolean DEFAULT_KEEP_UNCONSUMED = true;
-    public static final int DEFAULT_FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD = 90;
-    public static final int DEFAULT_FORCE_CLEAN_WAL_BUFFER_FRACTION=1;
+    public static final int DEFAULT_STORE_DISK_USAGE_MAX= 80;
+    public static final int DEFAULT_STORE_DISK_USAGE_SAFE=75;
     private PropertySupplier propertySupplier;
 
 
@@ -46,8 +46,8 @@ public class BrokerStoreConfig {
         CLEAN_SCHEDULE_BEGIN("store.clean.schedule.begin", DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN, Type.LONG),
         CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG),
         FORCE_RESTORE("store.force.restore", true, Type.BOOLEAN),
-        FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD("store.force.clean.wal.occupancy.fraction.threshold",DEFAULT_FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD,Type.INT),
-        FORCE_CLEAN_WAL_BUFFER_FRACTION("store.force.clean.wal.buffer.fraction",DEFAULT_FORCE_CLEAN_WAL_BUFFER_FRACTION,Type.INT);
+        STORE_DISK_USAGE_MAX("store.disk.usage.max",DEFAULT_STORE_DISK_USAGE_MAX,Type.INT),
+        STORE_DISK_USAGE_SAFE("store.disk.usage.safe",DEFAULT_STORE_DISK_USAGE_SAFE,Type.INT);
         private String name;
         private Object value;
         private Type type;
@@ -105,16 +105,16 @@ public class BrokerStoreConfig {
     /**
      * Once wal storage reach force clean threshold, at least clean storage fraction
      **/
-    public int getForceCleanWALBufferFraction(){
-        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.FORCE_CLEAN_WAL_BUFFER_FRACTION);
+    public int getStoreDiskUsageMax(){
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_DISK_USAGE_MAX);
     }
     /**
      *
-     *  Start to force clean consumed log threshold
+     *  Start to stop force clean consumed log threshold
      *
      **/
-    public int getForceCleanWALFractionThreshold(){
-        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD);
+    public int getStoreDiskUsageSafe(){
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_DISK_USAGE_SAFE);
     }
 
     /**

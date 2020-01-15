@@ -30,8 +30,7 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
     private long writeMsgMs;
     private GlobalStorageLimitCleaningStrategy cleaningStrategy=new GlobalStorageLimitCleaningStrategy();
     @Before
-    public void prepare(){
-        try {
+    public void prepare() throws Exception{
             this.config = config();
             this.storeConfig=new StoreConfig(config);
             this.storeService= new Store(storeConfig);
@@ -39,20 +38,19 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
             createTopic();
             cleaningStrategy.setSupplier(config);
             int forceCleanFraction= computeForceCleanFraction();
-            config.addProperty(BrokerStoreConfig.BrokerStoreConfigKey.FORCE_CLEAN_WAL_OCCUPANCY_FRACTION_THRESHOLD.getName(),String.valueOf(forceCleanFraction));
+            int safeFraction=forceCleanFraction-1;
+            config.addProperty(BrokerStoreConfig.BrokerStoreConfigKey.STORE_DISK_USAGE_MAX.getName(),String.valueOf(forceCleanFraction));
+            config.addProperty(BrokerStoreConfig.BrokerStoreConfigKey.STORE_DISK_USAGE_SAFE.getName(),String.valueOf(safeFraction));
             // update
             cleaningStrategy.setSupplier(config);
             totalStorageSize=cleaningStrategy.totalStorageSize();
             forceCleanStorageSize=totalStorageSize*forceCleanFraction/100;
-            forceCleanStopStorageSize=totalStorageSize*(forceCleanFraction-1)/100;
+            forceCleanStopStorageSize=totalStorageSize*safeFraction/100;
             // write message
             writeMsgMs=writeMessagesUntil();
             long oneMinutes=60*1000;
             // make sure no message expired
             updateMessageExpireTime(writeMsgMs+oneMinutes);
-        }catch (Exception e){
-            Assert.assertTrue(false);
-        }
     }
     public void createTopic(){
         for(int i=0;i<partitionGroup;i++){
@@ -94,40 +92,59 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
     }
 
     /**
+     *
      * Mock once force clean wal
      *
      **/
     @Test
-    public void cleanWAL(){
-        // assert need to force clean
-        Assert.assertTrue(cleaningStrategy.usedStorageSize()>forceCleanStorageSize);
+    public void cleanExpiredWALTest() throws IOException{
+        // message expired
+        updateMessageExpireTime(writeMsgMs/2);
         // assume cleaning state
         long startMs=SystemClock.now();
         // 5 minutes clean timeout
-        long timeout=5*60*1000;
-        int hasCleaningState=0;
+        long timeout=3*60*1000;
         long used=0;
-        try {
-            do {
-                for (int i = 0; i < partitionGroup; i++) {
-                    PartitionGroupStore pgstore = storeService.getStore(topic, i);
-                    Map<Short, Long> consumeAck = new HashMap();
-                    for (short p : pgstore.listPartitions()) {
-                        consumeAck.put(p, storeService.getManageService().partitionMetric(topic,p).getRightIndex());
-                    }
-                    cleaningStrategy.deleteIfNeeded(pgstore, consumeAck);
-                    hasCleaningState=hasCleaningState|cleaningStrategy.state().ordinal();
+        long totalCleanedSize=0;
+        do {
+            for (int i = 0; i < partitionGroup; i++) {
+                PartitionGroupStore pgstore = storeService.getStore(topic, i);
+                Map<Short, Long> consumeAck = new HashMap();
+                for (short p : pgstore.listPartitions()) {
+                    consumeAck.put(p, storeService.getManageService().partitionMetric(topic,p).getRightIndex());
                 }
-                // 检查是否出现过 cleaning 状态
-                used=cleaningStrategy.usedStorageSize();
-            } while (used>forceCleanStopStorageSize&&SystemClock.now()-startMs<timeout);
-        }catch (IOException e){
-            Assert.assertTrue(false);
+                totalCleanedSize+=cleaningStrategy.deleteIfNeeded(pgstore, consumeAck);
+
+            }
+            // 检查是否出现过 cleaning 状态
+            used=cleaningStrategy.usedStorageSize();
+        } while (used>forceCleanStopStorageSize&&SystemClock.now()-startMs<timeout);
+        Assert.assertTrue(totalCleanedSize>0);
+    }
+
+    @Test
+    public void forceCleanWALOnce() throws IOException{
+        long totalCleanedSize=0;
+        int hasCleaningState=0;
+        long plusTime=60*1000;
+        // no expire message
+        updateMessageExpireTime(writeMsgMs+plusTime);
+        for(int k=0;k<3;k++) {
+            for (int i = 0; i < partitionGroup; i++) {
+                PartitionGroupStore pgstore = storeService.getStore(topic, i);
+                Map<Short, Long> consumeAck = new HashMap();
+                for (short p : pgstore.listPartitions()) {
+                    consumeAck.put(p, storeService.getManageService().partitionMetric(topic, p).getRightIndex());
+                }
+                hasCleaningState=hasCleaningState|cleaningStrategy.state().ordinal();
+                totalCleanedSize+=cleaningStrategy.deleteIfNeeded(pgstore, consumeAck);
+            }
         }
         Assert.assertTrue(hasCleaningState>0);
-        // check timeout
-        if(SystemClock.now()-startMs<timeout){ Assert.assertTrue(true);}
+        Assert.assertTrue(totalCleanedSize>0);
+
     }
+
 
     @After
     public void close(){
