@@ -363,8 +363,8 @@ public class PreloadBufferPool {
             plMonitorInfos.add(plMonitorInfo);
             return totalSize;
         }).sum();
-        long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
-        long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
 
         bufferPoolMonitorInfo.setPlMonitorInfos(plMonitorInfos);
         bufferPoolMonitorInfo.setPlUsed(Format.formatSize(plUsed));
