@@ -98,9 +98,9 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
                     partitionOffset.setOffset(p.getRightIndex());
                 } else partitionOffset.setOffset(p.getLeftIndex());
                 partitionOffsets.add(partitionOffset);
+                logOperation(subscribe.getTopic().getCode(), subscribe.getApp().getCode(), "resetBound: " + partitionOffset);
             }
         }
-        logOperation(subscribe.getTopic().getCode(), subscribe.getApp().getCode(), "resetBound: " + partitionOffsets);
         boolean result = consumeOffsetService.resetOffset(subscribe, partitionOffsets);
         return result ? Responses.success("success") : Responses.error(ErrorCode.ServiceError.getCode(), "reset failed");
     }
