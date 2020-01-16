@@ -28,6 +28,10 @@
     <artifactId>joyqueue-console</artifactId>
     <name>JoyQueue-Console</name>
     <description>Administration console</description>
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <modules>
         <module>joyqueue-data</module>
         <module>joyqueue-web</module>

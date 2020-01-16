@@ -27,6 +27,9 @@
     <artifactId>joyqueue-server-runtime</artifactId>
     <name>JoyQueue-Server-Runtime</name>
     <description>Server runtime</description>
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
 
     <dependencies>
         <dependency>
