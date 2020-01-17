@@ -15,19 +15,15 @@
  */
 package org.joyqueue.network.transport.command.support;
 
-import org.joyqueue.network.transport.command.Command;
-import org.joyqueue.network.transport.command.Header;
-import org.joyqueue.network.transport.command.handler.ExceptionHandler;
 import org.joyqueue.network.transport.RequestBarrier;
 import org.joyqueue.network.transport.ResponseFuture;
 import org.joyqueue.network.transport.Transport;
+import org.joyqueue.network.transport.command.Command;
+import org.joyqueue.network.transport.command.Header;
+import org.joyqueue.network.transport.command.handler.ExceptionHandler;
 import org.joyqueue.network.transport.config.TransportConfig;
-import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * ResponseHandler
@@ -42,13 +38,11 @@ public class ResponseHandler {
     private TransportConfig config;
     private RequestBarrier barrier;
     private ExceptionHandler exceptionHandler;
-    private ExecutorService asyncExecutorService;
 
     public ResponseHandler(TransportConfig transportConfig, RequestBarrier barrier, ExceptionHandler exceptionHandler) {
         this.config = transportConfig;
         this.barrier = barrier;
         this.exceptionHandler = exceptionHandler;
-        this.asyncExecutorService = newAsyncExecutorService();
     }
 
     public void handle(Transport transport, Command response) {
@@ -66,25 +60,11 @@ public class ResponseHandler {
         // 异步调用
         if (responseFuture.getCallback() != null) {
             boolean success = false;
-            ExecutorService executor = this.asyncExecutorService;
-            if (executor != null) {
-                try {
-                    executor.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                responseFuture.onSuccess();
-                            } catch (Throwable e) {
-                                logger.error("execute callback error.", e);
-                            } finally {
-                                responseFuture.release();
-                            }
-                        }
-                    });
-                    success = true;
-                } catch (Throwable e) {
-                    logger.error("execute callback error.", e);
-                }
+            try {
+                barrier.onAsyncFuture(responseFuture);
+                success = true;
+            } catch (Throwable e) {
+                logger.error("execute callback error.", e);
             }
 
             if (!success) {
@@ -104,9 +84,5 @@ public class ResponseHandler {
             }
         }
         barrier.remove(header.getRequestId());
-    }
-
-    protected ExecutorService newAsyncExecutorService() {
-        return Executors.newFixedThreadPool(config.getCallbackThreads(), new NamedThreadFactory("joyqueue-async-callback"));
     }
 }
