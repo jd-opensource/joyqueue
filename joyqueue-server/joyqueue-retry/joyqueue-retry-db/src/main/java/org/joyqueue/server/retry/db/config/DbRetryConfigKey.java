@@ -26,6 +26,9 @@ public enum DbRetryConfigKey implements PropertyDef {
     WRITE_URL("retry.mysql.url.write", "", Type.STRING),
     WRITE_USER_NAME("retry.mysql.username.write", "", Type.STRING),
     WRITE_PASSWORD("retry.mysql.password.write", "", Type.STRING),
+    READ_URL("retry.mysql.url.read", "", Type.STRING),
+    READ_USER_NAME("retry.mysql.username.read", "", Type.STRING),
+    READ_PASSWORD("retry.mysql.password.read", "", Type.STRING),
     DRIVER("retry.mysql.driver", "com.mysql.jdbc.Driver", Type.STRING),
     RETRY_DELAY("retry.delay", 1000, Type.INT),
     MAX_RETRY_TIMES("retry.max.retry.times", "0", Type.INT);
