@@ -108,7 +108,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
     @Override
     public void start() {
         this.writeDataSource = DataSourceFactory.build(writeDataSourceConfig);
-        this.readDataSource = DataSourceFactory.build(writeDataSourceConfig);
+        this.readDataSource = DataSourceFactory.build(readDataSourceConfig);
         isStartFlag = true;
         logger.info("db retry manager is started");
     }
