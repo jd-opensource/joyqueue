@@ -17,33 +17,37 @@ package org.joyqueue.broker.config;
 
 import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
+import static org.joyqueue.toolkit.config.Property.APPLICATION_DATA_PATH;
 
 /**
  * @author majun8
  */
 public class BrokerStoreConfig {
-    public static final String DEFAULT_CLEAN_STRATEGY_CLASS = "FixedSizeStoreCleaningStrategy";
+    public static final String DEFAULT_CLEAN_STRATEGY_CLASS = "GlobalStorageLimitCleaningStrategy";
     public static final long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;  // 10gb
     public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 5 * 60 * 1000;
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_END = 10 * 60 * 1000;
-    public static final boolean DEFAULT_DO_NOT_DELETE_CONSUMED = true;
-
+    public static final boolean DEFAULT_KEEP_UNCONSUMED = true;
+    public static final int DEFAULT_STORE_DISK_USAGE_MAX= 80;
+    public static final int DEFAULT_STORE_DISK_USAGE_SAFE=75;
     private PropertySupplier propertySupplier;
+
 
     public BrokerStoreConfig(PropertySupplier propertySupplier) {
         this.propertySupplier = propertySupplier;
     }
 
-    private enum BrokerStoreConfigKey implements PropertyDef {
+    public enum BrokerStoreConfigKey implements PropertyDef {
         CLEAN_STRATEGY_CLASS("store.clean.strategy.class", DEFAULT_CLEAN_STRATEGY_CLASS, Type.STRING),
         MAX_STORE_SIZE("store.max.store.size", DEFAULT_MAX_STORE_SIZE, Type.LONG),
         MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
-        DO_NOT_DELETE_CONSUMED("store.clean.donot.delete.consumed", DEFAULT_DO_NOT_DELETE_CONSUMED, Type.BOOLEAN),
+        KEEP_UNCONSUMED("store.clean.keep.unconsumed", DEFAULT_KEEP_UNCONSUMED, Type.BOOLEAN),
         CLEAN_SCHEDULE_BEGIN("store.clean.schedule.begin", DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN, Type.LONG),
         CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG),
-        FORCE_RESTORE("store.force.restore", true, Type.BOOLEAN);
-
+        FORCE_RESTORE("store.force.restore", true, Type.BOOLEAN),
+        STORE_DISK_USAGE_MAX("store.disk.usage.max",DEFAULT_STORE_DISK_USAGE_MAX,Type.INT),
+        STORE_DISK_USAGE_SAFE("store.disk.usage.safe",DEFAULT_STORE_DISK_USAGE_SAFE,Type.INT);
         private String name;
         private Object value;
         private Type type;
@@ -82,8 +86,8 @@ public class BrokerStoreConfig {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.MAX_STORE_TIME, DEFAULT_MAX_STORE_TIME);
     }
 
-    public boolean getDoNotDeleteConsumed() {
-        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.DO_NOT_DELETE_CONSUMED, DEFAULT_DO_NOT_DELETE_CONSUMED);
+    public boolean keepUnconsumed() {
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.KEEP_UNCONSUMED, DEFAULT_KEEP_UNCONSUMED);
     }
 
     public long getStoreCleanScheduleBegin() {
@@ -97,4 +101,29 @@ public class BrokerStoreConfig {
     public boolean getForceRestore() {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.FORCE_RESTORE);
     }
+
+    /**
+     * Once wal storage reach force clean threshold, at least clean storage fraction
+     **/
+    public int getStoreDiskUsageMax(){
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_DISK_USAGE_MAX);
+    }
+    /**
+     *
+     *  Start to stop force clean consumed log threshold
+     *
+     **/
+    public int getStoreDiskUsageSafe(){
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_DISK_USAGE_SAFE);
+    }
+
+    /**
+     *  Application Data path
+     *  @return application data path
+     *  s
+     **/
+    public String getApplicationDataPath(){
+        return propertySupplier.getOrCreateProperty(APPLICATION_DATA_PATH).getString();
+    }
 }
+

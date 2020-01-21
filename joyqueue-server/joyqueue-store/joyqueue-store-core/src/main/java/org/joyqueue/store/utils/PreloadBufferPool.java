@@ -325,8 +325,12 @@ public class PreloadBufferPool {
         int size = byteBuffer.capacity();
         PreLoadCache preLoadCache = bufferCache.get(size);
         if (null != preLoadCache) {
-            byteBuffer.clear();
-            preLoadCache.cache.add(byteBuffer);
+            if(preLoadCache.cache.size() > preLoadCache.maxCount) {
+                byteBuffer.clear();
+                preLoadCache.cache.add(byteBuffer);
+            } else {
+                destroyOne(byteBuffer);
+            }
             preLoadCache.onFlyCounter.getAndDecrement();
         } else {
             destroyOne(byteBuffer);
@@ -359,8 +363,8 @@ public class PreloadBufferPool {
             plMonitorInfos.add(plMonitorInfo);
             return totalSize;
         }).sum();
-        long mmpUsed = mMapBufferHolders.stream().mapToInt(BufferHolder::size).sum();
-        long directUsed = directBufferHolders.stream().mapToInt(BufferHolder::size).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
 
         bufferPoolMonitorInfo.setPlMonitorInfos(plMonitorInfos);
         bufferPoolMonitorInfo.setPlUsed(Format.formatSize(plUsed));

@@ -539,7 +539,7 @@ public class ClusterManager extends Service {
     private Producer.ProducerPolicy getProducerPolicyOrDefault(Producer producer) {
         Producer.ProducerPolicy producerPolicy = producer.getProducerPolicy();
         if (producerPolicy == null) {
-            producer.setProducerPolicy(brokerContext.getProducerPolicy());
+            return brokerContext.getProducerPolicy();
         }
         return producer.getProducerPolicy();
     }
@@ -547,7 +547,7 @@ public class ClusterManager extends Service {
     private Consumer.ConsumerPolicy getConsumerPolicyOrDefault(Consumer consumer) {
         Consumer.ConsumerPolicy consumerPolicy = consumer.getConsumerPolicy();
         if (consumerPolicy == null) {
-            consumer.setConsumerPolicy(brokerContext.getConsumerPolicy());
+            return brokerContext.getConsumerPolicy();
         }
         return consumer.getConsumerPolicy();
     }

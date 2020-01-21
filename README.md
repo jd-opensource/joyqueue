@@ -55,6 +55,14 @@ Visit [Quick start](./docs/cn/quickstart.md)。
 
 Visit [Documentation Index](./docs/cn/index.md)。
 
+## Dependency Analysis
+
+The [License Maven Plugin](https://www.mojohaus.org/license-maven-plugin/) manages the license of this project and its dependencies. Use maven goal `license:third-party-report` to generate a report of all third-parties detected in the project.
+
+```bash
+mvn license:aggregate-third-party-report
+```
+
 ## Contributing
 
 We are dedicate to building high-quality messaging platform product. So any thoughts, pull requests, or issues are appreciated.

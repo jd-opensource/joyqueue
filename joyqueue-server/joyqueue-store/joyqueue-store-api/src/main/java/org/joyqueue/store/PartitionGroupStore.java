@@ -49,7 +49,15 @@ public interface PartitionGroupStore {
      */
     long getTotalPhysicalStorageSize();
 
-    long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap, boolean doNotDeleteConsumed) throws IOException;
+    /**
+     * @param time  delete oldest index file of partition if
+     *              exist at least two consumed index file and it's oldest message time < time,
+     *              force clean oldest consumed index file when time < 0
+     * @param partitionAckMap  partition consume ack offsets
+     * @param keepUnconsumed  do not delete unconsumed
+     * @return  release storage size
+     **/
+    long clean(long time, Map<Short, Long> partitionAckMap, boolean keepUnconsumed) throws IOException;
 
     /**
      * 获取分区当前的最小索引，用于初始化消费

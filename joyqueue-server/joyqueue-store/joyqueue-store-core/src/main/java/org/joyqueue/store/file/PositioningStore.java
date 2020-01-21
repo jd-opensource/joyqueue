@@ -316,7 +316,6 @@ public class PositioningStore<T> implements Closeable {
     public long appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
         if (null == writeStoreFile) writeStoreFile = createStoreFile(right());
         if (fileDataSize - writeStoreFile.writePosition() < byteBuffer.remaining()) {
-            writeStoreFile.closeWrite();
             writeStoreFile = createStoreFile(right());
         }
         return rightPosition.addAndGet(writeStoreFile.appendByteBuffer(byteBuffer));
@@ -328,7 +327,6 @@ public class PositioningStore<T> implements Closeable {
             writeLock.lock();
             if (null == writeStoreFile) writeStoreFile = createStoreFile(right());
             if (fileDataSize - writeStoreFile.writePosition() < serializer.size(t)) {
-                writeStoreFile.closeWrite();
                 writeStoreFile = createStoreFile(right());
             }
             return rightPosition.addAndGet(writeStoreFile.append(t));
@@ -645,16 +643,6 @@ public class PositioningStore<T> implements Closeable {
 
     public int meetMinStoreFile(long minIndexedPhysicalPosition) {
         return storeFileMap.headMap(minIndexedPhysicalPosition).size();
-    }
-
-    public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {
-        for (StoreFile<T> storeFile : storeFileMap.headMap(minIndexedPhysicalPosition).values()) {
-            if (storeFile.timestamp() > 0)
-                if (storeFile.timestamp() < timestamp) {
-                    return true;
-                }
-        }
-        return false;
     }
 
     public static class Config {
