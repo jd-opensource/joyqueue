@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.monitor;
-
-import org.joyqueue.monitor.TraceStat;
-import org.joyqueue.monitor.PointTracer;
+package org.joyqueue.monitor;
 
 /**
  * @author lining11

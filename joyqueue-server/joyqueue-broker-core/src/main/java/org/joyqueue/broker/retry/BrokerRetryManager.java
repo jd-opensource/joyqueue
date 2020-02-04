@@ -18,16 +18,22 @@ package org.joyqueue.broker.retry;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.jd.laf.extension.ExtensionManager;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
+import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.EventType;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.exception.JoyQueueException;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.config.TransportConfigSupport;
@@ -44,6 +50,7 @@ import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.retry.RetryPolicy;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,9 +81,9 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     private NameService nameService;
     // 集群管理
     private ClusterManager clusterManager;
-
     private PropertySupplier propertySupplier;
-
+    private BrokerMonitor brokerMonitor;
+    private PointTracer tracer;
 
     public BrokerRetryManager(BrokerContext brokerContext) {
         setBrokerContext(brokerContext);
@@ -182,17 +189,39 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
 
     @Override
     public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException {
-        delegate.addRetry(retryMessageModelList);
+        if (CollectionUtils.isEmpty(retryMessageModelList)) {
+            return;
+        }
+
+        RetryMessageModel retryMessageModel = retryMessageModelList.get(0);
+        TraceStat totalRetryTrace = tracer.begin("BrokerRetryManager.addRetry");
+        TraceStat appRetryTrace = tracer.begin(String.format("BrokerRetryManager.addRetry.%s.%s", retryMessageModel.getApp(), retryMessageModel.getTopic()));
+        try {
+            long startTime = SystemClock.now();
+            delegate.addRetry(retryMessageModelList);
+            brokerMonitor.onAddRetry(retryMessageModel.getTopic(), retryMessageModel.getApp(), retryMessageModelList.size(), SystemClock.now() - startTime);
+        } finally {
+            tracer.end(totalRetryTrace);
+            tracer.end(appRetryTrace);
+        }
     }
 
     @Override
     public void retrySuccess(String topic, String app, Long[] messageIds) throws JoyQueueException {
+        if (messageIds == null) {
+            return;
+        }
         delegate.retrySuccess(topic, app, messageIds);
+        brokerMonitor.onRetrySuccess(topic, app, messageIds.length);
     }
 
     @Override
     public void retryError(String topic, String app, Long[] messageIds) throws JoyQueueException {
+        if (messageIds == null) {
+            return;
+        }
         delegate.retryError(topic, app, messageIds);
+        brokerMonitor.onRetryFailure(topic, app, messageIds.length);
     }
 
     @Override
@@ -241,6 +270,8 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
         this.nameService = brokerContext.getNameService();
         this.clusterManager = brokerContext.getClusterManager();
         this.propertySupplier = brokerContext.getPropertySupplier();
+        this.brokerMonitor = brokerContext.getBrokerMonitor();
+        tracer = Plugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
     }
 
     @Override
