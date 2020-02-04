@@ -50,18 +50,38 @@ public class MessageConvertSupport {
         return result;
     }
 
+    public List<BrokerMessage> convert(BrokerMessage message, byte target) {
+        List<BrokerMessage> result = Lists.newLinkedList();
+        if (message.isBatch()) {
+            List<BrokerMessage> convertedMessages = doConvertBatch(message, target);
+            if (convertedMessages != null) {
+                result.addAll(convertedMessages);
+            } else {
+                result.add(message);
+            }
+        } else {
+            BrokerMessage convertedMessage = doConvert(message, target);
+            if (convertedMessage != null) {
+                result.add(convertedMessage);
+            } else {
+                result.add(message);
+            }
+        }
+        return result;
+    }
+
     public List<BrokerMessage> convert(List<BrokerMessage> messages, byte target) {
         List<BrokerMessage> result = Lists.newLinkedList();
         for (BrokerMessage message : messages) {
             if (message.isBatch()) {
-                List<BrokerMessage> convertedMessages = convertBatch(message, target);
+                List<BrokerMessage> convertedMessages = doConvertBatch(message, target);
                 if (convertedMessages != null) {
                     result.addAll(convertedMessages);
                 } else {
                     result.add(message);
                 }
             } else {
-                BrokerMessage convertedMessage = convert(message, target);
+                BrokerMessage convertedMessage = doConvert(message, target);
                 if (convertedMessage != null) {
                     result.add(convertedMessage);
                 } else {
@@ -72,7 +92,7 @@ public class MessageConvertSupport {
         return result;
     }
 
-    public BrokerMessage convert(BrokerMessage message, byte target) {
+    protected BrokerMessage doConvert(BrokerMessage message, byte target) {
         MessageConverter messageConverter = converterTable.get(message.getSource(), target);
         if (messageConverter == null) {
             return null;
@@ -83,7 +103,7 @@ public class MessageConvertSupport {
         return messageConverter.convert(message);
     }
 
-    public List<BrokerMessage> convertBatch(BrokerMessage message, byte target) {
+    protected List<BrokerMessage> doConvertBatch(BrokerMessage message, byte target) {
         MessageConverter messageConverter = converterTable.get(message.getSource(), target);
         if (messageConverter == null) {
             return null;
