@@ -51,6 +51,10 @@ public class KafkaConnectionManager {
     }
 
     public void addConnection(Transport transport, String clientId, String version) {
+        addConnection(transport, clientId, version, Language.JAVA);
+    }
+
+    public void addConnection(Transport transport, String clientId, String version, Language language) {
         Connection connection = SessionHelper.getConnection(transport);
         if (connection != null) {
             return;
@@ -67,7 +71,7 @@ public class KafkaConnectionManager {
         connection.setAddress(IpUtil.toByte(remoteAddress));
         connection.setAddressStr(IpUtil.toAddress(remoteAddress));
         connection.setHost(((InetSocketAddress) transport.remoteAddress()).getHostString());
-        connection.setLanguage(Language.JAVA);
+        connection.setLanguage(language);
         connection.setSource(SourceType.KAFKA.name());
         connection.setTransport(transport);
         connection.setCreateTime(SystemClock.now());
