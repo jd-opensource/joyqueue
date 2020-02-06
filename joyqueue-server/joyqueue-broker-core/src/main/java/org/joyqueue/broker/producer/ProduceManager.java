@@ -306,7 +306,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             putResult.addWriteResult((short) partitionGroup.getGroup(), writeResult);
 
             if (config.getLogDetail(producer.getApp())) {
-                logger.info("putMessage, topic: {}, app: {}, partitionGroup: {}, qosLevel: {}, size: {}, result: {}",
+                logger.info("writeMessages, topic: {}, app: {}, partitionGroup: {}, qosLevel: {}, size: {}, result: {}",
                         producer.getTopic(), producer.getApp(), partitionGroup.getGroup(), qosLevel, writeRequests.size(), writeResult.getCode());
             }
         }
