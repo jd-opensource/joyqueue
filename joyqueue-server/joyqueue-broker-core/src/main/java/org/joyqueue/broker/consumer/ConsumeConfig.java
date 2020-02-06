@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.consumer;
 
+import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
 
@@ -25,9 +26,11 @@ public class ConsumeConfig {
     private static final String CONSUME_POSITION_PATH = "/position";
     private PropertySupplier propertySupplier;
     private String consumePositionPath;
+    private BrokerConfig brokerConfig;
 
     public ConsumeConfig(PropertySupplier propertySupplier) {
         this.propertySupplier = propertySupplier;
+        this.brokerConfig = new BrokerConfig(propertySupplier);
     }
 
     public String getConsumePositionPath() {
@@ -62,5 +65,9 @@ public class ConsumeConfig {
 
     public void setConsumePositionPath(String consumePositionPath) {
         this.consumePositionPath = consumePositionPath;
+    }
+
+    public boolean getLogDetail(String app) {
+        return brokerConfig.getLogDetail(app);
     }
 }

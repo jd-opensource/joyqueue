@@ -15,17 +15,20 @@
  */
 package org.joyqueue.broker.producer;
 
+import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.toolkit.config.PropertySupplier;
 
 /**
  * Created by chengzhiliang on 2018/10/30.
  */
 public class ProduceConfig {
-    //TODO
     private PropertySupplier propertySupplier;
+    private BrokerConfig brokerConfig;
 
     public ProduceConfig(PropertySupplier propertySupplier) {
         this.propertySupplier = propertySupplier;
+        this.brokerConfig = new BrokerConfig(propertySupplier);
+
     }
 
     public int getTopicQosLevel(String topic) {
@@ -76,5 +79,9 @@ public class ProduceConfig {
 
     public int getBodyLength() {
         return PropertySupplier.getValue(propertySupplier, ProducerConfigKey.PRODUCE_BODY_LENGTH);
+    }
+
+    public boolean getLogDetail(String app) {
+        return brokerConfig.getLogDetail(app);
     }
 }
