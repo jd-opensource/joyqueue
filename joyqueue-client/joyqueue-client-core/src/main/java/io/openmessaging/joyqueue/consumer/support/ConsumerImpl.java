@@ -15,6 +15,7 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
+import com.google.common.collect.Lists;
 import org.joyqueue.client.internal.consumer.MessageConsumer;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
@@ -308,6 +309,25 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
     public ConsumerIndex getIndex(short partition) {
         FetchIndexData fetchIndexData = messageConsumer.fetchIndex(partition);
         return new ConsumerIndex(fetchIndexData.getIndex(), fetchIndexData.getLeftIndex(), fetchIndexData.getRightIndex());
+    }
+
+    @Override
+    public void batchAck(List<MessageReceipt> receiptList) {
+        try {
+            List<ConsumeReply> replyList = Lists.newLinkedList();
+            for (MessageReceipt receipt : receiptList) {
+                Preconditions.checkArgument(receipt instanceof MessageReceiptAdapter, "receipt is not supported");
+
+                MessageReceiptAdapter messageReceiptAdapter = (MessageReceiptAdapter) receipt;
+                ConsumeMessage message = messageReceiptAdapter.getMessage();
+                ConsumeReply consumeReply = new ConsumeReply(message.getPartition(), message.getIndex(), RetryType.NONE);
+                replyList.add(consumeReply);
+            }
+
+            messageConsumer.reply(replyList);
+        } catch (Throwable cause) {
+            throw handleConsumeException(cause);
+        }
     }
 
     protected OMSRuntimeException handleConsumeException(Throwable cause) {
