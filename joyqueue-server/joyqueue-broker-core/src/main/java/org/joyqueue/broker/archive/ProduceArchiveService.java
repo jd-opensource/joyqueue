@@ -47,7 +47,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -336,13 +335,7 @@ public class ProduceArchiveService extends Service {
      */
     private List<BrokerMessage> parseMessage(ByteBuffer buffer) throws Exception {
         BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
-        List<BrokerMessage> brokerMessageList = new LinkedList<>();
-        if (brokerMessage.getSource() == SourceType.KAFKA.getValue() && brokerMessage.isBatch()) {
-            brokerMessageList = messageConvertSupport.convertBatch(brokerMessage, SourceType.INTERNAL.getValue());
-        } else {
-            brokerMessageList.add(brokerMessage);
-        }
-        return brokerMessageList;
+        return messageConvertSupport.convert(brokerMessage, SourceType.INTERNAL.getValue());
     }
 
     /**

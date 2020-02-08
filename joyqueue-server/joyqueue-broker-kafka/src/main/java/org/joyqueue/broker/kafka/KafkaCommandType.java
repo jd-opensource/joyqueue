@@ -64,7 +64,7 @@ public enum KafkaCommandType {
     DESCRIBE_GROUP(15, 0, 2),
 
     // API VERSION
-    API_VERSIONS(18, 0, 2),
+    API_VERSIONS(18, 0, 3),
 
     INIT_PRODUCER_ID(22, 0, 0),
 
