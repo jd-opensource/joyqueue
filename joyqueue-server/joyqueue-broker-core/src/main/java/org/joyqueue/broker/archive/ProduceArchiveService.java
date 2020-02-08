@@ -125,7 +125,7 @@ public class ProduceArchiveService extends Service {
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
         Preconditions.checkArgument(archiveConfig != null, "archive config can not be null.");
 
-        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
+        this.tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
         this.batchNum = archiveConfig.getProduceBatchNum();
         this.archiveQueue = new LinkedBlockingDeque<>(archiveConfig.getLogQueueSize());
         this.executorService = new ThreadPoolExecutor(archiveConfig.getWriteThreadNum(), archiveConfig.getWriteThreadNum(),
