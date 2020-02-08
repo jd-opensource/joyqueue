@@ -77,7 +77,7 @@ public class OnceConsumerInvoker implements ConsumerInvoker {
                 long endTime = SystemClock.now();
                 if (endTime - startTime > ackTimeout) {
                     logger.warn("execute messageListener timeout, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
-                    retryType = RetryType.TIMEOUT;
+                    retryType = RetryType.NONE;
                 }
             } catch (Exception e) {
                 if (e instanceof IgnoreAckException) {

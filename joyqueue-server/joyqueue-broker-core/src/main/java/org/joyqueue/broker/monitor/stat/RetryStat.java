@@ -25,8 +25,13 @@ import org.joyqueue.broker.monitor.metrics.Metrics;
  */
 public class RetryStat {
 
+    private Metrics total = new Metrics();
     private Metrics success = new Metrics();
     private Metrics failure = new Metrics();
+
+    public Metrics getTotal() {
+        return total;
+    }
 
     public Metrics getSuccess() {
         return success;

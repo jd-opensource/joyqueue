@@ -124,8 +124,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ThinNameService extends Service implements NameService, PropertySupplierAware, Type {
     private static final Logger logger = LoggerFactory.getLogger(ThinNameService.class);
 
-    private static final String TRACE_PREFIX = "nameservice.thin.";
-
     private NameServiceConfig nameServiceConfig;
     private PointTracer tracer;
 
@@ -158,7 +156,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
                     .expireAfterWrite(nameServiceConfig.getThinCacheExpireTime(), TimeUnit.MILLISECONDS)
                     .build();
         }
-        tracer = NsrPlugins.TRACERERVICE.get((String) PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
+        tracer = NsrPlugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
         clientTransport = new ClientTransport(nameServiceConfig,this);
         try {
             eventBus.start();
@@ -514,7 +512,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
         if (tracer == null) {
             return doSend(request, timeout);
         }
-        TraceStat traceBegin = tracer.begin(TRACE_PREFIX + request.getPayload().getClass().getSimpleName());
+        TraceStat traceBegin = tracer.begin("ThinNameService.send." + request.getPayload().getClass().getSimpleName());
         try {
             return doSend(request, timeout);
         } finally {
