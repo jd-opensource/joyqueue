@@ -123,8 +123,11 @@ public class TopicMessageConsumer extends Service {
         TopicName topicName = TopicName.parse(NameServerHelper.getTopicFullName(topic, nameServerConfig));
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getAppFullName());
 
-        if (topicMetadata == null || topicMetadata.getConsumerPolicy() == null) {
+        if (topicMetadata == null) {
             throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+        }
+        if (topicMetadata.getConsumerPolicy() == null) {
+            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, config.getAppFullName()), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
 
         if (topicMetadata.getType().equals(TopicType.BROADCAST)) {

@@ -251,6 +251,9 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         if (!config.isEnable()) {
             return;
         }
+        TopicStat topicStat = brokerStat.getOrCreateTopicStat(topic);
+        AppStat appStat = topicStat.getOrCreateAppStat(app);
+        appStat.getConsumerStat().getRetryStat().getTotal().mark(time, count);
     }
 
     @Override

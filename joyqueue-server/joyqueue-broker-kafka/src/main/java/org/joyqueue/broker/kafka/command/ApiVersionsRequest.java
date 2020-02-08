@@ -25,6 +25,25 @@ import org.joyqueue.broker.kafka.KafkaCommandType;
  */
 public class ApiVersionsRequest extends KafkaRequestOrResponse {
 
+    private String clientSoftwareName;
+    private String clientSoftwareVersion;
+
+    public String getClientSoftwareName() {
+        return clientSoftwareName;
+    }
+
+    public void setClientSoftwareName(String clientSoftwareName) {
+        this.clientSoftwareName = clientSoftwareName;
+    }
+
+    public String getClientSoftwareVersion() {
+        return clientSoftwareVersion;
+    }
+
+    public void setClientSoftwareVersion(String clientSoftwareVersion) {
+        this.clientSoftwareVersion = clientSoftwareVersion;
+    }
+
     @Override
     public int type() {
         return KafkaCommandType.API_VERSIONS.getCode();

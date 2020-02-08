@@ -23,6 +23,7 @@ package org.joyqueue.broker.monitor.model;
  */
 public class RetryStatPo {
 
+    private long total;
     private long success;
     private long failure;
 
@@ -30,9 +31,18 @@ public class RetryStatPo {
 
     }
 
-    public RetryStatPo(long success, long failure) {
+    public RetryStatPo(long total, long success, long failure) {
+        this.total = total;
         this.success = success;
         this.failure = failure;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
+    }
+
+    public long getTotal() {
+        return total;
     }
 
     public long getSuccess() {
@@ -50,4 +60,5 @@ public class RetryStatPo {
     public void setFailure(long failure) {
         this.failure = failure;
     }
+
 }
