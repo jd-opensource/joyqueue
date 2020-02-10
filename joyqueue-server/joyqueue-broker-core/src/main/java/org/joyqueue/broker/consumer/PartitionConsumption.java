@@ -245,8 +245,12 @@ class PartitionConsumption extends Service {
     protected PullResult getMsgByPartitionAndIndex(String topic, int group, short partition, long index, int count) throws JoyQueueException, IOException {
         long startTime = System.nanoTime();
         PullResult result = new PullResult(topic, null, partition, null);
-
         PartitionGroupStore store = storeService.getStore(topic, group);
+
+        if (index < store.getLeftIndex(partition) || index >= store.getRightIndex(partition)) {
+            return result;
+        }
+
         ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
 
 
