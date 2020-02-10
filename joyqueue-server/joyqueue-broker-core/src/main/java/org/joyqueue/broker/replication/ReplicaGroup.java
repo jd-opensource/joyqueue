@@ -618,7 +618,7 @@ public class ReplicaGroup extends Service {
         long commitPosition = replicasWithoutLearners.get(replicasWithoutLearners.size() / 2).writePosition();
         replicableStore.commit(commitPosition);
 
-        if (brokerConfig.getLogDetail(replica.getTopicPartitionGroup().getTopic())) {
+        if (brokerConfig.getLogDetail(topicPartitionGroup.getTopic())) {
             replicas.forEach(r -> logger.info("Partition group {}/node {}", topicPartitionGroup, r));
             logger.info("Partition group {}/node {} commit position is {}",
                     topicPartitionGroup, localReplicaId, replicableStore.commitPosition());
