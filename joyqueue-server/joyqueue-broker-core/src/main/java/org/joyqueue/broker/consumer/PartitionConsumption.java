@@ -245,10 +245,9 @@ class PartitionConsumption extends Service {
     protected PullResult getMsgByPartitionAndIndex(String topic, int group, short partition, long index, int count) throws JoyQueueException, IOException {
         long startTime = System.nanoTime();
         PullResult result = new PullResult(topic, null, partition, null);
-
         PartitionGroupStore store = storeService.getStore(topic, group);
-        ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
 
+        ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
 
         if (readRst.getCode() == JoyQueueCode.SUCCESS) {
             result.setBuffers(Lists.newArrayList(readRst.getMessages()));
