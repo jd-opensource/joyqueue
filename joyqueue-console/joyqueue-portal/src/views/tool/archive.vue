@@ -20,7 +20,7 @@
 
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-consume="consume" @on-download="download" @on-retry="retryInit">
+              @on-consume="consume" @on-download="download" @on-preview="preview" @on-retry="retryInit">
     </my-table>
 
     <div style="text-align: right; margin-right: 50px">
@@ -78,6 +78,10 @@ export default {
       type: Array,
       default: function () {
         return [
+          {
+            txt: '查看消息',
+            method: 'on-preview'
+          },
           {
             txt: '下载消息体',
             method: 'on-download'

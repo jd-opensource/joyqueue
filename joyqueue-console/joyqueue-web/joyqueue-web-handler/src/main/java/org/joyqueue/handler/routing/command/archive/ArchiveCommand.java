@@ -18,6 +18,7 @@ package org.joyqueue.handler.routing.command.archive;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.handler.Constants;
+import org.joyqueue.service.MessagePreviewService;
 import org.joyqueue.util.serializer.Serializer;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.model.domain.Archive;
@@ -43,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
 
@@ -61,8 +64,16 @@ public class ArchiveCommand implements Command<Response>, Poolable {
     @Value(Constants.USER_KEY)
     protected User session;
 
+    @Value(nullable = false)
+    private MessagePreviewService messagePreviewService;
+
     @CRequest
     private HttpServerRequest request;
+
+    @Path("message-types")
+    public Response messageTypes() throws Exception {
+        return Responses.success(messagePreviewService.getMessageTypeNames());
+    }
 
     /**
      * 分页查询
@@ -77,7 +88,20 @@ public class ArchiveCommand implements Command<Response>, Poolable {
                 || qArchive.getEndTime() == null) {
             return Responses.error(HTTP_BAD_REQUEST,"beginTime,endTime,topic 不能为空");
         }
-        return Responses.success(archiveService.findByQuery(qArchive));
+        // TODO 临时代码
+//        return Responses.success(archiveService.findByQuery(qArchive));
+
+        List<SendLog> sendLogs = new ArrayList<>(10);
+        for (int i = 0; i < 10; i++) {
+            SendLog sendLog = new SendLog();
+            sendLog.setMessageId(String.valueOf(10000 + 1));
+            sendLog.setBusinessId(String.valueOf(6666));
+            sendLog.setSendTime(System.currentTimeMillis());
+            sendLog.setApp("testApp");
+            sendLog.setTopic(qArchive.getTopic());
+            sendLogs.add(sendLog);
+        }
+        return Responses.success(sendLogs);
     }
 
     /**
@@ -165,7 +189,9 @@ public class ArchiveCommand implements Command<Response>, Poolable {
      */
     @Path("isServerEnabled")
     public Response isServerEnabled() throws Exception {
-        return Responses.success(archiveService.isServerEnabled());
+        // TODO 临时代码
+//        return Responses.success(archiveService.isServerEnabled());
+        return Responses.success(true);
     }
 
     private String convertParams(QArchive qArchive) {
