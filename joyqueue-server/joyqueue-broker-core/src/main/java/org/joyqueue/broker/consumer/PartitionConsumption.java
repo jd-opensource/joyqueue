@@ -247,12 +247,7 @@ class PartitionConsumption extends Service {
         PullResult result = new PullResult(topic, null, partition, null);
         PartitionGroupStore store = storeService.getStore(topic, group);
 
-        if (index < store.getLeftIndex(partition) || index >= store.getRightIndex(partition)) {
-            return result;
-        }
-
         ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
-
 
         if (readRst.getCode() == JoyQueueCode.SUCCESS) {
             result.setBuffers(Lists.newArrayList(readRst.getMessages()));

@@ -224,8 +224,10 @@ public class ProduceArchiveService extends Service {
             try {
                 pullResult = consume.getMessage(item.topic, item.partition, readIndex, batchNum);
             } catch (Throwable th) {
-                logger.error("read message from topic:" + item.topic + " partition:" + item.partition
-                        + " index:" + item.getReadIndex() + " error.", th);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("read message from topic:" + item.topic + " partition:" + item.partition
+                            + " index:" + item.getReadIndex() + " error.", th);
+                }
 
                 if (th.getCause() instanceof PositionUnderflowException) {
                     // 如果读取位置小于存储索引的最小位置，将位置重置为可读到的最小位置
