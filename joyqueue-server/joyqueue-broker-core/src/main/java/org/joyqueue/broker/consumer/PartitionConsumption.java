@@ -78,12 +78,13 @@ class PartitionConsumption extends Service {
     private MessageRetry messageRetry;
     // 消费归档
     private ArchiveManager archiveManager;
+    private ConsumeConfig config;
     // 性能监控key
     private String monitorKey = "Read-Message";
 
     PartitionConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
                                 PositionManager positionManager, MessageRetry messageRetry,
-                                FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager) {
+                                FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager, ConsumeConfig config) {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.partitionManager = partitionManager;
@@ -91,6 +92,7 @@ class PartitionConsumption extends Service {
         this.messageRetry = messageRetry;
         this.filterMessageSupport = filterMessageSupport;
         this.archiveManager = archiveManager;
+        this.config = config;
     }
 
     @Override
@@ -182,6 +184,10 @@ class PartitionConsumption extends Service {
             PullResult pullResult = getMessage4Sequence(consumer, partition, count, ackTimeout);
             int pullMsgCount = pullResult.getBuffers().size();
             if (pullMsgCount > 0) {
+                if (config.getLogDetail(consumer.getApp())) {
+                    logger.info("getFromPartition, topic: {}, app: {}, count: {}, partition: {}, partitions: {}, result: {}",
+                            consumer.getTopic(), consumer.getApp(), count, partition, partitionList, pullMsgCount);
+                }
                 return pullResult;
             }
             listIndex++;
@@ -321,6 +327,11 @@ class PartitionConsumption extends Service {
                 }
 
                 pullResult = new PullResult(consumer, partition, rByteBufferList);
+
+                if (config.getLogDetail(consumer.getApp())) {
+                    logger.info("getMessage4Sequence, topic: {}, app: {}, count: {}, partition: {}, index: {}, result: {}",
+                            consumer.getTopic(), consumer.getApp(), count, partition, index, pullResult.getBuffers().size());
+                }
             } catch (Exception ex) {
                 // 出现异常释放分区占用
                 partitionManager.releasePartition(consumer, partition);
@@ -509,6 +520,11 @@ class PartitionConsumption extends Service {
             }
         } else {
             throw new JoyQueueException(JoyQueueCode.FW_CONSUMER_ACK_FAIL, "ack index is not continue or repeatable!");
+        }
+
+        if (config.getLogDetail(consumer.getApp())) {
+            logger.info("acknowledge, topic: {}, app: {}, partition: {}, startIndex: {}, endIndex: {}, isSuccess: {}",
+                    consumer.getTopic(), consumer.getApp(), partition, indexArr[0], indexArr[1], isSuccess);
         }
 
         return isSuccess;

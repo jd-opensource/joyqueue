@@ -271,7 +271,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
         this.clusterManager = brokerContext.getClusterManager();
         this.propertySupplier = brokerContext.getPropertySupplier();
         this.brokerMonitor = brokerContext.getBrokerMonitor();
-        tracer = Plugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
+        this.tracer = Plugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
     }
 
     @Override

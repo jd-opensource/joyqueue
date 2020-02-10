@@ -35,7 +35,9 @@ public enum BrokerConfigKey implements PropertyDef {
     FRONTEND_SERVER_PRODUCE_THREAD_KEEPALIVE("broker.frontend-server.produce.thread.keepalive", 1000 * 60, Type.INT),
     FRONTEND_SERVER_PRODUCE_THREAD_QUEUE_SIZE("broker.frontend-server.produce.thread.queue.size", 102400, Type.INT),
     TRACER_TYPE("broker.tracer.type", "default", Type.STRING),
-
+    // 详细日志
+    LOG_DETAIL("broker.log.detail", false, Type.BOOLEAN),
+    LOG_DETAIL_PREFIX("broker.log.detail.", false, Type.BOOLEAN),
     ;
 
     private String name;

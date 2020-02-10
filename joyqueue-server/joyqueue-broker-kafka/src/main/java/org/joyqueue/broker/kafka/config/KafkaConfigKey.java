@@ -66,9 +66,6 @@ public enum KafkaConfigKey implements PropertyDef {
     // 生产延迟
     PRODUCE_DELAY_ENABLE("kafka.produce.delay.enable", true, Type.BOOLEAN),
     PRODUCE_DELAY("kafka.produce.delay", 1000 * 1, Type.INT),
-    // 详细日志
-    LOG_DETAIL("kafka.log.detail", false, Type.BOOLEAN),
-    LOG_DETAIL_PREFIX("kafka.log.detail.", false, Type.BOOLEAN),
 
     ;
 

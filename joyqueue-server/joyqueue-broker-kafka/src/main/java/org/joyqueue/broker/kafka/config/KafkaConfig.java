@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.kafka.config;
 
+import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -31,9 +32,11 @@ public class KafkaConfig {
     protected static final Logger logger = LoggerFactory.getLogger(KafkaConfig.class);
 
     private PropertySupplier propertySupplier;
+    private BrokerConfig brokerConfig;
 
     public KafkaConfig(PropertySupplier propertySupplier) {
         this.propertySupplier = propertySupplier;
+        this.brokerConfig = new BrokerConfig(propertySupplier);
     }
 
     public boolean getProduceDelayEnable() {
@@ -42,14 +45,6 @@ public class KafkaConfig {
 
     public int getProduceDelay() {
         return getConfig(KafkaConfigKey.PRODUCE_DELAY);
-    }
-
-    public boolean getLogDetail(String app) {
-        return (boolean) getConfig(KafkaConfigKey.LOG_DETAIL)
-                || (boolean) PropertySupplier.getValue(propertySupplier,
-                KafkaConfigKey.LOG_DETAIL_PREFIX.getName() + app,
-                KafkaConfigKey.LOG_DETAIL_PREFIX.getType(),
-                KafkaConfigKey.LOG_DETAIL_PREFIX.getValue());
     }
 
     public int getProduceTimeout() {
@@ -118,6 +113,10 @@ public class KafkaConfig {
 
     public int getRebalanceTimeout() {
         return getConfig(KafkaConfigKey.REBALANCE_TIMEOUT);
+    }
+
+    public boolean getLogDetail(String app) {
+        return brokerConfig.getLogDetail(app);
     }
 
     protected <T> T getConfig(String key, PropertyDef.Type type, Object defaultValue) {
