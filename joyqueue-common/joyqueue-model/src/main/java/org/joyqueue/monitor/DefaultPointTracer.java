@@ -13,31 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.monitor.stat;
-
-import org.joyqueue.broker.monitor.metrics.Metrics;
+package org.joyqueue.monitor;
 
 /**
- * RetryStat
- *
- * author: gaohaoxiang
- * date: 2018/10/11
+ * @author lining11
+ * Date: 2020/1/6
  */
-public class RetryStat {
+public class DefaultPointTracer implements PointTracer {
 
-    private Metrics total = new Metrics();
-    private Metrics success = new Metrics();
-    private Metrics failure = new Metrics();
+    private TraceStat stat = new TraceStat();
 
-    public Metrics getTotal() {
-        return total;
+
+    @Override
+    public String type() {
+        return "default";
     }
 
-    public Metrics getSuccess() {
-        return success;
+    @Override
+    public TraceStat begin(String start) {
+        return stat;
     }
 
-    public Metrics getFailure() {
-        return failure;
+    @Override
+    public void end(TraceStat end) {
+
     }
 }

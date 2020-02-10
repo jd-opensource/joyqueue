@@ -16,6 +16,7 @@
 package org.joyqueue.broker.replication;
 
 import com.google.common.base.Preconditions;
+import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.election.DefaultElectionNode;
 import org.joyqueue.broker.election.ElectionConfig;
@@ -55,6 +56,7 @@ public class ReplicationManager extends Service {
 
     private ConcurrentHashMap<TopicPartitionGroup, ReplicaGroup> replicaGroups;
     private ElectionConfig electionConfig;
+    private BrokerConfig brokerConfig;
     private final ConcurrentHashMap<String, Transport> sessions = new ConcurrentHashMap<>();
 
     private StoreService storeService;
@@ -65,13 +67,14 @@ public class ReplicationManager extends Service {
     private ScheduledExecutorService replicateTimerExecutor;
     private BlockingDeque replicateQueue;
 
-    public ReplicationManager(ElectionConfig electionConfig, StoreService storeService,
+    public ReplicationManager(ElectionConfig electionConfig, BrokerConfig brokerConfig, StoreService storeService,
                               Consume consume, BrokerMonitor brokerMonitor) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(storeService != null, "store service is null");
         Preconditions.checkArgument(consume != null, "consume is null");
 
         this.electionConfig = electionConfig;
+        this.brokerConfig = brokerConfig;
         this.storeService = storeService;
         this.consume = consume;
     }
@@ -144,7 +147,7 @@ public class ReplicationManager extends Service {
             throw new ElectionException(String.format("Create Replica group for topic %s partition group " +
                     "%d failed, replicable store is null", topic, partitionGroup));
         }
-        replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig,
+        replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig, brokerConfig,
                 consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId,transportClient);
         try {
             replicaGroup.start();

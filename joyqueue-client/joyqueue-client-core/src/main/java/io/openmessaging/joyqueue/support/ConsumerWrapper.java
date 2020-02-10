@@ -171,4 +171,9 @@ public class ConsumerWrapper implements ExtensionConsumer {
     public ConsumerIndex getIndex(short partition) {
         return delegate.getIndex(partition);
     }
+
+    @Override
+    public void batchAck(List<MessageReceipt> receiptList) {
+        delegate.batchAck(receiptList);
+    }
 }

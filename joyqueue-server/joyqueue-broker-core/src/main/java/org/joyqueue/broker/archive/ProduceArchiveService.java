@@ -23,7 +23,6 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.model.PullResult;
-import org.joyqueue.broker.monitor.DefaultPointTracer;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueException;
@@ -48,7 +47,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -127,10 +125,7 @@ public class ProduceArchiveService extends Service {
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
         Preconditions.checkArgument(archiveConfig != null, "archive config can not be null.");
 
-        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
-        if (tracer == null) {
-            tracer = new DefaultPointTracer();
-        }
+        this.tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
         this.batchNum = archiveConfig.getProduceBatchNum();
         this.archiveQueue = new LinkedBlockingDeque<>(archiveConfig.getLogQueueSize());
         this.executorService = new ThreadPoolExecutor(archiveConfig.getWriteThreadNum(), archiveConfig.getWriteThreadNum(),
@@ -229,8 +224,10 @@ public class ProduceArchiveService extends Service {
             try {
                 pullResult = consume.getMessage(item.topic, item.partition, readIndex, batchNum);
             } catch (Throwable th) {
-                logger.error("read message from topic:" + item.topic + " partition:" + item.partition
-                        + " index:" + item.getReadIndex() + " error.", th);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("read message from topic:" + item.topic + " partition:" + item.partition
+                            + " index:" + item.getReadIndex() + " error.", th);
+                }
 
                 if (th.getCause() instanceof PositionUnderflowException) {
                     // 如果读取位置小于存储索引的最小位置，将位置重置为可读到的最小位置
@@ -340,13 +337,7 @@ public class ProduceArchiveService extends Service {
      */
     private List<BrokerMessage> parseMessage(ByteBuffer buffer) throws Exception {
         BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
-        List<BrokerMessage> brokerMessageList = new LinkedList<>();
-        if (brokerMessage.getSource() == SourceType.KAFKA.getValue() && brokerMessage.isBatch()) {
-            brokerMessageList = messageConvertSupport.convertBatch(brokerMessage, SourceType.INTERNAL.getValue());
-        } else {
-            brokerMessageList.add(brokerMessage);
-        }
-        return brokerMessageList;
+        return messageConvertSupport.convert(brokerMessage, SourceType.INTERNAL.getValue());
     }
 
     /**

@@ -170,7 +170,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         this.partitionManager = new PartitionManager(clusterManager, sessionManager);
         this.positionManager = new PositionManager(clusterManager, storeService, consumeConfig);
         this.brokerContext.positionManager(positionManager);
-        this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager);
+        this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager, consumeConfig);
         this.concurrentConsumption = new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager);
         this.resetBroadcastIndexTimer = new Timer("joyqueuue-consume-reset-broadcast-index-timer");
     }

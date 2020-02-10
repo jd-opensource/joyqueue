@@ -26,6 +26,7 @@ public class RetryMonitorInfo extends BaseMonitorInfo {
     private long count;
     private long success;
     private long failure;
+    private long current;
 
     public void setCount(long count) {
         this.count = count;
@@ -49,5 +50,13 @@ public class RetryMonitorInfo extends BaseMonitorInfo {
 
     public void setFailure(long failure) {
         this.failure = failure;
+    }
+
+    public void setCurrent(long current) {
+        this.current = current;
+    }
+
+    public long getCurrent() {
+        return current;
     }
 }

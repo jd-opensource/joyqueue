@@ -91,7 +91,11 @@ class FilterMessageSupport {
      * @throws JoyQueueException
      */
     private FilterPipeline<MessageFilter> createFilterPipeline(Consumer.ConsumerPolicy consumerPolicy) throws JoyQueueException {
-        Map<String, String> filterRule = consumerPolicy.getFilters();
+        Map<String, String> filterRule = null;
+        if (consumerPolicy != null) {
+            filterRule = consumerPolicy.getFilters();
+        }
+
         String pipelineId = generatePipelineId(filterRule);
         FilterPipeline<MessageFilter> filterPipeline = new FilterPipeline<>(pipelineId);
 

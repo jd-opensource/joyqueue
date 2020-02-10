@@ -15,14 +15,15 @@
  */
 package org.joyqueue.broker.kafka.network.codec;
 
-import org.joyqueue.broker.kafka.network.KafkaHeader;
-import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.command.ApiVersionsRequest;
 import org.joyqueue.broker.kafka.command.ApiVersionsResponse;
 import org.joyqueue.broker.kafka.model.ApiVersion;
+import org.joyqueue.broker.kafka.network.KafkaHeader;
+import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
+import org.joyqueue.broker.kafka.util.KafkaBufferUtils;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 /**
  * ApiVersionsCodec
@@ -34,10 +35,28 @@ public class ApiVersionsCodec implements KafkaPayloadCodec<ApiVersionsResponse>,
 
     @Override
     public Object decode(KafkaHeader header, ByteBuf buffer) throws Exception {
-        if (buffer.isReadable(4)) {
-            buffer.skipBytes(4);
+        ApiVersionsRequest apiVersionsRequest = new ApiVersionsRequest();
+
+        // 兼容未知新版本客户端
+        if (header.getVersion() > KafkaCommandType.API_VERSIONS.getMaxVersion()) {
+            buffer.skipBytes(buffer.readableBytes());
+        } else {
+            if (header.getVersion() >= 3) {
+                // 忽略rawTaggedField
+                KafkaBufferUtils.readRawTaggedFields(buffer);
+                apiVersionsRequest.setClientSoftwareName(KafkaBufferUtils.readCompactString(buffer));
+                apiVersionsRequest.setClientSoftwareVersion(KafkaBufferUtils.readCompactString(buffer));
+                KafkaBufferUtils.readRawTaggedFields(buffer);
+            }
+
+            // C客户端特殊处理
+            if (header.getVersion() < 3) {
+                if (buffer.isReadable(4)) {
+                    buffer.skipBytes(4);
+                }
+            }
         }
-        return new ApiVersionsRequest();
+        return apiVersionsRequest;
     }
 
     @Override

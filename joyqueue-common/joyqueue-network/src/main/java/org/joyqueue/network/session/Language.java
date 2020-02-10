@@ -24,6 +24,10 @@ public enum Language {
      */
     JAVA,
     /**
+     * C客户端
+     */
+    C,
+    /**
      * C++客户端
      */
     CPP,
@@ -44,6 +48,10 @@ public enum Language {
      */
     ERLANG,
     /**
+     * go客户端
+     */
+    GO,
+    /**
      * 其它客户端
      */
     OTHER;
@@ -53,6 +61,15 @@ public enum Language {
             throw new IndexOutOfBoundsException("Invalid ordinal");
         }
         return values()[ordinal];
+    }
+
+    public static Language parse(String value) {
+        for (Language language : Language.values()) {
+            if (language.name().equalsIgnoreCase(value)) {
+                return language;
+            }
+        }
+        return Language.OTHER;
     }
 
 }
