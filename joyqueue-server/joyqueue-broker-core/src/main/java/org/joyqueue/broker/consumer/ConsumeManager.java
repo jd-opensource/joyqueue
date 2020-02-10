@@ -406,7 +406,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     @Override
     public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JoyQueueException {
         boolean isSuccess = false;
-        if (locations.length < 0) {
+        if (locations.length <= 0) {
             return isSuccess;
         }
 

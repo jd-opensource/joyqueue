@@ -26,6 +26,7 @@ public enum ConsumeConfigKey implements PropertyDef {
     RETRY_RANDOM_BOUND("retry.random.bound", 1000, Type.INT),
     RETRY_RANDOM_BOUND_TOPIC_PREFIX("retry.random.bound.topic.", -1, Type.INT),
     RETRY_RANDOM_BOUND_APP_PREFIX("retry.random.bound.app.", -1, Type.INT),
+    RETRY_RATE("retry.rate", -1, Type.INT),
     BROADCAST_INDEX_RESET_ENABLE("consume.broadcast.index.reset.enable", true, Type.BOOLEAN),
     BROADCAST_INDEX_RESET_INTERVAL("consume.broadcast.index.reset.interval", 1000 * 60 * 5, Type.INT),
     BROADCAST_INDEX_RESET_TIME("consume.broadcast.index.reset.time", 1000 * 60 * 60 * 24 * 2, Type.INT),

@@ -60,6 +60,10 @@ public class ConsumeConfig {
         return propertySupplier.getValue(ConsumeConfigKey.BROADCAST_INDEX_RESET_TIME);
     }
 
+    public int getRetryRate(){
+        return propertySupplier.getValue(ConsumeConfigKey.RETRY_RATE);
+    }
+
     public void setConsumePositionPath(String consumePositionPath) {
         this.consumePositionPath = consumePositionPath;
     }
