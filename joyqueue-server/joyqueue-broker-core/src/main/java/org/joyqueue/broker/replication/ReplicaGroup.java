@@ -16,6 +16,7 @@
 package org.joyqueue.broker.replication;
 
 import com.google.common.base.Preconditions;
+import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
@@ -25,13 +26,13 @@ import org.joyqueue.broker.election.ElectionException;
 import org.joyqueue.broker.election.ElectionNode;
 import org.joyqueue.broker.election.LeaderElection;
 import org.joyqueue.broker.election.TopicPartitionGroup;
-import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.election.command.AppendEntriesRequest;
 import org.joyqueue.broker.election.command.AppendEntriesResponse;
 import org.joyqueue.broker.election.command.ReplicateConsumePosRequest;
 import org.joyqueue.broker.election.command.ReplicateConsumePosResponse;
 import org.joyqueue.broker.election.command.TimeoutNowRequest;
 import org.joyqueue.broker.election.command.TimeoutNowResponse;
+import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.event.TransportEvent;
@@ -56,10 +57,18 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import static org.joyqueue.broker.election.ElectionNode.State.*;
+import static org.joyqueue.broker.election.ElectionNode.State.FOLLOWER;
+import static org.joyqueue.broker.election.ElectionNode.State.LEADER;
+import static org.joyqueue.broker.election.ElectionNode.State.TRANSFERRING;
 
 /**
  * author: zhuduohui
@@ -70,6 +79,7 @@ public class ReplicaGroup extends Service {
     private static Logger logger = LoggerFactory.getLogger(ReplicaGroup.class);
 
     private ElectionConfig electionConfig;
+    private BrokerConfig brokerConfig;
     private TopicPartitionGroup topicPartitionGroup;
     private ReplicationManager replicationManager;
 
@@ -103,7 +113,7 @@ public class ReplicaGroup extends Service {
     private static final int MAX_PROCESS_TIME =  300 * 1000;
 
     ReplicaGroup(TopicPartitionGroup topicPartitionGroup, ReplicationManager replicationManager,
-                 ReplicableStore replicableStore, ElectionConfig electionConfig,
+                 ReplicableStore replicableStore, ElectionConfig electionConfig, BrokerConfig brokerConfig,
                  Consume consume, ExecutorService replicateExecutor, BrokerMonitor brokerMonitor,
                  List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId,
                  TransportClient transportClient
@@ -117,6 +127,7 @@ public class ReplicaGroup extends Service {
         Preconditions.checkArgument(replicableStore != null, "replicable store is null");
         Preconditions.checkArgument(transportClient !=null, "transport client can not be null");
         this.electionConfig = electionConfig;
+        this.brokerConfig = brokerConfig;
         this.topicPartitionGroup = topicPartitionGroup;
         this.replicationManager = replicationManager;
         this.localReplicaId = localReplicaId;
@@ -607,9 +618,9 @@ public class ReplicaGroup extends Service {
         long commitPosition = replicasWithoutLearners.get(replicasWithoutLearners.size() / 2).writePosition();
         replicableStore.commit(commitPosition);
 
-        if (logger.isDebugEnabled()) {
-            replicas.forEach(r -> logger.debug("Partition group {}/node {}", topicPartitionGroup, r));
-            logger.debug("Partition group {}/node {} commit position is {}",
+        if (brokerConfig.getLogDetail(replica.getTopicPartitionGroup().getTopic())) {
+            replicas.forEach(r -> logger.info("Partition group {}/node {}", topicPartitionGroup, r));
+            logger.info("Partition group {}/node {} commit position is {}",
                     topicPartitionGroup, localReplicaId, replicableStore.commitPosition());
         }
     }
