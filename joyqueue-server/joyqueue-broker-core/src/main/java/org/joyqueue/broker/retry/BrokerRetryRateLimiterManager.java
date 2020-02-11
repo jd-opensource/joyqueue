@@ -6,6 +6,7 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.ConsumeConfig;
 import org.joyqueue.broker.limit.RateLimiter;
 import org.joyqueue.broker.limit.support.DefaultRateLimiter;
+import org.joyqueue.domain.Config;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.MetaEvent;
@@ -59,15 +60,24 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
 
     /**
      *  Mix broker level consume retry rate with consumer level config
+     *  priority:
+     *    1. broker consumer level
+     *    2. broker level
+     *    3. consumer config level
      *
      **/
     public int consumerRetryRate(String topic,String app){
         Consumer consumer = clusterManager.tryGetConsumer(TopicName.parse(topic), app);
         int consumerLevelRetryRate=DEFAULT_CONSUMER_RETRY_RATE;
+        int retryRate=consumeConfig.getRetryRate(topic,app);
+        if(retryRate<0){
+            // get broker level retry rate
+            retryRate=consumeConfig.getRetryRate();
+        }
         if (consumer != null && consumer.getConsumerPolicy()!= null){
             consumerLevelRetryRate=consumer.getConsumerPolicy().getRetryRate();
         }
-        return consumeConfig.getRetryRate()>0? Math.min(consumeConfig.getRetryRate(),consumerLevelRetryRate):consumerLevelRetryRate;
+        return retryRate>0? Math.min(consumeConfig.getRetryRate(),consumerLevelRetryRate):consumerLevelRetryRate;
     }
 
 
@@ -77,15 +87,33 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
     @Override
     public void onEvent(MetaEvent event) {
         switch (event.getEventType()) {
-            case UPDATE_CONSUMER: {
-                UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event;
-                cleanRateLimiter(updateConsumerEvent.getTopic().getFullName(), updateConsumerEvent.getNewConsumer().getApp());
+            case UPDATE_CONFIG: {
+                UpdateConfigEvent updateConfigEvent = (UpdateConfigEvent) event;
+                Config config = updateConfigEvent.getNewConfig();
+                cleanRateLimiter(config);
                 break;
             }
-            case REMOVE_CONSUMER: {
-                RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event;
-                cleanRateLimiter(removeConsumerEvent.getTopic().getFullName(), removeConsumerEvent.getConsumer().getApp());
+            case REMOVE_CONFIG: {
+                RemoveConfigEvent removeConsumerEvent = (RemoveConfigEvent) event;
+                Config config=removeConsumerEvent.getConfig();
+                cleanRateLimiter(config);
                 break;
+            }
+        }
+    }
+
+    /**
+     * @param config  consumer config
+     *
+     **/
+    public void cleanRateLimiter(Config config){
+        String configKey=config.getKey();
+        if(configKey!=null){
+            String[] keys=configKey.split("_");
+            if(keys.length>=3){
+                String topic=keys[1];
+                String app=keys[2];
+                cleanRateLimiter(topic,app);
             }
         }
     }
