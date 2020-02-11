@@ -7,8 +7,6 @@ import org.joyqueue.broker.consumer.ConsumeConfig;
 import org.joyqueue.broker.limit.RateLimiter;
 import org.joyqueue.broker.limit.support.DefaultRateLimiter;
 import org.joyqueue.domain.Config;
-import org.joyqueue.domain.Consumer;
-import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.nsr.event.*;
 import org.joyqueue.toolkit.concurrent.EventListener;
@@ -63,20 +61,20 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
      *  priority:
      *    1. broker consumer level
      *    2. broker level
-     *    3. consumer config level
+     *    3. consumer config level(not support)
      *
      **/
     public int consumerRetryRate(String topic,String app){
-        Consumer consumer = clusterManager.tryGetConsumer(TopicName.parse(topic), app);
+//        Consumer consumer = clusterManager.tryGetConsumer(TopicName.parse(topic), app);
         int consumerLevelRetryRate=DEFAULT_CONSUMER_RETRY_RATE;
         int retryRate=consumeConfig.getRetryRate(topic,app);
         if(retryRate<0){
             // get broker level retry rate
             retryRate=consumeConfig.getRetryRate();
         }
-        if (consumer != null && consumer.getConsumerPolicy()!= null){
-            consumerLevelRetryRate=consumer.getConsumerPolicy().getRetryRate();
-        }
+//        if (consumer != null && consumer.getConsumerPolicy()!= null){
+//            consumerLevelRetryRate=consumer.getConsumerPolicy().getRetryRate();
+//        }
         return retryRate>0? Math.min(retryRate,consumerLevelRetryRate):consumerLevelRetryRate;
     }
 
@@ -99,6 +97,14 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
                 cleanRateLimiter(config);
                 break;
             }
+            case REMOVE_TOPIC:
+                RemoveTopicEvent topicEvent = (RemoveTopicEvent) event;
+                cleanRateLimiter(topicEvent.getTopic().getName().getFullName(),null);
+                break;
+            case REMOVE_CONSUMER:
+                RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event;
+                cleanRateLimiter(removeConsumerEvent.getTopic().getFullName(), removeConsumerEvent.getConsumer().getApp());
+                break;
         }
     }
 
@@ -110,10 +116,12 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
         String configKey=config.getKey();
         if(configKey!=null){
             String[] keys=configKey.split("_");
-            if(keys.length>=3){
+            if(keys.length>= 3){
                 String topic=keys[1];
                 String app=keys[2];
-                cleanRateLimiter(topic,app);
+                if(topic!=null&&app!=null) {
+                    cleanRateLimiter(topic, app);
+                }
             }
         }
     }
@@ -121,10 +129,15 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
     /**
      * Clean rate limiter of consumer
      **/
-    public void cleanRateLimiter(String topic,String app){
-       Map<String,RateLimiter> rateLimiters= retryRateLimiters.get(topic);
-       if(rateLimiters!=null){
-           rateLimiters.remove(app);
-       }
+    public void cleanRateLimiter(String topic,String app) {
+        if (app == null) {
+            retryRateLimiters.remove(topic);
+        }else {
+            Map<String, RateLimiter> rateLimiters = retryRateLimiters.get(topic);
+            if (rateLimiters != null) {
+                rateLimiters.remove(app);
+            }
+
+        }
     }
 }

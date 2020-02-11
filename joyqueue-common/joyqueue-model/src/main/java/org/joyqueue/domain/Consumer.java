@@ -183,15 +183,10 @@ public class Consumer extends Subscription {
         // 是否需要归档,默认归档
         private Boolean archive;
         // 是否需要重试，默认重试
-        private Boolean retry =true;
-
-        /**
-         *  重试频率，用于重试限流
-         **/
-        private Integer retryRate = 500;
+        private Boolean retry;
         // 顺序消费
         @Deprecated
-        private Boolean seq =false;
+        private Boolean seq;
         // 应答超时时间
         private Integer ackTimeout = 12000;
         // 批量大小
@@ -260,16 +255,9 @@ public class Consumer extends Subscription {
             return retry;
         }
 
-        public Integer getRetryRate() {
-            return retryRate;
-        }
-
-        public void setRetryRate(Integer retryRate) {
-            this.retryRate = retryRate;
-        }
 
         public Boolean getSeq() {
-            return  seq;
+            return seq;
         }
 
         public Integer getAckTimeout() {
@@ -374,7 +362,6 @@ public class Consumer extends Subscription {
                     Objects.equals(paused, that.paused) &&
                     Objects.equals(archive, that.archive) &&
                     Objects.equals(retry, that.retry) &&
-                    Objects.equals(retryRate, that.retryRate) &&
                     Objects.equals(seq, that.seq) &&
                     Objects.equals(ackTimeout, that.ackTimeout) &&
                     Objects.equals(batchSize, that.batchSize) &&
@@ -390,7 +377,7 @@ public class Consumer extends Subscription {
         @Override
         public int hashCode() {
 
-            return Objects.hash(nearby, paused, archive, retry, seq, ackTimeout, batchSize, concurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability, filters,retryRate);
+            return Objects.hash(nearby, paused, archive, retry, seq, ackTimeout, batchSize, concurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability, filters);
         }
 
         public static class Builder {
@@ -402,8 +389,6 @@ public class Consumer extends Subscription {
             private Boolean archive = false;
             // 是否需要重试，默认重试
             private Boolean retry = true;
-
-            private Integer retryRate= 1000;
             // 顺序消费
             private Boolean seq = false;
             // 应答超时时间
@@ -447,11 +432,6 @@ public class Consumer extends Subscription {
 
             public Builder retry(Boolean retry) {
                 this.retry = retry;
-                return this;
-            }
-
-            public Builder retryRate(Integer retryRate){
-                this.retryRate=retryRate;
                 return this;
             }
 
