@@ -535,6 +535,9 @@
                path="/v1/archive/download" handlers="archive#download render"
                errors="error"/>
         <route inherit="get"
+               path="/v1/archive/preview" handlers="archive#preview render"
+               errors="error"/>
+        <route inherit="get"
                path="/v1/archive/consume/:id" handlers="archive#consume render"
                errors="error"/>
         <route inherit="get"

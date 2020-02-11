@@ -182,6 +182,30 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         }
     }
 
+    @Path("preview")
+    public Response preview(@QueryParam("businessId") String businessId, @QueryParam("messageId") String messageId
+            , @QueryParam("sendTime") String sendTime, @QueryParam("topic") String topic, @QueryParam("messageType") String messageType) throws Exception {
+        if (businessId == null
+                || messageId == null
+                || sendTime == null
+                || topic == null) {
+            return Responses.error(HTTP_BAD_REQUEST, "请求参数错误!");
+        }
+        SendLog sendLog = archiveService.findSendLog(topic,Long.valueOf(sendTime),businessId,messageId);
+        if (sendLog != null) {
+
+            byte[] data = sendLog.getMessageBody();
+            if (data.length == 0) {
+                return Responses.error(Response.HTTP_NOT_FOUND, "未找到消息!");
+            }
+            BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(data));
+            return Responses.success(messagePreviewService.preview(messageType, brokerMessage.getByteBody()));
+
+        } else {
+            return Responses.error(Response.HTTP_NOT_FOUND, "未找到消息!");
+        }
+    }
+
     /**
      * 归档服务是否可用
      * @return

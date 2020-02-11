@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
  * Date: 2020/2/8
  */
 @Component(value = "defaultMessageDeserializer")
-public class TextMessageDeserializer implements MessageDeserializer {
+public class Utf8TextMessageDeserializer implements MessageDeserializer {
     @Override
     public String getSerializeTypeName() {
         return "UTF-8 TEXT";

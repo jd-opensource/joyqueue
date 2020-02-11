@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  * @author LiYue
  * Date: 2020/2/8
  */
-@Component
+@Service("messagePreviewService")
 public class MessagePreviewServiceImpl implements MessagePreviewService {
     private static final Logger logger = LoggerFactory.getLogger(MessagePreviewServiceImpl.class);
     private final Map<String, MessageDeserializer> messageDeserializerMap;

@@ -41,11 +41,18 @@
         <d-option v-for="item in retry.appList" :value="item" :key="item">{{ item }}</d-option>
       </d-select>
     </my-dialog>
+    <d-dialog v-model="previewDialogVisible" title="预览消息" width="600">
+      <preview :message-types="messageTypes" :url="urls.preview" :query="previewQuery" :messageType="messageType" @update:messageType="messageType = $event"></preview>
+      <div slot="footer">
+          <d-button @click="previewDialogVisible = false">关闭</d-button>
+      </div>
+    </d-dialog>
   </div>
 </template>
 
 <script>
 import myTable from '../../components/common/myTable.vue'
+import preview from './preview.vue'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
 import MyDialog from '../../components/common/myDialog'
@@ -55,7 +62,8 @@ export default {
   name: 'archive',
   components: {
     MyDialog,
-    myTable
+    myTable,
+    preview
   },
   mixins: [ crud ],
   props: {
@@ -79,7 +87,7 @@ export default {
       default: function () {
         return [
           {
-            txt: '查看消息',
+            txt: '预览消息',
             method: 'on-preview'
           },
           {
@@ -105,7 +113,9 @@ export default {
         consume: '/archive/consume',
         download: '/archive/download',
         retry: '/archive/retry',
-        getApps:'/consumer/findAppsByTopic/topic'
+        getApps:'/consumer/findAppsByTopic/topic',
+        preview: '/archive/preview',
+        messageTypes: '/archive/message-types'
       },
       firstDis: true,
       nextDis: true,
@@ -115,12 +125,18 @@ export default {
         showFooter: false,
         width: '1000px'
       },
+      messageTypes: [
+        'UTF8 TEXT'
+      ],
+      messageType: undefined,
       retryDialog: {
         visible: false,
         title: '归档转重试',
         showFooter: true,
         width: '300px'
       },
+      previewDialogVisible: false,
+      previewQuery: undefined,
       retry: {
         appList:[],
         app:'',
@@ -261,6 +277,16 @@ export default {
         this.$Message.success('下载成功')
       })
     },
+    preview (item) {
+      this.previewQuery = {
+        topic: item.topic ,
+        sendTime: item.sendTime,
+        businessId: item.businessId,
+        messageId: item.messageId
+      }
+      this.previewDialogVisible = true
+
+    },
     retryInit(item) {
       this.retryDialog.visible = true;
       this.retry.item = item;
@@ -282,7 +308,19 @@ export default {
     }
   },
   mounted () {
+    apiRequest.get(this.urls.messageTypes)
+      .then(data => {
+        this.messageTypes = data.data
 
+        if (typeof this.messageTypes !== 'undefined' && this.messageTypes.length > 0) {
+          if (typeof this.messageType === 'undefined') {
+            this.messageType = this.messageTypes[0]
+          }
+        } else {
+          console.error('Property message-types can not be empty!')
+        }
+
+      })
   }
 }
 </script>
