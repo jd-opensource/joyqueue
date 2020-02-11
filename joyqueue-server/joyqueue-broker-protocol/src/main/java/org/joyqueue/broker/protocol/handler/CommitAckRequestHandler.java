@@ -159,7 +159,6 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
             }
 
             consume.acknowledge(messageLocations, consumer, connection, true);
-
             if (CollectionUtils.isNotEmpty(retryDataList)) {
                 commitRetry(connection, consumer, retryDataList);
             }

@@ -77,7 +77,7 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
         if (consumer != null && consumer.getConsumerPolicy()!= null){
             consumerLevelRetryRate=consumer.getConsumerPolicy().getRetryRate();
         }
-        return retryRate>0? Math.min(consumeConfig.getRetryRate(),consumerLevelRetryRate):consumerLevelRetryRate;
+        return retryRate>0? Math.min(retryRate,consumerLevelRetryRate):consumerLevelRetryRate;
     }
 
 
