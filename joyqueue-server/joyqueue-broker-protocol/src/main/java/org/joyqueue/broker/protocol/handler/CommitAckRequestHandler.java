@@ -207,7 +207,7 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
         } catch (JoyQueueException e) {
             if (e.getCode() == JoyQueueCode.RETRY_TOKEN_LIMIT.getCode()) {
                 logger.warn("add retry limited, transport: {}, topic: {}, app: {}",
-                        connection.getTransport(), consumer.getTopic(), consumer.getApp());
+                        connection.getTransport().remoteAddress(), consumer.getTopic(), consumer.getApp());
             } else {
                 logger.error("add retry exception, transport: {}, topic: {}",
                         connection.getTransport().remoteAddress(), consumer.getTopic(), e);
