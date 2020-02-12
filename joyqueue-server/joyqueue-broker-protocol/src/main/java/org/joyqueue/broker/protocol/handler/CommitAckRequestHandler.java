@@ -187,8 +187,8 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
                 List<ByteBuffer> buffers = pullResult.getBuffers();
 
                 if (buffers.size() != 1) {
-                    logger.error("get retryMessage error, message not exist, transport: {}, topic: {}, partition: {}, index: {}",
-                            connection.getTransport().remoteAddress(), consumer.getTopic(), ackData.getPartition(), ackData.getIndex());
+                    logger.error("get retryMessage error, message not exist, transport: {}, topic: {}, app: {}, partition: {}, index: {}",
+                            connection.getTransport().remoteAddress(), consumer.getTopic(), consumer.getApp(), ackData.getPartition(), ackData.getIndex());
                     continue;
                 }
 
@@ -197,8 +197,8 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
                 RetryMessageModel model = generateRetryMessage(consumer, brokerMessage, buffer.array(), ackData.getRetryType().name());
                 retryMessageModelList.add(model);
             } catch (Exception e) {
-                logger.error("generate retryMessage exception, transport: {}, topic: {}, partition: {}, index: {}",
-                        connection.getTransport().remoteAddress(), consumer.getTopic(), ackData.getPartition(), ackData.getIndex(), e);
+                logger.error("generate retryMessage exception, transport: {}, topic: {}, app: {}, partition: {}, index: {}",
+                        connection.getTransport().remoteAddress(), consumer.getTopic(), consumer.getApp(), ackData.getPartition(), ackData.getIndex(), e);
             }
         }
 
@@ -209,12 +209,12 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
                 logger.warn("add retry limited, transport: {}, topic: {}, app: {}",
                         connection.getTransport().remoteAddress(), consumer.getTopic(), consumer.getApp());
             } else {
-                logger.error("add retry exception, transport: {}, topic: {}",
-                        connection.getTransport().remoteAddress(), consumer.getTopic(), e);
+                logger.error("add retry exception, transport: {}, topic: {}, app: {}",
+                        connection.getTransport().remoteAddress(), consumer.getTopic(), consumer.getApp(), e);
             }
         } catch (Exception e) {
-            logger.error("add retry exception, transport: {}, topic: {}",
-                    connection.getTransport().remoteAddress(), consumer.getTopic(), e);
+            logger.error("add retry exception, transport: {}, topic: {}, app: {}",
+                    connection.getTransport().remoteAddress(), consumer.getTopic(), consumer.getApp(), e);
         }
     }
 
