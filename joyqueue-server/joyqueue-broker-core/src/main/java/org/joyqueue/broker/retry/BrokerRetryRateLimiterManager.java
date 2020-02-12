@@ -46,10 +46,12 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
         RateLimiter consumerRetryRateLimiter=topicRateLimiters.get(app);
         if(consumerRetryRateLimiter==null){
             int tps=consumerRetryRate(topic,app);
-            consumerRetryRateLimiter=new DefaultRateLimiter(tps,Integer.MAX_VALUE);
-            RateLimiter oldRateLimiter=topicRateLimiters.putIfAbsent(app,consumerRetryRateLimiter);
-            if(oldRateLimiter!=null){
-                consumerRetryRateLimiter= oldRateLimiter;
+            if(tps>0) { // ulimit
+                consumerRetryRateLimiter = new DefaultRateLimiter(tps, Integer.MAX_VALUE);
+                RateLimiter oldRateLimiter = topicRateLimiters.putIfAbsent(app, consumerRetryRateLimiter);
+                if (oldRateLimiter != null) {
+                    consumerRetryRateLimiter = oldRateLimiter;
+                }
             }
         }
         return consumerRetryRateLimiter;
@@ -57,25 +59,21 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
 
 
     /**
-     *  Mix broker level consume retry rate with consumer level config
+     *  Mix broker level consume retry rate(default ulimit) with consumer level config
      *  priority:
      *    1. broker consumer level
      *    2. broker level
      *    3. consumer config level(not support)
+     *  @return  -1 indicate ulimit if above all not configure
      *
      **/
     public int consumerRetryRate(String topic,String app){
-//        Consumer consumer = clusterManager.tryGetConsumer(TopicName.parse(topic), app);
-        int consumerLevelRetryRate=DEFAULT_CONSUMER_RETRY_RATE;
         int retryRate=consumeConfig.getRetryRate(topic,app);
-        if(retryRate<0){
+        if(retryRate<=0){
             // get broker level retry rate
             retryRate=consumeConfig.getRetryRate();
         }
-//        if (consumer != null && consumer.getConsumerPolicy()!= null){
-//            consumerLevelRetryRate=consumer.getConsumerPolicy().getRetryRate();
-//        }
-        return retryRate>0? Math.min(retryRate,consumerLevelRetryRate):consumerLevelRetryRate;
+        return retryRate;
     }
 
 

@@ -216,13 +216,14 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
 
 
     /**
-     * @return true if any of topic has retry token
+     *
+     * @return true if any of topic has retry token or ulimit
      *
      **/
     public boolean retryTokenAvailable(Set<Joint> consumers){
         for(Joint consumer:consumers) {
             RateLimiter rateLimiter= rateLimiterManager.getOrCreate(consumer.getTopic(),consumer.getApp());
-            if(rateLimiter.tryAcquireTps()){
+            if(rateLimiter==null||rateLimiter.tryAcquireTps()){
                 return true;
             }
         }

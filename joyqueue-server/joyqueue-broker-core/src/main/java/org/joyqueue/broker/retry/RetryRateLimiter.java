@@ -10,6 +10,7 @@ public interface RetryRateLimiter {
 
     /**
      * Get or create a rate limiter
+     * @return null indicate no limit
      **/
     RateLimiter getOrCreate(String topic, String app);
 }
