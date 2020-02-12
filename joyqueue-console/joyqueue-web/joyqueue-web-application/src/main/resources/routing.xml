@@ -415,6 +415,9 @@
         <route inherit="delete"
                path="/v1/manage/broker/garbageFile" handlers="brokerMonitor#garbageFile render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/monitor/producer/sendMessage" handlers="brokerMonitor#sendMessage render"
+               errors="error"/>
 
 
 
