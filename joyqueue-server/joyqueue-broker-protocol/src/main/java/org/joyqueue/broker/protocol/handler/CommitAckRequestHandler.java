@@ -158,11 +158,11 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
                 }
             }
 
+            consume.acknowledge(messageLocations, consumer, connection, true);
             if (CollectionUtils.isNotEmpty(retryDataList)) {
                 commitRetry(connection, consumer, retryDataList);
             }
 
-            consume.acknowledge(messageLocations, consumer, connection, true);
             return JoyQueueCode.SUCCESS;
         } catch (JoyQueueException e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);

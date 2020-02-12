@@ -135,7 +135,7 @@ public class H2MessageRetry implements MessageRetry<Long> {
         List<ConsumeRetry> resultList = new LinkedList<>();
         for (RetryMessageModel retryMessageModel : retryMessageModelList) {
             ConsumeRetry consumeRetry = new ConsumeRetry();
-            consumeRetry.setMessageId(RetryUtil.generateMessageId(retryMessageModel.getTopic(), retryMessageModel.getPartition(), retryMessageModel.getIndex()));
+            consumeRetry.setMessageId(RetryUtil.generateMessageId(retryMessageModel.getTopic(), retryMessageModel.getPartition(), retryMessageModel.getIndex(),retryMessageModel.getSendTime()));
             consumeRetry.setBusinessId(retryMessageModel.getBusinessId());
             consumeRetry.setTopic(retryMessageModel.getTopic());
             consumeRetry.setApp(retryMessageModel.getApp());

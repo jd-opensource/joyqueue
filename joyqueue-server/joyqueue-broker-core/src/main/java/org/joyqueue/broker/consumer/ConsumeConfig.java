@@ -63,6 +63,19 @@ public class ConsumeConfig {
         return propertySupplier.getValue(ConsumeConfigKey.BROADCAST_INDEX_RESET_TIME);
     }
 
+    public int getRetryRate(){
+        return propertySupplier.getValue(ConsumeConfigKey.RETRY_RATE);
+    }
+
+    /**
+     * Get consumer level config from
+     *
+     **/
+    public int getRetryRate(String topic,String app){
+        return PropertySupplier.getValue(propertySupplier,ConsumeConfigKey.RETRY_RATE_PREFIX.getName()+String.format("%s.%s",topic,app),
+                ConsumeConfigKey.RETRY_RATE_PREFIX.getType(),ConsumeConfigKey.RETRY_RATE_PREFIX.getValue());
+    }
+
     public void setConsumePositionPath(String consumePositionPath) {
         this.consumePositionPath = consumePositionPath;
     }
