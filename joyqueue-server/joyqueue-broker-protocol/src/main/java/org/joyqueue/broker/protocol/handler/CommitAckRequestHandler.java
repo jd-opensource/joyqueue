@@ -158,11 +158,11 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
                 }
             }
 
-            consume.acknowledge(messageLocations, consumer, connection, true);
             if (CollectionUtils.isNotEmpty(retryDataList)) {
                 commitRetry(connection, consumer, retryDataList);
             }
 
+            consume.acknowledge(messageLocations, consumer, connection, true);
             return JoyQueueCode.SUCCESS;
         } catch (JoyQueueException e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
@@ -180,25 +180,41 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
             return;
         }
 
+        List<RetryMessageModel> retryMessageModelList = Lists.newLinkedList();
         for (CommitAckData ackData : data) {
-            PullResult pullResult = consume.getMessage(consumer, ackData.getPartition(), ackData.getIndex(), 1);
-            List<ByteBuffer> buffers = pullResult.getBuffers();
-
-            if (buffers.size() != 1) {
-                logger.error("get retryMessage error, message not exist, transport: {}, topic: {}, partition: {}, index: {}",
-                        connection.getTransport().remoteAddress(), consumer.getTopic(), ackData.getPartition(), ackData.getIndex());
-                continue;
-            }
-
             try {
+                PullResult pullResult = consume.getMessage(consumer, ackData.getPartition(), ackData.getIndex(), 1);
+                List<ByteBuffer> buffers = pullResult.getBuffers();
+
+                if (buffers.size() != 1) {
+                    logger.error("get retryMessage error, message not exist, transport: {}, topic: {}, partition: {}, index: {}",
+                            connection.getTransport().remoteAddress(), consumer.getTopic(), ackData.getPartition(), ackData.getIndex());
+                    continue;
+                }
+
                 ByteBuffer buffer = buffers.get(0);
                 BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
                 RetryMessageModel model = generateRetryMessage(consumer, brokerMessage, buffer.array(), ackData.getRetryType().name());
-                retryManager.addRetry(Lists.newArrayList(model));
+                retryMessageModelList.add(model);
             } catch (Exception e) {
-                logger.error("add retryMessage exception, transport: {}, topic: {}, partition: {}, index: {}",
+                logger.error("generate retryMessage exception, transport: {}, topic: {}, partition: {}, index: {}",
                         connection.getTransport().remoteAddress(), consumer.getTopic(), ackData.getPartition(), ackData.getIndex(), e);
             }
+        }
+
+        try {
+            retryManager.addRetry(retryMessageModelList);
+        } catch (JoyQueueException e) {
+            if (e.getCode() == JoyQueueCode.RETRY_TOKEN_LIMIT.getCode()) {
+                logger.warn("add retry limited, transport: {}, topic: {}, app: {}",
+                        connection.getTransport(), consumer.getTopic(), consumer.getApp());
+            } else {
+                logger.error("add retry exception, transport: {}, topic: {}",
+                        connection.getTransport().remoteAddress(), consumer.getTopic(), e);
+            }
+        } catch (Exception e) {
+            logger.error("add retry exception, transport: {}, topic: {}",
+                    connection.getTransport().remoteAddress(), consumer.getTopic(), e);
         }
     }
 

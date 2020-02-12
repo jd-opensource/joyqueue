@@ -1,9 +1,11 @@
 package org.joyqueue.broker.retry;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.ConsumeConfig;
+import org.joyqueue.broker.consumer.ConsumeConfigKey;
 import org.joyqueue.broker.limit.RateLimiter;
 import org.joyqueue.broker.limit.support.DefaultRateLimiter;
 import org.joyqueue.domain.Config;
@@ -90,8 +92,8 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
                 break;
             }
             case REMOVE_CONFIG: {
-                RemoveConfigEvent removeConsumerEvent = (RemoveConfigEvent) event;
-                Config config=removeConsumerEvent.getConfig();
+                RemoveConfigEvent removeConfigEvent = (RemoveConfigEvent) event;
+                Config config=removeConfigEvent.getConfig();
                 cleanRateLimiter(config);
                 break;
             }
@@ -112,14 +114,15 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
      **/
     public void cleanRateLimiter(Config config){
         String configKey=config.getKey();
-        if(configKey!=null){
-            String[] keys=configKey.split("_");
-            if(keys.length>= 3){
-                String topic=keys[1];
-                String app=keys[2];
-                if(topic!=null&&app!=null) {
-                    cleanRateLimiter(topic, app);
-                }
+        if (StringUtils.isBlank(configKey) || !configKey.startsWith(ConsumeConfigKey.RETRY_RATE_PREFIX.getName())) {
+            return;
+        }
+        String[] keys=configKey.split("_");
+        if(keys.length>= 3){
+            String topic=keys[1];
+            String app=keys[2];
+            if(topic!=null&&app!=null) {
+                cleanRateLimiter(topic, app);
             }
         }
     }
