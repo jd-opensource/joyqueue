@@ -19,6 +19,7 @@ import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.service.MessagePreviewService;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.util.serializer.Serializer;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.model.domain.Archive;
@@ -96,7 +97,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
             SendLog sendLog = new SendLog();
             sendLog.setMessageId(String.valueOf(10000 + 1));
             sendLog.setBusinessId(String.valueOf(6666));
-            sendLog.setSendTime(System.currentTimeMillis());
+            sendLog.setSendTime(SystemClock.now());
             sendLog.setApp("testApp");
             sendLog.setTopic(qArchive.getTopic());
             sendLogs.add(sendLog);
@@ -142,7 +143,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
      */
     @Path("download")
     public void download(@QueryParam("businessId") String businessId, @QueryParam("messageId") String messageId
-            , @QueryParam("sendTime") String sendTime, @QueryParam("topic") String topic) throws Exception {
+            , @QueryParam("sendTime") String sendTime, @QueryParam("topic") String topic,@QueryParam("messageType") String messageType) throws Exception {
         if (businessId == null
                 || messageId == null
                 || sendTime == null
@@ -166,7 +167,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
 
             String messageStr = null;
             try {
-                messageStr = brokerMessage.getText();
+                messageStr =messagePreviewService.preview(messageType, brokerMessage.getByteBody());
             } catch (Exception e) {
                 messageStr = Bytes.toString(data);
             }

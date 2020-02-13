@@ -33,16 +33,16 @@ import org.joyqueue.monitor.RestResponseCode;
 import org.joyqueue.other.HttpRestService;
 import org.joyqueue.service.BrokerMessageService;
 import org.joyqueue.service.LeaderService;
+import org.joyqueue.service.MessagePreviewService;
 import org.joyqueue.util.NullUtil;
 import org.joyqueue.util.UrlEncoderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -61,9 +61,10 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     private LeaderService leaderService;
     @Autowired(required = false)
     private HttpRestService httpRestService;
-
+    @Autowired
+    private MessagePreviewService messagePreviewService;
     @Override
-    public List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe, int count) {
+    public List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe,String messageDecodeType ,int count) {
         List<SimplifiedBrokeMessage> simplifiedBrokeMessages=new ArrayList<>();
         List<Broker> brokers=new ArrayList<>();
         Future<Map<String,String >> resultFuture= brokerClusterQuery.asyncQueryOnBroker(subscribe, new RetrieveProvider<Subscribe>() {
@@ -90,7 +91,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                 if (brokerMessageResponse.getCode()== RestResponseCode.SUCCESS.getCode()) {
                     if(!NullUtil.isEmpty(brokerMessageResponse.getData())){
                         for (BrokerMessageInfo m : brokerMessageResponse.getData()) {
-                            message = BrokerMessageConvert(m);
+                            message = simpleBrokerMessageConvert(m,messageDecodeType);
                             simplifiedBrokeMessages.add(message);
                         }
                     }else{
@@ -113,7 +114,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     }
 
     @Override
-    public List<BrokerMessageInfo> viewMessage(Subscribe subscribe,String partition, String index, int count) {
+    public List<BrokerMessageInfo> viewMessage(Subscribe subscribe,String messageDecodeType ,String partition, String index, int count) {
         Map.Entry<PartitionGroup, Broker> brokerEntry = leaderService.findPartitionLeaderBrokerDetail(subscribe.getNamespace().getCode(),subscribe.getTopic().getCode(),Integer.valueOf(partition));
         Broker broker = brokerEntry.getValue();
         String path="getPartitionMessageByIndex";
@@ -127,9 +128,23 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         args[6]=String.valueOf(count);
         RestResponse<List<BrokerMessageInfo>> restResponse = httpRestService.get(path,BrokerMessageInfo.class,true,args);
         if (restResponse != null && restResponse.getData() != null) {
-            return restResponse.getData();
+            return decodeBrokerMessage(restResponse.getData(),messageDecodeType);
         }
         return null;
+    }
+
+    /**
+     * decode message by type
+     * @param decodeType  decode type
+     *
+     **/
+    public List<BrokerMessageInfo> decodeBrokerMessage(List<BrokerMessageInfo> msgs,String decodeType){
+        for(BrokerMessageInfo m:msgs){
+            if(m.getBody()!=null){
+                m.setBody(messagePreviewService.preview(decodeType,Base64.getDecoder().decode(m.getBody())));
+            }
+        }
+        return msgs;
     }
 
     @Override
@@ -158,14 +173,19 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     }
 
 
-    private SimplifiedBrokeMessage BrokerMessageConvert(BrokerMessageInfo m) {
+    /**
+     * @param messageDecodeType  message deserialize type
+     **/
+    private SimplifiedBrokeMessage simpleBrokerMessageConvert(BrokerMessageInfo m,String messageDecodeType) {
         SimplifiedBrokeMessage message = new SimplifiedBrokeMessage();
 //        message.setQueryId(response.getKey());
         message.setId(m.getPartition() + "-" + m.getMsgIndexNo());
         message.setSendTime(m.getStartTime());
         message.setStoreTime(m.getStoreTime());
         message.setBusinessId(m.getBusinessId());
-        message.setBody(new String(m.getBody().getBytes(Charset.forName("utf-8"))));
+        if(m.getBody()!=null) {
+            message.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(m.getBody())));
+        }
         message.setAttributes(m.getAttributes());
         message.setFlag(m.isAck());
         return message;

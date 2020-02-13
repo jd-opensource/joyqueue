@@ -31,14 +31,14 @@ export default {
   },
   watch: {
     messageType: function () {
-      this.requetPreview()
+      this.requestPreview()
     }
   },
   mounted () {
-    this.requetPreview()
+    this.requestPreview()
   },
   methods: {
-    requetPreview: function () {
+    requestPreview: function () {
       let querydata = Object.assign(this.query, {messageType: this.messageType})
       apiRequest.get(this.url, querydata)
         .then(data => {

@@ -17,6 +17,7 @@ package org.joyqueue.monitor;
 
 import org.joyqueue.message.BrokerMessage;
 
+import java.util.Base64;
 import java.util.Map;
 
 /**
@@ -60,7 +61,10 @@ public class BrokerMessageInfo extends BaseMonitorInfo {
         this.businessId = message.getBusinessId();
         this.priority = message.getPriority();
         this.bodyCRC = message.getBodyCRC();
-        this.body = message.getText();
+        byte[] bytes = message.getDecompressedBody();
+        if(bytes!=null&&bytes.length>0) {
+            this.body = Base64.getEncoder().encodeToString(bytes);
+        }
         this.attributes = message.getAttributes();
         this.ack = ack;
     }

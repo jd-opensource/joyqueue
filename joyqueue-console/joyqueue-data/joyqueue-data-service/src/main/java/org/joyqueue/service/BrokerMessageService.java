@@ -35,10 +35,11 @@ public interface BrokerMessageService {
      *  积压消息预览，即将消费的消息
      *  @param topic 消息主题
      *  @param app   消息应用
+     *  @param messageDecodeType message decode type
      *  @param count 获取的消息条数
      *
      * */
-    List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe, int count);
+    List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe,String messageDecodeType ,int count);
 
     /**
      * 预览最新的消息
@@ -54,9 +55,9 @@ public interface BrokerMessageService {
      * @param partition 分区id
      * @param index     消息索引,第几条消息0～
      * @param count 获取的消息条数
-     *
+     * @param messageDecodeType
      **/
-    List<BrokerMessageInfo> viewMessage(Subscribe subscribe, String partition, String index, int count);
+    List<BrokerMessageInfo> viewMessage(Subscribe subscribe,String messageDecodeType , String partition, String index, int count);
 
     Long getPartitionIndexByTime(Subscribe subscribe,String partition, String timestamp);
     /**

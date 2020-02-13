@@ -272,7 +272,7 @@ export default {
       })
     },
     download (item) {
-      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId
+      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId+'&messageType='+this.messageType
       apiRequest.get(this.urlOrigin.download + data).then(data => {
         this.$Message.success('下载成功')
       })

@@ -17,9 +17,7 @@ package org.joyqueue.service.impl;
 
 import org.joyqueue.service.MessageDeserializer;
 import org.springframework.stereotype.Component;
-
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author LiYue
