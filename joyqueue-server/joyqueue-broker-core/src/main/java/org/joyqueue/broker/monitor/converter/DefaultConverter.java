@@ -18,7 +18,15 @@ package org.joyqueue.broker.monitor.converter;
 import com.codahale.metrics.Snapshot;
 import com.google.common.collect.Lists;
 import org.joyqueue.broker.monitor.PendingStat;
-import org.joyqueue.broker.monitor.stat.*;
+import org.joyqueue.broker.monitor.stat.AppStat;
+import org.joyqueue.broker.monitor.stat.BrokerStat;
+import org.joyqueue.broker.monitor.stat.BrokerStatExt;
+import org.joyqueue.broker.monitor.stat.DeQueueStat;
+import org.joyqueue.broker.monitor.stat.EnQueueStat;
+import org.joyqueue.broker.monitor.stat.JVMStat;
+import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
+import org.joyqueue.broker.monitor.stat.TopicPendingStat;
+import org.joyqueue.broker.monitor.stat.TopicStat;
 import org.joyqueue.model.MonitorRecord;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
@@ -799,16 +807,16 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private List<MonitorRecord> buildBrokerTopicApp(BrokerStat brokerStat, String brokerId, long time) {
 
         ConcurrentMap<String, TopicStat> topics = brokerStat.getTopicStats();
-        logger.info("start collect app metric ,topicSize: " + topics.size());
+        logger.debug("start collect app metric ,topicSize: " + topics.size());
         List<MonitorRecord> records = new ArrayList<>();
         for (String tsKey : topics.keySet()) {
 
             ConcurrentMap<String, AppStat> appStats = topics.get(tsKey).getAppStats();
 
             if (appStats == null || appStats.isEmpty()) {
-                logger.info("appStats is empty!");
+                logger.debug("appStats is empty!");
             } else {
-                logger.info("appStatus size:" + appStats.size());
+                logger.debug("appStatus size:" + appStats.size());
             }
             for (String app : appStats.keySet()) {
 
@@ -822,7 +830,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             }
         }
 
-        logger.info("All app metrics result :" + records.size());
+        logger.debug("All app metrics result :" + records.size());
         return records;
     }
 
@@ -830,7 +838,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
 
         List<MonitorRecord> records = new ArrayList<>();
 
-        logger.info("Start collect producer records!");
+        logger.debug("Start collect producer records!");
         String app = appStat.getApp();
 
         MonitorRecord enQueue = new MonitorRecord();
@@ -861,7 +869,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             records.addAll(emptyRecords);
         }
         if (logger.isDebugEnabled()) {
-            logger.info("Producer records:" + records.size());
+            logger.debug("Producer records:" + records.size());
 
         }
 
@@ -914,7 +922,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         List<MonitorRecord> records = new ArrayList<>();
 
         if (logger.isDebugEnabled()) {
-            logger.info("Start collect consume records!");
+            logger.debug("Start collect consume records!");
         }
         String app = appStat.getApp();
 
@@ -948,7 +956,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             records.addAll(emptyRecords);
         }
         if (logger.isDebugEnabled()) {
-            logger.info("consume records:" + records.size());
+            logger.debug("consume records:" + records.size());
         }
         return records;
     }
