@@ -10,10 +10,14 @@ import org.joyqueue.broker.limit.RateLimiter;
 import org.joyqueue.broker.limit.support.DefaultRateLimiter;
 import org.joyqueue.domain.Config;
 import org.joyqueue.event.MetaEvent;
-import org.joyqueue.nsr.event.*;
+import org.joyqueue.nsr.event.RemoveConfigEvent;
+import org.joyqueue.nsr.event.RemoveConsumerEvent;
+import org.joyqueue.nsr.event.RemoveTopicEvent;
+import org.joyqueue.nsr.event.UpdateConfigEvent;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -49,7 +53,7 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
         if(consumerRetryRateLimiter==null){
             int tps=consumerRetryRate(topic,app);
             if(tps>0) { // ulimit
-                consumerRetryRateLimiter = new DefaultRateLimiter(tps, Integer.MAX_VALUE);
+                consumerRetryRateLimiter = new DefaultRateLimiter(tps);
                 RateLimiter oldRateLimiter = topicRateLimiters.putIfAbsent(app, consumerRetryRateLimiter);
                 if (oldRateLimiter != null) {
                     consumerRetryRateLimiter = oldRateLimiter;
@@ -114,15 +118,20 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
      **/
     public void cleanRateLimiter(Config config){
         String configKey=config.getKey();
-        if (StringUtils.isBlank(configKey) || !configKey.startsWith(ConsumeConfigKey.RETRY_RATE_PREFIX.getName())) {
+        if (StringUtils.isBlank(configKey)) {
             return;
         }
-        String[] keys=configKey.split("_");
-        if(keys.length>= 3){
-            String topic=keys[1];
-            String app=keys[2];
-            if(topic!=null&&app!=null) {
-                cleanRateLimiter(topic, app);
+
+        if (configKey.equals(ConsumeConfigKey.RETRY_RATE.getName())) {
+            retryRateLimiters.clear();
+        } else if (configKey.startsWith(ConsumeConfigKey.RETRY_RATE_PREFIX.getName())) {
+            String[] keys=configKey.split("\\.");
+            if(keys.length == 4){
+                String topic=keys[2];
+                String app=keys[3];
+                if(topic!=null&&app!=null) {
+                    cleanRateLimiter(topic, app);
+                }
             }
         }
     }
