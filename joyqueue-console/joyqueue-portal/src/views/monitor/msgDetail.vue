@@ -143,6 +143,7 @@ export default {
   },
   methods: {
     getList () {
+      this.searchData.messageDecodeType=this.messageType
       if (!this.searchData.partition) {
         this.$Message.error('验证不通过: 分区必填')
         return
@@ -188,7 +189,6 @@ export default {
       deep: true
     },
     messageType: function () {
-      this.searchData.messageDecodeType=this.messageType
       this.getList()
     }
   },
