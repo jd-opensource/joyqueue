@@ -262,9 +262,10 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      *
      **/
     @Path("previewMessage")
-    public Response previewMessage(@Body Subscribe subscribe){
+    public Response previewMessage(@Body Subscribe subscribe, @QueryParam("messageDecodeType") String messageType){
         int defaultCount=10;
-        List<SimplifiedBrokeMessage> messages=brokerMessageService.previewMessage(subscribe,defaultCount);
+
+        List<SimplifiedBrokeMessage> messages=brokerMessageService.previewMessage(subscribe,messageType,defaultCount);
         return Responses.success(messages);
     }
 
@@ -273,13 +274,14 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      *
      **/
     @Path("viewMessage")
-    public Response viewMessage(@Body Subscribe subscribe,@QueryParam("partition") String partition, @QueryParam("index")String index,@QueryParam("timestamp")String timestamp){
+    public Response viewMessage(@Body Subscribe subscribe,@QueryParam("partition") String partition, @QueryParam("index")String index,
+                                @QueryParam("timestamp")String timestamp,@QueryParam("messageDecodeType") String messageDecodeType){
         int defaultCount=10;
         if (StringUtils.isNotEmpty(timestamp) && StringUtils.isEmpty(index)){
             Long indexByTime = brokerMessageService.getPartitionIndexByTime(subscribe,partition,timestamp);
             index = String.valueOf(indexByTime);
         }
-        List<BrokerMessageInfo> messages=brokerMessageService.viewMessage(subscribe,partition,index,defaultCount);
+        List<BrokerMessageInfo> messages=brokerMessageService.viewMessage(subscribe,messageDecodeType,partition,index,defaultCount);
         return Responses.success(messages);
     }
 

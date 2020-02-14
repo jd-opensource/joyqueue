@@ -527,11 +527,18 @@
         <!--<route inherit="delete"-->
         <!--path="/v1/archive/delete/:id" handlers="archive#delete render"-->
         <!--errors="error"/>-->
+
+        <route inherit="get"
+               path="/v1/archive/message-types" handlers="archive#message-types render"
+               errors="error"/>
         <route inherit="post"
                path="/v1/archive/retry" handlers="archive#retry render"
                errors="error"/>
         <route inherit="get"
                path="/v1/archive/download" handlers="archive#download render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/archive/preview" handlers="archive#preview render"
                errors="error"/>
         <route inherit="get"
                path="/v1/archive/consume/:id" handlers="archive#consume render"

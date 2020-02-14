@@ -18,6 +18,7 @@ package org.joyqueue.handler.routing.command.archive;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.handler.Constants;
+import org.joyqueue.service.MessagePreviewService;
 import org.joyqueue.util.serializer.Serializer;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.model.domain.Archive;
@@ -41,7 +42,6 @@ import io.vertx.core.http.HttpServerResponse;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.nio.ByteBuffer;
 
 import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
@@ -61,8 +61,16 @@ public class ArchiveCommand implements Command<Response>, Poolable {
     @Value(Constants.USER_KEY)
     protected User session;
 
+    @Value(nullable = false)
+    private MessagePreviewService messagePreviewService;
+
     @CRequest
     private HttpServerRequest request;
+
+    @Path("message-types")
+    public Response messageTypes() throws Exception {
+        return Responses.success(messagePreviewService.getMessageTypeNames());
+    }
 
     /**
      * 分页查询
@@ -118,7 +126,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
      */
     @Path("download")
     public void download(@QueryParam("businessId") String businessId, @QueryParam("messageId") String messageId
-            , @QueryParam("sendTime") String sendTime, @QueryParam("topic") String topic) throws Exception {
+            , @QueryParam("sendTime") String sendTime, @QueryParam("topic") String topic,@QueryParam("messageType") String messageType) throws Exception {
         if (businessId == null
                 || messageId == null
                 || sendTime == null
@@ -142,7 +150,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
 
             String messageStr = null;
             try {
-                messageStr = brokerMessage.getText();
+                messageStr =messagePreviewService.preview(messageType, brokerMessage.getDecompressedBody());
             } catch (Exception e) {
                 messageStr = Bytes.toString(data);
             }
@@ -155,6 +163,30 @@ public class ArchiveCommand implements Command<Response>, Poolable {
                     .putHeader("Content-Length",String.valueOf(messageStr.getBytes().length));
             response.write(messageStr,"UTF-8");
             response.end();
+        }
+    }
+
+    @Path("preview")
+    public Response preview(@QueryParam("businessId") String businessId, @QueryParam("messageId") String messageId
+            , @QueryParam("sendTime") String sendTime, @QueryParam("topic") String topic, @QueryParam("messageType") String messageType) throws Exception {
+        if (businessId == null
+                || messageId == null
+                || sendTime == null
+                || topic == null) {
+            return Responses.error(HTTP_BAD_REQUEST, "请求参数错误!");
+        }
+        SendLog sendLog = archiveService.findSendLog(topic,Long.valueOf(sendTime),businessId,messageId);
+        if (sendLog != null) {
+
+            byte[] data = sendLog.getMessageBody();
+            if (data.length == 0) {
+                return Responses.error(Response.HTTP_NOT_FOUND, "未找到消息!");
+            }
+            BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(data));
+            return Responses.success(messagePreviewService.preview(messageType, brokerMessage.getDecompressedBody()));
+
+        } else {
+            return Responses.error(Response.HTTP_NOT_FOUND, "未找到消息!");
         }
     }
 
