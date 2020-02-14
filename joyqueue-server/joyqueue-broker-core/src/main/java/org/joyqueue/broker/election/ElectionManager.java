@@ -169,7 +169,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
                 new NamedThreadFactory("Election-sendCommand"));
 
-        replicationManager = new ReplicationManager(electionConfig, storeService, consume, brokerMonitor);
+        replicationManager = new ReplicationManager(electionConfig, brokerConfig, storeService, consume, brokerMonitor);
         replicationManager.start();
 
 		Thread.sleep(1000);

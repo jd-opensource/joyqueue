@@ -97,7 +97,7 @@ public class ConsumeArchiveService extends Service {
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
         this.readByteCounter = new AtomicInteger(0);
 
-        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
+        this.tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
         this.readConsumeLogThread = LoopThread.builder()
                 .sleepTime(1, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")

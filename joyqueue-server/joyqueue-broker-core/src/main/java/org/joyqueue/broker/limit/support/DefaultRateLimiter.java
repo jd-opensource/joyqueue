@@ -28,6 +28,10 @@ public class DefaultRateLimiter implements RateLimiter {
     private com.google.common.util.concurrent.RateLimiter tpsRateLimiter;
     private com.google.common.util.concurrent.RateLimiter trafficRateLimiter;
 
+    public DefaultRateLimiter(int tps) {
+        this.tpsRateLimiter = com.google.common.util.concurrent.RateLimiter.create(tps);
+    }
+
     public DefaultRateLimiter(int tps, int traffic) {
         this.tpsRateLimiter = com.google.common.util.concurrent.RateLimiter.create(tps);
         this.trafficRateLimiter = com.google.common.util.concurrent.RateLimiter.create(traffic);

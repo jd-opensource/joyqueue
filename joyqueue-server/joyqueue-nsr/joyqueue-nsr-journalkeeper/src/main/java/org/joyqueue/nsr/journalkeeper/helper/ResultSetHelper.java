@@ -107,8 +107,13 @@ public class ResultSetHelper {
         } else if (type.equals(Double.class)) {
             return (T) Double.valueOf(value);
         } else if (type.equals(Date.class)) {
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            return (T) format.parse(value);
+            try {
+                DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                return (T) format.parse(value);
+            } catch (Exception e) {
+                DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                return (T) format.parse(value);
+            }
         }
         throw new UnsupportedOperationException(type.getName());
     }

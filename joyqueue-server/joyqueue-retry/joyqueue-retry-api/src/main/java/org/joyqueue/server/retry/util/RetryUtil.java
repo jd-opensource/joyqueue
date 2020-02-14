@@ -30,12 +30,12 @@ public class RetryUtil {
      * @param index     消息序号
      * @return 消息ID
      */
-    public static String generateMessageId(String topic, short partition, long index) {
+    public static String generateMessageId(String topic, short partition, long index,long sendTime) {
         StringBuilder sb = new StringBuilder();
         sb.append(topic);
         sb.append('-').append(partition);
         sb.append('-').append(index);
-
+        sb.append('-').append(sendTime);
         return sb.toString();
     }
 

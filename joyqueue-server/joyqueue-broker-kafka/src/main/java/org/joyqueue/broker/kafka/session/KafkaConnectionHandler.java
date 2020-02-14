@@ -87,7 +87,7 @@ public class KafkaConnectionHandler extends ChannelDuplexHandler {
             String language = StringUtils.replace(apiVersionsRequest.getClientSoftwareName(), "apache-kafka-", "");
             String version = apiVersionsRequest.getClientSoftwareVersion();
             if (Language.parse(language).equals(Language.OTHER)) {
-                version = apiVersionsRequest.getClientSoftwareName() + "-" + apiVersionsRequest.getVersion();
+                version = apiVersionsRequest.getClientSoftwareName() + "-" + apiVersionsRequest.getClientSoftwareVersion();
             }
             kafkaConnectionManager.addConnection(transport, apiVersionsRequest.getClientId(), version, Language.parse(language));
         }

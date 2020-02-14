@@ -16,6 +16,7 @@
 package org.joyqueue.service;
 
 
+import org.joyqueue.model.domain.ProducerSendMessage;
 import org.joyqueue.model.domain.SimplifiedBrokeMessage;
 import org.joyqueue.model.domain.Subscribe;
 import org.joyqueue.monitor.BrokerMessageInfo;
@@ -67,6 +68,8 @@ public interface BrokerMessageService {
      *
      **/
     SimplifiedBrokeMessage  download(String ip,int port,String topic,String app,short partition,long indexOffset);
+
+    void sendMessage(ProducerSendMessage sendMessage);
 
 
 

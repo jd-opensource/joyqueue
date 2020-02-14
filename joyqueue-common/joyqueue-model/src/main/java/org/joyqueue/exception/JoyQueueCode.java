@@ -212,6 +212,8 @@ public enum JoyQueueCode {
     RETRY_GET(241, "获取重试消息异常"),
     RETRY_UPDATE(242, "更新重试消息异常"),
     RETRY_COUNT(243, "统计重试消息异常"),
+    RETRY_DISABLED(244,"重试服务未打开异常"),
+    RETRY_TOKEN_LIMIT(245,"重试服务无可用 token"),
 
     //250~259 消费位置
     CONSUME_POSITION_NULL(250, "消费位置空异常"),
