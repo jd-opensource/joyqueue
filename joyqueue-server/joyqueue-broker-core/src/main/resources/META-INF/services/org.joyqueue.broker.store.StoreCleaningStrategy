@@ -1,3 +1,0 @@
-org.joyqueue.broker.store.FixedSizeStoreCleaningStrategy
-org.joyqueue.broker.store.IntervalTimeStoreCleaningStrategy
-org.joyqueue.broker.store.GlobalStorageLimitCleaningStrategy

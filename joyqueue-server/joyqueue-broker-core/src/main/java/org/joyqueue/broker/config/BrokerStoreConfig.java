@@ -23,7 +23,6 @@ import static org.joyqueue.toolkit.config.Property.APPLICATION_DATA_PATH;
  * @author majun8
  */
 public class BrokerStoreConfig {
-    public static final String DEFAULT_CLEAN_STRATEGY_CLASS = "GlobalStorageLimitCleaningStrategy";
     public static final long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;  // 10gb
     public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
     public static final long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 5 * 60 * 1000;
@@ -39,7 +38,6 @@ public class BrokerStoreConfig {
     }
 
     public enum BrokerStoreConfigKey implements PropertyDef {
-        CLEAN_STRATEGY_CLASS("store.clean.strategy.class", DEFAULT_CLEAN_STRATEGY_CLASS, Type.STRING),
         MAX_STORE_SIZE("store.max.store.size", DEFAULT_MAX_STORE_SIZE, Type.LONG),
         MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
         KEEP_UNCONSUMED("store.clean.keep.unconsumed", DEFAULT_KEEP_UNCONSUMED, Type.BOOLEAN),
@@ -74,9 +72,6 @@ public class BrokerStoreConfig {
         }
     }
 
-    public String getCleanStrategyClass() {
-        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.CLEAN_STRATEGY_CLASS, DEFAULT_CLEAN_STRATEGY_CLASS);
-    }
 
     public long getMaxStoreSize() {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.MAX_STORE_SIZE, DEFAULT_MAX_STORE_SIZE);
