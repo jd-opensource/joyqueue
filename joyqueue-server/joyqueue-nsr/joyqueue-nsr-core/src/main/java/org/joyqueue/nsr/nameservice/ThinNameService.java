@@ -19,6 +19,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.jd.laf.extension.Type;
+import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
@@ -34,12 +36,13 @@ import org.joyqueue.domain.Topic;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.NameServerEvent;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.network.command.GetTopics;
 import org.joyqueue.network.command.GetTopicsAck;
 import org.joyqueue.network.command.Subscribe;
 import org.joyqueue.network.command.SubscribeAck;
 import org.joyqueue.network.command.UnSubscribe;
-import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
@@ -48,6 +51,7 @@ import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.nsr.NameService;
+import org.joyqueue.nsr.NsrPlugins;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.nsr.network.NsrTransportClientFactory;
@@ -100,8 +104,6 @@ import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
-import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +125,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
     private static final Logger logger = LoggerFactory.getLogger(ThinNameService.class);
 
     private NameServiceConfig nameServiceConfig;
+    private PointTracer tracer;
 
     private ClientTransport clientTransport;
     private PropertySupplier propertySupplier;
@@ -130,7 +133,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
     /**
      * 事件管理器
      */
-    protected EventBus<NameServerEvent> eventBus = new EventBus<>("BROKER_THIN_NAMESERVICE_ENENT_BUS");
+    protected EventBus<NameServerEvent> eventBus = new EventBus<>("joyqueue-thin-nameservice-eventBus");
 
     private Cache<TopicName, TopicConfig> topicCache;
 
@@ -153,6 +156,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
                     .expireAfterWrite(nameServiceConfig.getThinCacheExpireTime(), TimeUnit.MILLISECONDS)
                     .build();
         }
+        tracer = NsrPlugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
         clientTransport = new ClientTransport(nameServiceConfig,this);
         try {
             eventBus.start();
@@ -500,23 +504,28 @@ public class ThinNameService extends Service implements NameService, PropertySup
         logger.info("name service stopped.");
     }
 
-    private Command send(Command request) throws TransportException {
+    protected Command send(Command request) throws TransportException {
         return send(request, nameServiceConfig.getThinTransportTimeout());
     }
 
-    private Command send(Command request, int timeout) throws TransportException {
-        // TODO 临时监控
-        long startTime = SystemClock.now();
+    protected Command send(Command request, int timeout) throws TransportException {
+        if (tracer == null) {
+            return doSend(request, timeout);
+        }
+        TraceStat traceBegin = tracer.begin("ThinNameService.send." + request.getPayload().getClass().getSimpleName());
+        try {
+            return doSend(request, timeout);
+        } finally {
+            tracer.end(traceBegin);
+        }
+    }
+
+    protected Command doSend(Command request, int timeout) throws TransportException {
         try {
             return clientTransport.getOrCreateTransport().sync(request, timeout);
         } catch (TransportException exception) {
             logger.error("send command to nameServer error request {}", request);
             throw exception;
-        } finally {
-            long time = SystemClock.now() - startTime;
-            if (time > 1000 * 1) {
-                logger.warn("thinNameService timeout, request: {}, time: {}", request, time);
-            }
         }
     }
 
@@ -546,33 +555,13 @@ public class ThinNameService extends Service implements NameService, PropertySup
         return "thin";
     }
 
-    private class ClientTransport implements EventListener<TransportEvent>, LifeCycle {
+    private class ClientTransport implements LifeCycle {
         private AtomicBoolean started = new AtomicBoolean(false);
         private TransportClient transportClient;
         protected final AtomicReference<Transport> transports = new AtomicReference<>();
 
         ClientTransport(NameServiceConfig config, NameService nameService) {
             this.transportClient = new NsrTransportClientFactory(nameService, propertySupplier).create(config.getClientConfig());
-            this.transportClient.addListener(this);
-        }
-
-
-        @Override
-        public void onEvent(TransportEvent event) {
-            Transport transport = event.getTransport();
-            switch (event.getType()) {
-                case CONNECT:
-                    registerToNsr();
-                    break;
-                case EXCEPTION:
-                case CLOSE:
-                    transports.set(null);
-                    transport.stop();
-                    logger.info("transport connect to nameServer closed. [{}] ", transport.toString());
-                    break;
-                default:
-                    break;
-            }
         }
 
         protected Transport getOrCreateTransport() throws TransportException {
@@ -583,6 +572,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
                     if (transport == null) {
                         transport = transportClient.createTransport(nameServiceConfig.getNameserverAddress());
                         transports.set(transport);
+                        registerToNsr();
                     }
                     logger.info("create transport connect to nameServer [{}]", nameServiceConfig.getNameserverAddress());
                 }

@@ -16,6 +16,7 @@
 package org.joyqueue.nsr.nameservice;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.toolkit.io.DoubleCopy;
 import org.joyqueue.toolkit.io.ZipUtil;
@@ -29,16 +30,22 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
 
     protected static final Logger logger = LoggerFactory.getLogger(NameServiceCacheDoubleCopy.class);
 
+    private static final int DEFAULT_MAX_LENGTH =  1024 * 1024 * 100;
+
     private static final int VERSION_V0 = 0;
     private static final int CURRENT_VERSION = VERSION_V0;
 
     private File file;
 
-    private NameServiceCacheEntry entry;
+    protected NameServiceCacheEntry entry;
+
+    public NameServiceCacheDoubleCopy(File file, int maxLength) throws IOException {
+        super(file, maxLength);
+        this.file = file;
+    }
 
     public NameServiceCacheDoubleCopy(File file) throws IOException {
-        super(file, Integer.MAX_VALUE);
-        this.file = file;
+        this(file, DEFAULT_MAX_LENGTH);
     }
 
     public void flush(AllMetadataCache cache) {
@@ -58,7 +65,7 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
     @Override
     protected byte[] serialize() {
         try {
-            byte[] json = JSON.toJSONBytes(entry);
+            byte[] json = JSON.toJSONBytes(entry, SerializerFeature.DisableCircularReferenceDetect);
             json = ZipUtil.compress(json);
 
             if (logger.isDebugEnabled()) {

@@ -17,6 +17,9 @@ package org.joyqueue.broker.consumer;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.archive.ArchiveManager;
@@ -52,9 +55,6 @@ import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,7 +169,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         this.partitionManager = new PartitionManager(clusterManager, sessionManager);
         this.positionManager = new PositionManager(clusterManager, storeService, this, brokerContext.brokerTransportManager(), consumeConfig);
         this.brokerContext.positionManager(positionManager);
-        this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager);
+        this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager, consumeConfig);
         this.concurrentConsumption = new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager);
         this.resetBroadcastIndexTimer = new Timer("joyqueuue-consume-reset-broadcast-index-timer");
     }
@@ -405,7 +405,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     @Override
     public boolean acknowledge(MessageLocation[] locations, Consumer consumer, Connection connection, boolean isSuccessAck) throws JoyQueueException {
         boolean isSuccess = false;
-        if (locations.length < 0) {
+        if (locations.length <= 0) {
             return isSuccess;
         }
 
@@ -432,8 +432,15 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         if (isSuccess) {
             // 释放占用
             partitionManager.releasePartition(consumePartition);
+
             // 更新最后应答时间
-            brokerMonitor.onAckMessage(consumer.getTopic(), consumer.getApp(), consumePartition.getPartitionGroup(), consumePartition.getPartition());
+            Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), consumePartition.getPartition());
+            if (partitionGroupId == null) {
+                logger.error("onAckMessage error, partitionGroupId is null, topic: {}, app: {}, partition: {}", consumer.getTopic(), consumer.getApp(), consumePartition.getPartition());
+            } else {
+                brokerMonitor.onAckMessage(consumer.getTopic(), consumer.getApp(), partitionGroupId, consumePartition.getPartition());
+            }
+
             //TODO 归档逻辑放到 handler里可能更合适
             archiveIfNecessary(consumerPolicy, connection, locations);
 

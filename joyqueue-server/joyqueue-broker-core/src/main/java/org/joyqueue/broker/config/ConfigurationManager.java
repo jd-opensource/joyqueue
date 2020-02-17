@@ -16,21 +16,18 @@
 package org.joyqueue.broker.config;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.Config;
-import org.joyqueue.event.ConfigEvent;
 import org.joyqueue.event.EventType;
 import org.joyqueue.event.NameServerEvent;
 import org.joyqueue.nsr.event.AddConfigEvent;
 import org.joyqueue.nsr.event.RemoveConfigEvent;
 import org.joyqueue.nsr.event.UpdateConfigEvent;
-import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.Property;
-import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +53,6 @@ public class ConfigurationManager extends Service implements EventListener<NameS
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
     private ConfigProvider configProvider;
-    // 事件派发器
-    private EventBus<ConfigEvent> eventManager = new EventBus<ConfigEvent>("ContextManager");
 
     private Configuration configuration;
     private String configPath = DEFAULT_CONFIG_PATH;
@@ -131,7 +126,6 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     @Override
     protected void doStart() throws Exception {
         super.doStart();
-        eventManager.start();
         //加载动态配置
         doUpdateConfig();
         logger.info("context manager is started");
@@ -140,7 +134,6 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     @Override
     protected void doStop() {
         super.doStop();
-        Close.close(eventManager);
         logger.info("configuration manager is stopped");
     }
 

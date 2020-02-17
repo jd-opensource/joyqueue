@@ -17,14 +17,17 @@ package org.joyqueue.handler.routing.command.monitor;
 
 import com.google.common.collect.Lists;
 import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
@@ -32,15 +35,15 @@ import org.joyqueue.model.domain.PartitionGroupWeight;
 import org.joyqueue.model.domain.Producer;
 import org.joyqueue.model.domain.ProducerConfig;
 import org.joyqueue.model.domain.TopicPartitionGroup;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QProducer;
 import org.joyqueue.nsr.ProducerNameServerService;
 import org.joyqueue.service.ApplicationService;
+import org.joyqueue.service.ApplicationUserService;
 import org.joyqueue.service.ProducerService;
 import org.joyqueue.service.TopicPartitionGroupService;
 import org.joyqueue.service.TopicService;
 import org.joyqueue.util.NullUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +65,8 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     private TopicPartitionGroupService topicPartitionGroupService;
     @Value(nullable = false)
     protected ProducerNameServerService producerNameServerService;
+    @Value(nullable = false)
+    private ApplicationUserService applicationUserService;
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QProducer> qPageQuery) throws Exception {
@@ -85,6 +90,16 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
             }
         }
 
+        if (CollectionUtils.isNotEmpty(producers) && session.getRole() != User.UserRole.ADMIN.value()) {
+            Iterator<Producer> iterator = producers.iterator();
+            while (iterator.hasNext()) {
+                Producer producer = iterator.next();
+                if (applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) == null) {
+                    iterator.remove();
+                }
+            }
+        }
+
         Pagination pagination = qPageQuery.getPagination();
         pagination.setTotalRecord(producers.size());
 
@@ -92,6 +107,20 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         result.setPagination(pagination);
         result.setResult(producers);
         return Responses.success(result.getPagination(), result.getResult());
+    }
+
+    @Path("query-by-topic")
+    public Response queryByTopic(@Body QProducer qProducer) throws Exception {
+        if(qProducer.getTopic() == null || qProducer.getTopic().getCode() == null) {
+            return Responses.error(Response.HTTP_BAD_REQUEST, "Empty topic!");
+        }
+        String namespace = null;
+        String topic = qProducer.getTopic().getCode();
+        if(null != qProducer.getTopic().getNamespace()) {
+            namespace = qProducer.getTopic().getNamespace().getCode();
+        }
+        List<Producer> producers = service.findByTopic(namespace, topic);
+        return Responses.success(producers);
     }
 
     @Override

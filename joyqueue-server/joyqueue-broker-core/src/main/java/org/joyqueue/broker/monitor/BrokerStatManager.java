@@ -42,6 +42,8 @@ public class BrokerStatManager extends Service {
 
     protected static final Logger logger = LoggerFactory.getLogger(BrokerStatManager.class);
 
+    private static final int DEFAULT_FILE_SIZE = 1024 * 1024 * 100;
+
     private Integer brokerId;
     private BrokerMonitorConfig config;
     private BrokerStat brokerStat;
@@ -113,7 +115,7 @@ public class BrokerStatManager extends Service {
         private BrokerStat brokerStat;
 
         public BrokerStatDoubleCopy(Integer brokerId, BrokerMonitorConfig config, File statFile) throws IOException {
-            super(statFile, Integer.MAX_VALUE);
+            super(statFile, DEFAULT_FILE_SIZE);
             this.brokerId = brokerId;
             this.config = config;
             this.statFile = statFile;

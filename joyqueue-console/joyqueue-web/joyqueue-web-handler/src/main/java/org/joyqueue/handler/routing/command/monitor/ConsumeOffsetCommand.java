@@ -16,13 +16,6 @@
 package org.joyqueue.handler.routing.command.monitor;
 
 
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.model.domain.PartitionOffset;
-import org.joyqueue.model.domain.ResetOffsetInfo;
-import org.joyqueue.model.domain.Subscribe;
-import org.joyqueue.monitor.PartitionLeaderAckMonitorInfo;
-import org.joyqueue.service.ConsumeOffsetService;
-import org.joyqueue.util.NullUtil;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -31,10 +24,21 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.OperLog;
+import org.joyqueue.model.domain.PartitionOffset;
+import org.joyqueue.model.domain.ResetOffsetInfo;
+import org.joyqueue.model.domain.Subscribe;
+import org.joyqueue.monitor.PartitionLeaderAckMonitorInfo;
+import org.joyqueue.service.ConsumeOffsetService;
+import org.joyqueue.service.OperLogService;
+import org.joyqueue.util.LocalSession;
+import org.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ConsumeOffsetCommand implements Command<Response>, Poolable {
@@ -43,6 +47,9 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
 
     @Value(nullable = false)
     private ConsumeOffsetService consumeOffsetService;
+
+    @Value(nullable = false)
+    private OperLogService operLogService;
 
     @Override
     public Response execute() throws Exception {
@@ -57,6 +64,21 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
             logger.error("query consumer offset info error.", e);
             return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
         }
+    }
+
+    private void logOperation(String topic, String app, String operation)  {
+        OperLog log = new OperLog();
+        log.setIdentity(topic);
+        Long id = LocalSession.getSession().getUser().getId();
+        String code = LocalSession.getSession().getUser().getCode();
+        log.setCreateBy(new Identity(id, code));
+        log.setCreateTime(new Date());
+        log.setUpdateBy(new Identity(id, code));
+        log.setUpdateTime(new Date());
+        log.setType(OperLog.Type.CONSUMER.value());
+        log.setOperType(OperLog.OperType.UPDATE.value());
+        log.setTarget("topic: " + topic + " app: " + app + " operation: " + operation);
+        operLogService.add(log);
     }
 
     /**
@@ -76,6 +98,7 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
                     partitionOffset.setOffset(p.getRightIndex());
                 } else partitionOffset.setOffset(p.getLeftIndex());
                 partitionOffsets.add(partitionOffset);
+                logOperation(subscribe.getTopic().getCode(), subscribe.getApp().getCode(), "resetBound: " + partitionOffset);
             }
         }
         boolean result = consumeOffsetService.resetOffset(subscribe, partitionOffsets);
@@ -89,6 +112,7 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
     public Response resetByTime(@Body Subscribe subscribe, @QueryParam("timestamp") String timestamp) {
         try {
             Long time = Long.valueOf(timestamp);
+            logOperation(subscribe.getTopic().getCode(), subscribe.getApp().getCode(), "resetByTime: " + timestamp);
             boolean result = consumeOffsetService.resetOffset(subscribe, time);
             return result ? Responses.success("success") : Responses.error(ErrorCode.ServiceError.getCode(), "reset failed");
         } catch (Exception e) {
@@ -106,6 +130,7 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
             if (NullUtil.isEmpty(partition) || NullUtil.isEmpty(offset)) {
                 return Responses.error(ErrorCode.BadRequest.getCode(), "partition and offset can't be null");
             }
+            logOperation(subscribe.getTopic().getCode(), subscribe.getApp().getCode(), "resetPartition: partition=" + partition + ", offset=" + offset);
             boolean result = consumeOffsetService.resetOffset(subscribe, Short.valueOf(partition), Long.valueOf(offset));
             return result ? Responses.success("success") : Responses.error(ErrorCode.ServiceError.getCode(), "reset failed");
         } catch (Exception e) {
@@ -122,6 +147,7 @@ public class ConsumeOffsetCommand implements Command<Response>, Poolable {
     @Path("reset")
     public Response resetOffsets(@Body ResetOffsetInfo offsetInfo) {
         try {
+            logOperation(offsetInfo.getSubscribe().getTopic().getCode(), offsetInfo.getSubscribe().getApp().getCode(), "resetOffsets: " + offsetInfo.getPartitionOffsets());
             boolean result = consumeOffsetService.resetOffset(offsetInfo.getSubscribe(), offsetInfo.getPartitionOffsets());
             return result ? Responses.success("success") : Responses.error(ErrorCode.ServiceError.getCode(), "reset failed");
         } catch (Exception e) {

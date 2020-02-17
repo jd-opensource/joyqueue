@@ -34,6 +34,7 @@ public interface MessageRetry<T> extends LifeCycle, PropertySupplierAware {
      *
      * @param retryMessageModelList 重试实例集合
      * @throws JoyQueueException 异常时抛出
+     * @throws JoyQueueException code=JoyQueueCode.RETRY_TOKEN_LIMIT
      */
     void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException;
 

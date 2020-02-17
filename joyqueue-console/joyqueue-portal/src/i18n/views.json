@@ -11,7 +11,8 @@
         "code": "英文名",
         "system": "来源[应用来源/系统名称/应用代码]",
         "btnDetail": "详情",
-        "btnDelete": "删除"
+        "btnDelete": "删除",
+        "description": "描述"
       }
     }
   },
@@ -27,7 +28,8 @@
         "code": "Code",
         "system": "Source[appSource/sysName/appCode]",
         "btnDetail": "Show Detail",
-        "btnDelete": "Delete"
+        "btnDelete": "Delete",
+        "description": "Description"
       }
     }
   }

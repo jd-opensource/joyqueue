@@ -16,7 +16,7 @@
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
-              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-cancel-subscribe="cancelSubscribe"
+              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog" @on-cancel-subscribe="cancelSubscribe"
               @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
 
     <!--生产订阅弹出框-->
@@ -28,12 +28,18 @@
 
     <!--Config dialog-->
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
-      <producer-config-form ref="configForm" :data="configData"/>
+      <grid-row :v-if="configDialogTip">{{configDialogTip}}</grid-row>
+      <producer-config-form ref="configForm" :data="configData"
+      :archive-config-enabled="configData.archive || !forbidEnableArchive"
+      :nearby-config-enabled="configData.nearBy || !forbidEnableNearby"/>
     </my-dialog>
     <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
       <producer-weight-form ref="weightForm" :producerId="producerId"/>
     </my-dialog>
 
+    <my-dialog :dialog="sendMessageDialog" @on-dialog-confirm="sendMessageConfirm" @on-dialog-cancel="dialogCancel('sendMessageDialog')">
+      <producer-sendMessage-form ref="sendMessageForm" :data="sendMessageDialog.data" />
+    </my-dialog>
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
       <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
     </my-dialog>
@@ -50,6 +56,7 @@ import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeightForm from './producerWeightForm.vue'
 import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 import RateLimit from './rateLimit'
+import ProducerSendMessageForm from './producerSendMessageForm'
 import ButtonGroup from '../../components/button/button-group'
 
 export default {
@@ -61,7 +68,8 @@ export default {
     myDialog,
     subscribe,
     ProducerConfigForm,
-    ProducerWeightForm
+    ProducerWeightForm,
+    ProducerSendMessageForm
   },
   props: {
     keywordTip: {
@@ -86,19 +94,6 @@ export default {
             txt: '取消订阅',
             method: 'on-cancel-subscribe'
           }
-          // ,
-          // {
-          //   txt: '详情监控图表',
-          //   method: 'on-detail-chart'
-          // },
-          // {
-          //   txt: '汇总监控图表',
-          //   method: 'on-summary-chart'
-          // },
-          // {
-          //   txt: '性能监控图表',
-          //   method: 'on-performance-chart'
-          // }
         ]
       }
     },
@@ -110,6 +105,10 @@ export default {
             txt: '设置生产权重',
             method: 'on-weight',
             isAdmin: true
+          },
+          {
+            txt: '发送消息',
+            method: 'on-send-message'
           },
           {
             txt: '限流',
@@ -133,6 +132,18 @@ export default {
     },
     monitorUrls: {// url variable format: [app], [topic], [namespace]
       type: Object
+    },
+    configDialogTip: {
+      type: String,
+      default: undefined
+    },
+    forbidEnableArchive: { // 禁止开启归档
+      type: Boolean,
+      default: false
+    },
+    forbidEnableNearby: { // 禁止开启归档
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -141,7 +152,8 @@ export default {
         search: `/producer/search`,
         getMonitor: `/monitor/find`,
         getUrl: `/grafana/getRedirectUrl`,
-        del: `/producer/delete`
+        del: `/producer/delete`,
+        sendMessage: '/monitor/producer/sendMessage'
       },
       showTablePin: false,
       tableData: {
@@ -155,6 +167,11 @@ export default {
         page: 1,
         size: 10,
         total: 100
+      },
+      sendMessageDialog: {
+        visible: false,
+        title: '发送消息',
+        width: '850'
       },
       rateLimitDialog: {
         visible: false,
@@ -229,6 +246,17 @@ export default {
       this.rateLimitDialog.limitTraffic = item.config.limitTraffic
       this.rateLimitDialog.visible = true
     },
+    openSendMessageDialog (item) {
+      this.configData = item.config || {}
+      this.configData['producerId'] = item.id
+      this.sendMessageDialog.data = {
+        topic: item.topic.code,
+        namespace: item.namespace.code,
+        app: item.app.code,
+        message: ''
+      };
+      this.sendMessageDialog.visible = true
+    },
     cancelSubscribe (item) {
       let _this = this
       this.$Dialog.confirm({
@@ -279,6 +307,30 @@ export default {
       configData.limitTps = this.$refs.rateLimit.tps
       configData.limitTraffic = this.$refs.rateLimit.traffic
       this.config(configData, 'rateLimitDialog')
+    },
+    sendMessageConfirm () {
+      let formData = this.$refs.sendMessageForm.formData
+      if (!formData.message || formData.message == '' || formData.message.trim() == '') {
+        this.$Message.error('消息体不能为空')
+        return
+      }
+      let data = {
+        topic: formData.topic,
+        namespace: formData.namespace,
+        app: formData.app,
+        message: formData.message
+      };
+      apiRequest.post(this.urls.sendMessage, null, data, true).then((data) => {
+        data.data = data.data || []
+        if (data.code !== this.$store.getters.successCode) {
+          this.$Dialog.error({
+            content: '发送失败'
+          })
+        } else {
+          this.$Message.success('发送成功')
+          this.sendMessageDialog.visible = false
+        }
+      })
     },
     goSummaryChart (item) {
       if (this.monitorUrls && this.monitorUrls.summary) {

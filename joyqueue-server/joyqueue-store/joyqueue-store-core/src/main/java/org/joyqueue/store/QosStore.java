@@ -71,8 +71,8 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
-    public long deleteMinStoreMessages(long targetDeleteTimeline, Map<Short, Long> partitionAckMap, boolean doNotDeleteConsumed) throws IOException {
-        return store.deleteMinStoreMessages(targetDeleteTimeline, partitionAckMap, doNotDeleteConsumed);
+    public long clean(long time, Map<Short, Long> partitionAckMap, boolean keepUnconsumed) throws IOException {
+        return store.clean(time, partitionAckMap, keepUnconsumed);
     }
 
     /**

@@ -77,24 +77,38 @@ public class DBMessageRetry implements MessageRetry<Long> {
                     " and topic = ? and app = ? and retry_time < NOW() limit ?";
 
     // 数据源
-    private DataSource dataSource;
+    private DataSource writeDataSource;
+    // read only data source
+    private DataSource readDataSource;
+
     // start flag
     private boolean isStartFlag = false;
     // 重试策略
     private RetryPolicyProvider retryPolicyProvider;
     private DataSourceConfig writeDataSourceConfig = null;
+    private DataSourceConfig readDataSourceConfig = null;
     private RetryPolicy retryPolicy = null;
 
     public DBMessageRetry() {
     }
 
     public DataSource getDataSource() {
-        return dataSource;
+        return writeDataSource;
     }
+
+    /**
+     * @return  read only data source
+     **/
+
+    public DataSource getReadDataSource() {
+        return readDataSource;
+    }
+
 
     @Override
     public void start() {
-        this.dataSource = DataSourceFactory.build(writeDataSourceConfig);
+        this.writeDataSource = DataSourceFactory.build(writeDataSourceConfig);
+        this.readDataSource = DataSourceFactory.build(readDataSourceConfig);
         isStartFlag = true;
         logger.info("db retry manager is started");
     }
@@ -106,9 +120,13 @@ public class DBMessageRetry implements MessageRetry<Long> {
 
     @Override
     public void stop() {
-        if (dataSource != null) {
-            Close.close(dataSource);
-            dataSource = null;
+        if (writeDataSource != null) {
+            Close.close(writeDataSource);
+            writeDataSource = null;
+        }
+        if (readDataSource != null) {
+            Close.close(readDataSource);
+            readDataSource = null;
         }
         isStartFlag = false;
         logger.info("db retry manager is stopped");
@@ -136,7 +154,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         List<ConsumeRetry> resultList = new LinkedList<>();
         for (RetryMessageModel retryMessageModel : retryMessageModelList) {
             ConsumeRetry consumeRetry = new ConsumeRetry();
-            consumeRetry.setMessageId(RetryUtil.generateMessageId(retryMessageModel.getTopic(), retryMessageModel.getPartition(), retryMessageModel.getIndex()));
+            consumeRetry.setMessageId(RetryUtil.generateMessageId(retryMessageModel.getTopic(), retryMessageModel.getPartition(), retryMessageModel.getIndex(),retryMessageModel.getSendTime()));
             consumeRetry.setBusinessId(retryMessageModel.getBusinessId());
             consumeRetry.setTopic(retryMessageModel.getTopic());
             consumeRetry.setApp(retryMessageModel.getApp());
@@ -173,7 +191,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         String app = messages.get(0).getApp();
 
         try {
-            int count = DaoUtil.insert(dataSource, messages, CREATE_SQL,
+            int count = DaoUtil.insert(writeDataSource, messages, CREATE_SQL,
                     new DaoUtil.InsertCallback<ConsumeRetry>() {
 
                         @Override
@@ -277,7 +295,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
 
         try {
             final Timestamp timestamp = new Timestamp(SystemClock.now());
-            DaoUtil.update(dataSource, idList, SUCCESS_UPDATE_SQL, (DaoUtil.UpdateCallback<Long>) (statement, target) -> {
+            DaoUtil.update(writeDataSource, idList, SUCCESS_UPDATE_SQL, (DaoUtil.UpdateCallback<Long>) (statement, target) -> {
                 //update_time
                 statement.setTimestamp(1, timestamp);
                 //id
@@ -300,7 +318,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         Connection connection = null;
         PreparedStatement statement = null;
         try {
-            connection = dataSource.getConnection();
+            connection = writeDataSource.getConnection();
             connection.setAutoCommit(false);
 
             statement = connection.prepareStatement(ERROR_UPDATE_SQL);
@@ -359,7 +377,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         ResultSet resultSet = null;
         Long nextRetryTime = null; // 下一次重试时间
         try {
-            connection = dataSource.getConnection();
+            connection = writeDataSource.getConnection();
             statement = connection.prepareStatement(QUERY_ENTITY_SQL);
 
             if (id <= 0) {
@@ -402,7 +420,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         }
 
         try {
-            DaoUtil.update(dataSource, idList, EXPIRE_UPDATE_SQL, (DaoUtil.UpdateCallback<Long>) (statement, target) -> {
+            DaoUtil.update(writeDataSource, idList, EXPIRE_UPDATE_SQL, (DaoUtil.UpdateCallback<Long>) (statement, target) -> {
                 //update_time
                 statement.setTimestamp(1, new Timestamp(SystemClock.now()));
                 //id
@@ -423,7 +441,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         }
         final long nowTime = SystemClock.now();
         try {
-            List<RetryMessageModel> list = DaoUtil.queryList(dataSource, QUERY_SQL_NOID, new DaoUtil.QueryCallback<RetryMessageModel>() {
+            List<RetryMessageModel> list = DaoUtil.queryList(readDataSource, QUERY_SQL_NOID, new DaoUtil.QueryCallback<RetryMessageModel>() {
                 @Override
                 public RetryMessageModel map(final ResultSet rs) throws Exception {
                     RetryMessageModel message = new RetryMessageModel();
@@ -464,7 +482,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
         }
         long start = SystemClock.now();
         try {
-            int count = DaoUtil.queryObject(dataSource, QUERY_COUNT_SQL, new DaoUtil.QueryCallback<Integer>() {
+            int count = DaoUtil.queryObject(readDataSource, QUERY_COUNT_SQL, new DaoUtil.QueryCallback<Integer>() {
                 @Override
                 public Integer map(final ResultSet rs) throws Exception {
                     return rs.getInt(1);
@@ -492,7 +510,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
     public RetryMessageModel getMessageById(final String topic, final String app, final long id) throws JoyQueueException {
         final long nowTime = SystemClock.now();
         try {
-            RetryMessageModel retryMessageModel = DaoUtil.queryObject(dataSource, GET_SQL, new DaoUtil.QueryCallback<RetryMessageModel>() {
+            RetryMessageModel retryMessageModel = DaoUtil.queryObject(readDataSource, GET_SQL, new DaoUtil.QueryCallback<RetryMessageModel>() {
                 @Override
                 public void before(PreparedStatement preparedStatement) throws Exception {
                     preparedStatement.setString(1, topic);
@@ -537,7 +555,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
      */
     public List<long[]> queryIdAndRetryTime(final String topic, final String app, final int count) throws JoyQueueException {
         try {
-            List<long[]> dbIds = DaoUtil.queryList(dataSource, QUERY_ID_RETRY_TIME_SQL, new DaoUtil.QueryCallback<long[]>() {
+            List<long[]> dbIds = DaoUtil.queryList(readDataSource, QUERY_ID_RETRY_TIME_SQL, new DaoUtil.QueryCallback<long[]>() {
 
                 @Override
                 public void before(PreparedStatement preparedStatement) throws Exception {
@@ -568,6 +586,12 @@ public class DBMessageRetry implements MessageRetry<Long> {
         writeDataSourceConfig.setUrl(supplier.getValue(DbRetryConfigKey.WRITE_URL));
         writeDataSourceConfig.setUser(supplier.getValue(DbRetryConfigKey.WRITE_USER_NAME));
         writeDataSourceConfig.setPassword(supplier.getValue(DbRetryConfigKey.WRITE_PASSWORD));
+
+        readDataSourceConfig = new DataSourceConfig();
+        readDataSourceConfig.setDriver(supplier.getValue(DbRetryConfigKey.DRIVER));
+        readDataSourceConfig.setUrl(supplier.getValue(DbRetryConfigKey.READ_URL));
+        readDataSourceConfig.setUser(supplier.getValue(DbRetryConfigKey.READ_USER_NAME));
+        readDataSourceConfig.setPassword(supplier.getValue(DbRetryConfigKey.READ_PASSWORD));
 
         retryPolicy = new RetryPolicy(supplier.getValue(DbRetryConfigKey.RETRY_DELAY), supplier.getValue(DbRetryConfigKey.MAX_RETRY_TIMES));
     }

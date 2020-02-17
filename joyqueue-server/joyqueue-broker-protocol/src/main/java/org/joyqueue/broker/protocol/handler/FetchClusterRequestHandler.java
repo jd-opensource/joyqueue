@@ -127,7 +127,9 @@ public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type,
         }
 
         if (producer == null) {
-            result.setProducerPolicy(PolicyConverter.convertProducer(brokerContext.getProducerPolicy()));
+            if (connection.isSystem()) {
+                result.setProducerPolicy(PolicyConverter.convertProducer(brokerContext.getProducerPolicy()));
+            }
         } else {
             if (producer.getProducerPolicy() == null) {
                 result.setProducerPolicy(PolicyConverter.convertProducer(brokerContext.getProducerPolicy()));
@@ -137,8 +139,10 @@ public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type,
         }
 
         if (consumer == null) {
-            result.setConsumerPolicy(PolicyConverter.convertConsumer(brokerContext.getConsumerPolicy()));
-            result.setType(TopicType.TOPIC);
+            if (connection.isSystem()) {
+                result.setConsumerPolicy(PolicyConverter.convertConsumer(brokerContext.getConsumerPolicy()));
+                result.setType(TopicType.TOPIC);
+            }
         } else {
             if (consumer.getConsumerPolicy() == null) {
                 result.setConsumerPolicy(PolicyConverter.convertConsumer(brokerContext.getConsumerPolicy()));

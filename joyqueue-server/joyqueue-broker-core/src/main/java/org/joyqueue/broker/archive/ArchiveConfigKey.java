@@ -30,7 +30,7 @@ public enum ArchiveConfigKey implements PropertyDef {
     WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
     ARCHIVE_SWITCH("archive.switch", false, Type.BOOLEAN),
     ARCHIVE_THREAD_POOL_QUEUE_SIZE("archive.thread.pool.queue.size", 10, Type.INT),
-    ARCHIVE_STORE_NAMESPACE("archive.store.namespace", "journalq", Type.STRING);
+    ARCHIVE_STORE_NAMESPACE("archive.store.namespace", "joyqueue", Type.STRING);
 
     private String name;
     private Object value;

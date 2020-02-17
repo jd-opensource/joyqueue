@@ -15,6 +15,10 @@
  */
 package org.joyqueue.broker.kafka.session;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import org.joyqueue.broker.kafka.command.ProduceRequest;
 import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.network.transport.ChannelTransport;
@@ -23,10 +27,6 @@ import org.joyqueue.network.transport.TransportHelper;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.support.DefaultCommandDispatcher;
 import org.joyqueue.network.transport.handler.CommandInvocation;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +67,12 @@ public class KafkaTransportHandler extends ChannelDuplexHandler {
         }
 
         if (!(transport instanceof KafkaChannelTransport)) {
-            transport = new KafkaChannelTransport(transport);
-            TransportHelper.setTransport(channel, transport);
+            KafkaChannelTransport kafkaTransport = new KafkaChannelTransport(transport);
+            if (TransportHelper.compareAndSet(channel, transport, kafkaTransport)) {
+                transport = kafkaTransport;
+            } else {
+                transport = TransportHelper.getTransport(channel);
+            }
         }
 
         Command command = (Command) msg;

@@ -16,6 +16,8 @@
 package org.joyqueue.broker.manage.service.support;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
@@ -26,8 +28,6 @@ import org.joyqueue.message.SourceType;
 import org.joyqueue.monitor.BrokerMessageInfo;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.store.StoreManagementService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -128,22 +128,21 @@ public class DefaultMessageManageService implements MessageManageService {
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
             for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
                 for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                    if (partitionMetric.getRightIndex() == 0) {
+                        continue;
+                    }
                     int realCount = count - result.size();
                     if (realCount <= 0) {
                         break;
                     }
-                    long realIndex = 0L;
-                    if (count > partitionMetric.getRightIndex()) {
-                        realIndex = 0;
-                    } else {
-                        realIndex = partitionMetric.getRightIndex() - realCount;
-                    }
                     long ackIndex = consume.getAckIndex(consumer, partitionMetric.getPartition());
-                    if (ackIndex < 0) {
-                        ackIndex = 0;
+                    long realIndex = ackIndex;
+                    if (realIndex < 0) {
+                        realIndex = 0;
                     }
-                    if (ackIndex >= partitionMetric.getRightIndex()) {
-                        continue;
+                    if (realIndex >= partitionMetric.getRightIndex()) {
+                        realIndex = partitionMetric.getRightIndex() - realCount;
+                        realIndex = Math.max(realIndex, 0);
                     }
                     byte[][] bytes = storeManagementService.readMessages(topic, partitionMetric.getPartition(), realIndex, realCount);
                     if (ArrayUtils.isNotEmpty(bytes)) {

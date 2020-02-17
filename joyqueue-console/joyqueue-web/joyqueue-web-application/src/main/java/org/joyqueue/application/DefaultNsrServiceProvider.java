@@ -46,9 +46,6 @@ public class DefaultNsrServiceProvider implements NsrServiceProvider {
             if (!servers[i].matches(PATTERN)) {
                 throw new InvalidPropertiesFormatException("Invalid property! joyqueue.servers: " + String.join(",", servers));
             }
-            if(!servers[i].contains(":")) {
-                servers[i] += ":50091";
-            }
         }
         logger.info("Using nameservers: {}.", String.join(",", servers));
     }

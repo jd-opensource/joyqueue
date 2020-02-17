@@ -17,6 +17,7 @@ package org.joyqueue.network.transport;
 
 import org.joyqueue.network.transport.config.TransportConfig;
 import org.joyqueue.network.transport.exception.TransportException;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -27,6 +28,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,11 +51,13 @@ public class RequestBarrier {
     private Map<Integer, ResponseFuture> futures = new ConcurrentHashMap<Integer, ResponseFuture>(200);
     // 清理时钟
     private AtomicReference<Timer> clearTimer = new AtomicReference<>();
+    private ExecutorService asyncThreadPool;
 
     public RequestBarrier(TransportConfig config) {
         this.config = config;
         this.onewaySemaphore = config.getMaxOneway() > 0 ? new Semaphore(config.getMaxOneway(), true) : null;
         this.asyncSemaphore = config.getMaxAsync() > 0 ? new Semaphore(config.getMaxAsync(), true) : null;
+        this.asyncThreadPool = Executors.newFixedThreadPool(config.getCallbackThreads(), new NamedThreadFactory("joyqueue-async-callback"));
     }
 
     /**
@@ -168,6 +173,7 @@ public class RequestBarrier {
             clearTimer.get().cancel();
             clearTimer.set(null);
         }
+        asyncThreadPool.shutdown();
     }
 
     /**
@@ -206,6 +212,21 @@ public class RequestBarrier {
         }
         Semaphore semaphore = type == SemaphoreType.ASYNC ? asyncSemaphore : onewaySemaphore;
         semaphore.release();
+    }
+
+    public void onAsyncFuture(ResponseFuture future) {
+        asyncThreadPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    future.onSuccess();
+                } catch (Throwable e) {
+                    logger.error("execute callback error.", e);
+                } finally {
+                    future.release();
+                }
+            }
+        });
     }
 
     public TransportConfig getConfig() {

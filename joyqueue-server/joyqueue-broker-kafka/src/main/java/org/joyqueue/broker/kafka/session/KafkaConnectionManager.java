@@ -16,6 +16,7 @@
 package org.joyqueue.broker.kafka.session;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import org.joyqueue.broker.monitor.SessionManager;
@@ -50,6 +51,10 @@ public class KafkaConnectionManager {
     }
 
     public void addConnection(Transport transport, String clientId, String version) {
+        addConnection(transport, clientId, version, Language.JAVA);
+    }
+
+    public void addConnection(Transport transport, String clientId, String version, Language language) {
         Connection connection = SessionHelper.getConnection(transport);
         if (connection != null) {
             return;
@@ -66,18 +71,20 @@ public class KafkaConnectionManager {
         connection.setAddress(IpUtil.toByte(remoteAddress));
         connection.setAddressStr(IpUtil.toAddress(remoteAddress));
         connection.setHost(((InetSocketAddress) transport.remoteAddress()).getHostString());
-        connection.setLanguage(Language.JAVA);
+        connection.setLanguage(language);
         connection.setSource(SourceType.KAFKA.name());
         connection.setTransport(transport);
         connection.setCreateTime(SystemClock.now());
-        this.sessionManager.addConnection(connection);
-        SessionHelper.setConnection(transport, connection);
+        if (this.sessionManager.addConnection(connection)) {
+            SessionHelper.putIfAbsentConnection(transport, connection);
+        }
     }
 
     public void addProducer(Transport transport, String topic) {
         Connection connection = SessionHelper.getConnection(transport);
         String app = connection.getApp();
-        if (connection.containsProducer(topic, app)) {
+        String producerId = connection.getProducer(topic, app);
+        if (StringUtils.isNotBlank(producerId)) {
             return;
         }
         String id = generateProducerId(connection, topic);
@@ -93,7 +100,8 @@ public class KafkaConnectionManager {
     public void addConsumer(Transport transport, String topic) {
         Connection connection = SessionHelper.getConnection(transport);
         String app = connection.getApp();
-        if (connection.containsConsumer(topic, app)) {
+        String consumerId = connection.getConsumer(topic, app);
+        if (StringUtils.isNotBlank(consumerId)) {
             return;
         }
         String id = generateConsumerId(connection, topic);

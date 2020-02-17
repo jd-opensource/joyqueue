@@ -17,6 +17,8 @@ package org.joyqueue.broker.monitor.service;
 
 import org.joyqueue.monitor.ArchiveMonitorInfo;
 
+import java.util.Map;
+
 /**
  * Created by chengzhiliang on 2018/12/18.
  */
@@ -35,6 +37,13 @@ public interface ArchiveMonitorService {
      * @return
      */
     long getSendBackLogNum();
+
+    /**
+     * 按主题获取发送归档数量
+     *
+     * @return
+     */
+    Map<String, Long> getSendBackLogNumByTopic();
 
     /**
      * 获取归档监控

@@ -58,6 +58,10 @@ export default {
       btns: [],
       operates: []
     },
+    operationColumnWidth: {
+      type: Number,
+      default: undefined
+    },
     page: {
       page: 1,
       size: 10,
@@ -121,6 +125,7 @@ export default {
       // 渲染操作
       colOpData.push({
         title: this.langConfig['operate'],
+        width: this.operationColumnWidth,
         render: (h, params) => {
           let btns = []
           let items = []

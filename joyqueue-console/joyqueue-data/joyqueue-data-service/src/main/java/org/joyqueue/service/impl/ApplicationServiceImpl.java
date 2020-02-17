@@ -23,7 +23,6 @@ import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.ApplicationToken;
-import org.joyqueue.model.domain.ApplicationUser;
 import org.joyqueue.model.domain.Consumer;
 import org.joyqueue.model.domain.Producer;
 import org.joyqueue.model.domain.TopicUnsubscribedApplication;
@@ -89,12 +88,9 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
     public int delete(final Application app) {
         try {
-            ApplicationUser application = applicationUserService.findById(app.getId());
-            Preconditions.checkArgument(application != null, "application not exist");
-
             //validate topic related producers and consumers
-            Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByApp(app.getCode()),
-                    String.format("app %s exists related producers", app.getCode())));
+            Preconditions.checkArgument(NullUtil.isEmpty(producerNameServerService.findByApp(app.getCode())),
+                    String.format("app %s exists related producers", app.getCode()));
             Preconditions.checkArgument(NullUtil.isEmpty(consumerNameServerService.findByApp(app.getCode())),
                     String.format("app %s exists related consumers", app.getCode()));
             //delete related app users

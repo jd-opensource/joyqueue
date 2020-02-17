@@ -35,6 +35,7 @@ import org.joyqueue.network.command.FetchPartitionMessageAckData;
 import org.joyqueue.network.command.FetchPartitionMessageData;
 import org.joyqueue.network.command.FetchPartitionMessageRequest;
 import org.joyqueue.network.command.JoyQueueCommandType;
+import org.joyqueue.network.protocol.annotation.FetchHandler;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.transport.Transport;
@@ -53,6 +54,7 @@ import java.util.Map;
  * author: gaohaoxiang
  * date: 2018/12/13
  */
+@FetchHandler
 public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchPartitionMessageRequestHandler.class);

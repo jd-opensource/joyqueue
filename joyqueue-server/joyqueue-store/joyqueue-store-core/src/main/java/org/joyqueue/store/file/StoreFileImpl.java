@@ -30,7 +30,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ConcurrentModificationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
 
@@ -69,7 +68,6 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private int writePosition = 0;
     private long timestamp = -1L;
     private AtomicBoolean positionLock = new AtomicBoolean(false);
-
 
     public StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength) {
         this.filePosition = filePosition;
@@ -332,6 +330,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             if (positionLock.compareAndSet(false, true)) {
                 try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
                      FileChannel fileChannel = raf.getChannel()) {
+
                     if (writePosition > flushPosition) {
                         if (flushPosition == 0) {
                             writeTimestamp(fileChannel);
@@ -345,13 +344,11 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 } finally {
                     positionLock.compareAndSet(true, false);
                 }
-            } else {
-                throw new ConcurrentModificationException();
             }
-            return 0;
         } finally {
             bufferLock.unlockRead(stamp);
         }
+        return 0;
     }
 
 

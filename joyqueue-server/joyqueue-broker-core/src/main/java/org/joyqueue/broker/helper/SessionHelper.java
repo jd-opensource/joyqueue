@@ -31,6 +31,10 @@ public class SessionHelper {
         transport.attr().set(SessionManager.CONNECTION_KEY, connection);
     }
 
+    public static boolean putIfAbsentConnection(Transport transport, Connection connection) {
+        return transport.attr().putIfAbsent(SessionManager.CONNECTION_KEY, connection) == null;
+    }
+
     public static Connection getConnection(Transport transport) {
         return transport.attr().get(SessionManager.CONNECTION_KEY);
     }

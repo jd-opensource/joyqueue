@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,7 @@
 package org.joyqueue.broker.archive;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.cluster.ClusterManager;
@@ -24,21 +25,21 @@ import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.model.PullResult;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
-import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
 import org.joyqueue.server.archive.store.model.AchivePosition;
 import org.joyqueue.server.archive.store.model.SendLog;
+import org.joyqueue.store.PositionOverflowException;
 import org.joyqueue.store.PositionUnderflowException;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,6 +94,8 @@ public class ProduceArchiveService extends Service {
     // 读不到消息暂停Map
     private final Map<String, Long> pauseMap = new HashMap<>();
 
+    private PointTracer tracer;
+
 
     // 负责监听元数据变化,并且同步归档位置
     private LoopThread updateItemThread;
@@ -123,6 +125,7 @@ public class ProduceArchiveService extends Service {
         Preconditions.checkArgument(archiveStore != null, "archive store can not be null.");
         Preconditions.checkArgument(archiveConfig != null, "archive config can not be null.");
 
+        this.tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
         this.batchNum = archiveConfig.getProduceBatchNum();
         this.archiveQueue = new LinkedBlockingDeque<>(archiveConfig.getLogQueueSize());
         this.executorService = new ThreadPoolExecutor(archiveConfig.getWriteThreadNum(), archiveConfig.getWriteThreadNum(),
@@ -168,7 +171,7 @@ public class ProduceArchiveService extends Service {
         updateItemThread.start();
         readMsgThread.start();
         writeMsgThread.start();
-        logger.info("produce archive service started.");
+        logger.info("produce archive archiveService started.");
     }
 
     @Override
@@ -179,7 +182,7 @@ public class ProduceArchiveService extends Service {
         Close.close(writeMsgThread);
         Close.close(executorService);
         Close.close(archiveStore);
-        logger.info("produce archive service stopped.");
+        logger.info("produce archive archiveService stopped.");
     }
 
     /**
@@ -221,38 +224,33 @@ public class ProduceArchiveService extends Service {
             try {
                 pullResult = consume.getMessage(item.topic, item.partition, readIndex, batchNum);
             } catch (Throwable th) {
-                logger.error("read message from topic:" + item.topic + " partition:" + item.partition
-                        + " index:" + item.getReadIndex() + " error.", th);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("read message from topic:" + item.topic + " partition:" + item.partition
+                            + " index:" + item.getReadIndex() + " error.", th);
+                }
 
-                if (th instanceof PositionUnderflowException) {
+                if (th.getCause() instanceof PositionUnderflowException) {
                     // 如果读取位置小于存储索引的最小位置，将位置重置为可读到的最小位置
-                    PositionUnderflowException positionException = (PositionUnderflowException) th;
 
-                    logger.info("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, positionException.getLeft());
+                    long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
+                    item.setReadIndex(minIndex);
 
-                    item.setReadIndex(positionException.getLeft());
+                    logger.info("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
+
+                }
+
+                if (th.getCause() instanceof PositionOverflowException) {
+                    // 如果读取位置大于存储索引的最小位置，将位置重置为可读到的最小位置
+
+                    long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
+                    item.setReadIndex(maxIndex);
+
+                    logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
+
                 }
 
                 // 报错暂停一会
                 put2PauseMap(item.getTopic(), item.getPartition());
-                continue;
-            }
-
-            if (pullResult.getCode() == JoyQueueCode.SE_INDEX_UNDERFLOW) {
-                long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
-                item.setReadIndex(minIndex);
-
-                logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
-
-                continue;
-            }
-
-            if (pullResult.getCode() == JoyQueueCode.SE_INDEX_OVERFLOW) {
-                long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
-                item.setReadIndex(maxIndex);
-
-                logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
-
                 continue;
             }
 
@@ -262,6 +260,9 @@ public class ProduceArchiveService extends Service {
             } else {
                 // 加入缓存队列
                 int size = putSendLog2Queue(pullResult);
+                if(size>0){
+                    writeMsgThread.wakeup();
+                }
                 // 更新下次拉取位置(当前位置序号 + 拉取到的消息条数, 要避免覆盖写线程回滚的位置)
                 item.setReadIndex(readIndex + size, readIndex);
                 // 计数
@@ -336,13 +337,7 @@ public class ProduceArchiveService extends Service {
      */
     private List<BrokerMessage> parseMessage(ByteBuffer buffer) throws Exception {
         BrokerMessage brokerMessage = Serializer.readBrokerMessage(buffer);
-        List<BrokerMessage> brokerMessageList = new LinkedList<>();
-        if (brokerMessage.getSource() == SourceType.KAFKA.getValue() && brokerMessage.isBatch()) {
-            brokerMessageList = messageConvertSupport.convertBatch(brokerMessage, SourceType.INTERNAL.getValue());
-        } else {
-            brokerMessageList.add(brokerMessage);
-        }
-        return brokerMessageList;
+        return messageConvertSupport.convert(brokerMessage, SourceType.INTERNAL.getValue());
     }
 
     /**
@@ -375,35 +370,39 @@ public class ProduceArchiveService extends Service {
      * @throws JoyQueueException
      */
     private void write2Store() throws InterruptedException {
-        List<SendLog> sendLogs = new ArrayList<>(batchNum);
-        for (int i = 0; i < batchNum; i++) {
-            SendLog sendLog = archiveQueue.poll(10, TimeUnit.MILLISECONDS);
-            if (sendLog == null) {
-                break;
-            }
-            sendLogs.add(sendLog);
-        }
-        if (sendLogs.size() > 0) {
-            // 提交任务
-            executorService.submit(() -> {
-                try {
-                    // 写入存储
-                    archiveStore.putSendLog(sendLogs);
-                    logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
-                    // 写入计数（用于归档位置）
-                    writeCounter(sendLogs);
-                } catch (JoyQueueException e) {
-                    // 写入存储失败
-                    hasStoreError.set(true);
-                    // 回滚读取位置
-                    rollBackReadIndex(sendLogs);
+        int readBatchSize;
+        do {
+            List<SendLog> sendLogs = new ArrayList<>(batchNum);
+            for (int i = 0; i < batchNum; i++) {
+                SendLog sendLog = archiveQueue.poll();
+                if (sendLog == null) {
+                    break;
                 }
-            });
-        }
-        if (hasStoreError.getAndSet(false)) {
-            // 操作存储失败，等待1000ms
-            Thread.sleep(1000);
-        }
+                sendLogs.add(sendLog);
+            }
+            readBatchSize=sendLogs.size();
+            if (readBatchSize> 0) {
+                // 提交任务
+                executorService.submit(() -> {
+                    try {
+                        // 写入存储
+                        archiveStore.putSendLog(sendLogs, tracer);
+                        logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
+                        // 写入计数（用于归档位置）
+                        writeCounter(sendLogs);
+                    } catch (JoyQueueException e) {
+                        // 写入存储失败
+                        hasStoreError.set(true);
+                        // 回滚读取位置
+                        rollBackReadIndex(sendLogs);
+                    }
+                });
+            }
+            if (hasStoreError.getAndSet(false)) {
+                // 操作存储失败，等待1000ms
+                Thread.sleep(1000);
+            }
+        }while(readBatchSize==batchNum);
     }
 
     /**
@@ -476,6 +475,16 @@ public class ProduceArchiveService extends Service {
                 }
             }
         }
+    }
+
+    public Map<String, Long> getArchivePosition() {
+        Map<String, Long> result = new HashMap<>();
+        List<SendArchiveItem> allList = itemList.getAll();
+        for (SendArchiveItem sai : allList) {
+            result.put(sai.getTopic(), remainMessagesSum(sai.getTopic()));
+        }
+
+        return result;
     }
 
     /**

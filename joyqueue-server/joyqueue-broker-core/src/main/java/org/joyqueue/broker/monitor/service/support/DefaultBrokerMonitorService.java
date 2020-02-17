@@ -291,6 +291,11 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
+    public Map<String, Long> getSendBackLogNumByTopic() {
+        return archiveMonitorService.getSendBackLogNumByTopic();
+    }
+
+    @Override
     public ArchiveMonitorInfo getArchiveMonitorInfo() {
         return archiveMonitorService.getArchiveMonitorInfo();
     }
@@ -365,7 +370,7 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
-    public List<String> getConfigsMetadata() {
+    public Map<String, String> getConfigsMetadata() {
         return metadataMonitorService.getConfigsMetadata();
     }
 

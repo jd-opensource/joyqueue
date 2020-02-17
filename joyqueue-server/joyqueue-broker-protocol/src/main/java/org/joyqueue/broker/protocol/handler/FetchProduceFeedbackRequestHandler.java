@@ -21,9 +21,10 @@ import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.producer.transaction.TransactionId;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.protocol.converter.CheckResultConverter;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.producer.Produce;
+import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import org.joyqueue.broker.protocol.converter.CheckResultConverter;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
@@ -32,6 +33,7 @@ import org.joyqueue.network.command.FetchProduceFeedbackAckData;
 import org.joyqueue.network.command.FetchProduceFeedbackRequest;
 import org.joyqueue.network.command.FetchProduceFeedbackResponse;
 import org.joyqueue.network.command.JoyQueueCommandType;
+import org.joyqueue.network.protocol.annotation.FetchHandler;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.network.transport.Transport;
@@ -49,6 +51,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2018/12/19
  */
+@FetchHandler
 public class FetchProduceFeedbackRequestHandler implements JoyQueueCommandHandler, Type, BrokerContextAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(FetchProduceFeedbackRequestHandler.class);

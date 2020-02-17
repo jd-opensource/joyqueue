@@ -75,14 +75,14 @@ public class BatchConsumerInvoker implements ConsumerInvoker {
             long endTime = SystemClock.now();
             if (endTime - startTime > ackTimeout) {
                 logger.warn("execute batchMessageListener timeout, topic: {}, messages: {}, listeners: {}", topicMetadata.getTopic(), messages, listeners);
-                retryType = RetryType.TIMEOUT;
+                retryType = RetryType.NONE;
             }
         } catch (Exception e) {
             if (e instanceof IgnoreAckException) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("execute batchMessageListener, ignore ack, topic: {}, messages: {}, listeners: {}", topicMetadata.getTopic(), messages, listeners);
                 }
-                retryType = RetryType.TIMEOUT;
+                retryType = RetryType.OTHER;
             } else {
                 logger.error("execute batchMessageListener exception, topic: {}, messages: {}, listeners: {}", topicMetadata.getTopic(), messages, listeners, e);
                 retryType = RetryType.EXCEPTION;

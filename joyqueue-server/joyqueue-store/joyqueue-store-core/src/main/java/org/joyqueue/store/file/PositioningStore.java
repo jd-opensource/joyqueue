@@ -384,12 +384,14 @@ public class PositioningStore<T> implements Closeable {
         if ((present = storeFileMap.putIfAbsent(position, storeFile)) != null) {
             storeFile = present;
         }
-        logger.info("Store file created, leftPosition: {}, rightPosition: {}, flushPosition: {}, base: {}.",
-                Format.formatWithComma(left()),
-                Format.formatWithComma(right()),
-                Format.formatWithComma(flushPosition()),
-                base.getAbsolutePath()
-        );
+        if (logger.isDebugEnabled()) {
+            logger.debug("Store file created, leftPosition: {}, rightPosition: {}, flushPosition: {}, base: {}.",
+                    Format.formatWithComma(left()),
+                    Format.formatWithComma(right()),
+                    Format.formatWithComma(flushPosition()),
+                    base.getAbsolutePath()
+            );
+        }
         return storeFile;
     }
 
@@ -565,11 +567,13 @@ public class PositioningStore<T> implements Closeable {
         File file = storeFile.file();
         if (file.exists()) {
             if (file.delete()) {
-                logger.info("Store file deleted, leftPosition: {}, rightPosition: {}, flushPosition: {}, store: {}.",
-                        Format.formatWithComma(left()),
-                        Format.formatWithComma(right()),
-                        Format.formatWithComma(flushPosition()),
-                        file.getAbsolutePath());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Store file deleted, leftPosition: {}, rightPosition: {}, flushPosition: {}, store: {}.",
+                            Format.formatWithComma(left()),
+                            Format.formatWithComma(right()),
+                            Format.formatWithComma(flushPosition()),
+                            file.getAbsolutePath());
+                }
             } else {
                 throw new IOException(String.format("Delete file %s failed!", file.getAbsolutePath()));
             }
@@ -639,16 +643,6 @@ public class PositioningStore<T> implements Closeable {
 
     public int meetMinStoreFile(long minIndexedPhysicalPosition) {
         return storeFileMap.headMap(minIndexedPhysicalPosition).size();
-    }
-
-    public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {
-        for (StoreFile<T> storeFile : storeFileMap.headMap(minIndexedPhysicalPosition).values()) {
-            if (storeFile.timestamp() > 0)
-                if (storeFile.timestamp() < timestamp) {
-                    return true;
-                }
-        }
-        return false;
     }
 
     public static class Config {

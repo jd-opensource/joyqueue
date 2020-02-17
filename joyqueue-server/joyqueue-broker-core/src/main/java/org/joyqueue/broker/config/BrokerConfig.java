@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.config;
 
+import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.network.transport.config.ServerConfig;
 import org.joyqueue.network.transport.config.TransportConfigSupport;
@@ -67,7 +68,7 @@ public class BrokerConfig implements PropertySupplierAware {
     private Configuration propertySupplier;
 
 
-    public BrokerConfig(Configuration propertySupplier) {
+    public BrokerConfig(PropertySupplier propertySupplier) {
         setSupplier(propertySupplier);
     }
 
@@ -128,6 +129,50 @@ public class BrokerConfig implements PropertySupplierAware {
         this.backendConfig = TransportConfigSupport.buildServerConfig(propertySupplier, BROKER_BACKEND_SERVER_CONFIG_PREFIX);
         Property adminUser = propertySupplier.getProperty(ADMIN_USER);
         if (null != adminUser) this.adminUser = adminUser.getString();
+    }
+
+    public int getServerCommonThreads() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_COMMON_THREADS);
+    }
+
+    public int getServerCommonThreadKeepalive() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_COMMON_THREAD_KEEPALIVE);
+    }
+
+    public int getServerCommonThreadQueueSize() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_COMMON_THREAD_QUEUE_SIZE);
+    }
+
+    public int getServerFetchThreads() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_FETCH_THREADS);
+    }
+
+    public int getServerFetchThreadKeepalive() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_FETCH_THREAD_KEEPALIVE);
+    }
+
+    public int getServerFetchThreadQueueSize() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_FETCH_THREAD_QUEUE_SIZE);
+    }
+
+    public int getServerProduceThreads() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PRODUCE_THREADS);
+    }
+
+    public int getServerProduceThreadKeepalive() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PRODUCE_THREAD_KEEPALIVE);
+    }
+
+    public int getServerProduceThreadQueueSize() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PRODUCE_THREAD_QUEUE_SIZE);
+    }
+
+    public boolean getLogDetail(String app) {
+        return (boolean) propertySupplier.getValue(BrokerConfigKey.LOG_DETAIL)
+                || (boolean) PropertySupplier.getValue(propertySupplier,
+                BrokerConfigKey.LOG_DETAIL_PREFIX.getName() + app,
+                BrokerConfigKey.LOG_DETAIL_PREFIX.getType(),
+                BrokerConfigKey.LOG_DETAIL_PREFIX.getValue());
     }
 
     public Broker getBroker() {

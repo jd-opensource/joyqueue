@@ -101,7 +101,7 @@ public class BrokerManageServiceManager extends Service {
         BrokerStat brokerStat = brokerMonitor.getBrokerStat();
         BrokerStartupInfo brokerStartupInfo = newBrokerStartInfo();
         DefaultBrokerMonitorInternalService brokerMonitorInternalService = new DefaultBrokerMonitorInternalService(brokerStat, consume,
-                storeManagementService, nameService, storeService, clusterManager, brokerStartupInfo);
+                storeManagementService, nameService, storeService, clusterManager, brokerStartupInfo, archiveManager);
         DefaultConnectionMonitorService connectionMonitorService = new DefaultConnectionMonitorService(brokerStat);
         DefaultConsumerMonitorService consumerMonitorService = new DefaultConsumerMonitorService(brokerStat, consume, storeManagementService, retryManager, clusterManager);
         DefaultProducerMonitorService producerMonitorService = new DefaultProducerMonitorService(brokerStat, storeManagementService, clusterManager);

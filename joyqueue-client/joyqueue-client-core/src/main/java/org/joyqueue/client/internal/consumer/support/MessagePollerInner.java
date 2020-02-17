@@ -17,12 +17,14 @@ package org.joyqueue.client.internal.consumer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.consumer.BrokerLoadBalance;
 import org.joyqueue.client.internal.consumer.MessageFetcher;
-import org.joyqueue.client.internal.consumer.callback.PollerListener;
 import org.joyqueue.client.internal.consumer.callback.FetchListener;
 import org.joyqueue.client.internal.consumer.callback.PartitionFetchListener;
+import org.joyqueue.client.internal.consumer.callback.PollerListener;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.converter.BrokerAssignmentConverter;
 import org.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignment;
@@ -43,8 +45,6 @@ import org.joyqueue.domain.ConsumerPolicy;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.domain.BrokerNode;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -335,7 +335,7 @@ public class MessagePollerInner extends Service {
             throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, nameServerConfig.getApp()), JoyQueueCode.FW_CONSUMER_NOT_EXISTS.getCode());
+            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, config.getAppFullName()), JoyQueueCode.FW_CONSUMER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }
