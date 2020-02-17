@@ -71,3 +71,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details on submitting patches and the
 ## License
 
 Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+
+## Community
+
+*Mailing list: <joyqueue-users@groups.io>
