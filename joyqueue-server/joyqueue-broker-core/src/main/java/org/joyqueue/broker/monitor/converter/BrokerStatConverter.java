@@ -85,7 +85,7 @@ public class BrokerStatConverter {
 
                 appStatPoMap.put(appStatEntry.getKey(), appStatPo);
                 appStatPo.setPartitionGroupStatMap(partitionGroupStatPoMap);
-                appStatPo.setConsumerStat(new ConsumerStatPo(new RetryStatPo(retryStat.getSuccess().getCount(), retryStat.getFailure().getCount()),
+                appStatPo.setConsumerStat(new ConsumerStatPo(new RetryStatPo(retryStat.getTotal().getCount(), retryStat.getSuccess().getCount(), retryStat.getFailure().getCount()),
                         new DeQueueStatPo(appStat.getConsumerStat().getDeQueueStat().getTotal(), appStat.getConsumerStat().getDeQueueStat().getTotalSize())));
                 appStatPo.setProducerStat(new ProducerStatPo(new EnQueueStatPo(appStat.getProducerStat().getEnQueueStat().getTotal(), appStat.getProducerStat().getEnQueueStat().getTotalSize())));
 
@@ -182,6 +182,7 @@ public class BrokerStatConverter {
                 appStat.getProducerStat().getEnQueueStat().setTotalSize(appStatPo.getProducerStat().getEnQueueStat().getTotalSize());
                 appStat.getConsumerStat().getDeQueueStat().setTotal(appStatPo.getConsumerStat().getDeQueueStat().getTotal());
                 appStat.getConsumerStat().getDeQueueStat().setTotalSize(appStatPo.getConsumerStat().getDeQueueStat().getTotalSize());
+                appStat.getConsumerStat().getRetryStat().getTotal().setCount(retryStatPo.getTotal());
                 appStat.getConsumerStat().getRetryStat().getSuccess().setCount(retryStatPo.getSuccess());
                 appStat.getConsumerStat().getRetryStat().getFailure().setCount(retryStatPo.getFailure());
 

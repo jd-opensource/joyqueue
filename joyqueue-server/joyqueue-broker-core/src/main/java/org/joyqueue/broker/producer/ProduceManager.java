@@ -16,6 +16,8 @@
 package org.joyqueue.broker.producer;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.buffer.Serializer;
@@ -44,8 +46,6 @@ import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.metric.Metric;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -304,6 +304,11 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
             }
 
             putResult.addWriteResult((short) partitionGroup.getGroup(), writeResult);
+
+            if (config.getLogDetail(producer.getApp())) {
+                logger.info("writeMessages, topic: {}, app: {}, partitionGroup: {}, qosLevel: {}, size: {}, result: {}",
+                        producer.getTopic(), producer.getApp(), partitionGroup.getGroup(), qosLevel, writeRequests.size(), writeResult.getCode());
+            }
         }
 
         return putResult;
@@ -358,6 +363,10 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 partitionStore.asyncWrite(event -> {
                     if (event.getCode().equals(JoyQueueCode.SUCCESS)) {
                         onPutMessage(topic, app, partitionGroup.getGroup(), startTime, writeRequests);
+                    }
+                    if (config.getLogDetail(producer.getApp())) {
+                        logger.info("writeMessagesAsync, topic: {}, app: {}, partitionGroup: {}, qosLevel: {}, size: {}, result: {}",
+                                producer.getTopic(), producer.getApp(), partitionGroup.getGroup(), qosLevel, writeRequests.size(),event.getCode());
                     }
                     eventListener.onEvent(event);
                 }, writeRequests.toArray(new WriteRequest[]{}));

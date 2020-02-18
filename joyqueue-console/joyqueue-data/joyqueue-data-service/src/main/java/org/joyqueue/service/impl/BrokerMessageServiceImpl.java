@@ -18,31 +18,51 @@ package org.joyqueue.service.impl;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.openmessaging.KeyValue;
+import io.openmessaging.MessagingAccessPoint;
+import io.openmessaging.OMS;
+import io.openmessaging.OMSBuiltinKeys;
+import io.openmessaging.joyqueue.producer.ExtensionProducer;
+import io.openmessaging.message.Message;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.async.BrokerClusterQuery;
 import org.joyqueue.async.BrokerMonitorClusterQuery;
 import org.joyqueue.async.RetrieveProvider;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.domain.TopicName;
+import org.joyqueue.model.domain.Application;
+import org.joyqueue.model.domain.ApplicationToken;
 import org.joyqueue.model.domain.Broker;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.PartitionGroupReplica;
+import org.joyqueue.model.domain.ProducerSendMessage;
 import org.joyqueue.model.domain.SimplifiedBrokeMessage;
 import org.joyqueue.model.domain.Subscribe;
 import org.joyqueue.model.domain.SubscribeType;
 import org.joyqueue.monitor.BrokerMessageInfo;
 import org.joyqueue.monitor.RestResponse;
 import org.joyqueue.monitor.RestResponseCode;
+import org.joyqueue.nsr.AppTokenNameServerService;
+import org.joyqueue.nsr.BrokerNameServerService;
+import org.joyqueue.nsr.ReplicaServerService;
 import org.joyqueue.other.HttpRestService;
+import org.joyqueue.service.ApplicationService;
+import org.joyqueue.service.ApplicationTokenService;
 import org.joyqueue.service.BrokerMessageService;
 import org.joyqueue.service.LeaderService;
+import org.joyqueue.service.MessagePreviewService;
 import org.joyqueue.util.NullUtil;
 import org.joyqueue.util.UrlEncoderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -61,9 +81,20 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     private LeaderService leaderService;
     @Autowired(required = false)
     private HttpRestService httpRestService;
+    @Autowired
+    private MessagePreviewService messagePreviewService;
+    private ReplicaServerService replicaServerService;
+    @Autowired
+    private BrokerNameServerService brokerNameServerService;
+    @Autowired
+    private AppTokenNameServerService appTokenNameServerService;
+    @Autowired
+    private ApplicationTokenService applicationTokenService;
+    @Autowired
+    private ApplicationService applicationService;
 
     @Override
-    public List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe, int count) {
+    public List<SimplifiedBrokeMessage> previewMessage(Subscribe subscribe,String messageDecodeType ,int count) {
         List<SimplifiedBrokeMessage> simplifiedBrokeMessages=new ArrayList<>();
         List<Broker> brokers=new ArrayList<>();
         Future<Map<String,String >> resultFuture= brokerClusterQuery.asyncQueryOnBroker(subscribe, new RetrieveProvider<Subscribe>() {
@@ -90,7 +121,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                 if (brokerMessageResponse.getCode()== RestResponseCode.SUCCESS.getCode()) {
                     if(!NullUtil.isEmpty(brokerMessageResponse.getData())){
                         for (BrokerMessageInfo m : brokerMessageResponse.getData()) {
-                            message = BrokerMessageConvert(m);
+                            message = simpleBrokerMessageConvert(m,messageDecodeType);
                             simplifiedBrokeMessages.add(message);
                         }
                     }else{
@@ -113,7 +144,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     }
 
     @Override
-    public List<BrokerMessageInfo> viewMessage(Subscribe subscribe,String partition, String index, int count) {
+    public List<BrokerMessageInfo> viewMessage(Subscribe subscribe,String messageDecodeType ,String partition, String index, int count) {
         Map.Entry<PartitionGroup, Broker> brokerEntry = leaderService.findPartitionLeaderBrokerDetail(subscribe.getNamespace().getCode(),subscribe.getTopic().getCode(),Integer.valueOf(partition));
         Broker broker = brokerEntry.getValue();
         String path="getPartitionMessageByIndex";
@@ -127,9 +158,23 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         args[6]=String.valueOf(count);
         RestResponse<List<BrokerMessageInfo>> restResponse = httpRestService.get(path,BrokerMessageInfo.class,true,args);
         if (restResponse != null && restResponse.getData() != null) {
-            return restResponse.getData();
+            return decodeBrokerMessage(restResponse.getData(),messageDecodeType);
         }
         return null;
+    }
+
+    /**
+     * decode message by type
+     * @param decodeType  decode type
+     *
+     **/
+    public List<BrokerMessageInfo> decodeBrokerMessage(List<BrokerMessageInfo> msgs,String decodeType){
+        for(BrokerMessageInfo m:msgs){
+            if(m.getBody()!=null){
+                m.setBody(messagePreviewService.preview(decodeType,Base64.getDecoder().decode(m.getBody())));
+            }
+        }
+        return msgs;
     }
 
     @Override
@@ -157,15 +202,86 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         return null;
     }
 
+    @Override
+    public void sendMessage(ProducerSendMessage sendMessage) {
+        Application application = applicationService.findByCode(sendMessage.getApp());
+        if (application == null) {
+            throw new RuntimeException("application not exist");
+        }
 
-    private SimplifiedBrokeMessage BrokerMessageConvert(BrokerMessageInfo m) {
+        TopicName topicName = TopicName.parse(sendMessage.getTopic(), sendMessage.getNamespace());
+        List<PartitionGroupReplica> partitionGroupReplicas = replicaServerService.findByTopicAndGroup(topicName.getCode(), topicName.getNamespace(), 0);
+
+        if (CollectionUtils.isEmpty(partitionGroupReplicas)) {
+            throw new RuntimeException("topic not exist");
+        }
+
+        Broker broker = null;
+
+        try {
+            broker = brokerNameServerService.findById(partitionGroupReplicas.get(0).getBrokerId());
+        } catch (Exception e) {
+            logger.error("find broker exception, brokerId: {}", partitionGroupReplicas.get(0).getBrokerId(), e);
+            throw new RuntimeException("topic not exist");
+        }
+
+        if (broker == null) {
+            throw new RuntimeException("broker not exist");
+        }
+
+        List<ApplicationToken> applicationTokens = null;
+        try {
+            applicationTokens = appTokenNameServerService.findByApp(sendMessage.getApp());
+        } catch (Exception e) {
+            logger.error("find token exception, app: {}", sendMessage.getApp(), e);
+            throw new RuntimeException("topic not exist");
+        }
+
+        if (CollectionUtils.isNotEmpty(applicationTokens)) {
+            ApplicationToken applicationToken = new ApplicationToken();
+            applicationToken.setApplication(new Identity(application.getId(), application.getCode()));
+            try {
+                applicationTokenService.add(applicationToken);
+                applicationTokens = Arrays.asList(applicationToken);
+            } catch (Exception e) {
+                logger.error("add token exception, app: {}", sendMessage.getApp(), e);
+                throw new RuntimeException("token not exist");
+            }
+        }
+
+        String[] messages = sendMessage.getMessage().split("\n");
+        KeyValue attributes = OMS.newKeyValue();
+        attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, applicationTokens.get(0).getToken());
+        MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://%s@%s:%s/console", sendMessage.getApp(), broker.getIp(), broker.getPort()), attributes);
+        ExtensionProducer producer = (ExtensionProducer) messagingAccessPoint.createProducer();
+
+        try {
+            producer.start();
+            for (String message : messages) {
+                if (StringUtils.isBlank(message)) {
+                    continue;
+                }
+                Message produceMessage = producer.createMessage(topicName.getFullName(), message);
+                producer.send(produceMessage);
+            }
+        } finally {
+            producer.stop();
+        }
+    }
+
+    /**
+     * @param messageDecodeType  message deserialize type
+     **/
+    private SimplifiedBrokeMessage simpleBrokerMessageConvert(BrokerMessageInfo m,String messageDecodeType) {
         SimplifiedBrokeMessage message = new SimplifiedBrokeMessage();
 //        message.setQueryId(response.getKey());
         message.setId(m.getPartition() + "-" + m.getMsgIndexNo());
         message.setSendTime(m.getStartTime());
         message.setStoreTime(m.getStoreTime());
         message.setBusinessId(m.getBusinessId());
-        message.setBody(new String(m.getBody().getBytes(Charset.forName("utf-8"))));
+        if(m.getBody()!=null) {
+            message.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(m.getBody())));
+        }
         message.setAttributes(m.getAttributes());
         message.setFlag(m.isAck());
         return message;

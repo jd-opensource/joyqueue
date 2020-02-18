@@ -254,6 +254,7 @@ public class DefaultConsumerMonitorService implements ConsumerMonitorService {
         } catch (JoyQueueException e) {
             logger.error("getRetry exception, topic: {}, app: {}", consumerStat.getTopic(), consumerStat.getApp(), e);
         }
+        retryMonitorInfo.setCurrent(consumerStat.getRetryStat().getTotal().getOneMinuteRate());
         retryMonitorInfo.setSuccess(consumerStat.getRetryStat().getSuccess().getOneMinuteRate());
         retryMonitorInfo.setFailure(consumerStat.getRetryStat().getFailure().getOneMinuteRate());
 

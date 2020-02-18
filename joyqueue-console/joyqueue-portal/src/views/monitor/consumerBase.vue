@@ -31,14 +31,14 @@
 
     <!--Msg preview dialog-->
     <my-dialog :dialog="msgPreviewDialog" @on-dialog-cancel="dialogCancel('msgPreviewDialog')">
-      <msg-preview ref="msgPreview" :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
-                   :type="type" :subscribeGroup="msgPreviewDialog.subscribeGroup"/>
+      <msg-preview ref="msgPreview" :message-types="messageTypes" :app="msgPreviewDialog.app" :topic="msgPreviewDialog.topic" :namespace="msgPreviewDialog.namespace"
+                   :type="type" :subscribeGroup="msgPreviewDialog.subscribeGroup" :messageType="messageType" @update:messageType="messageType = $event" />
     </my-dialog>
 
     <!--Msg detail dialog-->
     <my-dialog :dialog="msgDetailDialog" @on-dialog-cancel="dialogCancel('msgDetailDialog')">
-      <msg-detail ref="msgDetail" :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
-                   :type="type" :subscribeGroup="msgDetailDialog.subscribeGroup"/>
+      <msg-detail ref="msgDetail" :message-types="messageTypes" :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
+                   :type="type" :subscribeGroup="msgDetailDialog.subscribeGroup" :messageType="messageType" @update:messageType="messageType = $event"/>
     </my-dialog>
 
     <!--Config dialog-->
@@ -181,7 +181,8 @@ export default {
         getMonitor: `/monitor/find`,
         previewMessage: '/monitor/preview/message',
         getUrl: `/grafana/getRedirectUrl`,
-        del: `/consumer/delete`
+        del: `/consumer/delete`,
+        messageTypes: '/archive/message-types'
       },
       showTablePin: false,
       tableData: {
@@ -226,7 +227,8 @@ export default {
         showFooter: true,
         urls: {
           addOrUpdate: `/consumer/config/addOrUpdate`,
-          search: 'consumer/config/search'
+          search: 'consumer/config/search',
+          messageTypes: '/archive/message-types'
         }
       },
       msgPreviewDialog: {
@@ -269,6 +271,10 @@ export default {
           code: ''
         }
       },
+      messageType:undefined,
+      messageTypes: [
+        'UTF8 TEXT'
+      ],
        monitorUIds: {
          detail: this.$store.getters.uIds.consumer.detail,
          summary: this.$store.getters.uIds.consumer.summary
@@ -515,6 +521,19 @@ export default {
   },
   mounted () {
     // this.getList();
+    apiRequest.get(this.urls.messageTypes)
+      .then(data => {
+        this.messageTypes = data.data
+
+        if (typeof this.messageTypes !== 'undefined' && this.messageTypes.length > 0) {
+          if (typeof this.messageType === 'undefined') {
+            this.messageType = this.messageTypes[0]
+          }
+        } else {
+          console.error('Property message-types can not be empty!')
+        }
+
+      })
   }
 }
 </script>

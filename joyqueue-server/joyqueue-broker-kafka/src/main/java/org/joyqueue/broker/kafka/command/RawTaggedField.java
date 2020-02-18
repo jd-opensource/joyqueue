@@ -13,32 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.monitor;
-
-import org.joyqueue.monitor.TraceStat;
-import org.joyqueue.monitor.PointTracer;
+package org.joyqueue.broker.kafka.command;
 
 /**
- * @author lining11
- * Date: 2020/1/6
+ * RawTaggedField
+ * author: gaohaoxiang
+ * date: 2020/2/5
  */
-public class DefaultPointTracer implements PointTracer {
+public class RawTaggedField {
 
-    private TraceStat stat = new TraceStat();
+    private int tag;
+    private byte[] data;
 
+    public RawTaggedField() {
 
-    @Override
-    public String type() {
-        return "default";
     }
 
-    @Override
-    public TraceStat begin(String start) {
-        return stat;
+    public RawTaggedField(int tag, byte[] data) {
+        this.tag = tag;
+        this.data = data;
     }
 
-    @Override
-    public void end(TraceStat end) {
+    public int getTag() {
+        return tag;
+    }
 
+    public void setTag(int tag) {
+        this.tag = tag;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
     }
 }

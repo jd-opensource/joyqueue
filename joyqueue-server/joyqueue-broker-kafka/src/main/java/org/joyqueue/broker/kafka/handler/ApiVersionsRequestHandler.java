@@ -60,6 +60,11 @@ public class ApiVersionsRequestHandler extends AbstractKafkaCommandHandler {
         if (logger.isDebugEnabled()) {
             logger.debug("fetch api version, transport: {}, version: {}", transport.remoteAddress(), apiVersionsRequest.getVersion());
         }
+
+        if (apiVersionsRequest.getVersion() > KafkaCommandType.API_VERSIONS.getMaxVersion()) {
+            return new Command(new ApiVersionsResponse(KafkaErrorCode.UNSUPPORTED_VERSION.getCode(), APIS));
+        }
+
         return new Command(SUPPORTED_RESPONSE);
     }
 

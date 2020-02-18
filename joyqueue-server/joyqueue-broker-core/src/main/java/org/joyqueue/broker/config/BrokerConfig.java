@@ -68,7 +68,7 @@ public class BrokerConfig implements PropertySupplierAware {
     private Configuration propertySupplier;
 
 
-    public BrokerConfig(Configuration propertySupplier) {
+    public BrokerConfig(PropertySupplier propertySupplier) {
         setSupplier(propertySupplier);
     }
 
@@ -165,6 +165,14 @@ public class BrokerConfig implements PropertySupplierAware {
 
     public int getServerProduceThreadQueueSize() {
         return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_PRODUCE_THREAD_QUEUE_SIZE);
+    }
+
+    public boolean getLogDetail(String app) {
+        return (boolean) propertySupplier.getValue(BrokerConfigKey.LOG_DETAIL)
+                || (boolean) PropertySupplier.getValue(propertySupplier,
+                BrokerConfigKey.LOG_DETAIL_PREFIX.getName() + app,
+                BrokerConfigKey.LOG_DETAIL_PREFIX.getType(),
+                BrokerConfigKey.LOG_DETAIL_PREFIX.getValue());
     }
 
     public Broker getBroker() {

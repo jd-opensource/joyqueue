@@ -96,22 +96,18 @@ public class KafkaMessageV1Serializer extends AbstractKafkaMessageSerializer {
     }
 
     public static List<KafkaBrokerMessage> readMessages(ByteBuffer buffer) throws Exception {
-        List<KafkaBrokerMessage> result = Lists.newLinkedList();
-        while (buffer.hasRemaining()) {
-            KafkaBrokerMessage message = readMessage(buffer);
-            result.add(message);
-        }
-        return result;
-    }
-
-    public static KafkaBrokerMessage readMessage(ByteBuffer buffer) throws Exception {
         byte attribute = buffer.get(ATTRIBUTE_OFFSET);
         KafkaCompressionCodec compressionCodec = KafkaCompressionCodec.valueOf(getCompressionCodecType(attribute));
         if (!compressionCodec.equals(KafkaCompressionCodec.NoCompressionCodec)) {
             buffer.position(ATTRIBUTE_OFFSET + 1 + 8 + 4 + 4); // attribute, timestamp, key, valueLength
             buffer = ByteBuffer.wrap(decompress(compressionCodec, buffer, CURRENT_MAGIC));
         }
-        return doReadMessage(buffer);
+        List<KafkaBrokerMessage> result = Lists.newLinkedList();
+        while (buffer.hasRemaining()) {
+            KafkaBrokerMessage message = doReadMessage(buffer);
+            result.add(message);
+        }
+        return result;
     }
 
     protected static KafkaBrokerMessage doReadMessage(ByteBuffer buffer) throws Exception {

@@ -20,12 +20,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.monitor.DefaultPointTracer;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.MessageLocation;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
-import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.lang.Close;
@@ -43,7 +42,11 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.GeneralSecurityException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -94,10 +97,7 @@ public class ConsumeArchiveService extends Service {
         this.repository = new ArchiveMappedFileRepository(archiveConfig.getArchivePath());
         this.readByteCounter = new AtomicInteger(0);
 
-        tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
-        if (tracer == null){
-            tracer = new DefaultPointTracer();
-        }
+        this.tracer = Plugins.TRACERERVICE.get(archiveConfig.getTracerType());
         this.readConsumeLogThread = LoopThread.builder()
                 .sleepTime(1, 10)
                 .name("ReadAndPutHBase-ConsumeLog-Thread")

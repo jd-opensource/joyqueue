@@ -23,7 +23,9 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.Broker;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.model.BrokerMetadata;
@@ -33,14 +35,17 @@ import org.joyqueue.model.domain.BrokerClient;
 import org.joyqueue.model.domain.BrokerMonitorRecord;
 import org.joyqueue.model.domain.BrokerTopicMonitor;
 import org.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
+import org.joyqueue.model.domain.ProducerSendMessage;
 import org.joyqueue.model.domain.SimplifiedBrokeMessage;
 import org.joyqueue.model.domain.Subscribe;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QMonitor;
 import org.joyqueue.model.query.QPartitionGroupMonitor;
 import org.joyqueue.monitor.BrokerMessageInfo;
 import org.joyqueue.monitor.BrokerMonitorInfo;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.Client;
+import org.joyqueue.service.ApplicationUserService;
 import org.joyqueue.service.BrokerManageService;
 import org.joyqueue.service.BrokerMessageService;
 import org.joyqueue.service.BrokerMonitorService;
@@ -49,7 +54,6 @@ import org.joyqueue.service.BrokerTopicMonitorService;
 import org.joyqueue.service.CoordinatorMonitorService;
 import org.joyqueue.toolkit.io.Directory;
 import org.joyqueue.util.NullUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +77,13 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     private BrokerTopicMonitorService brokerTopicMonitorService;
 
     @Value
+    private ApplicationUserService applicationUserService;
+
+    @Value
     private BrokerService brokerService;
+
+    @Value(Constants.USER_KEY)
+    protected User session;
 
     @Override
     public Response execute() throws Exception {
@@ -252,9 +262,10 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      *
      **/
     @Path("previewMessage")
-    public Response previewMessage(@Body Subscribe subscribe){
+    public Response previewMessage(@Body Subscribe subscribe, @QueryParam("messageDecodeType") String messageType){
         int defaultCount=10;
-        List<SimplifiedBrokeMessage> messages=brokerMessageService.previewMessage(subscribe,defaultCount);
+
+        List<SimplifiedBrokeMessage> messages=brokerMessageService.previewMessage(subscribe,messageType,defaultCount);
         return Responses.success(messages);
     }
 
@@ -263,13 +274,14 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      *
      **/
     @Path("viewMessage")
-    public Response viewMessage(@Body Subscribe subscribe,@QueryParam("partition") String partition, @QueryParam("index")String index,@QueryParam("timestamp")String timestamp){
+    public Response viewMessage(@Body Subscribe subscribe,@QueryParam("partition") String partition, @QueryParam("index")String index,
+                                @QueryParam("timestamp")String timestamp,@QueryParam("messageDecodeType") String messageDecodeType){
         int defaultCount=10;
         if (StringUtils.isNotEmpty(timestamp) && StringUtils.isEmpty(index)){
             Long indexByTime = brokerMessageService.getPartitionIndexByTime(subscribe,partition,timestamp);
             index = String.valueOf(indexByTime);
         }
-        List<BrokerMessageInfo> messages=brokerMessageService.viewMessage(subscribe,partition,index,defaultCount);
+        List<BrokerMessageInfo> messages=brokerMessageService.viewMessage(subscribe,messageDecodeType,partition,index,defaultCount);
         return Responses.success(messages);
     }
 
@@ -441,6 +453,18 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             logger.error("query broker metadata error.", e);
             return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
         }
+    }
+
+    @Path("sendMessage")
+    public Response sendMessage(@Body ProducerSendMessage sendMessage) {
+        if (session.getRole() != User.UserRole.ADMIN.value()) {
+            if (applicationUserService.findByUserApp(session.getCode(), sendMessage.getApp()) == null) {
+                return Responses.error(ErrorCode.BadRequest.getCode(), ErrorCode.BadRequest.getCode(), "bad request");
+            }
+        }
+
+        brokerMessageService.sendMessage(sendMessage);
+        return Responses.success("test");
     }
 
     @Override

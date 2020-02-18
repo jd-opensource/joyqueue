@@ -16,8 +16,10 @@
 package org.joyqueue.broker.kafka.util;
 
 import com.google.common.base.Charsets;
-import org.joyqueue.toolkit.security.Crc32;
+import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
+import org.joyqueue.broker.kafka.command.RawTaggedField;
+import org.joyqueue.toolkit.security.Crc32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by zhangkepeng on 16-8-18.
@@ -53,6 +57,43 @@ public class KafkaBufferUtils {
      */
     public static long readUnsignedInt(ByteBuffer buffer, int index) {
         return buffer.getInt(index) & 0xffffffffL;
+    }
+
+    /**
+     * Read an integer stored in variable-length format using unsigned decoding from
+     * <a href="http://code.google.com/apis/protocolbuffers/docs/encoding.html"> Google Protocol Buffers</a>.
+     *
+     * @param buffer The buffer to read from
+     * @return The integer read
+     *
+     * @throws IllegalArgumentException if variable-length value does not terminate after 5 bytes have been read
+     */
+    public static int readUnsignedVarint(ByteBuffer buffer) {
+        int value = 0;
+        int i = 0;
+        int b;
+        while (((b = buffer.get()) & 0x80) != 0) {
+            value |= (b & 0x7f) << i;
+            i += 7;
+            if (i > 28)
+                throw new IllegalArgumentException(String.valueOf(value));
+        }
+        value |= b << i;
+        return value;
+    }
+
+    public static int readUnsignedVarint(ByteBuf buffer) {
+        int value = 0;
+        int i = 0;
+        int b;
+        while (((b = buffer.readByte()) & 0x80) != 0) {
+            value |= (b & 0x7f) << i;
+            i += 7;
+            if (i > 28)
+                throw new IllegalArgumentException(String.valueOf(value));
+        }
+        value |= b << i;
+        return value;
     }
 
     /**
@@ -222,6 +263,24 @@ public class KafkaBufferUtils {
         return result;
     }
 
+    public static byte[] readCompactBytes(ByteBuf buffer) {
+        int length = readUnsignedVarint(buffer) - 1;
+        if (length <= 0) {
+            return null;
+        }
+        byte[] result = new byte[length];
+        buffer.readBytes(result);
+        return result;
+    }
+
+    public static String readCompactString(ByteBuf buffer) {
+        byte[] content = readCompactBytes(buffer);
+        if (content == null) {
+            return null;
+        }
+        return new String(content);
+    }
+
     public static void writeVarlong(long value, ByteBuf buffer) {
         long v = (value << 1) ^ (value >> 63);
         while ((v & 0xffffffffffffff80L) != 0L) {
@@ -292,6 +351,21 @@ public class KafkaBufferUtils {
         return (value >>> 1) ^ -(value & 1);
     }
 
+    public static int readVarint(ByteBuf buffer) {
+        int value = 0;
+        int i = 0;
+        int b;
+        while (((b = buffer.readByte()) & 0x80) != 0) {
+            value |= (b & 0x7f) << i;
+            i += 7;
+            if (i > 28) {
+                throw new IllegalArgumentException();
+            }
+        }
+        value |= b << i;
+        return (value >>> 1) ^ -(value & 1);
+    }
+
     public static void writeBytes(byte[] value, ByteBuf buffer) {
         if (value == null) {
             buffer.writeInt(-1);
@@ -308,5 +382,21 @@ public class KafkaBufferUtils {
             writeVarint(value.length, buffer);
             buffer.writeBytes(value);
         }
+    }
+
+    public static List<RawTaggedField> readRawTaggedFields(ByteBuf buffer) {
+        int size = readUnsignedVarint(buffer);
+        if (size == 0) {
+            return Collections.emptyList();
+        }
+        List<RawTaggedField> result = Lists.newLinkedList();
+        for (int i = 0; i < size; i++) {
+            int tag = readUnsignedVarint(buffer);
+            int length = readUnsignedVarint(buffer);
+            byte[] data = new byte[length];
+            buffer.readBytes(length);
+            result.add(new RawTaggedField(tag, data));
+        }
+        return result;
     }
 }

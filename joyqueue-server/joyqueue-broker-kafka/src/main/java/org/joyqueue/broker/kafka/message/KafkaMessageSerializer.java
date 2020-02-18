@@ -128,16 +128,4 @@ public class KafkaMessageSerializer extends AbstractKafkaMessageSerializer {
             throw new UnsupportedOperationException(String.format("readMessages unsupported magic, magic: %s", magic));
         }
     }
-
-    public static KafkaBrokerMessage readMessage(ByteBuffer buffer) throws Exception {
-        byte magic = buffer.get(MAGIC_OFFSET);
-        if (magic == MESSAGE_MAGIC_V0) {
-            return KafkaMessageV0Serializer.readMessage(buffer);
-        } else if (magic == MESSAGE_MAGIC_V1) {
-            return KafkaMessageV1Serializer.readMessage(buffer);
-        } else {
-            throw new UnsupportedOperationException(String.format("readMessage unsupported magic, magic: %s", magic));
-        }
-    }
-
 }
