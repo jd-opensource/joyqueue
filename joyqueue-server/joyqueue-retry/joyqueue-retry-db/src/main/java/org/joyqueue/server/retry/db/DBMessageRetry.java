@@ -298,8 +298,12 @@ public class DBMessageRetry implements MessageRetry<Long> {
             DaoUtil.update(writeDataSource, idList, SUCCESS_UPDATE_SQL, (DaoUtil.UpdateCallback<Long>) (statement, target) -> {
                 //update_time
                 statement.setTimestamp(1, timestamp);
+                //topic
+                statement.setString(2, topic);
+                //app
+                statement.setString(3, app);
                 //id
-                statement.setLong(2, target);
+                statement.setLong(4, target);
             });
         } catch (Exception e) {
             logger.error("retrySuccess error.", e);
@@ -343,7 +347,9 @@ public class DBMessageRetry implements MessageRetry<Long> {
                         statement.setTimestamp(2, timestamp);
                         statement.setInt(3, RetryStatus.RETRY_ING.getValue());
                     }
-                    statement.setLong(4, messageId);
+                    statement.setString(4, topic);
+                    statement.setString(5, app);
+                    statement.setLong(6, messageId);
                     statement.executeUpdate();
                 }
             }
@@ -423,8 +429,12 @@ public class DBMessageRetry implements MessageRetry<Long> {
             DaoUtil.update(writeDataSource, idList, EXPIRE_UPDATE_SQL, (DaoUtil.UpdateCallback<Long>) (statement, target) -> {
                 //update_time
                 statement.setTimestamp(1, new Timestamp(SystemClock.now()));
+                //topic
+                statement.setString(2, topic);
+                //app
+                statement.setString(3, app);
                 //id
-                statement.setLong(2, target);
+                statement.setLong(4, target);
             });
         } catch (Exception e) {
             logger.error("retryExpire error", e);
