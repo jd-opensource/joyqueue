@@ -125,41 +125,51 @@ public class StoreCleanManager extends Service {
         if (LOG.isDebugEnabled()) {
             LOG.info("Start scheduled StoreCleaningStrategy task use class: <{}>!!!", brokerStoreConfig.getCleanStrategyClass());
         }
-        List<TopicConfig> topicConfigs = clusterManager.getTopics();
-        if (topicConfigs != null && topicConfigs.size() > 0) {
-            for (TopicConfig topicConfig : topicConfigs) {
-                List<PartitionGroup> partitionGroups = clusterManager.getTopicPartitionGroups(topicConfig.getName());
-                if (CollectionUtils.isNotEmpty(partitionGroups)) {
-                    for (PartitionGroup partitionGroup : partitionGroups) {
-                        try {
-                            Set<Short> partitions = partitionGroup.getPartitions();
-                            if (CollectionUtils.isNotEmpty(partitions)) {
-                                List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
-                                Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
-                                for (Short partition : partitions) {
-                                    long minAckIndex = Long.MAX_VALUE;
-                                    if (CollectionUtils.isNotEmpty(appList)) {
-                                        for (String app : appList) {
-                                            minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
+        long roundTotalDeleteStoreSize=0;
+        long roundDeleteStoreSize;
+        long startMs=SystemClock.now();
+        do {
+            roundDeleteStoreSize=0;
+            List<TopicConfig> topicConfigs = clusterManager.getTopics();
+            if (topicConfigs != null && topicConfigs.size() > 0) {
+                for (TopicConfig topicConfig : topicConfigs) {
+                    List<PartitionGroup> partitionGroups = clusterManager.getTopicPartitionGroups(topicConfig.getName());
+                    if (CollectionUtils.isNotEmpty(partitionGroups)) {
+                        for (PartitionGroup partitionGroup : partitionGroups) {
+                            try {
+                                Set<Short> partitions = partitionGroup.getPartitions();
+                                if (CollectionUtils.isNotEmpty(partitions)) {
+                                    List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
+                                    Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
+                                    for (Short partition : partitions) {
+                                        long minAckIndex = Long.MAX_VALUE;
+                                        if (CollectionUtils.isNotEmpty(appList)) {
+                                            for (String app : appList) {
+                                                minAckIndex = Math.min(minAckIndex, positionManager.getLastMsgAckIndex(topicConfig.getName(), app, partition));
+                                            }
                                         }
+                                        partitionAckMap.put(partition, minAckIndex);
                                     }
-                                    partitionAckMap.put(partition, minAckIndex);
-                                }
-                                StoreCleaningStrategy cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
-                                if (cleaningStrategy != null) {
-                                    if (LOG.isDebugEnabled()){
-                                        LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
-                                                topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
+                                    StoreCleaningStrategy cleaningStrategy = cleaningStrategyMap.get(brokerStoreConfig.getCleanStrategyClass());
+                                    if (cleaningStrategy != null) {
+                                        if (LOG.isDebugEnabled()) {
+                                            LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
+                                                    topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
+                                        }
+                                        roundDeleteStoreSize = cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                     }
-                                    cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                 }
+                            } catch (Throwable t) {
+                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, exception: {}", topicConfig, partitionGroup.getGroup(), t);
                             }
-                        } catch (Throwable t) {
-                            LOG.error("Error to clean store for topic <{}>, partition group <{}>, exception: {}", topicConfig, partitionGroup.getGroup(), t);
                         }
                     }
                 }
             }
+            roundTotalDeleteStoreSize+=roundDeleteStoreSize;
+        }while (roundDeleteStoreSize>0);
+        if(LOG.isDebugEnabled()){
+            LOG.debug("Round total clean storage size {},elapsed time {}ms",roundTotalDeleteStoreSize,SystemClock.now()-startMs);
         }
     }
 }

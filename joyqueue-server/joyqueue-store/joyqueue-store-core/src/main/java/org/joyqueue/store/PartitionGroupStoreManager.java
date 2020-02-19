@@ -172,15 +172,15 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     public void recover() {
         try {
 
-            logger.info("Recovering message store...");
+            logger.info("Recovering message store {}...", base.getAbsolutePath());
             store.recover();
-            logger.info("Recovering index store...");
+            logger.info("Recovering index store {}...", base.getAbsolutePath());
             indexPosition = recoverPartitions();
             long safeIndexPosition = indexPosition;
-            logger.info("Recovering the checkpoint ...");
+            logger.info("Recovering the checkpoint {}...", base.getAbsolutePath());
             indexPosition = recoverCheckpoint();
             long checkPointIndexPosition = indexPosition;
-            logger.info("Building indices ...");
+            logger.info("Building indices {}...", base.getAbsolutePath());
             try {
                 recoverIndices();
             } catch (Throwable t) {
@@ -196,6 +196,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     throw t;
                 }
             }
+            logger.info("Store recovered: {}...", base.getAbsolutePath());
         } catch (IOException e) {
             throw new StoreInitializeException(e);
         }
