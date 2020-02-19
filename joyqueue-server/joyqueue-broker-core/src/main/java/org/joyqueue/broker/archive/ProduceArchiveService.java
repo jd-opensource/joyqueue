@@ -235,7 +235,7 @@ public class ProduceArchiveService extends Service {
                     long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
                     item.setReadIndex(minIndex);
 
-                    logger.info("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
+                    logger.debug("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
 
                 }
 
@@ -245,7 +245,7 @@ public class ProduceArchiveService extends Service {
                     long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
                     item.setReadIndex(maxIndex);
 
-                    logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
+                    logger.debug("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
 
                 }
 
@@ -268,7 +268,7 @@ public class ProduceArchiveService extends Service {
                 // 计数
                 counter += messageSize;
                 if (logger.isDebugEnabled()) {
-                    logger.info("produce archive: {} messages put into the archive queue.", size);
+                    logger.debug("produce archive: {} messages put into the archive queue.", size);
                 }
             }
         }
