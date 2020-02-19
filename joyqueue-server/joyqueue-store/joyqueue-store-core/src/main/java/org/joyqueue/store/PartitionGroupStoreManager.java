@@ -263,7 +263,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
             if (indexStore.right() - indexStore.flushPosition() >= 10 * 1024 * 1024) {
                 indexStore.flush();
-                logger.info("Write position: {}, index position: {}", store.right(), indexPosition);
+                logger.info("Recovering index, topic: {}, group: {}, Write position: {}, index position: {}",
+                        topic, partitionGroup, store.right(), indexPosition);
             }
         }
 
