@@ -372,7 +372,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         try {
             return partitionConsumption.getMsgByPartitionAndIndex(topic, group, partition, index, count);
         } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
+            logger.debug(e.getMessage(), e);
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
     }
