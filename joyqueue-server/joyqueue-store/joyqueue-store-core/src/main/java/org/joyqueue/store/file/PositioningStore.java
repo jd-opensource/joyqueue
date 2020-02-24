@@ -58,7 +58,7 @@ public class PositioningStore<T> implements Closeable {
 
     private final Lock writeLock = new ReentrantLock();
     private final Lock flushLock = new ReentrantLock();
-    private final Lock deleteLock = new ReentrantLock();
+    private final ReentrantLock deleteLock = new ReentrantLock();
 
     // 正在写入的
     private StoreFile<T> writeStoreFile = null;
@@ -523,7 +523,7 @@ public class PositioningStore<T> implements Closeable {
         StoreFile<T> storeFile;
         try {
             deleteLock.lock();
-            while (storeFileMap.size() > 1 &&
+            while (storeFileMap.size() > 0 &&
                     (entry = storeFileMap.firstEntry()) != null &&
                     entry.getKey() +
                             (fileDataSize =
@@ -532,19 +532,45 @@ public class PositioningStore<T> implements Closeable {
                                             storeFile.fileDataSize())
                             <= position) {
 
-                if (storeFileMap.remove(entry.getKey(), storeFile)) {
-                    leftPosition.addAndGet(fileDataSize);
-                    forceDeleteStoreFile(storeFile);
-                    if(writeStoreFile == storeFile) {
-                        writeStoreFile = null;
+                if (storeFile == writeStoreFile) {
+                    deleteLock.unlock();
+                    try {
+                        // 注意锁的顺序必须一致，避免死锁。
+                        flushLock.lock();
+                        writeLock.lock();
+                        deleteLock.lock();
+                        if (storeFileMap.remove(entry.getKey(), storeFile)) {
+                            this.writeStoreFile = null;
+                            forceDeleteStoreFile(storeFile);
+                            deleteSize += fileDataSize;
+                            leftPosition.addAndGet(fileDataSize);
+                            if(flushPosition.get() < leftPosition.get()) {
+                                flushPosition.set(leftPosition.get());
+                            }
+                        } else {
+                            break;
+                        }
+
+                    } finally {
+                        deleteLock.unlock();
+                        writeLock.unlock();
+                        flushLock.unlock();
                     }
-                    deleteSize += fileDataSize;
+
                 } else {
-                    break;
+                    if (storeFileMap.remove(entry.getKey(), storeFile)) {
+                        leftPosition.addAndGet(fileDataSize);
+                        forceDeleteStoreFile(storeFile);
+                        deleteSize += fileDataSize;
+                    } else {
+                        break;
+                    }
                 }
             }
         } finally {
-            deleteLock.unlock();
+            if(deleteLock.isHeldByCurrentThread()) {
+                deleteLock.unlock();
+            }
         }
         return deleteSize;
     }
