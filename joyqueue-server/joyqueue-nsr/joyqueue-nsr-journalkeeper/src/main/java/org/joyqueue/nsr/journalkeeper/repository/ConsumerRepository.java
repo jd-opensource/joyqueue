@@ -16,7 +16,6 @@
 package org.joyqueue.nsr.journalkeeper.repository;
 
 import org.joyqueue.nsr.journalkeeper.domain.ConsumerDTO;
-import io.journalkeeper.sql.client.SQLOperator;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/16
  */
-public class ConsumerRepository extends BaseRepository {
+public class ConsumerRepository {
 
     private static final String TABLE = "consumer";
     private static final String COLUMNS = "id, topic, namespace, app, topic_type, client_type, referer, `group`, consume_policy, retry_policy, limit_policy";
@@ -49,45 +48,47 @@ public class ConsumerRepository extends BaseRepository {
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?",
             TABLE);
 
-    public ConsumerRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public ConsumerRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public ConsumerDTO getById(String id) {
-        return queryOnce(ConsumerDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(ConsumerDTO.class, GET_BY_ID, id);
     }
 
     public ConsumerDTO getByTopicAndApp(String topic, String namespace, String app) {
-        return queryOnce(ConsumerDTO.class, GET_BY_TOPIC_AND_APP, topic, namespace, app);
+        return baseRepository.queryOnce(ConsumerDTO.class, GET_BY_TOPIC_AND_APP, topic, namespace, app);
     }
 
     public List<ConsumerDTO> getByTopic(String topic, String namespace) {
-        return query(ConsumerDTO.class, GET_BY_TOPIC, topic, namespace);
+        return baseRepository.query(ConsumerDTO.class, GET_BY_TOPIC, topic, namespace);
     }
 
     public List<ConsumerDTO> getByApp(String app) {
-        return query(ConsumerDTO.class, GET_BY_APP, app, app);
+        return baseRepository.query(ConsumerDTO.class, GET_BY_APP, app, app);
     }
 
     public List<ConsumerDTO> getAll() {
-        return query(ConsumerDTO.class, GET_ALL);
+        return baseRepository.query(ConsumerDTO.class, GET_ALL);
     }
 
     public ConsumerDTO add(ConsumerDTO consumerDTO) {
-        insert(ADD, consumerDTO.getId(), consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
+        baseRepository.insert(ADD, consumerDTO.getId(), consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
                 consumerDTO.getTopicType(), consumerDTO.getClientType(), consumerDTO.getReferer(), consumerDTO.getGroup(),
                 consumerDTO.getConsumePolicy(), consumerDTO.getRetryPolicy(), consumerDTO.getLimitPolicy());
         return consumerDTO;
     }
 
     public ConsumerDTO update(ConsumerDTO consumerDTO) {
-        update(UPDATE_BY_ID, consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
+        baseRepository.update(UPDATE_BY_ID, consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
                 consumerDTO.getTopicType(), consumerDTO.getClientType(), consumerDTO.getReferer(), consumerDTO.getConsumePolicy(),
                 consumerDTO.getRetryPolicy(), consumerDTO.getLimitPolicy(), consumerDTO.getId());
         return consumerDTO;
     }
 
     public int deleteById(String id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }

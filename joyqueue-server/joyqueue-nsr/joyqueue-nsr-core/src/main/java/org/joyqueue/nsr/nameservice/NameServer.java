@@ -16,13 +16,11 @@
 package org.joyqueue.nsr.nameservice;
 
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
-import com.jd.laf.extension.Type;
+import org.apache.commons.lang3.RandomUtils;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
@@ -38,15 +36,12 @@ import org.joyqueue.domain.Topic;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.NameServerEvent;
-import org.joyqueue.network.transport.TransportServer;
-import org.joyqueue.network.transport.config.ServerConfig;
 import org.joyqueue.nsr.ManageServer;
 import org.joyqueue.nsr.MetaManager;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.ServiceProvider;
 import org.joyqueue.nsr.config.NameServerConfig;
 import org.joyqueue.nsr.exception.NsrException;
-import org.joyqueue.nsr.network.NsrTransportServerFactory;
 import org.joyqueue.nsr.service.AppTokenService;
 import org.joyqueue.nsr.service.BrokerService;
 import org.joyqueue.nsr.service.ConfigService;
@@ -65,7 +60,6 @@ import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,9 +73,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -91,19 +82,11 @@ import java.util.stream.Collectors;
  * @author wylixiaobin
  * @date 2018/9/4
  */
-public class NameServer extends Service implements NameService, PropertySupplierAware, Type {
+public class NameServer extends Service implements NameService, PropertySupplierAware {
     /**
      * name server config
      */
     private NameServerConfig nameServerConfig;
-    /**
-     * transport factory
-     */
-    private NsrTransportServerFactory transportServerFactory;
-    /**
-     * transport server
-     */
-    private TransportServer transportServer;
     /**
      * manage server
      */
@@ -131,9 +114,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
     public static ExtensionPoint<ServiceProvider, String> serviceProviderPoint = new ExtensionPointLazy<>(ServiceProvider.class);
     private static final Logger logger = LoggerFactory.getLogger(NameServer.class);
 
-    private Cache<String, Map<TopicName, TopicConfig>> appTopicCache;
-    private Cache<String, Optional<TopicConfig>> topicCache;
-
     public NameServer() {
 
     }
@@ -151,31 +131,12 @@ public class NameServer extends Service implements NameService, PropertySupplier
             if (metaManager == null) {
                 metaManager = buildMetaManager();
             }
-            if (transportServerFactory == null) {
-                this.transportServerFactory = new NsrTransportServerFactory(this, propertySupplier);
-            }
             if (manageServer == null) {
                 this.manageServer = buildManageServer();
             }
-            if (transportServer == null){
-                this.transportServer = buildTransportServer();
-            }
-            if (appTopicCache == null) {
-                this.appTopicCache = CacheBuilder.newBuilder()
-                        .expireAfterWrite(nameServerConfig.getCacheExpireTime(), TimeUnit.MILLISECONDS)
-                        .build();
-            }
-            if (topicCache == null) {
-                this.topicCache = CacheBuilder.newBuilder()
-                        .expireAfterWrite(nameServerConfig.getCacheExpireTime(), TimeUnit.MILLISECONDS)
-                        .build();
-            }
-
             this.manageServer.setManagerPort(nameServerConfig.getManagerPort());
-
             this.metaManager.start();
             this.eventManager.start();
-            this.transportServer.start();
             this.manageServer.start();
             logger.info("nameServer is started");
         } catch (Exception e) {
@@ -190,7 +151,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
             Close.close(manageServer);
             Close.close(metaManager);
             Close.close(eventManager);
-            Close.close(transportServer);
             if(serviceProvider instanceof LifeCycle)
             Close.close((LifeCycle )serviceProvider);
         } finally {
@@ -323,19 +283,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public TopicConfig getTopicConfig(TopicName topicName) {
-        if (nameServerConfig.getCacheEnable()) {
-            try {
-                Optional<TopicConfig> result = topicCache.get(topicName.getFullName(), () -> {
-                    return Optional.ofNullable(doGetTopicConfig(topicName));
-                });
-                return (result.isPresent() ? result.get() : null);
-            } catch (Exception e) {
-                logger.error("getTopicConfig exception, topicName: {}", topicName, e);
-                throw new NsrException(e);
-            }
-        } else {
-            return doGetTopicConfig(topicName);
-        }
+        return doGetTopicConfig(topicName);
     }
 
     protected TopicConfig doGetTopicConfig(TopicName topicName) {
@@ -490,25 +438,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     @Override
     public Map<TopicName, TopicConfig> getTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
-        if (nameServerConfig.getCacheEnable()) {
-            try {
-                return appTopicCache.get(subscribeApp + "_" + String.valueOf(subscribe), new Callable<Map<TopicName, TopicConfig>>() {
-                    @Override
-                    public Map<TopicName, TopicConfig> call() throws Exception {
-                        return doGetTopicConfigByApp(subscribeApp, subscribe);
-                    }
-                });
-            } catch (ExecutionException e) {
-                logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}",
-                        subscribeApp, subscribe);
-                return Maps.newHashMap();
-            }
-        } else {
-            return doGetTopicConfigByApp(subscribeApp, subscribe);
-        }
-    }
-
-    public Map<TopicName, TopicConfig> doGetTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
         Map<TopicName, TopicConfig> appTopicConfigs = new HashMap<>();
 
         List<? extends Subscription> subscriptions = null;
@@ -667,11 +596,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
         eventManager.add(event);
     }
 
-    @Override
-    public String type() {
-        return "server";
-    }
-
     private ManageServer buildManageServer() {
         TopicService topicService = serviceProvider.getService(TopicService.class);
         BrokerService brokerService = serviceProvider.getService(BrokerService.class);
@@ -716,17 +640,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
                 partitionGroupReplicaService, appTokenService, dataCenterService);
 
     }
-
-
-
-    private TransportServer buildTransportServer(){
-        ServerConfig serverConfig = nameServerConfig.getServerConfig();
-        serverConfig.setPort(nameServerConfig.getServicePort());
-        serverConfig.setAcceptThreadName("joyqueue-nameserver-accept-eventLoop");
-        serverConfig.setIoThreadName("joyqueue-nameserver-io-eventLoop");
-        return transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());
-    }
-
 
     private ServiceProvider loadServiceProvider(PropertySupplier propertySupplier) throws Exception{
         ServiceProvider serviceProvider = serviceProviderPoint.get();

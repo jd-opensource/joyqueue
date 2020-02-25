@@ -16,13 +16,6 @@
 package org.joyqueue.nsr.journalkeeper;
 
 import com.google.common.collect.Lists;
-import org.joyqueue.nsr.InternalServiceProvider;
-import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfig;
-import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfigKey;
-import org.joyqueue.toolkit.config.Property;
-import org.joyqueue.toolkit.config.PropertySupplier;
-import org.joyqueue.toolkit.config.PropertySupplierAware;
-import org.joyqueue.toolkit.service.Service;
 import io.journalkeeper.core.api.ClusterConfiguration;
 import io.journalkeeper.core.api.RaftServer;
 import io.journalkeeper.core.server.AbstractServer;
@@ -35,6 +28,16 @@ import io.journalkeeper.sql.server.SQLServer;
 import io.journalkeeper.sql.server.SQLServerAccessPoint;
 import io.journalkeeper.sql.state.config.SQLConfigs;
 import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.config.BrokerConfigKey;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.nsr.InternalServiceProvider;
+import org.joyqueue.nsr.NsrPlugins;
+import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfig;
+import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfigKey;
+import org.joyqueue.toolkit.config.Property;
+import org.joyqueue.toolkit.config.PropertySupplier;
+import org.joyqueue.toolkit.config.PropertySupplierAware;
+import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +57,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
 
     private PropertySupplier propertySupplier;
     private JournalkeeperConfig config;
+    private PointTracer tracer;
 
     private SQLServer sqlServer;
     private SQLClient sqlClient;
@@ -88,6 +92,11 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
     }
 
     @Override
+    protected void validate() throws Exception {
+        this.tracer = NsrPlugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
+    }
+
+    @Override
     protected void doStart() throws Exception {
         Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
         URI currentNode = URI.create(String.format("journalkeeper://%s:%s", config.getLocal(), config.getPort()));
@@ -118,7 +127,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         }
         this.sqlOperator = new DefaultSQLOperator(this.sqlClient);
         BatchOperationContext.init(sqlOperator);
-        this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator);
+        this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator, this.tracer);
         this.journalkeeperInternalServiceManager.start();
     }
 

@@ -1286,41 +1286,44 @@ public class ClusterManager extends Service {
                     case ADD_PARTITION_GROUP: {
                         AddPartitionGroupEvent addPartitionGroupEvent = (AddPartitionGroupEvent) event.getMetaEvent();
                         PartitionGroup partitionGroup = addPartitionGroupEvent.getPartitionGroup();
-                        TopicConfig topicConfig = buildTopicConfigCache(addPartitionGroupEvent.getTopic());
+                        TopicConfig oldTopicConfig = topicConfigCache.get(addPartitionGroupEvent.getTopic().getFullName());
+                        if (oldTopicConfig == null) {
+                            break;
+                        }
 
-                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
+                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
                         topicPartitionGroups.put(addPartitionGroupEvent.getPartitionGroup().getGroup(), partitionGroup);
-                        topicConfig.setPartitionGroups(topicPartitionGroups);
-                        buildTopicConfigCache(topicConfig);
-
-                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
+                        oldTopicConfig.setPartitionGroups(topicPartitionGroups);
+                        buildTopicConfigCache(oldTopicConfig);
                         break;
                     }
                     case UPDATE_PARTITION_GROUP: {
                         UpdatePartitionGroupEvent updatePartitionGroupEvent = (UpdatePartitionGroupEvent) event.getMetaEvent();
                         PartitionGroup oldPartitionGroup = updatePartitionGroupEvent.getOldPartitionGroup();
                         PartitionGroup newPartitionGroup = updatePartitionGroupEvent.getNewPartitionGroup();
-                        TopicConfig topicConfig = buildTopicConfigCache(updatePartitionGroupEvent.getTopic());
+                        TopicConfig oldTopicConfig = topicConfigCache.get(updatePartitionGroupEvent.getTopic().getFullName());
+                        if (oldTopicConfig == null) {
+                            break;
+                        }
 
-                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
+                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
                         topicPartitionGroups.put(newPartitionGroup.getGroup(), newPartitionGroup);
-                        topicConfig.setPartitionGroups(topicPartitionGroups);
-                        buildTopicConfigCache(topicConfig);
-
-                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
+                        oldTopicConfig.setPartitionGroups(topicPartitionGroups);
+                        buildTopicConfigCache(oldTopicConfig);
                         break;
                     }
                     case REMOVE_PARTITION_GROUP: {
                         RemovePartitionGroupEvent removePartitionGroupEvent = (RemovePartitionGroupEvent) event.getMetaEvent();
                         PartitionGroup partitionGroup = removePartitionGroupEvent.getPartitionGroup();
-                        TopicConfig topicConfig = buildTopicConfigCache(removePartitionGroupEvent.getTopic());
+                        TopicConfig oldTopicConfig = topicConfigCache.get(removePartitionGroupEvent.getTopic().getFullName());
+                        if (oldTopicConfig == null) {
+                            break;
+                        }
 
-                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(topicConfig.getPartitionGroups());
+                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
                         topicPartitionGroups.remove(partitionGroup.getGroup());
-                        topicConfig.setPartitionGroups(topicPartitionGroups);
-                        buildTopicConfigCache(topicConfig);
-
-                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
+                        oldTopicConfig.setPartitionGroups(topicPartitionGroups);
+                        buildTopicConfigCache(oldTopicConfig);
                         break;
                     }
                     case ADD_CONSUMER: {

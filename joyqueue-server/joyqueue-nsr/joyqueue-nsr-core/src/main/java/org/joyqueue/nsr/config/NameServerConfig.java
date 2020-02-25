@@ -46,6 +46,10 @@ public class NameServerConfig {
         return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_CACHE_ENABLE);
     }
 
+    public int getTopicCacheExpireTime() {
+        return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_TOPIC_CACHE_EXPIRE_TIME);
+    }
+
     public int getCacheExpireTime() {
         return propertySupplier.getValue(NameServerConfigKey.NAMESERVER_CACHE_EXPIRE_TIME);
     }

@@ -32,4 +32,6 @@ public interface PointTracer extends Type {
      * @param end begin 方法的返回值，用来结束跟踪
      */
     void end(TraceStat end);
+
+    void error(TraceStat end);
 }

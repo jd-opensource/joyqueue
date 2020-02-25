@@ -16,7 +16,6 @@
 package org.joyqueue.nsr.journalkeeper.repository;
 
 import org.joyqueue.nsr.journalkeeper.domain.ProducerDTO;
-import io.journalkeeper.sql.client.SQLOperator;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/16
  */
-public class ProducerRepository extends BaseRepository {
+public class ProducerRepository {
 
     private static final String TABLE = "producer";
     private static final String COLUMNS = "id, topic, namespace, app, client_type, produce_policy, limit_policy";
@@ -48,43 +47,45 @@ public class ProducerRepository extends BaseRepository {
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?",
             TABLE);
 
-    public ProducerRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public ProducerRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public ProducerDTO getById(String id) {
-        return queryOnce(ProducerDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(ProducerDTO.class, GET_BY_ID, id);
     }
 
     public ProducerDTO getByTopicAndApp(String topic, String namespace, String app) {
-        return queryOnce(ProducerDTO.class, GET_BY_TOPIC_AND_APP, topic, namespace, app);
+        return baseRepository.queryOnce(ProducerDTO.class, GET_BY_TOPIC_AND_APP, topic, namespace, app);
     }
 
     public List<ProducerDTO> getByTopic(String topic, String namespace) {
-        return query(ProducerDTO.class, GET_BY_TOPIC, topic, namespace);
+        return baseRepository.query(ProducerDTO.class, GET_BY_TOPIC, topic, namespace);
     }
 
     public List<ProducerDTO> getByApp(String app) {
-        return query(ProducerDTO.class, GET_BY_APP, app);
+        return baseRepository.query(ProducerDTO.class, GET_BY_APP, app);
     }
 
     public List<ProducerDTO> getAll() {
-        return query(ProducerDTO.class, GET_ALL);
+        return baseRepository.query(ProducerDTO.class, GET_ALL);
     }
 
     public ProducerDTO add(ProducerDTO consumerDTO) {
-        insert(ADD, consumerDTO.getId(), consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
+        baseRepository.insert(ADD, consumerDTO.getId(), consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
                 consumerDTO.getClientType(), consumerDTO.getProducePolicy(), consumerDTO.getLimitPolicy());
         return consumerDTO;
     }
 
     public ProducerDTO update(ProducerDTO consumerDTO) {
-        update(UPDATE_BY_ID, consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
+        baseRepository.update(UPDATE_BY_ID, consumerDTO.getTopic(), consumerDTO.getNamespace(), consumerDTO.getApp(),
                 consumerDTO.getClientType(), consumerDTO.getProducePolicy(), consumerDTO.getLimitPolicy(), consumerDTO.getId());
         return consumerDTO;
     }
 
     public int deleteById(String id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }

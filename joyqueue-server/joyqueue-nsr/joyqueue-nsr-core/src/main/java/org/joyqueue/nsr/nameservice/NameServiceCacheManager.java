@@ -425,6 +425,10 @@ public class NameServiceCacheManager extends Service {
         return cache;
     }
 
+    public boolean tryLock() {
+        return lock.tryLock();
+    }
+
     public void lock() {
         lock.lock();
     }

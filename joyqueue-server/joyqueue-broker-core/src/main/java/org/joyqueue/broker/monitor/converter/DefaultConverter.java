@@ -557,7 +557,11 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         // type
         electionAndReplicaRecords.get(1).setValue(partitionGroupStat.getElectionEventStat().getState().ordinal());
         // compose value
-        electionAndReplicaRecords.get(2).setValue(partitionGroupStat.getReplicationStat().getStat().getState().ordinal());
+        if (partitionGroupStat.getReplicationStat().getStat().getState() != null) {
+            electionAndReplicaRecords.get(2).setValue(partitionGroupStat.getReplicationStat().getStat().getState().ordinal());
+        } else {
+            electionAndReplicaRecords.get(2).setValue(0);
+        }
         return electionAndReplicaRecords;
     }
 

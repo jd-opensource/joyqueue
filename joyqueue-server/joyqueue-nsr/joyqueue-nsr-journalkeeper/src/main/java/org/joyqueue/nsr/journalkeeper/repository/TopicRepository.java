@@ -15,12 +15,11 @@
  */
 package org.joyqueue.nsr.journalkeeper.repository;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.nsr.journalkeeper.domain.TopicDTO;
 import org.joyqueue.nsr.model.TopicQuery;
-import io.journalkeeper.sql.client.SQLOperator;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/15
  */
-public class TopicRepository extends BaseRepository {
+public class TopicRepository {
 
     private static final String TABLE = "topic";
     private static final String COLUMNS = "id, code, namespace, partitions, priority_partitions, type";
@@ -45,27 +44,29 @@ public class TopicRepository extends BaseRepository {
     private static final String UPDATE_DECR_PARTITION_BY_ID = String.format("UPDATE %s SET partitions = partitions - ? WHERE id = ?", TABLE);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
 
-    public TopicRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public TopicRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public List<TopicDTO> getAll() {
-        return query(TopicDTO.class, GET_ALL);
+        return baseRepository.query(TopicDTO.class, GET_ALL);
     }
 
     public TopicDTO getByCodeAndNamespace(String code, String namespace) {
-        return queryOnce(TopicDTO.class, GET_BY_CODE, code, namespace);
+        return baseRepository.queryOnce(TopicDTO.class, GET_BY_CODE, code, namespace);
     }
 
     public TopicDTO getById(String id) {
-        return queryOnce(TopicDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(TopicDTO.class, GET_BY_ID, id);
     }
 
     public int getSearchCount(TopicQuery query) {
         List<Object> params = new LinkedList<>();
         String sql = getSearchSql(String.format("SELECT COUNT(*) FROM %s WHERE 1 = 1", TABLE), query, params);
 
-        return count(sql, params.toArray(new Object[]{}));
+        return baseRepository.count(sql, params.toArray(new Object[]{}));
     }
 
     public List<TopicDTO> search(QPageQuery<TopicQuery> pageQuery) {
@@ -77,7 +78,7 @@ public class TopicRepository extends BaseRepository {
             sql.append(String.format(" LIMIT %s, %s", ((pagination.getPage() - 1) * pagination.getSize()), pagination.getSize()));
         }
 
-        return query(TopicDTO.class, sql.toString(), params.toArray(new Object[]{}));
+        return baseRepository.query(TopicDTO.class, sql.toString(), params.toArray(new Object[]{}));
     }
 
     protected String getSearchSql(String prefix, TopicQuery query, List<Object> params) {
@@ -106,26 +107,26 @@ public class TopicRepository extends BaseRepository {
     }
 
     public TopicDTO add(TopicDTO topicDTO) {
-        insert(ADD, topicDTO.getId(), topicDTO.getCode(), topicDTO.getNamespace(), topicDTO.getPartitions(),
+        baseRepository.insert(ADD, topicDTO.getId(), topicDTO.getCode(), topicDTO.getNamespace(), topicDTO.getPartitions(),
                 topicDTO.getPriorityPartitions(), topicDTO.getType());
         return topicDTO;
     }
 
     public TopicDTO update(TopicDTO topicDTO) {
-        update(UPDATE_BY_ID, topicDTO.getCode(), topicDTO.getNamespace(), topicDTO.getPartitions(),
+        baseRepository.update(UPDATE_BY_ID, topicDTO.getCode(), topicDTO.getNamespace(), topicDTO.getPartitions(),
                 topicDTO.getPriorityPartitions(), topicDTO.getType(), topicDTO.getId());
         return topicDTO;
     }
 
     public int incrPartitions(String id, int value) {
-        return update(UPDATE_INCR_PARTITION_BY_ID, value, id);
+        return baseRepository.update(UPDATE_INCR_PARTITION_BY_ID, value, id);
     }
 
     public int decrPartitions(String id, int value) {
-        return update(UPDATE_DECR_PARTITION_BY_ID, value, id);
+        return baseRepository.update(UPDATE_DECR_PARTITION_BY_ID, value, id);
     }
 
     public int deleteById(String id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }

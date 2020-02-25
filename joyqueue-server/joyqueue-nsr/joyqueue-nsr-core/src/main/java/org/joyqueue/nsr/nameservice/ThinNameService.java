@@ -514,9 +514,12 @@ public class ThinNameService extends Service implements NameService, PropertySup
         }
         TraceStat traceBegin = tracer.begin("ThinNameService.send." + request.getPayload().getClass().getSimpleName());
         try {
-            return doSend(request, timeout);
-        } finally {
+            Command result = doSend(request, timeout);
             tracer.end(traceBegin);
+            return result;
+        } catch (Exception e) {
+            tracer.error(traceBegin);
+            throw e;
         }
     }
 
