@@ -15,7 +15,7 @@
  */
 package org.joyqueue.nsr.service.test;
 
-import org.joyqueue.nsr.nameservice.NameServer;
+import org.joyqueue.nsr.nameservice.NameServerInternal;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.nameservice.ThinNameService;
 import org.joyqueue.nsr.config.NameServiceConfig;
@@ -46,7 +46,7 @@ import java.util.*;
 
 public class NameServiceTest {
     private static NameService nameService;
-    private static NameServer nameServer;
+    private static NameServerInternal nameServer;
     private static File dataRoot = new File(System.getProperty("java.io.tmpdir") + "/joyqueue/nsr_temp");
 
     @BeforeClass
@@ -70,7 +70,7 @@ public class NameServiceTest {
 
         NameServiceConfig nameServiceConfig = new NameServiceConfig(new PropertySupplier.MapSupplier(properties));
 
-        nameServer = new NameServer();
+        nameServer = new NameServerInternal();
         nameServer.setSupplier(new PropertySupplier.MapSupplier(properties));
         nameServer.start();
 

@@ -1,2 +1,2 @@
-org.joyqueue.nsr.nameservice.NameServerWrapper
+org.joyqueue.nsr.nameservice.NameServer
 org.joyqueue.nsr.nameservice.ThinNameService
