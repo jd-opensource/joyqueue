@@ -17,6 +17,7 @@ package org.joyqueue.nsr.nameservice;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Maps;
 import com.jd.laf.extension.Type;
 import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.domain.AllMetadata;
@@ -55,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,6 +76,7 @@ public class NameServerWrapper extends Service implements NameService, PropertyS
     private NsrTransportServerFactory transportServerFactory;
     private TransportServer transportServer;
 
+    private Cache<String, Map<TopicName, TopicConfig>> appTopicCache;
     private Cache<String, Optional<TopicConfig>> topicCache;
 
     public NameServerWrapper() {
@@ -303,12 +307,31 @@ public class NameServerWrapper extends Service implements NameService, PropertyS
     public Map<TopicName, TopicConfig> getTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
         TraceStat trace = tracer.begin("NameService.getTopicConfigByApp");
         try {
-            Map<TopicName, TopicConfig> result = delegate.getTopicConfigByApp(subscribeApp, subscribe);
+            Map<TopicName, TopicConfig> result = doGetTopicConfigByApp(subscribeApp, subscribe);
             tracer.end(trace);
             return result;
         } catch (Exception e) {
             tracer.error(trace);
             throw e;
+        }
+    }
+
+    protected Map<TopicName, TopicConfig> doGetTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
+        if (nameServerConfig.getCacheEnable()) {
+            try {
+                return appTopicCache.get(subscribeApp + "_" + String.valueOf(subscribe), new Callable<Map<TopicName, TopicConfig>>() {
+                    @Override
+                    public Map<TopicName, TopicConfig> call() throws Exception {
+                        return delegate.getTopicConfigByApp(subscribeApp, subscribe);
+                    }
+                });
+            } catch (ExecutionException e) {
+                logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}",
+                        subscribeApp, subscribe);
+                return Maps.newHashMap();
+            }
+        } else {
+            return delegate.getTopicConfigByApp(subscribeApp, subscribe);
         }
     }
 
@@ -458,6 +481,9 @@ public class NameServerWrapper extends Service implements NameService, PropertyS
         transportServerFactory = new NsrTransportServerFactory(this, propertySupplier);
         transportServer = buildTransportServer();
         topicCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(nameServerConfig.getTopicCacheExpireTime(), TimeUnit.MILLISECONDS)
+                .build();
+        appTopicCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(nameServerConfig.getTopicCacheExpireTime(), TimeUnit.MILLISECONDS)
                 .build();
         try {
