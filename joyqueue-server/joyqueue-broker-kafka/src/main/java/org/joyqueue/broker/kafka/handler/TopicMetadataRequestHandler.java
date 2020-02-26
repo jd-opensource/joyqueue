@@ -91,18 +91,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
 
         Map<String, TopicConfig> topicConfigs = Collections.emptyMap();
         if (CollectionUtils.isEmpty(topicMetadataRequest.getTopics()) && StringUtils.isNotBlank(clientId)) {
-            if (config.getMetadataCacheEnable()) {
-                try {
-                    topicConfigs = appCache.get(clientId, new Callable<Map<String, TopicConfig>>() {
-                        @Override
-                        public Map<String, TopicConfig> call() throws Exception {
-                            return getAllTopicConfigs(clientId);
-                        }
-                    });
-                } catch (ExecutionException e) {
-                    logger.error("getAllTopicConfigs exception, clientId: {}", clientId, e);
-                }
-            } else {
+            if (config.getFuzzySearchEnable()) {
                 topicConfigs = getAllTopicConfigs(clientId);
             }
         } else {
@@ -142,6 +131,24 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     }
 
     protected Map<String, TopicConfig> getAllTopicConfigs(String clientId) {
+        if (config.getMetadataCacheEnable()) {
+            try {
+                return appCache.get(clientId, new Callable<Map<String, TopicConfig>>() {
+                    @Override
+                    public Map<String, TopicConfig> call() throws Exception {
+                        return doGetAllTopicConfigs(clientId);
+                    }
+                });
+            } catch (ExecutionException e) {
+                logger.error("getAllTopicConfigs exception, clientId: {}", clientId, e);
+                return Collections.emptyMap();
+            }
+        } else {
+            return doGetAllTopicConfigs(clientId);
+        }
+    }
+
+    protected Map<String, TopicConfig> doGetAllTopicConfigs(String clientId) {
         // TODO 常量
         String[] appGroup = clientId.split("\\.");
         Map<TopicName, TopicConfig> consumers = nameService.getTopicConfigByApp(clientId, Subscription.Type.CONSUMPTION);
