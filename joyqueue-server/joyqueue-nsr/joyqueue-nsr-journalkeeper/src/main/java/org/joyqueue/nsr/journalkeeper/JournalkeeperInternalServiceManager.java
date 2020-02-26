@@ -15,6 +15,10 @@
  */
 package org.joyqueue.nsr.journalkeeper;
 
+import io.journalkeeper.sql.client.SQLClient;
+import io.journalkeeper.sql.client.SQLOperator;
+import io.journalkeeper.sql.server.SQLServer;
+import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.nsr.journalkeeper.repository.AppTokenRepository;
 import org.joyqueue.nsr.journalkeeper.repository.BaseRepository;
 import org.joyqueue.nsr.journalkeeper.repository.BrokerRepository;
@@ -53,9 +57,6 @@ import org.joyqueue.nsr.service.internal.ProducerInternalService;
 import org.joyqueue.nsr.service.internal.TopicInternalService;
 import org.joyqueue.nsr.service.internal.TransactionInternalService;
 import org.joyqueue.toolkit.service.Service;
-import io.journalkeeper.sql.client.SQLClient;
-import io.journalkeeper.sql.client.SQLOperator;
-import io.journalkeeper.sql.server.SQLServer;
 
 /**
  * JournalkeeperInternalServiceManager
@@ -68,6 +69,7 @@ public class JournalkeeperInternalServiceManager extends Service {
     private SQLClient sqlClient;
     private SQLOperator sqlOperator;
 
+    private BaseRepository baseRepository;
     private TopicRepository topicRepository;
     private PartitionGroupRepository partitionGroupRepository;
     private PartitionGroupReplicaRepository partitionGroupReplicaRepository;
@@ -78,6 +80,7 @@ public class JournalkeeperInternalServiceManager extends Service {
     private NamespaceRepository namespaceRepository;
     private ConfigRepository configRepository;
     private AppTokenRepository appTokenRepository;
+    private PointTracer tracer;
 
     private JournalkeeperTopicInternalService journalkeeperTopicInternalService;
     private JournalkeeperPartitionGroupInternalService journalkeeperPartitionGroupInternalService;
@@ -93,24 +96,26 @@ public class JournalkeeperInternalServiceManager extends Service {
     private JournalkeeperOperationInternalService journalkeeperOperationInternalService;
     private JournalkeeperClusterInternalService journalkeeperClusterInternalService;
 
-    public JournalkeeperInternalServiceManager(SQLServer sqlServer, SQLClient sqlClient, SQLOperator sqlOperator) {
+    public JournalkeeperInternalServiceManager(SQLServer sqlServer, SQLClient sqlClient, SQLOperator sqlOperator, PointTracer tracer) {
         this.sqlServer = sqlServer;
         this.sqlClient = sqlClient;
         this.sqlOperator = sqlOperator;
+        this.tracer = tracer;
     }
 
     @Override
     protected void validate() throws Exception {
-        topicRepository = new TopicRepository(sqlOperator);
-        partitionGroupRepository = new PartitionGroupRepository(sqlOperator);
-        partitionGroupReplicaRepository = new PartitionGroupReplicaRepository(sqlOperator);
-        brokerRepository = new BrokerRepository(sqlOperator);
-        consumerRepository = new ConsumerRepository(sqlOperator);
-        producerRepository = new ProducerRepository(sqlOperator);
-        dataCenterRepository = new DataCenterRepository(sqlOperator);
-        namespaceRepository = new NamespaceRepository(sqlOperator);
-        configRepository = new ConfigRepository(sqlOperator);
-        appTokenRepository = new AppTokenRepository(sqlOperator);
+        baseRepository = new BaseRepository(sqlOperator, tracer);
+        topicRepository = new TopicRepository(baseRepository);
+        partitionGroupRepository = new PartitionGroupRepository(baseRepository);
+        partitionGroupReplicaRepository = new PartitionGroupReplicaRepository(baseRepository);
+        brokerRepository = new BrokerRepository(baseRepository);
+        consumerRepository = new ConsumerRepository(baseRepository);
+        producerRepository = new ProducerRepository(baseRepository);
+        dataCenterRepository = new DataCenterRepository(baseRepository);
+        namespaceRepository = new NamespaceRepository(baseRepository);
+        configRepository = new ConfigRepository(baseRepository);
+        appTokenRepository = new AppTokenRepository(baseRepository);
 
         journalkeeperTopicInternalService = new JournalkeeperTopicInternalService(topicRepository, partitionGroupRepository, partitionGroupReplicaRepository);
         journalkeeperPartitionGroupInternalService = new JournalkeeperPartitionGroupInternalService(partitionGroupRepository);
@@ -123,7 +128,7 @@ public class JournalkeeperInternalServiceManager extends Service {
         journalkeeperConfigInternalService = new JournalkeeperConfigInternalService(configRepository);
         journalkeeperAppTokenInternalService = new JournalkeeperAppTokenInternalService(appTokenRepository);
         journalkeeperTransactionInternalService = new JournalkeeperTransactionInternalService();
-        journalkeeperOperationInternalService = new JournalkeeperOperationInternalService(new BaseRepository(sqlOperator));
+        journalkeeperOperationInternalService = new JournalkeeperOperationInternalService(baseRepository);
         journalkeeperClusterInternalService = new JournalkeeperClusterInternalService(sqlClient);
     }
 

@@ -95,29 +95,28 @@ public class NameServiceCompensateThread extends Service implements Runnable {
 
             nameServiceCacheManager.fillCache(newCache);
         } else {
-            if (nameServiceCacheManager.isLocked()) {
+            if (!nameServiceCacheManager.tryLock()) {
                 return;
             }
+            try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
+                }
 
-            int oldVersion = nameServiceCacheManager.getVersion();
+                AllMetadata allMetadata = delegate.getAllMetadata();
+                AllMetadataCache newCache = nameServiceCacheManager.buildCache(allMetadata);
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
-            }
+                if (logger.isDebugEnabled()) {
+                    logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
+                            JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
+                }
 
-            AllMetadata allMetadata = delegate.getAllMetadata();
-            AllMetadataCache newCache = nameServiceCacheManager.buildCache(allMetadata);
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
-                        JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
-            }
-
-            if (!nameServiceCacheManager.isLocked() && nameServiceCacheManager.getVersion() == oldVersion) {
                 if (config.getCompensationEnable()) {
                     nameServiceCompensator.compensate(oldCache, newCache);
                 }
                 nameServiceCacheManager.fillCache(newCache);
+            } finally {
+                nameServiceCacheManager.unlock();
             }
         }
     }

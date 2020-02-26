@@ -205,9 +205,12 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
                 long startTime = SystemClock.now();
                 delegate.addRetry(retryMessageModelList);
                 brokerMonitor.onAddRetry(retryMessageModel.getTopic(), retryMessageModel.getApp(), retryMessageModelList.size(), SystemClock.now() - startTime);
-            } finally {
                 tracer.end(totalRetryTrace);
                 tracer.end(appRetryTrace);
+            } catch (Exception e) {
+                tracer.error(totalRetryTrace);
+                tracer.error(appRetryTrace);
+                throw e;
             }
         }else{
             throw new JoyQueueException(JoyQueueCode.RETRY_TOKEN_LIMIT);

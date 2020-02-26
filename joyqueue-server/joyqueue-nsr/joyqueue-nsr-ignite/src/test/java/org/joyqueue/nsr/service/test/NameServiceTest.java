@@ -15,15 +15,6 @@
  */
 package org.joyqueue.nsr.service.test;
 
-import org.joyqueue.nsr.nameservice.NameServer;
-import org.joyqueue.nsr.NameService;
-import org.joyqueue.nsr.nameservice.ThinNameService;
-import org.joyqueue.nsr.config.NameServiceConfig;
-import org.joyqueue.toolkit.config.PropertySupplier;
-import org.joyqueue.toolkit.config.PropertySupplierAware;
-import org.joyqueue.toolkit.io.Files;
-import org.joyqueue.toolkit.lang.Close;
-import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.ClientType;
@@ -34,10 +25,26 @@ import org.joyqueue.domain.Replica;
 import org.joyqueue.domain.Subscription;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
-import org.junit.*;
+import org.joyqueue.nsr.NameService;
+import org.joyqueue.nsr.config.NameServiceConfig;
+import org.joyqueue.nsr.nameservice.NameServer;
+import org.joyqueue.nsr.nameservice.ThinNameService;
+import org.joyqueue.toolkit.config.PropertySupplier;
+import org.joyqueue.toolkit.config.PropertySupplierAware;
+import org.joyqueue.toolkit.io.Files;
+import org.joyqueue.toolkit.lang.Close;
+import org.joyqueue.toolkit.network.IpUtil;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author wylixiaobin
