@@ -1258,7 +1258,9 @@ public class RaftLeaderElection extends LeaderElection  {
                 updateMetadata(localNodeId, currentTerm);
             } else {
                 PartitionGroup partitionGroup = clusterManager.getPartitionGroupByGroup(TopicName.parse(topicPartitionGroup.getTopic()), topicPartitionGroup.getPartitionGroupId());
-                if (partitionGroup != null && partitionGroup.getTerm() != null && !partitionGroup.getTerm().equals(currentTerm)) {
+                if (partitionGroup != null && partitionGroup.getTerm() != null &&
+                        (partitionGroup.getTerm() == null || !partitionGroup.getTerm().equals(currentTerm)
+                            || partitionGroup.getLeader() == null || !partitionGroup.getLeader().equals(localNodeId))) {
                     updateMetadata(localNodeId, currentTerm);
                 }
             }
