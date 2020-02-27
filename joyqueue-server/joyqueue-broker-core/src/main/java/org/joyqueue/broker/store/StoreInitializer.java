@@ -283,7 +283,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         oldReplicas.removeAll(newReplicas);
 
         List<Broker> brokers = Lists.newLinkedList();
-        for (Integer newReplica : newReplicas) {
+        for (Integer newReplica : newPartitionGroup.getReplicas()) {
             brokers.add(nameService.getBroker(newReplica));
         }
 

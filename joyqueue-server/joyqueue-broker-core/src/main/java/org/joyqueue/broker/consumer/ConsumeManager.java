@@ -18,7 +18,6 @@ package org.joyqueue.broker.consumer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
@@ -64,7 +63,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -655,14 +653,13 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             return;
         }
 
-        Map<TopicName, TopicConfig> localTopics = clusterManager.getNameService().getTopicConfigByBroker(clusterManager.getBrokerId());
-        if (MapUtils.isEmpty(localTopics)) {
+        List<TopicConfig> localTopics = clusterManager.getTopics();
+        if (CollectionUtils.isEmpty(localTopics)) {
             return;
         }
 
-        for (Map.Entry<TopicName, TopicConfig> topicEntry : localTopics.entrySet()) {
-            TopicConfig topicConfig = topicEntry.getValue();
-            List<org.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getLocalConsumersByTopic(topicConfig.getName()));
+        for (TopicConfig topicConfig : localTopics) {
+            List<org.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getNameService().getConsumerByTopic(topicConfig.getName()));
             Iterator<org.joyqueue.domain.Consumer> iterator = broadcastConsumers.iterator();
             while (iterator.hasNext()) {
                 org.joyqueue.domain.Consumer consumer = iterator.next();
@@ -675,11 +672,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
                 continue;
             }
 
-            for (Map.Entry<Integer, PartitionGroup> partitionGroupEntry : topicConfig.getPartitionGroups().entrySet()) {
-                PartitionGroup partitionGroup = partitionGroupEntry.getValue();
-                if (!Objects.equals(partitionGroup.getLeader(), clusterManager.getBrokerId())) {
-                    continue;
-                }
+            for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(clusterManager.getBrokerId())) {
                 doResetBroadcastIndex(topicConfig, partitionGroup, broadcastConsumers);
             }
         }

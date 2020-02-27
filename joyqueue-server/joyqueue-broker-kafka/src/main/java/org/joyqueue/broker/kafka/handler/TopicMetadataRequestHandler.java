@@ -110,8 +110,10 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
         }
 
         if (CollectionUtils.isEmpty(topicMetadata) && config.getMetadataDelayEnable()) {
-            logger.info("get topic metadata, topics: {}, address: {}, metadata: {}, app: {}",
-                    topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata), topicMetadataRequest.getClientId());
+            if (logger.isDebugEnabled()) {
+                logger.debug("get topic metadata, topics: {}, address: {}, metadata: {}, app: {}",
+                        topicMetadataRequest.getTopics(), transport.remoteAddress(), JSON.toJSONString(topicMetadata), topicMetadataRequest.getClientId());
+            }
 
             delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(config.getMetadataDelay()) {
                 @Override
