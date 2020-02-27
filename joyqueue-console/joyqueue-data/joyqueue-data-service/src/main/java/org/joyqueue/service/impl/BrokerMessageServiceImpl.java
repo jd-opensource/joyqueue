@@ -83,6 +83,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     private HttpRestService httpRestService;
     @Autowired
     private MessagePreviewService messagePreviewService;
+    @Autowired
     private ReplicaServerService replicaServerService;
     @Autowired
     private BrokerNameServerService brokerNameServerService;
