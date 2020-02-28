@@ -61,7 +61,7 @@ public class NameServiceCacheManager extends Service {
     private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile AllMetadataCache cache;
     private ReentrantLock lock = new ReentrantLock();
-    private volatile AtomicInteger version = new AtomicInteger();
+    private AtomicInteger version = new AtomicInteger();
 
     public NameServiceCacheManager(NameServiceConfig config) {
         this.config = config;
