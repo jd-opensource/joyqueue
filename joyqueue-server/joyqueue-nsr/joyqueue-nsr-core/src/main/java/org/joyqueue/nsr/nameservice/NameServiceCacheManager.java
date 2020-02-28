@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -60,7 +61,7 @@ public class NameServiceCacheManager extends Service {
     private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile AllMetadataCache cache;
     private ReentrantLock lock = new ReentrantLock();
-    private volatile int version = 0;
+    private AtomicInteger version = new AtomicInteger();
 
     public NameServiceCacheManager(NameServiceConfig config) {
         this.config = config;
@@ -442,10 +443,10 @@ public class NameServiceCacheManager extends Service {
     }
 
     public int getVersion() {
-        return version;
+        return version.intValue();
     }
 
     public void updateVersion() {
-        version++;
+        version.incrementAndGet();
     }
 }
