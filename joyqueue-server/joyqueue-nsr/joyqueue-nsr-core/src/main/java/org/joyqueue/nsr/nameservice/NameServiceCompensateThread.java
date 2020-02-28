@@ -124,7 +124,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                         break;
                     } else {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("retry compensation, oldVersion: {}, currentVersion: {}", version, currentVersion);
+                            logger.debug("doCompensate retry, oldVersion: {}, currentVersion: {}", version, currentVersion);
                         }
                         version = currentVersion;
                         oldCache = newCache;
