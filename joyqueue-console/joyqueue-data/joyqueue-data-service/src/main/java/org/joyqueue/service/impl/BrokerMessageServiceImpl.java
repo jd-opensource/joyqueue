@@ -288,11 +288,8 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                 if(logger.isDebugEnabled()) {
                     logger.debug("may old broker", e);
                 }
-                if(m.getBody()!=null) {
-                    message.setBody(messagePreviewService.preview(messageDecodeType, m.getBody().getBytes(Charset.forName("utf-8"))));
-                }
+                message.setBody(messagePreviewService.preview(messageDecodeType, m.getBody().getBytes(Charset.forName("utf-8"))));
             }
-
         }
         message.setAttributes(m.getAttributes());
         message.setFlag(m.isAck());
