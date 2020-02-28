@@ -32,6 +32,7 @@ import org.joyqueue.async.RetrieveProvider;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.exception.ServiceException;
 import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.ApplicationToken;
 import org.joyqueue.model.domain.Broker;
@@ -68,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import static org.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 
 @Service("brokerMessageService")
@@ -134,7 +136,8 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                 }
             }
         }catch (Exception e){
-            logger.info("parse broker message error",e);
+            logger.error("parse broker message error", e);
+            throw new ServiceException(INTERNAL_SERVER_ERROR,"Message can't be parse");
         }
         return simplifiedBrokeMessages;
     }
