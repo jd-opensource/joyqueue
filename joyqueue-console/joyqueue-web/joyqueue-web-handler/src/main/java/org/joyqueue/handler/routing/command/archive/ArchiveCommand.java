@@ -15,11 +15,14 @@
  */
 package org.joyqueue.handler.routing.command.archive;
 
+import com.alibaba.fastjson.JSON;
+import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.exception.JoyQueueException;
+import org.joyqueue.message.SourceType;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.service.MessagePreviewService;
-import org.joyqueue.util.serializer.Serializer;
+import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.model.domain.Archive;
 import org.joyqueue.model.domain.User;
@@ -43,6 +46,8 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
 
@@ -51,7 +56,7 @@ import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
  */
 public class ArchiveCommand implements Command<Response>, Poolable {
     private static final Logger logger = LoggerFactory.getLogger(ArchiveCommand.class);
-
+    private  final String BATCH_SPLIT="\n\n";
     @Value(nullable = false)
     private ArchiveService archiveService;
 
@@ -66,7 +71,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
 
     @CRequest
     private HttpServerRequest request;
-
+    private static MessageConvertSupport messageConvertSupport=new MessageConvertSupport();
     @Path("message-types")
     public Response messageTypes() throws Exception {
         return Responses.success(messagePreviewService.getMessageTypeNames());
@@ -133,38 +138,60 @@ public class ArchiveCommand implements Command<Response>, Poolable {
                 || topic == null) {
             return;
         }
+        HttpServerResponse response = request.response();
         SendLog sendLog = archiveService.findSendLog(topic,Long.valueOf(sendTime),businessId,messageId);
         if (sendLog != null) {
-            HttpServerResponse response = request.response();
             byte[] data = sendLog.getMessageBody();
             if (data.length == 0) {
                 throw new JoyQueueException("消息内容为空",HTTP_BAD_REQUEST);
             }
             String fileName = sendLog.getMessageId() +".txt";
             response.reset();
-            BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(data));
-//            Message message = new Message();
-//            message.setBody(data);
-//            message.setCompressed(true);
-//            message.setCompressionType(Message.CompressionType.valueOf(sendLog.getCompressType()));
-
-            String messageStr = null;
-            try {
-                messageStr =messagePreviewService.preview(messageType, brokerMessage.getDecompressedBody());
-            } catch (Exception e) {
-                messageStr = Bytes.toString(data);
-            }
-
-            if (messageStr == null) {
-                messageStr = "";
-            }
+            ByteBuffer byteBuffer= ByteBuffer.wrap(data);
+            BrokerMessage brokerMessage = Serializer.readBrokerMessage(byteBuffer);
+            String content=brokerMessageToString(brokerMessage,messageType);
+            logger.info("content {}",content);
             response.putHeader("Content-Disposition","attachment;fileName=" + fileName)
                     .putHeader("content-type","text/plain")
-                    .putHeader("Content-Length",String.valueOf(messageStr.getBytes().length));
-            response.write(messageStr,"UTF-8");
+                    .putHeader("Content-Length",String.valueOf(content.getBytes().length));
+            response.write(content,"UTF-8");
             response.end();
+        }else{
+            response.end(JSON.toJSONString(Responses.error(Response.HTTP_NOT_FOUND, "未找到消息!")));
         }
     }
+
+    /**
+     *  Parse broker message to message type
+     **/
+    public String brokerMessageToString(BrokerMessage brokerMessage,String messageType){
+        List<BrokerMessage> msgs=messageConvertSupport.convert(brokerMessage, SourceType.INTERNAL.getValue());
+        List<String> messages = new ArrayList(msgs.size());
+        for(BrokerMessage m:msgs) {
+            try {
+                messages.add(messagePreviewService.preview(messageType, m.getDecompressedBody()));
+            } catch (Exception e) {
+                logger.error("parse error",e);
+                messages.add(Bytes.toString(m.getDecompressedBody()));
+            }
+        }
+        return batchMessageFormat(messages);
+    }
+
+    /**
+     *   Format batch message
+     **/
+    public  String batchMessageFormat(List<String> batch){
+        StringBuilder stringBuilder=new StringBuilder();
+        for(String s:batch){
+            stringBuilder.append(s).append(BATCH_SPLIT);
+        }
+        if(stringBuilder.length()>0){
+            stringBuilder.setLength(stringBuilder.length()-BATCH_SPLIT.length());
+        }
+        return stringBuilder.toString();
+    }
+
 
     @Path("preview")
     public Response preview(@QueryParam("businessId") String businessId, @QueryParam("messageId") String messageId
@@ -177,14 +204,13 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         }
         SendLog sendLog = archiveService.findSendLog(topic,Long.valueOf(sendTime),businessId,messageId);
         if (sendLog != null) {
-
             byte[] data = sendLog.getMessageBody();
             if (data.length == 0) {
                 return Responses.error(Response.HTTP_NOT_FOUND, "未找到消息!");
             }
             BrokerMessage brokerMessage = Serializer.readBrokerMessage(ByteBuffer.wrap(data));
-            return Responses.success(messagePreviewService.preview(messageType, brokerMessage.getDecompressedBody()));
-
+            String content=brokerMessageToString(brokerMessage,messageType);
+            return Responses.success(content);
         } else {
             return Responses.error(Response.HTTP_NOT_FOUND, "未找到消息!");
         }
