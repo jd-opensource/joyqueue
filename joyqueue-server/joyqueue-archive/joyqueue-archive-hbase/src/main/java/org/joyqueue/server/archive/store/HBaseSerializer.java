@@ -19,7 +19,6 @@ import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.server.archive.store.model.SendLog;
 import org.joyqueue.toolkit.lang.Pair;
 import org.joyqueue.toolkit.security.Md5;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
@@ -91,7 +90,7 @@ public class HBaseSerializer {
         bufferKey.putInt(sendLog.getTopicId());
         bufferKey.putLong(sendLog.getSendTime());
         bufferKey.put(Md5.INSTANCE.encrypt(sendLog.getBusinessId().getBytes(Charset.forName("utf-8")), null));
-        bufferKey.put(Md5.INSTANCE.encrypt(sendLog.getMessageId().getBytes(Charset.forName("utf-8")), null));
+        bufferKey.put(md5(sendLog.getMessageId(),null));
 
 
         // value
@@ -129,7 +128,7 @@ public class HBaseSerializer {
         bufferKey.putInt(sendLog.getTopicId());
         bufferKey.put(Md5.INSTANCE.encrypt(sendLog.getBusinessId().getBytes(Charset.forName("utf-8")), null));
         bufferKey.putLong(sendLog.getSendTime());
-        bufferKey.put(Md5.INSTANCE.encrypt(sendLog.getMessageId().getBytes(Charset.forName("utf-8")), null));
+        bufferKey.put(md5(sendLog.getMessageId(), null));
 
 
         // value
@@ -241,6 +240,14 @@ public class HBaseSerializer {
         log.setBusinessId(new String(businessIdBytes, Charset.forName("utf-8")));
 
         return log;
+    }
+
+    /**
+     * MD5 for content with key
+     *
+     **/
+    public static byte[] md5(String content,byte[] key) throws GeneralSecurityException {
+       return Md5.INSTANCE.encrypt(content.getBytes(Charset.forName("utf-8")), key);
     }
 
     public static String byteArrayToHexStr(byte[] byteArray) {
