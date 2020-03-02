@@ -16,7 +16,6 @@
 package org.joyqueue.nsr.journalkeeper.repository;
 
 import org.joyqueue.nsr.journalkeeper.domain.NamespaceDTO;
-import io.journalkeeper.sql.client.SQLOperator;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/16
  */
-public class NamespaceRepository extends BaseRepository {
+public class NamespaceRepository {
 
     private static final String TABLE = "namespace";
     private static final String COLUMNS = "id, code, name";
@@ -38,33 +37,35 @@ public class NamespaceRepository extends BaseRepository {
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
 
-    public NamespaceRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public NamespaceRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public NamespaceDTO getById(String id) {
-        return queryOnce(NamespaceDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(NamespaceDTO.class, GET_BY_ID, id);
     }
 
     public NamespaceDTO getByCode(String code) {
-        return queryOnce(NamespaceDTO.class, GET_BY_CODE, code);
+        return baseRepository.queryOnce(NamespaceDTO.class, GET_BY_CODE, code);
     }
 
     public List<NamespaceDTO> getAll() {
-        return query(NamespaceDTO.class, GET_ALL);
+        return baseRepository.query(NamespaceDTO.class, GET_ALL);
     }
 
     public NamespaceDTO add(NamespaceDTO namespaceDTO) {
-        insert(ADD, namespaceDTO.getId(), namespaceDTO.getCode(), namespaceDTO.getName());
+        baseRepository.insert(ADD, namespaceDTO.getId(), namespaceDTO.getCode(), namespaceDTO.getName());
         return namespaceDTO;
     }
 
     public NamespaceDTO update(NamespaceDTO namespaceDTO) {
-        update(UPDATE_BY_ID, namespaceDTO.getCode(), namespaceDTO.getName(), namespaceDTO.getId());
+        baseRepository.update(UPDATE_BY_ID, namespaceDTO.getCode(), namespaceDTO.getName(), namespaceDTO.getId());
         return namespaceDTO;
     }
 
     public int deleteById(String id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }

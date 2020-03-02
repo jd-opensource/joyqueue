@@ -16,7 +16,6 @@
 package org.joyqueue.nsr.journalkeeper.repository;
 
 import org.joyqueue.nsr.journalkeeper.domain.PartitionGroupDTO;
-import io.journalkeeper.sql.client.SQLOperator;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/15
  */
-public class PartitionGroupRepository extends BaseRepository {
+public class PartitionGroupRepository {
 
     private static final String TABLE = "partition_group";
     private static final String COLUMNS = "id, namespace, topic, `group`, leader, isrs, term, partitions, learners, " +
@@ -50,28 +49,30 @@ public class PartitionGroupRepository extends BaseRepository {
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?",
             TABLE);
 
-    public PartitionGroupRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public PartitionGroupRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public PartitionGroupDTO getById(String id) {
-        return queryOnce(PartitionGroupDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(PartitionGroupDTO.class, GET_BY_ID, id);
     }
 
     public PartitionGroupDTO getByTopicAndGroup(String topic, String namespace, int group) {
-        return queryOnce(PartitionGroupDTO.class, GET_BY_TOPIC_AND_GROUP, topic, namespace, group);
+        return baseRepository.queryOnce(PartitionGroupDTO.class, GET_BY_TOPIC_AND_GROUP, topic, namespace, group);
     }
 
     public List<PartitionGroupDTO> getByTopic(String topic, String namespace) {
-        return query(PartitionGroupDTO.class, GET_BY_TOPIC, topic, namespace);
+        return baseRepository.query(PartitionGroupDTO.class, GET_BY_TOPIC, topic, namespace);
     }
 
     public List<PartitionGroupDTO> getAll() {
-        return query(PartitionGroupDTO.class, GET_ALL);
+        return baseRepository.query(PartitionGroupDTO.class, GET_ALL);
     }
 
     public PartitionGroupDTO add(PartitionGroupDTO partitionGroupDTO) {
-        insert(ADD, partitionGroupDTO.getId(), partitionGroupDTO.getNamespace(), partitionGroupDTO.getTopic(),
+        baseRepository.insert(ADD, partitionGroupDTO.getId(), partitionGroupDTO.getNamespace(), partitionGroupDTO.getTopic(),
                 partitionGroupDTO.getGroup(), partitionGroupDTO.getLeader(), partitionGroupDTO.getIsrs(),
                 partitionGroupDTO.getTerm(), partitionGroupDTO.getPartitions(), partitionGroupDTO.getLearners(),
                 partitionGroupDTO.getReplicas(), partitionGroupDTO.getOutSyncReplicas(), partitionGroupDTO.getElectType(), partitionGroupDTO.getRecLeader());
@@ -79,13 +80,13 @@ public class PartitionGroupRepository extends BaseRepository {
     }
 
     public PartitionGroupDTO updateLeader(PartitionGroupDTO partitionGroupDTO) {
-        update(UPDATE_LEADER_BY_ID, partitionGroupDTO.getLeader(), partitionGroupDTO.getTerm(), partitionGroupDTO.getIsrs(),
+        baseRepository.update(UPDATE_LEADER_BY_ID, partitionGroupDTO.getLeader(), partitionGroupDTO.getTerm(), partitionGroupDTO.getIsrs(),
                 partitionGroupDTO.getId());
         return partitionGroupDTO;
     }
 
     public PartitionGroupDTO update(PartitionGroupDTO partitionGroupDTO) {
-        update(UPDATE_BY_ID, partitionGroupDTO.getNamespace(), partitionGroupDTO.getTopic(), partitionGroupDTO.getGroup(),
+        baseRepository.update(UPDATE_BY_ID, partitionGroupDTO.getNamespace(), partitionGroupDTO.getTopic(), partitionGroupDTO.getGroup(),
                 partitionGroupDTO.getLeader(), partitionGroupDTO.getIsrs(), partitionGroupDTO.getTerm(), partitionGroupDTO.getPartitions(),
                 partitionGroupDTO.getLearners(), partitionGroupDTO.getReplicas(), partitionGroupDTO.getOutSyncReplicas(),
                 partitionGroupDTO.getElectType(), partitionGroupDTO.getRecLeader(), partitionGroupDTO.getId());
@@ -93,6 +94,6 @@ public class PartitionGroupRepository extends BaseRepository {
     }
 
     public int deleteById(String id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }

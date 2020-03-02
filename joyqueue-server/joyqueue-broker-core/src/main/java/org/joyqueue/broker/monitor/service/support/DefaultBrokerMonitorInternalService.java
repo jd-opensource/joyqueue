@@ -218,7 +218,9 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
             Map<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
             for (PartitionGroupStat partitionGroupStat : partitionGroupStatMap.values()) {
                 StoreManagementService.PartitionGroupMetric partitionGroupMetric = storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(), partitionGroupStat.getPartitionGroup());
-                partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
+                if (partitionGroupMetric != null) {
+                    partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
+                }
             }
         }
     }

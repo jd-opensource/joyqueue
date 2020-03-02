@@ -38,4 +38,9 @@ public class DefaultPointTracer implements PointTracer {
     public void end(TraceStat end) {
 
     }
+
+    @Override
+    public void error(TraceStat end) {
+
+    }
 }

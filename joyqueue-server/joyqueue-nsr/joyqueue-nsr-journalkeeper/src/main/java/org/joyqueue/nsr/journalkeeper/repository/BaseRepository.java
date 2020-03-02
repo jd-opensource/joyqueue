@@ -15,11 +15,13 @@
  */
 package org.joyqueue.nsr.journalkeeper.repository;
 
-import org.joyqueue.nsr.journalkeeper.BatchOperationContext;
-import org.joyqueue.nsr.journalkeeper.helper.ResultSetHelper;
 import io.journalkeeper.sql.client.BatchSQLOperator;
 import io.journalkeeper.sql.client.SQLOperator;
 import io.journalkeeper.sql.client.domain.ResultSet;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.monitor.TraceStat;
+import org.joyqueue.nsr.journalkeeper.BatchOperationContext;
+import org.joyqueue.nsr.journalkeeper.helper.ResultSetHelper;
 
 import java.util.List;
 
@@ -31,12 +33,26 @@ import java.util.List;
 public class BaseRepository {
 
     private SQLOperator sqlOperator;
+    private PointTracer tracer;
 
-    public BaseRepository(SQLOperator sqlOperator) {
+    public BaseRepository(SQLOperator sqlOperator, PointTracer tracer) {
         this.sqlOperator = sqlOperator;
+        this.tracer = tracer;
     }
 
     public String insert(String sql, Object... params) {
+        TraceStat trace = tracer.begin(getTraceKey(sql));
+        try {
+            String result = doInsert(sql, params);
+            tracer.end(trace);
+            return result;
+        } catch (Exception e) {
+            tracer.error(trace);
+            throw e;
+        }
+    }
+
+    protected String doInsert(String sql, Object... params) {
         BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
         if (batchSQLOperator != null) {
             batchSQLOperator.insert(sql, params);
@@ -52,6 +68,18 @@ public class BaseRepository {
     }
 
     public int update(String sql, Object... params) {
+        TraceStat trace = tracer.begin(getTraceKey(sql));
+        try {
+            int result = doUpdate(sql, params);
+            tracer.end(trace);
+            return result;
+        } catch (Exception e) {
+            tracer.error(trace);
+            throw e;
+        }
+    }
+
+    protected int doUpdate(String sql, Object... params) {
         BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
         if (batchSQLOperator != null) {
             batchSQLOperator.update(sql, params);
@@ -62,6 +90,18 @@ public class BaseRepository {
     }
 
     public int delete(String sql, Object... params) {
+        TraceStat trace = tracer.begin(getTraceKey(sql));
+        try {
+            int result = doDelete(sql, params);
+            tracer.end(trace);
+            return result;
+        } catch (Exception e) {
+            tracer.error(trace);
+            throw e;
+        }
+    }
+
+    protected int doDelete(String sql, Object... params) {
         BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
         if (batchSQLOperator != null) {
             batchSQLOperator.delete(sql, params);
@@ -72,6 +112,18 @@ public class BaseRepository {
     }
 
     public ResultSet query(String sql, Object... params) {
+        TraceStat trace = tracer.begin(getTraceKey(sql));
+        try {
+            ResultSet result = doQuery(sql, params);
+            tracer.end(trace);
+            return result;
+        } catch (Exception e) {
+            tracer.error(trace);
+            throw e;
+        }
+    }
+
+    protected ResultSet doQuery(String sql, Object... params) {
         return sqlOperator.query(sql, params);
     }
 
@@ -104,5 +156,11 @@ public class BaseRepository {
     public <T> T queryOnce(Class<T> type, String sql, Object... params) {
         ResultSet resultSet = query(sql, params);
         return ResultSetHelper.assembleOnce(type, resultSet);
+    }
+
+    protected String getTraceKey(String name) {
+        return "NameService.journalkeeper." + name.replace(" = ?", "_")
+                .replace(" ", "_")
+                .replace(",", "");
     }
 }

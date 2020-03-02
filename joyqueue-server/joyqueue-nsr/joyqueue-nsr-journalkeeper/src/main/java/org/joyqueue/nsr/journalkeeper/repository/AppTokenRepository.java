@@ -16,7 +16,6 @@
 package org.joyqueue.nsr.journalkeeper.repository;
 
 import org.joyqueue.nsr.journalkeeper.domain.AppTokenDTO;
-import io.journalkeeper.sql.client.SQLOperator;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,7 +26,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/16
  */
-public class AppTokenRepository extends BaseRepository {
+public class AppTokenRepository {
 
     private static final String TABLE = "app_token";
     private static final String COLUMNS = "id, app, token, effective_time, expiration_time";
@@ -41,41 +40,43 @@ public class AppTokenRepository extends BaseRepository {
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
 
-    public AppTokenRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public AppTokenRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public AppTokenDTO getById(long id) {
-        return queryOnce(AppTokenDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(AppTokenDTO.class, GET_BY_ID, id);
     }
 
     public AppTokenDTO getByAppAndToken(String app, String token) {
-        return queryOnce(AppTokenDTO.class, GET_BY_APP_AND_CODE, app, token);
+        return baseRepository.queryOnce(AppTokenDTO.class, GET_BY_APP_AND_CODE, app, token);
     }
 
     public List<AppTokenDTO> getByApp(String app) {
-        return query(AppTokenDTO.class, GET_BY_APP, app);
+        return baseRepository.query(AppTokenDTO.class, GET_BY_APP, app);
     }
 
     public List<AppTokenDTO> getAll() {
-        return query(AppTokenDTO.class, GET_ALL);
+        return baseRepository.query(AppTokenDTO.class, GET_ALL);
     }
 
     public AppTokenDTO add(AppTokenDTO appTokenDTO) {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        insert(ADD, appTokenDTO.getId(), appTokenDTO.getApp(), appTokenDTO.getToken(),
+        baseRepository.insert(ADD, appTokenDTO.getId(), appTokenDTO.getApp(), appTokenDTO.getToken(),
                 format.format(appTokenDTO.getEffectiveTime()), format.format(appTokenDTO.getExpirationTime()));
         return appTokenDTO;
     }
 
     public AppTokenDTO update(AppTokenDTO appTokenDTO) {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        update(UPDATE_BY_ID, appTokenDTO.getApp(), appTokenDTO.getToken(), format.format(appTokenDTO.getEffectiveTime()),
+        baseRepository.update(UPDATE_BY_ID, appTokenDTO.getApp(), appTokenDTO.getToken(), format.format(appTokenDTO.getEffectiveTime()),
                 format.format(appTokenDTO.getExpirationTime()), appTokenDTO.getId());
         return appTokenDTO;
     }
 
     public int deleteById(long id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }
