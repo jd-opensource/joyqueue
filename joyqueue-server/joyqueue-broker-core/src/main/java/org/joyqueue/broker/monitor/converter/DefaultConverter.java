@@ -552,14 +552,16 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         electionRecord.partitionGroup(partitionGroup.toString());
         String[] metrics = {PG_SLICE_ELECTION_TERM, PG_SLICE_ELECTION_TYPE, PG_SLICE_REPLICA_STAT};
         List<MonitorRecord> electionAndReplicaRecords = buildEmptyRecords(electionRecord, metrics);
-        // term
-        electionAndReplicaRecords.get(0).setValue(partitionGroupStat.getElectionEventStat().getTerm());
-        // type
-        electionAndReplicaRecords.get(1).setValue(partitionGroupStat.getElectionEventStat().getState().ordinal());
         // compose value
         if (partitionGroupStat.getReplicationStat().getStat().getState() != null) {
+            // term
+            electionAndReplicaRecords.get(0).setValue(partitionGroupStat.getElectionEventStat().getTerm());
+            // type
+            electionAndReplicaRecords.get(1).setValue(partitionGroupStat.getElectionEventStat().getState().ordinal());
             electionAndReplicaRecords.get(2).setValue(partitionGroupStat.getReplicationStat().getStat().getState().ordinal());
         } else {
+            electionAndReplicaRecords.get(0).setValue(0);
+            electionAndReplicaRecords.get(1).setValue(0);
             electionAndReplicaRecords.get(2).setValue(0);
         }
         return electionAndReplicaRecords;
