@@ -104,4 +104,16 @@ public class VoteRequest extends JoyQueuePayload {
     public int type() {
         return CommandType.RAFT_VOTE_REQUEST;
     }
+
+    @Override
+    public String toString() {
+        return "VoteRequest{" +
+                "topicPartitionGroup=" + topicPartitionGroup +
+                ", term=" + term +
+                ", candidateId=" + candidateId +
+                ", lastLogPos=" + lastLogPos +
+                ", lastLogTerm=" + lastLogTerm +
+                ", preVote=" + preVote +
+                '}';
+    }
 }
