@@ -47,6 +47,7 @@ public class PositioningStore<T> implements Closeable {
     private final int fileHeaderSize;
     private final int fileDataSize;
     private final int diskFullRatio;
+    private final int maxMessageLength;
     private final File base;
     private final LogSerializer<T> serializer;
     private final PreloadBufferPool bufferPool;
@@ -67,6 +68,7 @@ public class PositioningStore<T> implements Closeable {
         this.base = base;
         this.fileHeaderSize = config.fileHeaderSize;
         this.fileDataSize = config.fileDataSize;
+        this.maxMessageLength = config.maxMessageLength;
         if(config.diskFullRatio <= 0 || config.diskFullRatio > 100) {
             logger.warn("Invalid config diskFullRatio: {}, using default: {}.", config.diskFullRatio, Config.DEFAULT_DISK_FULL_RATIO);
             diskFullRatio = Config.DEFAULT_DISK_FULL_RATIO;
@@ -284,7 +286,8 @@ public class PositioningStore<T> implements Closeable {
 
     private long toLogTail(long position) {
         T t = null;
-        while (position >= left()) {
+        long seekEndPosition = Math.max(position - 2 * maxMessageLength, left());
+        while (position >= seekEndPosition) {
             try {
                 t = tryRead(position--);
             } catch (Throwable ignored) {
@@ -297,7 +300,8 @@ public class PositioningStore<T> implements Closeable {
     public long toLogStart(long position) {
 
         T t = null;
-        while (position >= left()) {
+        long seekEndPosition = Math.max(position - 2 * maxMessageLength, left());
+        while (position >= seekEndPosition) {
             try {
                 t = tryRead(position--);
             } catch (Throwable ignored) {
@@ -675,6 +679,7 @@ public class PositioningStore<T> implements Closeable {
         public static final int DEFAULT_FILE_HEADER_SIZE = 128;
         public static final int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;
         public static final int DEFAULT_DISK_FULL_RATIO = 90;
+        public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
 
         /**
          * 文件头长度
@@ -686,6 +691,8 @@ public class PositioningStore<T> implements Closeable {
         private final int fileDataSize;
 
         private final int diskFullRatio;
+
+        private final int maxMessageLength;
 
         public Config() {
             this(DEFAULT_FILE_DATA_SIZE,
@@ -701,9 +708,13 @@ public class PositioningStore<T> implements Closeable {
             this(fileDataSize, fileHeaderSize, DEFAULT_DISK_FULL_RATIO);
         }
         public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio) {
+            this(fileDataSize, fileHeaderSize, diskFullRatio, DEFAULT_MAX_MESSAGE_LENGTH);
+        }
+        public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio, int maxMessageLength) {
             this.fileDataSize = fileDataSize;
             this.fileHeaderSize = fileHeaderSize;
             this.diskFullRatio = diskFullRatio;
+            this.maxMessageLength = maxMessageLength;
         }
     }
 

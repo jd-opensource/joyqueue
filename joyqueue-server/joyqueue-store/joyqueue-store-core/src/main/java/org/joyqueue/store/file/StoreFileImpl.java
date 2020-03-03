@@ -109,7 +109,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             bufferType = MAPPED_BUFFER;
             pageBuffer.clear();
         } catch (Throwable t) {
-            logger.warn("Exception: ", t);
+//            logger.warn("Exception: ", t);
             bufferPool.releaseMMap(this);
             pageBuffer = null;
             throw t;
