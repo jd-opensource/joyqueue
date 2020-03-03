@@ -93,8 +93,12 @@ public class AppendEntriesRequestHandler implements CommandHandler, Type {
                         new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
             }
 
-            return leaderElection.handleAppendEntriesRequest(request);
-
+            Command response =  leaderElection.handleAppendEntriesRequest(request);
+            if (null == response) {
+                response = new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
+                        new AppendEntriesResponse.Build().success(false).nextPosition(-1L).build());
+            }
+            return response;
         } catch (Exception e) {
             logger.warn("Handle append entries request of topic {} partition group {} fail",
                     request.getTopic(), request.getPartitionGroup(), e);
