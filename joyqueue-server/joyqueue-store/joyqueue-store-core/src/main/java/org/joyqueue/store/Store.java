@@ -301,7 +301,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
     private PositioningStore.Config getMessageStoreConfig(StoreConfig config) {
         return new PositioningStore.Config(config.getMessageFileSize(),
-                config.getFileHeaderSize(), config.getDiskFullRatio());
+                config.getFileHeaderSize(), config.getDiskFullRatio(),config.getMaxMessageLength());
     }
 
     /**
