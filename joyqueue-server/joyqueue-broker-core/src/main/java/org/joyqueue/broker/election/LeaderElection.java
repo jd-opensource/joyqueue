@@ -137,4 +137,7 @@ public abstract class LeaderElection extends Service {
 
 	public void stepDown(int term){}
 
+    public int getLocalNodeId() {
+        return localNodeId;
+    }
 }
