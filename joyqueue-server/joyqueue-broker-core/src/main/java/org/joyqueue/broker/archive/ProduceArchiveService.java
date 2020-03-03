@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -478,6 +479,9 @@ public class ProduceArchiveService extends Service {
     }
 
     public Map<String, Long> getArchivePosition() {
+        if (!archiveConfig.isBacklogEnable()) {
+            return Collections.emptyMap();
+        }
         Map<String, Long> result = new HashMap<>();
         List<SendArchiveItem> allList = itemList.getAll();
         for (SendArchiveItem sai : allList) {
@@ -493,6 +497,9 @@ public class ProduceArchiveService extends Service {
      * @return
      */
     public long remainMessagesSum() {
+        if (!archiveConfig.isReamingEnable()) {
+            return 0;
+        }
         List<TopicConfig> topics = clusterManager.getTopics();
         long sum = topics.stream().mapToLong(topic -> remainMessagesSum(topic.getName().getFullName())).sum();
         return sum;

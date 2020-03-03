@@ -90,6 +90,7 @@ public class ReplicationManager extends Service {
         clientConfig.setMaxAsync(100);
         clientConfig.setIoThread(32);
         clientConfig.setSocketBufferSize(1024 * 1024 * 1);
+        clientConfig.setNonBlockAsync(true);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 
