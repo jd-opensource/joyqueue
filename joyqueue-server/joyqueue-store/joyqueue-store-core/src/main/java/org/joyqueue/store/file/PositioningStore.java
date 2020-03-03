@@ -512,7 +512,7 @@ public class PositioningStore<T> implements Closeable {
     }
 
     public long physicalSize() {
-        return storeFileMap.values().stream().map(StoreFile::file).mapToLong(File::length).sum();
+        return right() - left();
     }
 
     /**
