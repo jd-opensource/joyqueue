@@ -40,6 +40,11 @@
             <artifactId>joyqueue-data-service</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-broker-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--<dependency>-->
         <!--<groupId>org.apache.commons</groupId>-->
         <!--<artifactId>commons-lang3</artifactId>-->
