@@ -352,7 +352,7 @@ public class ProduceArchiveService extends Service {
         sendLog.setTopic(brokerMessage.getTopic());
         sendLog.setSendTime(brokerMessage.getStartTime());
         sendLog.setBusinessId(brokerMessage.getBusinessId() == null ? "" : brokerMessage.getBusinessId());
-        sendLog.setMessageId(brokerMessage.getTopic() + brokerMessage.getPartition() + brokerMessage.getMsgIndexNo());
+        sendLog.setMessageId(ArchiveUtils.messageId(brokerMessage.getTopic(),brokerMessage.getPartition(), brokerMessage.getMsgIndexNo()));
         sendLog.setBrokerId(clusterManager.getBrokerId());
         sendLog.setApp(brokerMessage.getApp());
         sendLog.setClientIp(brokerMessage.getClientIp());
@@ -360,7 +360,6 @@ public class ProduceArchiveService extends Service {
         sendLog.setMessageBody(buffer.array());
         sendLog.setPartition(brokerMessage.getPartition());
         sendLog.setIndex(brokerMessage.getMsgIndexNo());
-
         return sendLog;
     }
 
