@@ -87,10 +87,9 @@ public class ReplicationManager extends Service {
 
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop");
-        clientConfig.setMaxAsync(100);
+        clientConfig.setMaxAsync(1000);
         clientConfig.setIoThread(32);
         clientConfig.setSocketBufferSize(1024 * 1024 * 1);
-        clientConfig.setNonBlockAsync(true);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 
