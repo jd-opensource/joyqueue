@@ -347,6 +347,9 @@ public class DefaultTopicService implements TopicService {
 
         logger.info("leaderChange, topic: {}, partitionGroup: {}", group.getTopic(), group);
         Broker oldLeader = brokerInternalService.getById(oldPartitionGroup.getLeader());
+        if (oldLeader == null) {
+            throw new NsrException(String.format("topic: %s, group: %s, broker: {} is not exist", group.getTopic(), group.getGroup(), group.getLeader()));
+        }
 
         try {
             transactionInternalService.begin();
@@ -364,7 +367,7 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new LeaderChangeEvent(group.getTopic(), oldPartitionGroup, group), leader);
+        messenger.publish(new LeaderChangeEvent(group.getTopic(), oldPartitionGroup, group), oldLeader);
     }
 
     @Override

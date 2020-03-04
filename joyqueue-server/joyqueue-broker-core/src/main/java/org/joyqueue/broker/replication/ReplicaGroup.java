@@ -33,6 +33,7 @@ import org.joyqueue.broker.election.command.ReplicateConsumePosResponse;
 import org.joyqueue.broker.election.command.TimeoutNowRequest;
 import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.monitor.BrokerMonitor;
+import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.event.TransportEvent;
@@ -43,6 +44,7 @@ import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.Direction;
+import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.network.transport.support.DefaultTransportAttribute;
 import org.joyqueue.store.replication.ReplicableStore;
@@ -115,8 +117,7 @@ public class ReplicaGroup extends Service {
     ReplicaGroup(TopicPartitionGroup topicPartitionGroup, ReplicationManager replicationManager,
                  ReplicableStore replicableStore, ElectionConfig electionConfig, BrokerConfig brokerConfig,
                  Consume consume, ExecutorService replicateExecutor, BrokerMonitor brokerMonitor,
-                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId,
-                 TransportClient transportClient
+                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId
     ) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(topicPartitionGroup != null, "topic partition group is null");
@@ -125,7 +126,6 @@ public class ReplicaGroup extends Service {
         Preconditions.checkArgument(brokerMonitor != null, "broker monitor is null");
         Preconditions.checkArgument(replicateExecutor != null, "replicate executor is null");
         Preconditions.checkArgument(replicableStore != null, "replicable store is null");
-        Preconditions.checkArgument(transportClient !=null, "transport client can not be null");
         this.electionConfig = electionConfig;
         this.brokerConfig = brokerConfig;
         this.topicPartitionGroup = topicPartitionGroup;
@@ -136,7 +136,13 @@ public class ReplicaGroup extends Service {
         this.brokerMonitor = brokerMonitor;
         this.replicateExecutor = replicateExecutor;
         this.replicableStore = replicableStore;
-        this.transportClient = transportClient;
+
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop");
+        clientConfig.setMaxAsync(100);
+        clientConfig.setIoThread(1);
+        clientConfig.setSocketBufferSize(1024 * 1024 * 1);
+        transportClient = new BrokerTransportClientFactory().create(clientConfig);
 
         replicas = allNodes.stream()
                 .map(n -> new Replica(n.getNodeId(), n.getAddress()))
@@ -150,7 +156,7 @@ public class ReplicaGroup extends Service {
     @Override
     public void doStart() throws Exception {
         super.doStart();
-
+        transportClient.start();
         transportClient.addListener(new ClientEventListener());
 
         replicateResponseQueue = new DelayQueue<>();
@@ -177,6 +183,7 @@ public class ReplicaGroup extends Service {
             }
         }
 
+        transportClient.stop();
         super.doStop();
     }
 
