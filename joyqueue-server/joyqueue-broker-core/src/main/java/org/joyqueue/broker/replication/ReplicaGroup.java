@@ -138,7 +138,7 @@ public class ReplicaGroup extends Service {
         this.replicableStore = replicableStore;
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop");
+        clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop-" + topicPartitionGroup.toString());
         clientConfig.setMaxAsync(100);
         clientConfig.setIoThread(1);
         clientConfig.setSocketBufferSize(1024 * 1024 * 1);
