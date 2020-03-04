@@ -150,7 +150,9 @@ public class DefaultChannelTransport implements ChannelTransport {
 
         long sendTimeout = timeout <= 0 ? barrier.getSendTimeout() : timeout;
         // 获取信号量
-        barrier.acquire(RequestBarrier.SemaphoreType.ASYNC, sendTimeout);
+        if (!config.isNonBlockAsync()) {
+            barrier.acquire(RequestBarrier.SemaphoreType.ASYNC, sendTimeout);
+        }
 
         try {
             long time = SystemClock.now();
@@ -171,7 +173,9 @@ public class DefaultChannelTransport implements ChannelTransport {
 
         } catch (Throwable th) {
             logger.warn("Default channel transport async fail, command type is {}", command.getHeader().getType(), th);
-            barrier.release(RequestBarrier.SemaphoreType.ASYNC);
+            if (!config.isNonBlockAsync()) {
+                barrier.release(RequestBarrier.SemaphoreType.ASYNC);
+            }
             barrier.remove(command.getHeader().getRequestId());
             command.release();
             throw th;
