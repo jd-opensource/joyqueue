@@ -32,6 +32,7 @@ import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.domain.Consumer.ConsumerPolicy;
+import org.joyqueue.domain.Partition;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
@@ -432,17 +433,17 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             // 释放占用
             partitionManager.releasePartition(consumePartition);
 
-            // 更新最后应答时间
-            Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), consumePartition.getPartition());
-            if (partitionGroupId == null) {
-                logger.error("onAckMessage error, partitionGroupId is null, topic: {}, app: {}, partition: {}", consumer.getTopic(), consumer.getApp(), consumePartition.getPartition());
-            } else {
-                brokerMonitor.onAckMessage(consumer.getTopic(), consumer.getApp(), partitionGroupId, consumePartition.getPartition());
+            if (consumePartition.getPartition() != Partition.RETRY_PARTITION_ID) {
+                // 更新最后应答时间
+                Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), consumePartition.getPartition());
+                if (partitionGroupId == null) {
+                    logger.error("onAckMessage error, partitionGroupId is null, topic: {}, app: {}, partition: {}", consumer.getTopic(), consumer.getApp(), consumePartition.getPartition());
+                } else {
+                    brokerMonitor.onAckMessage(consumer.getTopic(), consumer.getApp(), partitionGroupId, consumePartition.getPartition());
+                }
+                //TODO 归档逻辑放到 handler里可能更合适
+                archiveIfNecessary(consumerPolicy, connection, locations);
             }
-
-            //TODO 归档逻辑放到 handler里可能更合适
-            archiveIfNecessary(consumerPolicy, connection, locations);
-
         }
 
         return isSuccess;
