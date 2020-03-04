@@ -176,7 +176,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     public List<BrokerMessageInfo> decodeBrokerMessage(List<BrokerMessageInfo> msgs,String decodeType){
         for(BrokerMessageInfo m:msgs){
             if(m.getBody()!=null){
-                compliantDecode(m,decodeType);
+                compliantPreviewDecode(m,decodeType);
             }
         }
         return msgs;
@@ -279,15 +279,16 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
      * compliant old version broker decode
      *
      **/
-    public void compliantDecode(BrokerMessageInfo m,String messageDecodeType){
+    public void compliantPreviewDecode(BrokerMessageInfo message, String messageDecodeType){
+
         try {
-            m.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(m.getBody())));
+            message.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(message.getBody())));
         }catch(Throwable e){
             if(logger.isDebugEnabled()) {
                 logger.debug("may old broker", e);
             }
             try {
-                m.setBody(messagePreviewService.preview(messageDecodeType, m.getBody().getBytes(Charset.forName("utf-8"))));
+                message.setBody(messagePreviewService.preview(messageDecodeType, message.getBody().getBytes(Charset.forName("utf-8"))));
             }catch (Throwable ex){
                 logger.debug("incorrect message format", ex);
                 throw new ServiceException(INTERNAL_SERVER_ERROR,"Message can't be parse");
@@ -305,7 +306,8 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         message.setStoreTime(m.getStoreTime());
         message.setBusinessId(m.getBusinessId());
         if(m.getBody()!=null) {
-            compliantDecode(m,messageDecodeType);
+            compliantPreviewDecode(m,messageDecodeType);
+            message.setBody(m.getBody());
         }
         message.setAttributes(m.getAttributes());
         message.setFlag(m.isAck());
