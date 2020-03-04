@@ -20,8 +20,11 @@ import org.joyqueue.broker.election.ElectionManager;
 import org.joyqueue.broker.election.ElectionService;
 import org.joyqueue.broker.election.RaftLeaderElection;
 import org.joyqueue.broker.election.command.VoteRequest;
+import org.joyqueue.broker.election.command.VoteResponse;
+import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.command.CommandType;
+import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
 import org.joyqueue.network.transport.Transport;
@@ -68,18 +71,27 @@ public class VoteRequestHandler implements CommandHandler, Type {
         if (!(command.getPayload() instanceof VoteRequest)) {
             throw new IllegalArgumentException();
         }
-
-        VoteRequest voteRequest = (VoteRequest)command.getPayload();
-        RaftLeaderElection election = (RaftLeaderElection) electionManager.getLeaderElection(
-                voteRequest.getTopic(), voteRequest.getPartitionGroup());
-        if (election == null) {
-            logger.warn("Receive vote request of {}, election is null", voteRequest.getTopicPartitionGroup());
-            return null;
-        }
-        if (voteRequest.isPreVote()) {
-            return election.handlePreVoteRequest(voteRequest);
-        } else {
-            return election.handleVoteRequest(voteRequest);
+        VoteRequest voteRequest = (VoteRequest) command.getPayload();
+        Command response = null;
+        try {
+            RaftLeaderElection election = (RaftLeaderElection) electionManager.getLeaderElection(
+                    voteRequest.getTopic(), voteRequest.getPartitionGroup());
+            if (election == null) {
+                logger.warn("Receive vote request of {}, election is null", voteRequest.getTopicPartitionGroup());
+            } else  if (voteRequest.isPreVote()) {
+                response = election.handlePreVoteRequest(voteRequest);
+            } else {
+                response =  election.handleVoteRequest(voteRequest);
+            }
+            if(null == response) {
+                response = new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
+                        new VoteResponse(voteRequest.getTerm(), voteRequest.getCandidateId(), election == null ? -1 : election.getLocalNodeId(), false));
+            }
+            return response;
+        } catch (Throwable t) {
+            logger.warn("Handle vote request exception, request: {}, exception: ", voteRequest, t);
+            return  new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_VOTE_RESPONSE),
+                    new VoteResponse(voteRequest.getTerm(), voteRequest.getCandidateId(), -1, false));
         }
     }
 
