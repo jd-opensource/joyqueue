@@ -16,11 +16,11 @@
 package org.joyqueue.broker.protocol.network;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.protocol.network.codec.JoyQueueCodec;
 import org.joyqueue.broker.protocol.network.codec.JoyQueuePayloadCodec;
 import org.joyqueue.network.transport.codec.Codec;
 import org.joyqueue.network.transport.codec.CodecFactory;
-import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
 

@@ -15,10 +15,6 @@
  */
 package org.joyqueue.toolkit.config;
 
-import org.joyqueue.toolkit.config.BinderListener;
-import org.joyqueue.toolkit.config.Binders;
-import org.joyqueue.toolkit.config.Context;
-import org.joyqueue.toolkit.config.PostmanUpdater;
 import org.joyqueue.toolkit.config.annotation.BooleanBinding;
 import org.joyqueue.toolkit.config.annotation.DateBinding;
 import org.joyqueue.toolkit.config.annotation.DoubleBinding;

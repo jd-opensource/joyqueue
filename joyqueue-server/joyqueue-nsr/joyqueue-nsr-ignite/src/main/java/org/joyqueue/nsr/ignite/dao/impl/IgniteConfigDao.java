@@ -15,13 +15,6 @@
  */
 package org.joyqueue.nsr.ignite.dao.impl;
 
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.nsr.ignite.dao.ConfigDao;
-import org.joyqueue.nsr.ignite.dao.IgniteDao;
-import org.joyqueue.nsr.ignite.model.IgniteConfig;
-import org.joyqueue.nsr.model.ConfigQuery;
-import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
@@ -30,15 +23,22 @@ import org.apache.ignite.cache.QueryEntity;
 import org.apache.ignite.cache.QueryIndex;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.nsr.ignite.dao.ConfigDao;
+import org.joyqueue.nsr.ignite.dao.IgniteDao;
+import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
+import org.joyqueue.nsr.ignite.model.IgniteConfig;
+import org.joyqueue.nsr.model.ConfigQuery;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static org.joyqueue.nsr.ignite.model.IgniteConfig.COLUMN_ID;
+import static org.joyqueue.nsr.ignite.model.IgniteConfig.COLUMN_CFG_GROUP;
 import static org.joyqueue.nsr.ignite.model.IgniteConfig.COLUMN_CFG_KEY;
 import static org.joyqueue.nsr.ignite.model.IgniteConfig.COLUMN_CFG_VALUE;
-import static org.joyqueue.nsr.ignite.model.IgniteConfig.COLUMN_CFG_GROUP;
+import static org.joyqueue.nsr.ignite.model.IgniteConfig.COLUMN_ID;
 
 public class IgniteConfigDao implements ConfigDao {
     public static final String CACHE_NAME = "config";

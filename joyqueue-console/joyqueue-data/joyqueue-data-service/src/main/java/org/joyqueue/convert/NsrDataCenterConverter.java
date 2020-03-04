@@ -15,9 +15,9 @@
  */
 package org.joyqueue.convert;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.model.domain.DataCenter;
 import org.joyqueue.toolkit.URL;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

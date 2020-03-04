@@ -15,9 +15,9 @@
  */
 package org.joyqueue.toolkit.config;
 
+import org.joyqueue.toolkit.config.annotation.StringBinding;
 import org.joyqueue.toolkit.reflect.Reflect;
 import org.joyqueue.toolkit.reflect.ReflectException;
-import org.joyqueue.toolkit.config.annotation.StringBinding;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

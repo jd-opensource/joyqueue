@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.cluster;
 
-import org.joyqueue.broker.cluster.ClusterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

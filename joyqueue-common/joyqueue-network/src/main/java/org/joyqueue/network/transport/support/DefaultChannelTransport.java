@@ -15,6 +15,9 @@
  */
 package org.joyqueue.network.transport.support;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.network.transport.ChannelTransport;
 import org.joyqueue.network.transport.RequestBarrier;
@@ -30,9 +33,6 @@ import org.joyqueue.network.transport.config.TransportConfig;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

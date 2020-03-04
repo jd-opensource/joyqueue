@@ -15,11 +15,11 @@
  */
 package org.joyqueue.nsr.ignite.model;
 
-import org.joyqueue.domain.AppToken;
 import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;
 import org.apache.ignite.binary.BinaryWriter;
 import org.apache.ignite.binary.Binarylizable;
+import org.joyqueue.domain.AppToken;
 
 import java.util.Date;
 

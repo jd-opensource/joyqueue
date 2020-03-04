@@ -17,8 +17,8 @@ package org.joyqueue.client.internal.consumer.converter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 
 import java.util.Collections;
 import java.util.List;

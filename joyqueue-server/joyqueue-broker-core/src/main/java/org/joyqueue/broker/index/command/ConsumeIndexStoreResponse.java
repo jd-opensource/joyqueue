@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.index.command;
 
-import org.joyqueue.network.transport.command.JoyQueuePayload;
 import org.joyqueue.network.command.CommandType;
+import org.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.Map;
 

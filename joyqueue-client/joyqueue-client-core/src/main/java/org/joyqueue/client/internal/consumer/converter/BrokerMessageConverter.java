@@ -20,6 +20,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import org.joyqueue.client.internal.consumer.domain.FetchMessageData;
 import org.joyqueue.domain.TopicName;
@@ -28,8 +30,6 @@ import org.joyqueue.message.SourceType;
 import org.joyqueue.network.command.FetchPartitionMessageAckData;
 import org.joyqueue.network.command.FetchTopicMessageAckData;
 import org.joyqueue.network.serializer.BatchMessageSerializer;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 
 import java.util.Collections;
 import java.util.List;

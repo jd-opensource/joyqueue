@@ -15,6 +15,7 @@
  */
 package org.joyqueue.convert;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.ClientType;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.Namespace;
@@ -22,7 +23,6 @@ import org.joyqueue.model.domain.Producer;
 import org.joyqueue.model.domain.ProducerConfig;
 import org.joyqueue.model.domain.Topic;
 import org.joyqueue.util.NullUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;

@@ -16,12 +16,12 @@
 package org.joyqueue.broker.kafka.message.serializer;
 
 import com.google.common.collect.Lists;
+import io.netty.buffer.ByteBuf;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.broker.kafka.message.KafkaBrokerMessage;
 import org.joyqueue.broker.kafka.message.compressor.KafkaCompressionCodec;
 import org.joyqueue.broker.kafka.util.KafkaBufferUtils;
 import org.joyqueue.message.BrokerMessage;
-import io.netty.buffer.ByteBuf;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.ByteBuffer;
 import java.util.List;

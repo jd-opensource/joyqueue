@@ -16,8 +16,6 @@
 package org.joyqueue.nsr.admin;
 
 import org.joyqueue.domain.Broker;
-import org.joyqueue.nsr.admin.AdminClient;
-import org.joyqueue.nsr.admin.BrokerAdmin;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;

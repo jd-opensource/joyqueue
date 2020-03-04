@@ -15,12 +15,12 @@
  */
 package org.joyqueue.network.event;
 
-import org.joyqueue.network.transport.RequestBarrier;
-import org.joyqueue.network.transport.TransportHelper;
-import org.joyqueue.toolkit.concurrent.EventBus;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.joyqueue.network.transport.RequestBarrier;
+import org.joyqueue.network.transport.TransportHelper;
+import org.joyqueue.toolkit.concurrent.EventBus;
 
 /**
  * TransportEventHandler

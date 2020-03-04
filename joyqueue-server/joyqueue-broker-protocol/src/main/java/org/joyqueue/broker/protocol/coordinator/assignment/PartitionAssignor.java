@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.protocol.coordinator.assignment;
 
+import com.jd.laf.extension.Type;
 import org.joyqueue.broker.protocol.coordinator.domain.GroupMemberMetadata;
 import org.joyqueue.broker.protocol.coordinator.domain.GroupMetadata;
 import org.joyqueue.broker.protocol.coordinator.domain.PartitionAssignment;
 import org.joyqueue.domain.PartitionGroup;
-import com.jd.laf.extension.Type;
 
 import java.util.List;
 

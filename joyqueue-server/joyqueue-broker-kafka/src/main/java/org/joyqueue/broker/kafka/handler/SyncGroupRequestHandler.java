@@ -16,6 +16,7 @@
 package org.joyqueue.broker.kafka.handler;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.KafkaContext;
 import org.joyqueue.broker.kafka.KafkaContextAware;
@@ -28,7 +29,6 @@ import org.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

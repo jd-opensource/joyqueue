@@ -17,9 +17,9 @@ package org.joyqueue.store;
 
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
-import org.joyqueue.toolkit.util.BaseDirUtils;
 import org.joyqueue.store.utils.MessageUtils;
 import org.joyqueue.toolkit.time.SystemClock;
+import org.joyqueue.toolkit.util.BaseDirUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

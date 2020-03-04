@@ -15,6 +15,7 @@
  */
 package org.joyqueue.network.transport.codec.support;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.JoyQueuePayloadCodecRegistry;
 import org.joyqueue.network.transport.codec.Codec;
 import org.joyqueue.network.transport.codec.Decoder;
@@ -24,7 +25,6 @@ import org.joyqueue.network.transport.codec.Encoder;
 import org.joyqueue.network.transport.codec.JoyQueueHeaderCodec;
 import org.joyqueue.network.transport.codec.PayloadCodecFactory;
 import org.joyqueue.network.transport.exception.TransportException;
-import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueCodec

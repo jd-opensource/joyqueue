@@ -16,13 +16,6 @@
 package org.joyqueue.nsr.ignite.dao.impl;
 
 import com.google.inject.Inject;
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.nsr.ignite.dao.IgniteDao;
-import org.joyqueue.nsr.ignite.dao.TopicDao;
-import org.joyqueue.nsr.ignite.model.IgniteTopic;
-import org.joyqueue.nsr.model.TopicQuery;
-import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
@@ -31,6 +24,13 @@ import org.apache.ignite.cache.QueryEntity;
 import org.apache.ignite.cache.QueryIndex;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.nsr.ignite.dao.IgniteDao;
+import org.joyqueue.nsr.ignite.dao.TopicDao;
+import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
+import org.joyqueue.nsr.ignite.model.IgniteTopic;
+import org.joyqueue.nsr.model.TopicQuery;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;

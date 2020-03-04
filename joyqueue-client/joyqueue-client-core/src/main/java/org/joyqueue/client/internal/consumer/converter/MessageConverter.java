@@ -15,8 +15,8 @@
  */
 package org.joyqueue.client.internal.consumer.converter;
 
-import org.joyqueue.message.BrokerMessage;
 import com.jd.laf.extension.Type;
+import org.joyqueue.message.BrokerMessage;
 
 import java.util.List;
 

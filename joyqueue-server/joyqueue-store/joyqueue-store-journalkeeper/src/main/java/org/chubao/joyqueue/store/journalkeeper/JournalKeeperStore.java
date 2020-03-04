@@ -1,5 +1,9 @@
 package org.chubao.joyqueue.store.journalkeeper;
 
+import io.journalkeeper.core.api.RaftServer;
+import io.journalkeeper.core.strategy.JournalCompactionStrategy;
+import io.journalkeeper.rpc.URIParser;
+import io.journalkeeper.utils.spi.ServiceSupport;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
@@ -12,10 +16,6 @@ import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.service.Service;
-import io.journalkeeper.core.api.RaftServer;
-import io.journalkeeper.core.strategy.JournalCompactionStrategy;
-import io.journalkeeper.rpc.URIParser;
-import io.journalkeeper.utils.spi.ServiceSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

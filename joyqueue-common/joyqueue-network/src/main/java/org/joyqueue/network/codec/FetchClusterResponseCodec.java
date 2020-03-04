@@ -17,6 +17,9 @@ package org.joyqueue.network.codec;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.netty.buffer.ByteBuf;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.domain.ConsumerPolicy;
 import org.joyqueue.domain.ProducerPolicy;
 import org.joyqueue.domain.TopicType;
@@ -32,9 +35,6 @@ import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Header;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 
 import java.util.Map;
 import java.util.Set;

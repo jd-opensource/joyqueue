@@ -15,22 +15,22 @@
  */
 package org.joyqueue.handler.routing.command.user;
 
-import org.joyqueue.handler.annotation.PageQuery;
-import org.joyqueue.handler.error.ConfigException;
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.handler.routing.command.CommandSupport;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.User;
-import org.joyqueue.model.query.QUser;
-import org.joyqueue.service.UserService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.annotation.PageQuery;
+import org.joyqueue.handler.error.ConfigException;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.handler.routing.command.CommandSupport;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.User;
+import org.joyqueue.model.query.QUser;
+import org.joyqueue.service.UserService;
 
 /**
  * @author wylixiaobin

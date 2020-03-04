@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.consumer.message;
 
-import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.openmessaging.consumer.MessageReceipt;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 
 /**
  * MessageReceiptAdapter

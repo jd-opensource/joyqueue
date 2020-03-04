@@ -15,6 +15,10 @@
  */
 package org.joyqueue.broker.network.protocol.support;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import org.joyqueue.network.event.TransportEventHandler;
 import org.joyqueue.network.handler.ConnectionHandler;
 import org.joyqueue.network.protocol.CommandHandlerProvider;
@@ -25,10 +29,6 @@ import org.joyqueue.network.transport.codec.support.NettyDecoder;
 import org.joyqueue.network.transport.codec.support.NettyEncoder;
 import org.joyqueue.network.transport.command.CommandDispatcher;
 import org.joyqueue.network.transport.handler.CommandInvocation;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
 
 /**
  * DefaultProtocolHandlerPipeline

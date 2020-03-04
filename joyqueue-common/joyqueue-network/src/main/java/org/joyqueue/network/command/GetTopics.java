@@ -15,10 +15,9 @@
  */
 package org.joyqueue.network.command;
 
+import com.google.common.base.Objects;
 import org.joyqueue.network.transport.command.Payload;
 import org.joyqueue.network.transport.command.Types;
-
-import com.google.common.base.Objects;
 
 /**
  * @author wylixiaobin

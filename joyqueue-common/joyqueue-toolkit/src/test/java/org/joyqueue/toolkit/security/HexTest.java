@@ -15,7 +15,6 @@
  */
 package org.joyqueue.toolkit.security;
 
-import org.joyqueue.toolkit.security.Hex;
 import org.junit.Assert;
 import org.junit.Test;
 

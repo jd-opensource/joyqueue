@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.mqtt.handler;
 
-import org.joyqueue.broker.mqtt.util.NettyAttrManager;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttFixedHeader;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageType;
+import org.joyqueue.broker.mqtt.util.NettyAttrManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,11 +15,10 @@
  */
 package org.joyqueue.network.command;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.joyqueue.network.session.Language;
 import org.joyqueue.network.transport.command.JoyQueuePayload;
-import com.google.common.base.Preconditions;
-
-import com.google.common.base.Objects;
 
 /**
  * 添加连接

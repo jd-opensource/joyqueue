@@ -16,16 +16,16 @@
 package org.joyqueue.broker.kafka.network.codec;
 
 import com.google.common.collect.Lists;
-import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
+import io.netty.buffer.ByteBuf;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.command.JoinGroupRequest;
 import org.joyqueue.broker.kafka.command.JoinGroupResponse;
 import org.joyqueue.broker.kafka.network.KafkaHeader;
+import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.exception.TransportException;
-import io.netty.buffer.ByteBuf;
-import org.apache.commons.lang3.StringUtils;
 
 import java.nio.ByteBuffer;
 import java.util.List;

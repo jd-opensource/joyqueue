@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.consumer;
 
-import org.joyqueue.message.MessageLocation;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.message.MessageLocation;
 
 import java.util.HashSet;
 import java.util.Set;

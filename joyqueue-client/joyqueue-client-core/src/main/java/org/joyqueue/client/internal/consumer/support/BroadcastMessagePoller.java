@@ -16,6 +16,7 @@
 package org.joyqueue.client.internal.consumer.support;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.consumer.MessagePoller;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
@@ -27,7 +28,6 @@ import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

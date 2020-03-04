@@ -15,10 +15,10 @@
  */
 package org.joyqueue.client.internal.producer;
 
+import com.jd.laf.extension.Type;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
-import com.jd.laf.extension.Type;
 
 import java.util.List;
 

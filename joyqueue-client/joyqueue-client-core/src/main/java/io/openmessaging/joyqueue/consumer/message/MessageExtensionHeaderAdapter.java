@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.consumer.message;
 
-import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import io.openmessaging.extension.ExtensionHeader;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 
 /**
  * MessageExtensionAdapter

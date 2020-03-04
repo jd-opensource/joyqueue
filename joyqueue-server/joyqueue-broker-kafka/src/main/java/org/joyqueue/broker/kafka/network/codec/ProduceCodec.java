@@ -17,6 +17,7 @@ package org.joyqueue.broker.kafka.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.command.ProduceRequest;
 import org.joyqueue.broker.kafka.command.ProduceResponse;
@@ -27,7 +28,6 @@ import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.exception.TransportException;
-import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteBuffer;
 import java.util.List;

@@ -16,12 +16,12 @@
 package org.joyqueue.broker.kafka.network.protocol;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
 import org.joyqueue.network.transport.codec.Codec;
 import org.joyqueue.network.transport.codec.CodecFactory;
 import org.joyqueue.network.transport.codec.PayloadCodecFactory;
 import org.joyqueue.network.transport.codec.support.DefaultCodec;
-import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
 

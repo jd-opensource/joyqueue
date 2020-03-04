@@ -15,13 +15,13 @@
  */
 package org.joyqueue.convert;
 
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.domain.AppName;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.domain.Topic;
-import com.google.common.base.Preconditions;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author wylixiaobin

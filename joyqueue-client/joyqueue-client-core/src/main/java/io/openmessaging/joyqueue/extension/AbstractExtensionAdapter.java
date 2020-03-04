@@ -15,12 +15,12 @@
  */
 package io.openmessaging.joyqueue.extension;
 
-import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import com.google.common.base.Preconditions;
 import io.openmessaging.extension.Extension;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 
 /**
  * AbstractExtensionAdapter

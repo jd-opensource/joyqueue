@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import org.joyqueue.client.internal.producer.domain.TransactionStatus;
 import io.openmessaging.producer.TransactionStateCheckListener;
+import org.joyqueue.client.internal.producer.domain.TransactionStatus;
 
 /**
  * TransactionalContextAdapter

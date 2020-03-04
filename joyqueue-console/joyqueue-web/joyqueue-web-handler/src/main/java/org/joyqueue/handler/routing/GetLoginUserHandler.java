@@ -15,12 +15,12 @@
  */
 package org.joyqueue.handler.routing;
 
-import org.joyqueue.handler.Constants;
-import org.joyqueue.util.LocalSession;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.RoutingHandler;
 import com.jd.laf.web.vertx.response.Responses;
 import io.vertx.ext.web.RoutingContext;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.util.LocalSession;
 
 /**
  * 获取当前登录用户

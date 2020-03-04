@@ -15,15 +15,7 @@
  */
 package org.joyqueue.handler.routing.command.chart;
 
-import org.joyqueue.exception.ServiceException;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.handler.util.GrafanaUtils;
-import org.joyqueue.model.domain.grafana.GrafanaSearch;
-import org.joyqueue.model.domain.grafana.GrafanaVariable;
-import org.joyqueue.model.domain.grafana.GrafanaVariableParameter;
-import org.joyqueue.model.domain.grafana.GrafanaVariableResult;
 import com.google.common.base.Preconditions;
-import org.joyqueue.util.NullUtil;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Context;
@@ -34,6 +26,14 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.exception.ServiceException;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.util.GrafanaUtils;
+import org.joyqueue.model.domain.grafana.GrafanaSearch;
+import org.joyqueue.model.domain.grafana.GrafanaVariable;
+import org.joyqueue.model.domain.grafana.GrafanaVariableParameter;
+import org.joyqueue.model.domain.grafana.GrafanaVariableResult;
+import org.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

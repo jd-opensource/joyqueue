@@ -16,11 +16,11 @@
 package org.joyqueue.broker.kafka;
 
 import com.google.common.collect.Lists;
-import org.joyqueue.broker.kafka.conf.KafkaConfigs;
-import org.joyqueue.broker.kafka.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.joyqueue.broker.kafka.conf.KafkaConfigs;
+import org.joyqueue.broker.kafka.consumer.Consumer;
 
 import java.util.List;
 

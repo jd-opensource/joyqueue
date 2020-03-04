@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -32,13 +33,12 @@ import org.joyqueue.client.internal.consumer.transport.ConsumerClientGroup;
 import org.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
 import org.joyqueue.client.internal.exception.ClientException;
 import org.joyqueue.client.internal.transport.ConnectionState;
+import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.command.FetchPartitionMessageResponse;
 import org.joyqueue.network.command.FetchTopicMessageResponse;
-import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.domain.BrokerNode;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
-import com.google.common.base.Preconditions;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -15,9 +15,6 @@
  */
 package org.joyqueue.nsr.ignite.dao;
 
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.Pagination;
-import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
 import com.google.common.base.Preconditions;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
@@ -27,6 +24,9 @@ import org.apache.ignite.cache.query.SqlFieldsQuery;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.internal.processors.cache.CacheEntryImpl;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.Pagination;
+import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
 
 import java.io.Serializable;
 import java.util.ArrayList;

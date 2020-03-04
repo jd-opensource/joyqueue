@@ -15,12 +15,6 @@
  */
 package org.joyqueue.nsr.ignite.dao.impl;
 
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.nsr.ignite.dao.IgniteDao;
-import org.joyqueue.nsr.ignite.dao.PartitionGroupDao;
-import org.joyqueue.nsr.ignite.model.IgnitePartitionGroup;
-import org.joyqueue.nsr.model.PartitionGroupQuery;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
@@ -28,24 +22,30 @@ import org.apache.ignite.cache.QueryEntity;
 import org.apache.ignite.cache.QueryIndex;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.nsr.ignite.dao.IgniteDao;
+import org.joyqueue.nsr.ignite.dao.PartitionGroupDao;
+import org.joyqueue.nsr.ignite.model.IgnitePartitionGroup;
+import org.joyqueue.nsr.model.PartitionGroupQuery;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.joyqueue.nsr.ignite.model.IgniteBaseModel.SCHEMA;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ID;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_NAMESPACE;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_TOPIC;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_GROUP;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_LEADER;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ISR;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_TERM;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_PARTITIONS;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_LEARNERS;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_REPLICAS;
-import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_OUT_SYNC_REPLICAS;
 import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ELECT_TYPE;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_GROUP;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ID;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_ISR;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_LEADER;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_LEARNERS;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_NAMESPACE;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_OUT_SYNC_REPLICAS;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_PARTITIONS;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_REPLICAS;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_TERM;
+import static org.joyqueue.nsr.ignite.model.IgnitePartitionGroup.COLUMN_TOPIC;
 
 public class IgnitePartitionGroupDao implements PartitionGroupDao {
     public static final String CACHE_NAME = "partition_group";

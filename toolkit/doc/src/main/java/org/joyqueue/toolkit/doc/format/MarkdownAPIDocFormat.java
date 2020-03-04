@@ -16,15 +16,16 @@
 package org.joyqueue.toolkit.doc.format;
 
 
-import org.joyqueue.toolkit.doc.APIDoc;
-import org.joyqueue.toolkit.doc.Format;
-import org.joyqueue.toolkit.doc.Param;
 import net.steppschuh.markdowngenerator.list.UnorderedList;
 import net.steppschuh.markdowngenerator.table.Table;
 import net.steppschuh.markdowngenerator.table.TableRow;
 import net.steppschuh.markdowngenerator.text.Text;
 import net.steppschuh.markdowngenerator.text.code.CodeBlock;
 import net.steppschuh.markdowngenerator.text.heading.Heading;
+import org.joyqueue.toolkit.doc.APIDoc;
+import org.joyqueue.toolkit.doc.Format;
+import org.joyqueue.toolkit.doc.Param;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

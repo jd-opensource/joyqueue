@@ -17,6 +17,8 @@ package org.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.domain.Application;
@@ -27,8 +29,6 @@ import org.joyqueue.nsr.ProducerNameServerService;
 import org.joyqueue.nsr.TopicNameServerService;
 import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.ProducerService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

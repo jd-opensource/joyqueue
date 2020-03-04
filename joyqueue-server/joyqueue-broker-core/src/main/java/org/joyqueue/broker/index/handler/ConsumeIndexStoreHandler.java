@@ -17,6 +17,7 @@ package org.joyqueue.broker.index.handler;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.apache.commons.collections.map.HashedMap;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.index.command.ConsumeIndexStoreRequest;
@@ -34,7 +35,6 @@ import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

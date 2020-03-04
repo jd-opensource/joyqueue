@@ -16,6 +16,8 @@
 package org.joyqueue.server.retry.console;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.joyqueue.domain.ConsumeRetry;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
@@ -29,8 +31,6 @@ import org.joyqueue.server.retry.model.RetryQueryCondition;
 import org.joyqueue.server.retry.model.RetryStatus;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.db.DaoUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

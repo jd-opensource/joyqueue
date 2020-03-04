@@ -15,6 +15,13 @@
  */
 package org.joyqueue.broker.mqtt.transport;
 
+import com.google.common.base.Strings;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.mqtt.MqttMessage;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.joyqueue.broker.mqtt.cluster.MqttConnectionManager;
 import org.joyqueue.broker.mqtt.cluster.MqttConsumerManager;
 import org.joyqueue.broker.mqtt.cluster.MqttSessionManager;
@@ -24,13 +31,6 @@ import org.joyqueue.broker.mqtt.handler.Handler;
 import org.joyqueue.broker.mqtt.handler.HandlerExecutor;
 import org.joyqueue.broker.mqtt.handler.MqttHandlerDispatcher;
 import org.joyqueue.broker.mqtt.util.NettyAttrManager;
-import com.google.common.base.Strings;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,9 +15,9 @@
  */
 package io.openmessaging.joyqueue.extension;
 
+import io.openmessaging.extension.QueueMetaData;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import org.joyqueue.network.domain.BrokerNode;
-import io.openmessaging.extension.QueueMetaData;
 
 /**
  * PartitionAdapter

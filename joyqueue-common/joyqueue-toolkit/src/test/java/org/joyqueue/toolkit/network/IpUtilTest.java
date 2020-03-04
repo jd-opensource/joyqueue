@@ -15,8 +15,6 @@
  */
 package org.joyqueue.toolkit.network;
 
-import org.joyqueue.toolkit.network.IpUtil;
-import org.joyqueue.toolkit.network.Lan;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -25,20 +25,20 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.vertx.core.Vertx;
 import org.joyqueue.exception.ValidationException;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.GenericValue;
 import org.joyqueue.handler.annotation.Operator;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.message.AuditLogMessage;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.message.MessageType;
 import org.joyqueue.model.Query;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.nsr.NsrService;
-import io.vertx.core.Vertx;
 
 /**
  * Created by wangxiaofei1 on 2019/1/4.

@@ -17,16 +17,16 @@ package org.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.message.BrokerMessage;
-import org.joyqueue.network.command.FetchTopicMessageResponse;
 import org.joyqueue.network.command.FetchTopicMessageAckData;
+import org.joyqueue.network.command.FetchTopicMessageResponse;
 import org.joyqueue.network.command.JoyQueueCommandType;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteBuffer;
 import java.util.List;

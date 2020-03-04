@@ -16,6 +16,7 @@
 package org.joyqueue.sync;
 
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.ApplicationUser;
@@ -26,7 +27,6 @@ import org.joyqueue.model.domain.User.UserStatus;
 import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.UserService;
 import org.joyqueue.util.NullUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

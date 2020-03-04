@@ -15,10 +15,10 @@
  */
 package org.joyqueue.repository;
 
-import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.PageResult;
-import org.joyqueue.model.query.QApplication;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.Application;
+import org.joyqueue.model.query.QApplication;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

@@ -15,8 +15,8 @@
  */
 package org.joyqueue.client.internal.common.compress;
 
-import org.joyqueue.client.internal.Plugins;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.client.internal.Plugins;
 
 /**
  * CompressorManager

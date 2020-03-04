@@ -15,11 +15,11 @@
  */
 package org.joyqueue.server.archive.store;
 
+import org.apache.hadoop.hbase.util.Bytes;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.hbase.HBaseClient;
 import org.joyqueue.toolkit.lang.Pair;
-import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 import java.util.LinkedList;

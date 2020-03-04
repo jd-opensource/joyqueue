@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -657,10 +658,15 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             return;
         }
 
-        for (Map.Entry<TopicName, TopicConfig> topicEntry : localTopics.entrySet()) {
-            TopicConfig topicConfig = topicEntry.getValue();
-            List<org.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getLocalConsumersByTopic(topicConfig.getName()));
-            broadcastConsumers.removeIf(consumer -> !consumer.getTopicType().equals(TopicType.BROADCAST));
+        for (TopicConfig topicConfig : localTopics) {
+            List<org.joyqueue.domain.Consumer> broadcastConsumers = Lists.newArrayList(clusterManager.getNameService().getConsumerByTopic(topicConfig.getName()));
+            Iterator<org.joyqueue.domain.Consumer> iterator = broadcastConsumers.iterator();
+            while (iterator.hasNext()) {
+                org.joyqueue.domain.Consumer consumer = iterator.next();
+                if (!consumer.getTopicType().equals(TopicType.BROADCAST)) {
+                    iterator.remove();
+                }
+            }
 
             if (CollectionUtils.isEmpty(broadcastConsumers)) {
                 continue;

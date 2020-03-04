@@ -1,17 +1,5 @@
 package org.chubao.joyqueue.store.journalkeeper;
 
-import org.joyqueue.domain.QosLevel;
-import org.joyqueue.exception.JoyQueueCode;
-import org.joyqueue.store.PartitionGroupStore;
-import org.joyqueue.store.ReadResult;
-import org.joyqueue.store.WriteRequest;
-import org.joyqueue.store.WriteResult;
-import org.chubao.joyqueue.store.journalkeeper.entry.JoyQueueEntryParser;
-import org.chubao.joyqueue.store.journalkeeper.transaction.JournalKeeperTransactionStore;
-import org.joyqueue.store.message.MessageParser;
-import org.joyqueue.store.transaction.TransactionStore;
-import org.joyqueue.toolkit.concurrent.EventListener;
-import org.joyqueue.toolkit.service.Service;
 import io.journalkeeper.core.api.AdminClient;
 import io.journalkeeper.core.api.ClusterConfiguration;
 import io.journalkeeper.core.api.JournalEntry;
@@ -23,6 +11,18 @@ import io.journalkeeper.exceptions.NotLeaderException;
 import io.journalkeeper.journalstore.JournalStoreClient;
 import io.journalkeeper.journalstore.JournalStoreServer;
 import io.journalkeeper.utils.event.EventWatcher;
+import org.chubao.joyqueue.store.journalkeeper.entry.JoyQueueEntryParser;
+import org.chubao.joyqueue.store.journalkeeper.transaction.JournalKeeperTransactionStore;
+import org.joyqueue.domain.QosLevel;
+import org.joyqueue.exception.JoyQueueCode;
+import org.joyqueue.store.PartitionGroupStore;
+import org.joyqueue.store.ReadResult;
+import org.joyqueue.store.WriteRequest;
+import org.joyqueue.store.WriteResult;
+import org.joyqueue.store.message.MessageParser;
+import org.joyqueue.store.transaction.TransactionStore;
+import org.joyqueue.toolkit.concurrent.EventListener;
+import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,8 +153,8 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
     @Override
     public CompletableFuture<WriteResult> asyncWrite(QosLevel qosLevel, WriteRequest... writeRequests) {
-        List<UpdateRequest<byte []>> updateRequests = Arrays.stream(writeRequests)
-                .map(r -> new UpdateRequest<>(r.getBuffer().array(), r.getPartition(), r.getBatchSize()))
+        List<UpdateRequest> updateRequests = Arrays.stream(writeRequests)
+                .map(r -> new UpdateRequest(r.getBuffer().array(), r.getPartition(), r.getBatchSize()))
                 .collect(Collectors.toList());
         return client.append(updateRequests, true, qosLevelToResponseConfig(qosLevel))
                 .thenApply(indices -> new WriteResult(JoyQueueCode.SUCCESS, indices.stream().mapToLong(i -> i).toArray()))
@@ -229,7 +229,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
             try {
                 client.waitForClusterReady(timeoutMs);
                 return true;
-            } catch (InterruptedException | TimeoutException ignored) {
+            } catch (TimeoutException ignored) {
                 return false;
             }
         });

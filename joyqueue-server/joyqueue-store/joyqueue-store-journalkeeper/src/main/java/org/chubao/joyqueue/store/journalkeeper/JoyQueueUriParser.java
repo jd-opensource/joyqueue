@@ -1,11 +1,11 @@
 package org.chubao.joyqueue.store.journalkeeper;
 
+import io.journalkeeper.rpc.URIParser;
+import io.journalkeeper.utils.spi.Singleton;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.helper.PortHelper;
-import io.journalkeeper.rpc.URIParser;
-import io.journalkeeper.utils.spi.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -18,6 +18,7 @@ package org.joyqueue.nsr.ignite.service;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.ConsumerEvent;
@@ -29,7 +30,6 @@ import org.joyqueue.nsr.ignite.model.IgniteConsumer;
 import org.joyqueue.nsr.ignite.model.IgniteConsumerConfig;
 import org.joyqueue.nsr.model.ConsumerQuery;
 import org.joyqueue.nsr.service.internal.ConsumerInternalService;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -17,6 +17,8 @@ package org.joyqueue.client.internal.metadata.converter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.metadata.domain.ClusterMetadata;
 import org.joyqueue.client.internal.metadata.domain.PartitionGroupMetadata;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
@@ -27,8 +29,6 @@ import org.joyqueue.network.command.Topic;
 import org.joyqueue.network.command.TopicPartition;
 import org.joyqueue.network.command.TopicPartitionGroup;
 import org.joyqueue.network.domain.BrokerNode;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;

@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.buffer;
 
-import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.junit.Assert;

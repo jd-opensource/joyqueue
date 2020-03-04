@@ -18,6 +18,7 @@ package org.joyqueue.client.internal.producer.support;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.exception.ClientException;
 import org.joyqueue.client.internal.producer.MessageSender;
 import org.joyqueue.client.internal.producer.callback.AsyncBatchSendCallback;
@@ -48,7 +49,6 @@ import org.joyqueue.network.domain.BrokerNode;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

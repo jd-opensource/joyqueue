@@ -17,8 +17,6 @@ package org.joyqueue.broker.consumer;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by chengzhiliang on 2018/10/24.
  */

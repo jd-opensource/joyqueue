@@ -19,6 +19,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.client.internal.consumer.ConsumerIndexManager;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
@@ -26,7 +27,6 @@ import org.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import org.joyqueue.client.internal.consumer.domain.LocalIndexData;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

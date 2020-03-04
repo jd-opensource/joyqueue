@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.producer.message;
 
-import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.KeyValue;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 
 import java.util.Collections;
 import java.util.Map;

@@ -15,8 +15,8 @@
  */
 package org.joyqueue.nsr.ignite.model;
 
-import org.joyqueue.domain.ConsumeRetry;
 import org.apache.ignite.cache.query.annotations.QuerySqlField;
+import org.joyqueue.domain.ConsumeRetry;
 
 /**
  * @author wylixiaobin

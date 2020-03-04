@@ -15,8 +15,10 @@
  */
 package org.joyqueue.broker.protocol.network;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
+import org.joyqueue.broker.polling.LongPollingManager;
 import org.joyqueue.broker.protocol.JoyQueueConsts;
 import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.config.JoyQueueConfig;
@@ -24,14 +26,12 @@ import org.joyqueue.broker.protocol.coordinator.Coordinator;
 import org.joyqueue.broker.protocol.coordinator.GroupMetadataManager;
 import org.joyqueue.broker.protocol.coordinator.assignment.PartitionAssignmentHandler;
 import org.joyqueue.broker.protocol.network.helper.JoyQueueProtocolHelper;
-import org.joyqueue.broker.polling.LongPollingManager;
 import org.joyqueue.network.protocol.ExceptionHandlerProvider;
 import org.joyqueue.network.protocol.ProtocolService;
 import org.joyqueue.network.transport.codec.CodecFactory;
 import org.joyqueue.network.transport.command.handler.CommandHandlerFactory;
 import org.joyqueue.network.transport.command.handler.ExceptionHandler;
 import org.joyqueue.toolkit.service.Service;
-import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueProtocol

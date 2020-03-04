@@ -15,14 +15,14 @@
  */
 package org.joyqueue.broker.kafka.producer;
 
-import org.joyqueue.broker.kafka.conf.KafkaConfigs;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.record.CompressionType;
+import org.joyqueue.broker.kafka.conf.KafkaConfigs;
+import org.joyqueue.toolkit.time.SystemClock;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;

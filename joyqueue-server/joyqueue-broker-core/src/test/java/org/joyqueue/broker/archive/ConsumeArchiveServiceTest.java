@@ -15,8 +15,6 @@
  */
 package org.joyqueue.broker.archive;
 
-import org.joyqueue.broker.archive.ArchiveSerializer;
-import org.joyqueue.broker.archive.ConsumeArchiveService;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.junit.Assert;

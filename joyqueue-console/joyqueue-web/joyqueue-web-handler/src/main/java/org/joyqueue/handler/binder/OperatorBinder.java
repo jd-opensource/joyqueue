@@ -16,14 +16,14 @@
 package org.joyqueue.handler.binder;
 
 
-import org.joyqueue.handler.annotation.Operator;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.model.domain.Application;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.User;
 import com.jd.laf.binding.binder.Binder;
 import com.jd.laf.binding.reflect.exception.ReflectionException;
 import io.vertx.ext.web.RoutingContext;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.annotation.Operator;
+import org.joyqueue.model.domain.Application;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.User;
 
 /**
  * operator binder

@@ -18,6 +18,7 @@ package org.joyqueue.client.internal.consumer.converter.kafka;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.client.internal.consumer.converter.MessageConverter;
 import org.joyqueue.client.internal.consumer.converter.kafka.compressor.KafkaCompressionCodec;
 import org.joyqueue.client.internal.consumer.converter.kafka.compressor.KafkaCompressionCodecFactory;
@@ -25,7 +26,6 @@ import org.joyqueue.client.internal.consumer.converter.kafka.compressor.stream.B
 import org.joyqueue.client.internal.exception.ClientException;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

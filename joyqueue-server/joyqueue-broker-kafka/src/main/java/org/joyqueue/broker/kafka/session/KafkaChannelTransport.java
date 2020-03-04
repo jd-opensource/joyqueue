@@ -15,13 +15,13 @@
  */
 package org.joyqueue.broker.kafka.session;
 
+import io.netty.channel.Channel;
 import org.joyqueue.network.transport.ChannelTransport;
 import org.joyqueue.network.transport.TransportAttribute;
 import org.joyqueue.network.transport.TransportState;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.exception.TransportException;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

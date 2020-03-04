@@ -15,8 +15,6 @@
  */
 package org.joyqueue.toolkit.reflect;
 
-import org.joyqueue.toolkit.reflect.Reflect;
-import org.joyqueue.toolkit.reflect.ReflectException;
 import org.junit.Assert;
 import org.junit.Test;
 

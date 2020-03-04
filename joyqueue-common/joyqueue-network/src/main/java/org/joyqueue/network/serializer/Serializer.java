@@ -16,6 +16,7 @@
 package org.joyqueue.network.serializer;
 
 import com.google.common.base.Charsets;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.ClientType;
@@ -31,13 +32,12 @@ import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.BrokerPrepare;
 import org.joyqueue.message.BrokerRollback;
 import org.joyqueue.message.Message;
+import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.toolkit.io.Compressors;
 import org.joyqueue.toolkit.io.Zip;
 import org.joyqueue.toolkit.io.ZipUtil;
 import org.joyqueue.toolkit.retry.RetryPolicy;
 import org.joyqueue.toolkit.serialize.AbstractSerializer;
-import io.netty.buffer.ByteBuf;
-import org.joyqueue.network.transport.codec.JoyQueueHeader;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;

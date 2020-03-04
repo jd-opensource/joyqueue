@@ -20,6 +20,7 @@ import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
@@ -34,7 +35,6 @@ import org.joyqueue.model.query.QPartitionGroupReplica;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.PartitionGroupReplicaService;
 import org.joyqueue.service.TopicPartitionGroupService;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

@@ -15,12 +15,12 @@
  */
 package org.joyqueue.nsr.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.transport.command.Header;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.nsr.network.NsrPayloadCodec;
 import org.joyqueue.nsr.network.command.GetBroker;
 import org.joyqueue.nsr.network.command.NsrCommandType;
-import io.netty.buffer.ByteBuf;
 
 /**
  * @author wylixiaobin

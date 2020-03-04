@@ -16,6 +16,7 @@
 package org.joyqueue.nsr.network.codec;
 
 import com.alibaba.fastjson.JSON;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.event.NameServerEvent;
 import org.joyqueue.network.serializer.Serializer;
@@ -25,7 +26,6 @@ import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.nsr.network.NsrPayloadCodec;
 import org.joyqueue.nsr.network.command.NsrCommandType;
 import org.joyqueue.nsr.network.command.PushNameServerEvent;
-import io.netty.buffer.ByteBuf;
 
 /**
  * @author wylixiaobin

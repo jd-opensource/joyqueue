@@ -15,10 +15,10 @@
  */
 package org.joyqueue.handler.message;
 
-import org.joyqueue.service.OperLogService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.MessageHandler;
 import io.vertx.core.eventbus.Message;
+import org.joyqueue.service.OperLogService;
 
 /**
  * 操作日志消息处理器

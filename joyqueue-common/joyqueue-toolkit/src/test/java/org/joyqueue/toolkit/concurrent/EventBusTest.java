@@ -15,8 +15,6 @@
  */
 package org.joyqueue.toolkit.concurrent;
 
-import org.joyqueue.toolkit.concurrent.EventBus;
-import org.joyqueue.toolkit.concurrent.EventListener;
 import org.junit.Assert;
 import org.junit.Test;
 

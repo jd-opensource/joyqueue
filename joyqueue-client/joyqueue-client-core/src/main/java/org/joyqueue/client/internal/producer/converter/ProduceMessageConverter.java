@@ -16,6 +16,7 @@
 package org.joyqueue.client.internal.producer.converter;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.client.internal.common.compress.CompressUtils;
 import org.joyqueue.client.internal.common.compress.Compressor;
 import org.joyqueue.client.internal.common.compress.CompressorManager;
@@ -27,7 +28,6 @@ import org.joyqueue.message.SourceType;
 import org.joyqueue.network.serializer.BatchMessageSerializer;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,10 @@
 package org.chubao.joyqueue.store.journalkeeper.entry;
 
-import org.joyqueue.store.message.BatchMessageParser;
-import org.joyqueue.store.message.MessageParser;
 import io.journalkeeper.core.api.JournalEntry;
 import io.journalkeeper.core.api.JournalEntryParser;
 import io.journalkeeper.core.entry.DefaultJournalEntry;
+import org.joyqueue.store.message.BatchMessageParser;
+import org.joyqueue.store.message.MessageParser;
 
 import java.nio.ByteBuffer;
 

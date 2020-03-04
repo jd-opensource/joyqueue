@@ -15,8 +15,8 @@
  */
 package org.joyqueue.client.internal.metadata.domain;
 
-import org.joyqueue.network.domain.BrokerNode;
 import com.google.common.base.Objects;
+import org.joyqueue.network.domain.BrokerNode;
 
 import java.io.Serializable;
 

@@ -15,9 +15,9 @@
  */
 package io.openmessaging.joyqueue.consumer.extension;
 
+import io.openmessaging.joyqueue.extension.AbstractExtensionAdapter;
 import org.joyqueue.client.internal.consumer.MessageConsumer;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
-import io.openmessaging.joyqueue.extension.AbstractExtensionAdapter;
 
 /**
  * ExtensionAdapter

@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.kafka.coordinator.transaction.synchronizer;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionIdManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionMarker;
@@ -27,7 +28,6 @@ import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

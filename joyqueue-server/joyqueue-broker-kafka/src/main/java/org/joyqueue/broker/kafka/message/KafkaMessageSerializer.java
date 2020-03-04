@@ -15,14 +15,14 @@
  */
 package org.joyqueue.broker.kafka.message;
 
+import io.netty.buffer.ByteBuf;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.message.serializer.AbstractKafkaMessageSerializer;
 import org.joyqueue.broker.kafka.message.serializer.KafkaMessageV0Serializer;
 import org.joyqueue.broker.kafka.message.serializer.KafkaMessageV1Serializer;
 import org.joyqueue.broker.kafka.message.serializer.KafkaMessageV2Serializer;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
-import io.netty.buffer.ByteBuf;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.nio.ByteBuffer;
 import java.util.List;

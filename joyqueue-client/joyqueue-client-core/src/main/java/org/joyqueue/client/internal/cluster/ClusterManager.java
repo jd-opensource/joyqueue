@@ -15,16 +15,16 @@
  */
 package org.joyqueue.client.internal.cluster;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.cluster.domain.TopicMetadataHolder;
 import org.joyqueue.client.internal.metadata.MetadataManager;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.client.internal.nameserver.NameServerConfigChecker;
-import com.google.common.base.Preconditions;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,8 +15,6 @@
  */
 package org.joyqueue.toolkit.stat;
 
-import org.joyqueue.toolkit.stat.TPStat;
-import org.joyqueue.toolkit.stat.TPStatBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 

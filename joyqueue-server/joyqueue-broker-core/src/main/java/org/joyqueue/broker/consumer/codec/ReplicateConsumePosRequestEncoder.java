@@ -16,6 +16,7 @@
 package org.joyqueue.broker.consumer.codec;
 
 import com.alibaba.fastjson.JSON;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.consumer.command.ReplicateConsumePosRequest;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
@@ -24,7 +25,6 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadEncoder;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.Map;
 

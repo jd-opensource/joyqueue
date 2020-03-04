@@ -17,8 +17,6 @@ package io.openmessaging.joyqueue.producer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.joyqueue.client.internal.producer.MessageProducer;
-import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.Future;
 import io.openmessaging.exception.OMSRuntimeException;
 import io.openmessaging.extension.Extension;
@@ -35,6 +33,8 @@ import io.openmessaging.message.Message;
 import io.openmessaging.producer.SendResult;
 import io.openmessaging.producer.TransactionalResult;
 import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 
 import java.util.List;
 import java.util.Optional;

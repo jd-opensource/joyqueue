@@ -15,14 +15,14 @@
  */
 package org.joyqueue.nsr.ignite.model;
 
-import org.joyqueue.domain.ClientType;
-import org.joyqueue.domain.Consumer;
-import org.joyqueue.domain.TopicName;
-import org.joyqueue.domain.TopicType;
 import org.apache.ignite.binary.BinaryObjectException;
 import org.apache.ignite.binary.BinaryReader;
 import org.apache.ignite.binary.BinaryWriter;
 import org.apache.ignite.binary.Binarylizable;
+import org.joyqueue.domain.ClientType;
+import org.joyqueue.domain.Consumer;
+import org.joyqueue.domain.TopicName;
+import org.joyqueue.domain.TopicType;
 
 
 /**

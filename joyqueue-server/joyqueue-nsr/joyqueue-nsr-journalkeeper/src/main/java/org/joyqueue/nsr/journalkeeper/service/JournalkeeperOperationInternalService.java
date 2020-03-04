@@ -15,9 +15,9 @@
  */
 package org.joyqueue.nsr.journalkeeper.service;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.nsr.journalkeeper.repository.BaseRepository;
 import org.joyqueue.nsr.service.internal.OperationInternalService;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
 

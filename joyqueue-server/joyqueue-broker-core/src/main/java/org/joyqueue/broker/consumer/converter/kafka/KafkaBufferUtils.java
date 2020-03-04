@@ -16,9 +16,9 @@
 package org.joyqueue.broker.consumer.converter.kafka;
 
 import com.google.common.base.Charsets;
-import org.joyqueue.toolkit.security.Crc32;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.ArrayUtils;
+import org.joyqueue.toolkit.security.Crc32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

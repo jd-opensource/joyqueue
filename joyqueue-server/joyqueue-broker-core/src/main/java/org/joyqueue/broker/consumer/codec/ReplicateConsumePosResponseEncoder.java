@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.consumer.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.consumer.command.ReplicateConsumePosResponse;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.codec.PayloadEncoder;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 /**
  * author: zhuduohui

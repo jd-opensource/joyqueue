@@ -18,13 +18,13 @@ package org.joyqueue.toolkit.validate;
 import org.joyqueue.toolkit.lang.Getter;
 import org.joyqueue.toolkit.lang.Getters;
 import org.joyqueue.toolkit.reflect.ReflectException;
+import org.joyqueue.toolkit.validate.annotation.DoubleRange;
 import org.joyqueue.toolkit.validate.annotation.NotEmpty;
 import org.joyqueue.toolkit.validate.annotation.NotNull;
+import org.joyqueue.toolkit.validate.annotation.Pattern;
 import org.joyqueue.toolkit.validate.annotation.Range;
 import org.joyqueue.toolkit.validate.annotation.Size;
-import org.joyqueue.toolkit.validate.annotation.Pattern;
 import org.joyqueue.toolkit.validate.annotation.Valid;
-import org.joyqueue.toolkit.validate.annotation.DoubleRange;
 
 import javax.xml.bind.ValidationException;
 import java.lang.annotation.Annotation;

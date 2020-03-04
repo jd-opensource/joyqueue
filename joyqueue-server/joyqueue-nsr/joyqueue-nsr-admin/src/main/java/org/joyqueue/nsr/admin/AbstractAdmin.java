@@ -19,6 +19,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import org.joyqueue.nsr.Admin;
 import org.joyqueue.nsr.CommandArgs;
+
 import java.util.Map;
 /**
  *  Only support sub command

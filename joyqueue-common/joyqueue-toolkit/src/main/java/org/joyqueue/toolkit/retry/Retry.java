@@ -15,8 +15,8 @@
  */
 package org.joyqueue.toolkit.retry;
 
-import org.joyqueue.toolkit.lang.Online;
 import org.joyqueue.toolkit.exception.Abnormity;
+import org.joyqueue.toolkit.lang.Online;
 import org.joyqueue.toolkit.time.SystemClock;
 
 import java.util.concurrent.Callable;

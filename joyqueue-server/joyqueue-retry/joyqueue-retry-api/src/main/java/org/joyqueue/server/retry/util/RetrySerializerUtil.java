@@ -15,9 +15,9 @@
  */
 package org.joyqueue.server.retry.util;
 
-import org.joyqueue.server.retry.model.RetryMessageModel;
 import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.server.retry.model.RetryMessageModel;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;

@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.protocol.handler.mqtt;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
@@ -29,7 +30,6 @@ import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.nsr.NameService;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashSet;
 import java.util.Set;

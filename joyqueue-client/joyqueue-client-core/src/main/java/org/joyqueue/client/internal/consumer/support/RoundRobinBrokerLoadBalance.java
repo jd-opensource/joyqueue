@@ -15,10 +15,10 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
+import com.jd.laf.extension.Extension;
 import org.joyqueue.client.internal.consumer.BrokerLoadBalance;
 import org.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignment;
 import org.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignments;
-import com.jd.laf.extension.Extension;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

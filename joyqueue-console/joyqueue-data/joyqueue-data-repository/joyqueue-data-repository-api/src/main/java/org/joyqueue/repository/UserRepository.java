@@ -15,10 +15,10 @@
  */
 package org.joyqueue.repository;
 
+import org.apache.ibatis.annotations.Param;
 import org.joyqueue.model.domain.ApplicationUser;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QUser;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

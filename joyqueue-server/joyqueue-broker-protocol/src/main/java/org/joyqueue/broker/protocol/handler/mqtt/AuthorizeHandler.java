@@ -15,10 +15,10 @@
  */
 package org.joyqueue.broker.protocol.handler.mqtt;
 
-import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.command.Authorization;
 import org.joyqueue.network.command.BooleanAck;

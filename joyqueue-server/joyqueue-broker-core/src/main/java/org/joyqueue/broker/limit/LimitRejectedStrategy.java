@@ -15,9 +15,9 @@
  */
 package org.joyqueue.broker.limit;
 
+import com.jd.laf.extension.Type;
 import org.joyqueue.broker.limit.domain.LimitContext;
 import org.joyqueue.network.transport.command.Command;
-import com.jd.laf.extension.Type;
 
 /**
  * LimitRejectedStrategy

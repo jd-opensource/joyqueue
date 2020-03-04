@@ -21,11 +21,12 @@ import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.Subscription;
-import org.joyqueue.nsr.admin.AdminClient;
-import org.joyqueue.nsr.admin.AppAdmin;
-import org.joyqueue.nsr.admin.BrokerAdmin;
-import org.joyqueue.nsr.admin.TopicAdmin;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.util.List;

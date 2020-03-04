@@ -13,6 +13,10 @@
  */
 package org.chubao.joyqueue.store.journalkeeper;
 
+import io.journalkeeper.core.api.RaftServer;
+import io.journalkeeper.rpc.URIParser;
+import io.journalkeeper.utils.event.EventType;
+import io.journalkeeper.utils.spi.ServiceSupport;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.store.PositionOverflowException;
@@ -25,10 +29,6 @@ import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.format.Format;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.toolkit.util.BaseDirUtils;
-import io.journalkeeper.core.api.RaftServer;
-import io.journalkeeper.rpc.URIParser;
-import io.journalkeeper.utils.event.EventType;
-import io.journalkeeper.utils.spi.ServiceSupport;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

@@ -15,6 +15,7 @@
  */
 package org.joyqueue.network.transport.support;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.transport.ChannelTransport;
 import org.joyqueue.network.transport.Transport;
@@ -24,7 +25,6 @@ import org.joyqueue.network.transport.config.TransportConfig;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
-import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;

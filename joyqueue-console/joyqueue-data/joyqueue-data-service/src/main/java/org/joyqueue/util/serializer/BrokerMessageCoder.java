@@ -15,16 +15,17 @@
  */
 package org.joyqueue.util.serializer;
 
-import org.joyqueue.message.JoyQueueLog;
+import com.google.common.base.Charsets;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.message.BrokerMessage;
+import org.joyqueue.message.JoyQueueLog;
 import org.joyqueue.message.Message;
 import org.joyqueue.network.serializer.JoyQueueMapTools;
 import org.joyqueue.toolkit.io.Compressors;
 import org.joyqueue.toolkit.io.Zip;
 import org.joyqueue.toolkit.io.ZipUtil;
-import com.google.common.base.Charsets;
 import org.joyqueue.toolkit.serialize.AbstractSerializer;
-import io.netty.buffer.ByteBuf;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Map;

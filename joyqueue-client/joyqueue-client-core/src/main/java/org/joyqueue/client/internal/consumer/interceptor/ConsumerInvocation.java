@@ -15,11 +15,11 @@
  */
 package org.joyqueue.client.internal.consumer.interceptor;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;

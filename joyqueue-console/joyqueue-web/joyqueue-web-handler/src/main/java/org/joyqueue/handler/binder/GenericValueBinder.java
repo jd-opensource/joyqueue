@@ -15,10 +15,10 @@
  */
 package org.joyqueue.handler.binder;
 
-import org.joyqueue.handler.annotation.GenericValue;
 import com.jd.laf.binding.binder.Binder;
 import com.jd.laf.binding.reflect.exception.ReflectionException;
 import org.apache.commons.lang.WordUtils;
+import org.joyqueue.handler.annotation.GenericValue;
 
 /**
  * Generic value binder implement

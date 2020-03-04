@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.transport;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.ClientConsts;
 import org.joyqueue.client.internal.exception.ClientException;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
@@ -28,7 +29,6 @@ import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.JoyQueueCommand;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

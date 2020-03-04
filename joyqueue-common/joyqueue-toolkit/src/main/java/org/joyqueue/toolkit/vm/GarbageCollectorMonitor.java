@@ -15,8 +15,10 @@
  */
 
 package org.joyqueue.toolkit.vm;
+
 import org.joyqueue.toolkit.service.Service;
 import sun.misc.SharedSecrets;
+
 import javax.management.NotificationEmitter;
 import javax.management.NotificationListener;
 import java.lang.management.GarbageCollectorMXBean;

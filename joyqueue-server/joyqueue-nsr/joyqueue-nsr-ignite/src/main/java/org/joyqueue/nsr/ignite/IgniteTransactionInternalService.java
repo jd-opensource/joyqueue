@@ -15,11 +15,11 @@
  */
 package org.joyqueue.nsr.ignite;
 
-import org.joyqueue.nsr.service.internal.TransactionInternalService;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.transactions.Transaction;
 import org.apache.ignite.transactions.TransactionConcurrency;
 import org.apache.ignite.transactions.TransactionIsolation;
+import org.joyqueue.nsr.service.internal.TransactionInternalService;
 
 /**
  * IgniteTransactionInternalService

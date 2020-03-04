@@ -17,6 +17,7 @@ package org.joyqueue.broker.kafka.coordinator.group;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.command.JoinGroupRequest;
 import org.joyqueue.broker.kafka.command.SyncGroupAssignment;
@@ -29,7 +30,6 @@ import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupState;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

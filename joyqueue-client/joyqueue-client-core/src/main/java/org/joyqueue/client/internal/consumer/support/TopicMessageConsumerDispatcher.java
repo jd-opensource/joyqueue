@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.consumer.BatchMessageListener;
 import org.joyqueue.client.internal.consumer.MessageListener;
 import org.joyqueue.client.internal.consumer.MessagePoller;
@@ -27,7 +28,6 @@ import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.domain.ConsumerPolicy;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

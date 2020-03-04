@@ -15,9 +15,6 @@
  */
 package org.joyqueue.network.transport;
 
-import org.joyqueue.network.transport.config.ServerConfig;
-import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
-import org.joyqueue.toolkit.service.Service;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -29,6 +26,9 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.joyqueue.network.transport.config.ServerConfig;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
+import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

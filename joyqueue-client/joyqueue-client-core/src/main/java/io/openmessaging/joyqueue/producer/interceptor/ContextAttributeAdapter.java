@@ -16,8 +16,8 @@
 package io.openmessaging.joyqueue.producer.interceptor;
 
 import com.google.common.collect.Sets;
-import org.joyqueue.client.internal.producer.interceptor.ProduceContext;
 import io.openmessaging.KeyValue;
+import org.joyqueue.client.internal.producer.interceptor.ProduceContext;
 
 import java.util.Collections;
 import java.util.Map;

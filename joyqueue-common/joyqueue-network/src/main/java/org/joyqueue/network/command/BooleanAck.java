@@ -15,12 +15,12 @@
  */
 package org.joyqueue.network.command;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.command.JoyQueuePayload;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * 布尔应答.

@@ -16,12 +16,12 @@
 package org.joyqueue.broker.protocol.handler;
 
 import com.google.common.collect.Maps;
+import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.JoyQueueContextAware;
 import org.joyqueue.broker.protocol.converter.BrokerNodeConverter;
 import org.joyqueue.broker.protocol.coordinator.Coordinator;
-import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.DataCenter;
 import org.joyqueue.exception.JoyQueueCode;

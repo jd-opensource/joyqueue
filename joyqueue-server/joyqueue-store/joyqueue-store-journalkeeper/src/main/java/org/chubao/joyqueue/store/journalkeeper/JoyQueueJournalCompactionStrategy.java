@@ -1,12 +1,12 @@
 package org.chubao.joyqueue.store.journalkeeper;
 
+import io.journalkeeper.core.journal.Journal;
+import io.journalkeeper.core.strategy.JournalCompactionStrategy;
+import io.journalkeeper.utils.spi.Singleton;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.toolkit.time.SystemClock;
-import io.journalkeeper.core.journal.Journal;
-import io.journalkeeper.core.strategy.JournalCompactionStrategy;
-import io.journalkeeper.utils.spi.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

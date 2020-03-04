@@ -15,14 +15,14 @@
  */
 package org.joyqueue.broker.mqtt.util;
 
-import org.joyqueue.message.BrokerMessage;
-import org.joyqueue.message.SourceType;
-import org.joyqueue.toolkit.network.IpUtil;
-import org.joyqueue.toolkit.time.SystemClock;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import org.joyqueue.message.BrokerMessage;
+import org.joyqueue.message.SourceType;
+import org.joyqueue.toolkit.network.IpUtil;
+import org.joyqueue.toolkit.time.SystemClock;
 
 import java.util.zip.CRC32;
 

@@ -15,6 +15,7 @@
  */
 package org.joyqueue.nsr.network.handler;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Consumer;
@@ -90,7 +91,6 @@ import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

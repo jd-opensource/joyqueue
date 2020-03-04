@@ -15,6 +15,7 @@
  */
 package org.joyqueue.server.retry.remote.command.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
@@ -22,7 +23,6 @@ import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.server.retry.remote.command.PutRetry;
 import org.joyqueue.server.retry.util.RetrySerializerUtil;
-import io.netty.buffer.ByteBuf;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

@@ -15,13 +15,13 @@
  */
 package org.joyqueue.handler.routing.validate;
 
-import org.joyqueue.handler.error.ConfigException;
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.model.domain.User;
-import org.joyqueue.model.domain.User.UserRole;
 import com.jd.laf.web.vertx.RoutingHandler;
 import io.vertx.ext.web.RoutingContext;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.error.ConfigException;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.model.domain.User;
+import org.joyqueue.model.domain.User.UserRole;
 
 /**
  * 验证系统管理所需要的管理员角色

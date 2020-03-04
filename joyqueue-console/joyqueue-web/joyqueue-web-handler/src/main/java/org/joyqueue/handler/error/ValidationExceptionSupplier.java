@@ -15,10 +15,10 @@
  */
 package org.joyqueue.handler.error;
 
-import org.joyqueue.exception.ValidationException;
 import com.jd.laf.web.vertx.response.ErrorSupplier;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.joyqueue.exception.ValidationException;
 
 /**
  * Form validation exception conversion

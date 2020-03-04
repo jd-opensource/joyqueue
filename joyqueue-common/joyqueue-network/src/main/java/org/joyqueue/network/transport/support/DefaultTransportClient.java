@@ -15,6 +15,9 @@
  */
 package org.joyqueue.network.transport.support;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
 import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.event.TransportEventHandler;
 import org.joyqueue.network.handler.ClientConnectionHandler;
@@ -34,9 +37,6 @@ import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.network.transport.handler.CommandInvocation;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
 
 import java.net.SocketAddress;
 

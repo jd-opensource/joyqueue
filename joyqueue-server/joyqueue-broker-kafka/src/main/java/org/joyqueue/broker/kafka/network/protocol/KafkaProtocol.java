@@ -15,6 +15,10 @@
  */
 package org.joyqueue.broker.kafka.network.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.kafka.KafkaConsts;
@@ -28,12 +32,12 @@ import org.joyqueue.broker.kafka.coordinator.group.GroupMetadataManager;
 import org.joyqueue.broker.kafka.coordinator.group.GroupOffsetHandler;
 import org.joyqueue.broker.kafka.coordinator.group.GroupOffsetManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.ProducerIdManager;
+import org.joyqueue.broker.kafka.coordinator.transaction.ProducerSequenceManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionHandler;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionIdManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionMetadataManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionOffsetHandler;
-import org.joyqueue.broker.kafka.coordinator.transaction.ProducerSequenceManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.completion.TransactionCompletionHandler;
 import org.joyqueue.broker.kafka.coordinator.transaction.completion.TransactionCompletionScheduler;
 import org.joyqueue.broker.kafka.coordinator.transaction.log.TransactionLog;
@@ -50,10 +54,6 @@ import org.joyqueue.network.transport.codec.CodecFactory;
 import org.joyqueue.network.transport.command.handler.CommandHandlerFactory;
 import org.joyqueue.network.transport.command.handler.ExceptionHandler;
 import org.joyqueue.toolkit.service.Service;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

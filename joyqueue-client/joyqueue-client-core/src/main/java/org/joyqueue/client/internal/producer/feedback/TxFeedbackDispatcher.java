@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.producer.feedback;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.MessageSender;
@@ -27,7 +28,6 @@ import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.command.TxStatus;
 import org.joyqueue.network.domain.BrokerNode;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

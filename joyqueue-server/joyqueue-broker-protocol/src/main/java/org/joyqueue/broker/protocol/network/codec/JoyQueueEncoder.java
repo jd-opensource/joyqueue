@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.protocol.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.transport.codec.Codec;
 import org.joyqueue.network.transport.codec.DefaultEncoder;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
@@ -22,7 +23,6 @@ import org.joyqueue.network.transport.codec.PayloadCodecFactory;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.JoyQueuePayload;
 import org.joyqueue.network.transport.exception.TransportException;
-import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueEncoder

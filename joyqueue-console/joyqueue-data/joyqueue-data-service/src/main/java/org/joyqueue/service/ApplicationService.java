@@ -15,11 +15,11 @@
  */
 package org.joyqueue.service;
 
-import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.TopicUnsubscribedApplication;
 import org.joyqueue.model.query.QApplication;
-import org.joyqueue.model.QPageQuery;
 
 import java.util.List;
 

@@ -15,12 +15,12 @@
  */
 package org.joyqueue.network.transport.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Header;
 import org.joyqueue.network.transport.command.JoyQueuePayload;
 import org.joyqueue.network.transport.command.Payload;
 import org.joyqueue.network.transport.exception.TransportException;
-import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

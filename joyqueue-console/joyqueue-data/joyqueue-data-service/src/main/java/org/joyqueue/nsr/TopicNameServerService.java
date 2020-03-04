@@ -15,13 +15,13 @@
  */
 package org.joyqueue.nsr;
 
+import org.apache.ibatis.annotations.Param;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Topic;
 import org.joyqueue.model.domain.TopicPartitionGroup;
 import org.joyqueue.model.query.QTopic;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

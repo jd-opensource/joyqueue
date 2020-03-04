@@ -16,8 +16,8 @@
 package org.joyqueue.nsr.util;
 
 
-import org.joyqueue.toolkit.URL;
 import com.jd.laf.extension.Type;
+import org.joyqueue.toolkit.URL;
 
 /**
  * 数据中心匹配器

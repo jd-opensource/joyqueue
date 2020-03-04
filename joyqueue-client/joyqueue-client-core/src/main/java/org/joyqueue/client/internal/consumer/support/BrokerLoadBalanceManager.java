@@ -15,10 +15,10 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
-import com.google.common.collect.Maps;
-import org.joyqueue.client.internal.consumer.BrokerLoadBalance;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.joyqueue.client.internal.Plugins;
+import org.joyqueue.client.internal.consumer.BrokerLoadBalance;
 
 import java.util.concurrent.ConcurrentMap;
 

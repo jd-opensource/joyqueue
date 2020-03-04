@@ -15,9 +15,9 @@
  */
 package org.joyqueue.broker.mqtt.cluster;
 
+import com.google.common.base.Strings;
 import org.joyqueue.broker.mqtt.connection.MqttConnection;
 import org.joyqueue.network.session.Producer;
-import com.google.common.base.Strings;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

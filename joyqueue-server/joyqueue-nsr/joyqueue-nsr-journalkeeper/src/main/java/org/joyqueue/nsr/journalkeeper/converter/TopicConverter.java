@@ -16,11 +16,11 @@
 package org.joyqueue.nsr.journalkeeper.converter;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Topic;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.nsr.journalkeeper.domain.TopicDTO;
 import org.joyqueue.nsr.journalkeeper.helper.ArrayHelper;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;

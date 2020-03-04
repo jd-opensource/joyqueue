@@ -15,13 +15,13 @@
  */
 package org.joyqueue.broker.mqtt.handler;
 
-import org.joyqueue.broker.mqtt.config.MqttConfig;
-import org.joyqueue.broker.mqtt.config.MqttContext;
+import io.netty.handler.codec.mqtt.MqttMessageType;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.mqtt.command.MqttHandlerFactory;
+import org.joyqueue.broker.mqtt.config.MqttConfig;
+import org.joyqueue.broker.mqtt.config.MqttContext;
 import org.joyqueue.network.transport.command.handler.CommandHandlerFactory;
 import org.joyqueue.toolkit.service.Service;
-import io.netty.handler.codec.mqtt.MqttMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

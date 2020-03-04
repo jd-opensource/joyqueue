@@ -15,10 +15,10 @@
  */
 package org.joyqueue.network.command;
 
-import org.joyqueue.domain.Subscription;
-import org.joyqueue.network.transport.command.JoyQueuePayload;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import org.joyqueue.domain.Subscription;
+import org.joyqueue.network.transport.command.JoyQueuePayload;
 
 import java.util.List;
 

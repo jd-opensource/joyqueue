@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.index.handler;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.index.command.ConsumeIndexQueryRequest;
@@ -31,7 +32,6 @@ import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.apache.commons.collections.map.HashedMap;
 
 import java.util.List;
 import java.util.Map;

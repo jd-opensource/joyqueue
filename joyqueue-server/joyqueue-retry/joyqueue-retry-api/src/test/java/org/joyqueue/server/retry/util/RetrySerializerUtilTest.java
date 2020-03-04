@@ -15,10 +15,9 @@
  */
 package org.joyqueue.server.retry.util;
 
-import org.joyqueue.server.retry.model.RetryMessageModel;
-import org.joyqueue.server.retry.util.RetrySerializerUtil;
-import org.joyqueue.toolkit.time.SystemClock;
 import io.netty.buffer.ByteBufAllocator;
+import org.joyqueue.server.retry.model.RetryMessageModel;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.junit.Assert;
 import org.junit.Test;
 

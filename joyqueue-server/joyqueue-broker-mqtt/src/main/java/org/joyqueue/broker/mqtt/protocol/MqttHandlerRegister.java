@@ -16,10 +16,10 @@
 package org.joyqueue.broker.mqtt.protocol;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.mqtt.command.MqttHandlerFactory;
 import org.joyqueue.broker.mqtt.handler.Handler;
 import org.joyqueue.network.transport.command.handler.CommandHandlerFactory;
-import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
 

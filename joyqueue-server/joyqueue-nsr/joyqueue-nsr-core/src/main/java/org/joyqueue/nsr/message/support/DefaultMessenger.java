@@ -16,6 +16,7 @@
 package org.joyqueue.nsr.message.support;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.exception.JoyQueueCode;
@@ -36,7 +37,6 @@ import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

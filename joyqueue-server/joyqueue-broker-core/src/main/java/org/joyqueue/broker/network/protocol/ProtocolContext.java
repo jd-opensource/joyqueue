@@ -15,10 +15,10 @@
  */
 package org.joyqueue.broker.network.protocol;
 
+import io.netty.channel.ChannelHandler;
 import org.joyqueue.network.protocol.Protocol;
 import org.joyqueue.network.protocol.ProtocolService;
 import org.joyqueue.network.transport.TransportServer;
-import io.netty.channel.ChannelHandler;
 
 public class ProtocolContext {
 

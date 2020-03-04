@@ -17,9 +17,9 @@ package org.joyqueue.broker.kafka.coordinator.transaction.helper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import org.joyqueue.domain.Broker;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;

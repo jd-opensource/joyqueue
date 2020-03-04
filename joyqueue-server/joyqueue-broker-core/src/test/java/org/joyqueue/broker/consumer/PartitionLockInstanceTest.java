@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.consumer;
 
-import org.joyqueue.broker.consumer.PartitionLockInstance;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.junit.Assert;
 import org.junit.Test;

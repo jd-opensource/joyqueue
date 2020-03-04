@@ -15,10 +15,10 @@
  */
 package org.joyqueue.network.transport.support;
 
+import io.netty.channel.ChannelHandler;
 import org.joyqueue.network.transport.TransportServer;
 import org.joyqueue.network.transport.TransportServerFactory;
 import org.joyqueue.network.transport.config.ServerConfig;
-import io.netty.channel.ChannelHandler;
 
 /**
  * ChannelTransportServerFactory

@@ -15,8 +15,8 @@
  */
 package org.joyqueue.toolkit.io.snappy;
 
-import org.joyqueue.toolkit.io.Files;
 import com.google.common.base.Preconditions;
+import org.joyqueue.toolkit.io.Files;
 import org.joyqueue.toolkit.security.Crc32C;
 
 import java.io.EOFException;

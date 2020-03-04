@@ -17,13 +17,15 @@ package org.joyqueue.broker.protocol.handler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.JoyQueueContextAware;
 import org.joyqueue.broker.protocol.coordinator.Coordinator;
 import org.joyqueue.broker.protocol.coordinator.assignment.PartitionAssignmentHandler;
 import org.joyqueue.broker.protocol.coordinator.domain.PartitionAssignment;
-import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.domain.DataCenter;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
@@ -40,8 +42,6 @@ import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.nsr.NameService;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.producer.message;
 
-import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.message.Header;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 
 /**
  * MessageHeaderAdapter

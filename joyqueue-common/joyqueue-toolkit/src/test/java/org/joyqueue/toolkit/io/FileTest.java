@@ -15,8 +15,6 @@
  */
 package org.joyqueue.toolkit.io;
 
-import org.joyqueue.toolkit.io.Directory;
-import org.joyqueue.toolkit.io.Files;
 import org.junit.Test;
 
 public class FileTest {

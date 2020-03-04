@@ -15,8 +15,6 @@
  */
 package org.joyqueue.broker.consumer.filter;
 
-import org.joyqueue.broker.consumer.filter.FilterCallback;
-import org.joyqueue.broker.consumer.filter.FlagFilter;
 import org.joyqueue.exception.JoyQueueException;
 import org.junit.Assert;
 import org.junit.Test;

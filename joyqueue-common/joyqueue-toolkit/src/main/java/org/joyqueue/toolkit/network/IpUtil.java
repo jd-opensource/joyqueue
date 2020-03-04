@@ -17,8 +17,18 @@ package org.joyqueue.toolkit.network;
 
 import sun.net.util.IPAddressUtil;
 
-import java.net.*;
-import java.util.*;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Ipv4工具

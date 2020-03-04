@@ -16,11 +16,11 @@
 package org.joyqueue.broker.network;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.network.support.BrokerCommandHandlerRegistrar;
 import org.joyqueue.network.transport.command.support.DefaultCommandHandlerFactory;
-import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
 

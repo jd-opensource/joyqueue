@@ -15,12 +15,12 @@
  */
 package org.joyqueue.client.samples.api.interceptor;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.common.ordered.Ordered;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
 import org.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
 import org.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 

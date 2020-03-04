@@ -15,12 +15,12 @@
  */
 package org.joyqueue.broker.kafka;
 
-import org.joyqueue.broker.kafka.conf.KafkaConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.joyqueue.broker.kafka.conf.KafkaConfigs;
 
 import java.util.Arrays;
 import java.util.Properties;

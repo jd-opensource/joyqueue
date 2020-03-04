@@ -15,8 +15,8 @@
  */
 package io.openmessaging.joyqueue.extension;
 
-import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import io.openmessaging.extension.QueueMetaData;
+import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 
 /**
  * TopicMetadataConverter

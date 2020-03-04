@@ -15,9 +15,9 @@
  */
 package org.joyqueue.repository.mybatis.handler;
 
-import org.joyqueue.model.domain.EnumItem;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
+import org.joyqueue.model.domain.EnumItem;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;

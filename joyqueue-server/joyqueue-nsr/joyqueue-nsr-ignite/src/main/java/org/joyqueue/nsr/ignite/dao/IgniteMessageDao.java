@@ -16,21 +16,21 @@
 package org.joyqueue.nsr.ignite.dao;
 
 import com.google.inject.Inject;
-import org.joyqueue.nsr.ignite.model.IgniteMessage;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cache.QueryEntity;
 import org.apache.ignite.cache.QueryIndex;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.joyqueue.nsr.ignite.model.IgniteMessage;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import static org.joyqueue.nsr.ignite.model.IgniteBaseModel.SCHEMA;
 import static org.joyqueue.nsr.ignite.model.IgniteMessage.COLUMN_CONTENT;
-import static org.joyqueue.nsr.ignite.model.IgniteMessage.COLUMN_TYPE;
 import static org.joyqueue.nsr.ignite.model.IgniteMessage.COLUMN_MESSAGE_ID;
+import static org.joyqueue.nsr.ignite.model.IgniteMessage.COLUMN_TYPE;
 
 public class IgniteMessageDao extends IgniteDao {
     public static CacheConfiguration<String, IgniteMessage> cacheCfg;

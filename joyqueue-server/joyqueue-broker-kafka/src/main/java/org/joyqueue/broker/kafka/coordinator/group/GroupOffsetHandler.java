@@ -18,6 +18,7 @@ package org.joyqueue.broker.kafka.coordinator.group;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.Coordinator;
@@ -26,7 +27,6 @@ import org.joyqueue.broker.kafka.coordinator.group.domain.GroupState;
 import org.joyqueue.broker.kafka.model.OffsetAndMetadata;
 import org.joyqueue.broker.kafka.model.OffsetMetadataAndError;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

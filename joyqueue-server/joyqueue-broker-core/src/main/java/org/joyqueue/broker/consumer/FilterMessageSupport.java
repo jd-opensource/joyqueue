@@ -17,6 +17,8 @@ package org.joyqueue.broker.consumer;
 
 import com.alibaba.fastjson.JSON;
 import com.jd.laf.extension.ExtensionManager;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.filter.FilterCallback;
 import org.joyqueue.broker.consumer.filter.FilterPipeline;
@@ -31,8 +33,6 @@ import org.joyqueue.nsr.event.UpdateConsumerEvent;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.security.Hex;
 import org.joyqueue.toolkit.security.Md5;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

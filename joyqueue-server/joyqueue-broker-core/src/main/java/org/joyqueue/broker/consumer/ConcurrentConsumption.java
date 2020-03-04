@@ -16,6 +16,8 @@
 package org.joyqueue.broker.consumer;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.archive.ConsumeArchiveService;
 import org.joyqueue.broker.buffer.Serializer;
@@ -47,8 +49,6 @@ import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

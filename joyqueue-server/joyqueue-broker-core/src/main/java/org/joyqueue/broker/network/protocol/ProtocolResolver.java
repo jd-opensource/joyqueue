@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.network.protocol;
 
-import org.joyqueue.network.protocol.ProtocolService;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.apache.commons.lang3.ArrayUtils;
+import org.joyqueue.network.protocol.ProtocolService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

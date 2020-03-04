@@ -15,12 +15,6 @@
  */
 package org.joyqueue.nsr.ignite.dao.impl;
 
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.nsr.ignite.dao.IgniteDao;
-import org.joyqueue.nsr.ignite.dao.ProducerConfigDao;
-import org.joyqueue.nsr.ignite.model.IgniteProducerConfig;
-import org.joyqueue.nsr.model.ProducerQuery;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
@@ -28,6 +22,12 @@ import org.apache.ignite.cache.QueryEntity;
 import org.apache.ignite.cache.QueryIndex;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.nsr.ignite.dao.IgniteDao;
+import org.joyqueue.nsr.ignite.dao.ProducerConfigDao;
+import org.joyqueue.nsr.ignite.model.IgniteProducerConfig;
+import org.joyqueue.nsr.model.ProducerQuery;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -36,16 +36,16 @@ import java.util.List;
 import static org.joyqueue.nsr.ignite.model.IgniteBaseModel.SCHEMA;
 import static org.joyqueue.nsr.ignite.model.IgniteConsumerConfig.COLUMN_LIMIT_TPS;
 import static org.joyqueue.nsr.ignite.model.IgniteConsumerConfig.COLUMN_LIMIT_TRAFFIC;
+import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_APP;
+import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_ARCHIVE;
+import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_BLACK_LIST;
 import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_ID;
 import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_NAMESPACE;
-import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_TOPIC;
-import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_APP;
 import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_NEAR_BY;
-import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_ARCHIVE;
 import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_SINGLE;
-import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_WEIGHT;
-import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_BLACK_LIST;
 import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_TIMEOUT;
+import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_TOPIC;
+import static org.joyqueue.nsr.ignite.model.IgniteProducerConfig.COLUMN_WEIGHT;
 
 public class IgniteProducerConfigDao implements ProducerConfigDao {
     public static final String CACHE_NAME = "producer_config";

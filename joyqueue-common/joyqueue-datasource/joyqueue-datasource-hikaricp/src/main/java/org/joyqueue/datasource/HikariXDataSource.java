@@ -16,7 +16,6 @@
 package org.joyqueue.datasource;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.joyqueue.datasource.XDataSource;
 
 /**
  * Hikari 数据源

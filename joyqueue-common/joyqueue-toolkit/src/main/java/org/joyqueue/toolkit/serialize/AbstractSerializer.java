@@ -15,10 +15,10 @@
  */
 package org.joyqueue.toolkit.serialize;
 
-import org.joyqueue.toolkit.io.Compressors;
-import org.joyqueue.toolkit.io.Zip;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.toolkit.io.Compressors;
+import org.joyqueue.toolkit.io.Zip;
 
 import java.io.IOException;
 import java.io.StringReader;

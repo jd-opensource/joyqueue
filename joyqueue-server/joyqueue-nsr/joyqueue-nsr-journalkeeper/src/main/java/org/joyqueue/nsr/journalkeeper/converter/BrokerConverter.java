@@ -16,9 +16,9 @@
 package org.joyqueue.nsr.journalkeeper.converter;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.nsr.journalkeeper.domain.BrokerDTO;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;

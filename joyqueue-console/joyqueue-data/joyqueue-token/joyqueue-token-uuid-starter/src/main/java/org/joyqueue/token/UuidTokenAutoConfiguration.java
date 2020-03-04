@@ -15,8 +15,6 @@
  */
 package org.joyqueue.token;
 
-import org.joyqueue.token.TokenSupplier;
-import org.joyqueue.token.UuidTokenSupplier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

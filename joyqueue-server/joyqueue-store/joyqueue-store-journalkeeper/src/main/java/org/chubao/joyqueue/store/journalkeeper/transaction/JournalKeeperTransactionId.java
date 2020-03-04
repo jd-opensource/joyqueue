@@ -1,7 +1,7 @@
 package org.chubao.joyqueue.store.journalkeeper.transaction;
 
-import org.joyqueue.store.transaction.StoreTransactionId;
 import io.journalkeeper.core.api.transaction.TransactionId;
+import org.joyqueue.store.transaction.StoreTransactionId;
 
 /**
  * @author LiYue

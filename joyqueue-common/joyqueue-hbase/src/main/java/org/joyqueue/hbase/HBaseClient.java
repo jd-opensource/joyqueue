@@ -15,9 +15,6 @@
  */
 package org.joyqueue.hbase;
 
-import org.joyqueue.toolkit.lang.Close;
-import org.joyqueue.toolkit.lang.LifeCycle;
-import org.joyqueue.toolkit.lang.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -30,6 +27,9 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.joyqueue.toolkit.lang.Close;
+import org.joyqueue.toolkit.lang.LifeCycle;
+import org.joyqueue.toolkit.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,7 +15,6 @@
  */
 package org.joyqueue.toolkit.concurrent;
 
-import org.joyqueue.toolkit.concurrent.CAtomicLong;
 import org.junit.Assert;
 import org.junit.Test;
 

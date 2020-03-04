@@ -15,12 +15,12 @@
  */
 package org.joyqueue.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.BooleanAck;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 /**
  * BooleanAckCodec

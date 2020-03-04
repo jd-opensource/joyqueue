@@ -15,14 +15,14 @@
  */
 package org.joyqueue.broker.kafka.network.codec;
 
-import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.command.HeartbeatRequest;
 import org.joyqueue.broker.kafka.command.HeartbeatResponse;
 import org.joyqueue.broker.kafka.network.KafkaHeader;
+import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 /**
  * HeartbeatCodec

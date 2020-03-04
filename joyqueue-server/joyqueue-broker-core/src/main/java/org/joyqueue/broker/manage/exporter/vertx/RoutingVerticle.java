@@ -16,7 +16,6 @@
 package org.joyqueue.broker.manage.exporter.vertx;
 
 import com.google.common.collect.Maps;
-import org.joyqueue.toolkit.util.ASMUtils;
 import com.jd.laf.web.vertx.Environment;
 import com.jd.laf.web.vertx.RouteProvider;
 import com.jd.laf.web.vertx.config.RouteConfig;
@@ -25,6 +24,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Route;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.toolkit.util.ASMUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

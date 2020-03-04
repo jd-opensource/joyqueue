@@ -15,11 +15,11 @@
  */
 package org.joyqueue.network.transport.handler;
 
-import org.joyqueue.network.transport.command.Command;
-import org.joyqueue.network.transport.command.CommandDispatcher;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.joyqueue.network.transport.command.Command;
+import org.joyqueue.network.transport.command.CommandDispatcher;
 
 /**
  * CommandInvocation

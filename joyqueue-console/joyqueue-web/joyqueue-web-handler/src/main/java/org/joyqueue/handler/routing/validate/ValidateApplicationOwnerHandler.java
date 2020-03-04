@@ -15,16 +15,16 @@
  */
 package org.joyqueue.handler.routing.validate;
 
+import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.parameter.Parameters;
+import io.vertx.ext.web.RoutingContext;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.model.domain.User.UserRole;
 import org.joyqueue.service.UserService;
-import com.jd.laf.binding.annotation.Value;
-import com.jd.laf.web.vertx.parameter.Parameters;
-import io.vertx.ext.web.RoutingContext;
 
 /**
  * 判断当前用户是否是应用负责人

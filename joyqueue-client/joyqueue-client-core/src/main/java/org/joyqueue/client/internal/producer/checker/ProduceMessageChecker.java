@@ -15,12 +15,12 @@
  */
 package org.joyqueue.client.internal.producer.checker;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.producer.config.ProducerConfig;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import org.joyqueue.client.internal.producer.exception.ProducerException;
 import org.joyqueue.exception.JoyQueueCode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 

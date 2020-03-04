@@ -16,9 +16,9 @@
 package org.joyqueue.network.transport.command.support;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.network.transport.command.handler.filter.CommandHandlerFilter;
 import org.joyqueue.network.transport.command.handler.filter.CommandHandlerFilterFactory;
-import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
 

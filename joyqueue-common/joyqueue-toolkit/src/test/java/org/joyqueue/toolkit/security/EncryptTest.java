@@ -15,10 +15,6 @@
  */
 package org.joyqueue.toolkit.security;
 
-import org.joyqueue.toolkit.security.Crc32;
-import org.joyqueue.toolkit.security.Des;
-import org.joyqueue.toolkit.security.Encrypt;
-import org.joyqueue.toolkit.security.Md5;
 import org.junit.Assert;
 import org.junit.Test;
 

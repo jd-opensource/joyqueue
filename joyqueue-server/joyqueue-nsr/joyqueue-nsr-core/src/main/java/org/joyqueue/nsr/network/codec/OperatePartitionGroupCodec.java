@@ -15,6 +15,7 @@
  */
 package org.joyqueue.nsr.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.command.Header;
@@ -25,7 +26,6 @@ import org.joyqueue.nsr.network.command.NsrCommandType;
 import org.joyqueue.nsr.network.command.OperatePartitionGroup;
 import org.joyqueue.nsr.network.command.RemovePartitionGroup;
 import org.joyqueue.nsr.network.command.UpdatePartitionGroup;
-import io.netty.buffer.ByteBuf;
 
 /**
  * @author wylixiaobin

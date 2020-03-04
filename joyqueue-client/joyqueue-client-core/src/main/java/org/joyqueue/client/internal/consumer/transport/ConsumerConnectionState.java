@@ -18,11 +18,11 @@ package org.joyqueue.client.internal.consumer.transport;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.network.command.AddConsumerRequest;
 import org.joyqueue.network.command.RemoveConsumerRequest;
 import org.joyqueue.network.transport.command.JoyQueueCommand;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

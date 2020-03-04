@@ -1,12 +1,12 @@
 package org.chubao.joyqueue.store.journalkeeper;
 
-import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.domain.TopicName;
 import io.journalkeeper.rpc.URIParser;
 import io.journalkeeper.utils.event.Event;
 import io.journalkeeper.utils.event.EventType;
 import io.journalkeeper.utils.event.EventWatcher;
 import io.journalkeeper.utils.spi.ServiceSupport;
+import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.domain.TopicName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

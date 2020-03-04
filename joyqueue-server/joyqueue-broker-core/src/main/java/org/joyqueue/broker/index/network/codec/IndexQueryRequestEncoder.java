@@ -15,12 +15,12 @@
  */
 package org.joyqueue.broker.index.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.index.command.ConsumeIndexQueryRequest;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.PayloadEncoder;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 import java.util.Map;

@@ -16,14 +16,6 @@
 package org.joyqueue.handler.routing.command.application;
 
 
-import org.joyqueue.handler.error.ConfigException;
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.model.domain.Application;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.User;
-import org.joyqueue.sync.ApplicationInfo;
-import org.joyqueue.sync.SyncService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -32,6 +24,14 @@ import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import io.vertx.core.Vertx;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.error.ConfigException;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.model.domain.Application;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.User;
+import org.joyqueue.sync.ApplicationInfo;
+import org.joyqueue.sync.SyncService;
 
 import javax.validation.constraints.NotNull;
 

@@ -15,8 +15,8 @@
  */
 package org.joyqueue.client.internal.consumer.domain;
 
-import org.joyqueue.domain.TopicName;
 import com.google.common.base.Objects;
+import org.joyqueue.domain.TopicName;
 
 import java.io.Serializable;
 import java.util.Collections;

@@ -15,10 +15,10 @@
  */
 package org.joyqueue.broker.network.protocol.support;
 
+import io.netty.channel.ChannelHandler;
 import org.joyqueue.broker.network.protocol.MultiProtocolHandlerPipelineFactory;
 import org.joyqueue.broker.network.protocol.ProtocolHandlerPipelineFactory;
 import org.joyqueue.broker.network.protocol.ProtocolManager;
-import io.netty.channel.ChannelHandler;
 
 /**
  * DefaultMultiProtocolHandlerPipelineFactory

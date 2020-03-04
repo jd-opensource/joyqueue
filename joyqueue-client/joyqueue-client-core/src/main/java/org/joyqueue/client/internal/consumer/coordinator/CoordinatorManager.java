@@ -17,16 +17,16 @@ package org.joyqueue.client.internal.consumer.coordinator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.client.internal.cluster.ClusterClient;
 import org.joyqueue.client.internal.cluster.ClusterClientManager;
 import org.joyqueue.exception.JoyQueueCode;
-import org.joyqueue.network.command.FetchAssignedPartitionResponse;
 import org.joyqueue.network.command.FetchAssignedPartitionData;
-import org.joyqueue.network.command.FindCoordinatorResponse;
+import org.joyqueue.network.command.FetchAssignedPartitionResponse;
 import org.joyqueue.network.command.FindCoordinatorAckData;
+import org.joyqueue.network.command.FindCoordinatorResponse;
 import org.joyqueue.network.domain.BrokerNode;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

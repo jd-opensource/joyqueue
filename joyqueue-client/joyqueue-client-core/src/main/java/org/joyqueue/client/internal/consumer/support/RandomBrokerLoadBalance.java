@@ -15,10 +15,10 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.joyqueue.client.internal.consumer.BrokerLoadBalance;
 import org.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignment;
 import org.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignments;
-import org.apache.commons.lang3.RandomUtils;
 
 import java.util.List;
 

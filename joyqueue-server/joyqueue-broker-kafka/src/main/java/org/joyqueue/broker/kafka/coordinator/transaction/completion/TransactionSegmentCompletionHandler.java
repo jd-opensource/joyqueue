@@ -17,6 +17,7 @@ package org.joyqueue.broker.kafka.coordinator.transaction.completion;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.Coordinator;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionMetadataManager;
@@ -30,7 +31,6 @@ import org.joyqueue.broker.kafka.coordinator.transaction.domain.UnCompletedTrans
 import org.joyqueue.broker.kafka.coordinator.transaction.log.TransactionLogSegment;
 import org.joyqueue.broker.kafka.coordinator.transaction.synchronizer.TransactionSynchronizer;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

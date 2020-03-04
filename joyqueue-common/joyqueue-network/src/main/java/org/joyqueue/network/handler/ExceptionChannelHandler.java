@@ -15,11 +15,11 @@
  */
 package org.joyqueue.network.handler;
 
+import io.netty.channel.ChannelHandlerAdapter;
+import io.netty.channel.ChannelHandlerContext;
 import org.joyqueue.network.transport.RequestBarrier;
 import org.joyqueue.network.transport.TransportHelper;
 import org.joyqueue.network.transport.command.handler.ExceptionHandler;
-import io.netty.channel.ChannelHandlerAdapter;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * ExceptionChannelHandler

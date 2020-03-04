@@ -15,14 +15,14 @@
  */
 package org.joyqueue.handler.routing;
 
-import org.joyqueue.model.domain.User;
-import org.joyqueue.service.UserService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.handler.RemoteIpHandler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
+import org.joyqueue.model.domain.User;
+import org.joyqueue.service.UserService;
 
 import javax.validation.constraints.NotNull;
 

@@ -16,8 +16,6 @@
 package org.joyqueue.repository.mybatis.interceptor;
 
 
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.QPageQuery;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.Intercepts;
@@ -27,6 +25,8 @@ import org.apache.ibatis.reflection.DefaultReflectorFactory;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
 
 import java.sql.Statement;
 import java.util.ArrayList;

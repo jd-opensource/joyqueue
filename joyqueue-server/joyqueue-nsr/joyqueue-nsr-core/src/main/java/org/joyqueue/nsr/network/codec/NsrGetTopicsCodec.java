@@ -17,10 +17,8 @@ package org.joyqueue.nsr.network.codec;
 
 import org.joyqueue.network.codec.GetTopicsCodec;
 import org.joyqueue.network.command.GetTopics;
-
 import org.joyqueue.network.transport.command.Types;
 import org.joyqueue.nsr.network.NsrPayloadCodec;
-
 import org.joyqueue.nsr.network.command.NsrCommandType;
 
 /**

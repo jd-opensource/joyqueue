@@ -15,9 +15,9 @@
  */
 package org.joyqueue.client.internal.consumer;
 
+import com.jd.laf.extension.Type;
 import org.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignment;
 import org.joyqueue.client.internal.consumer.coordinator.domain.BrokerAssignments;
-import com.jd.laf.extension.Type;
 
 /**
  * BrokerLoadBalance

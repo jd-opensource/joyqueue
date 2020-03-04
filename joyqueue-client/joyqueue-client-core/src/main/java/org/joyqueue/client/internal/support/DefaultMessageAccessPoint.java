@@ -17,6 +17,7 @@ package org.joyqueue.client.internal.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.MessageAccessPoint;
 import org.joyqueue.client.internal.cluster.ClusterClientManager;
 import org.joyqueue.client.internal.cluster.ClusterClientManagerFactory;
@@ -44,7 +45,6 @@ import org.joyqueue.client.internal.producer.transport.ProducerClientManagerFact
 import org.joyqueue.client.internal.transport.config.TransportConfig;
 import org.joyqueue.client.internal.transport.config.TransportConfigChecker;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 

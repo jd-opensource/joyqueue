@@ -16,6 +16,7 @@
 package org.joyqueue.broker.security;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.cluster.ClusterManager;
@@ -27,7 +28,6 @@ import org.joyqueue.security.Authentication;
 import org.joyqueue.security.PasswordEncoder;
 import org.joyqueue.security.UserDetails;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author wylixiaobin

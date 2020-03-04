@@ -15,11 +15,11 @@
  */
 package org.joyqueue.toolkit.doc.vertx;
 
+import com.jd.laf.web.vertx.config.RouteConfig;
+import com.jd.laf.web.vertx.config.VertxConfig;
 import org.joyqueue.toolkit.doc.APIDoc;
 import org.joyqueue.toolkit.doc.DocEntry;
 import org.joyqueue.toolkit.doc.MultiHandlerMetaParser;
-import com.jd.laf.web.vertx.config.RouteConfig;
-import com.jd.laf.web.vertx.config.VertxConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

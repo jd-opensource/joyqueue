@@ -20,11 +20,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import org.joyqueue.broker.kafka.model.OffsetAndMetadata;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.kafka.model.OffsetAndMetadata;
+import org.joyqueue.toolkit.time.SystemClock;
 
 import java.util.Collections;
 import java.util.Iterator;

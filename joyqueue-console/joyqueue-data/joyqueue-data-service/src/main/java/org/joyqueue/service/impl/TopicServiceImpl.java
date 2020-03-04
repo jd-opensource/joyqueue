@@ -17,6 +17,7 @@ package org.joyqueue.service.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.ServiceException;
@@ -41,7 +42,6 @@ import org.joyqueue.nsr.TopicNameServerService;
 import org.joyqueue.service.TopicService;
 import org.joyqueue.util.EnvironmentUtil;
 import org.joyqueue.util.NullUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

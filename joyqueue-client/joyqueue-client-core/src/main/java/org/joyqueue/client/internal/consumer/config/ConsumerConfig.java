@@ -15,8 +15,8 @@
  */
 package org.joyqueue.client.internal.consumer.config;
 
-import org.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
 
 /**
  * ConsumerConfig

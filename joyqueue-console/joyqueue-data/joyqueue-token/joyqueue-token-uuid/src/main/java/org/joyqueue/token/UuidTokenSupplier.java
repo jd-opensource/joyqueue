@@ -15,8 +15,6 @@
  */
 package org.joyqueue.token;
 
-import org.joyqueue.token.TokenSupplier;
-
 import java.util.Date;
 import java.util.UUID;
 

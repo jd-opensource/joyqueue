@@ -16,6 +16,7 @@
 package org.joyqueue.async;
 
 
+import org.apache.http.client.methods.HttpGet;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.domain.Broker;
@@ -28,7 +29,6 @@ import org.joyqueue.service.PartitionGroupReplicaService;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.util.AsyncHttpClient;
 import org.joyqueue.util.NullUtil;
-import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

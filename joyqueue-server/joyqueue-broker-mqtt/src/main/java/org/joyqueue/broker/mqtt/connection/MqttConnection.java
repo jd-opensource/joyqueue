@@ -15,10 +15,10 @@
  */
 package org.joyqueue.broker.mqtt.connection;
 
+import io.netty.channel.Channel;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
-import io.netty.channel.Channel;
 
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentMap;

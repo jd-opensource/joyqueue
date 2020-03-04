@@ -16,7 +16,6 @@
 package org.joyqueue.toolkit.os;
 
 import org.joyqueue.toolkit.io.Files;
-import org.joyqueue.toolkit.os.Systems;
 import org.junit.Assert;
 import org.junit.Test;
 

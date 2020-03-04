@@ -15,9 +15,10 @@
  */
 package org.joyqueue.service;
 
+import org.joyqueue.exception.MessageDeserializeException;
+
 import java.util.List;
 import java.util.stream.Collectors;
-import org.joyqueue.exception.MessageDeserializeException;
 /**
  * 消息内容反序列化器，用于把序列化的二进制消息转为可读的文本，用于消息预览
  * @author LiYue

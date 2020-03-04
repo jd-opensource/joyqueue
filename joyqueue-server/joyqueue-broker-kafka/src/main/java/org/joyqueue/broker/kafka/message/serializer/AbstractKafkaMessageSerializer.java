@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.kafka.message.serializer;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.broker.kafka.message.compressor.KafkaCompressionCodec;
 import org.joyqueue.broker.kafka.message.compressor.KafkaCompressionCodecFactory;
 import org.joyqueue.broker.kafka.message.compressor.stream.ByteBufferInputStream;
 import org.joyqueue.broker.kafka.util.KafkaBufferUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

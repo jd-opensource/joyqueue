@@ -1,5 +1,8 @@
 package org.chubao.joyqueue.store.journalkeeper.transaction;
 
+import io.journalkeeper.core.api.UpdateRequest;
+import io.journalkeeper.core.api.transaction.TransactionalJournalStore;
+import io.journalkeeper.exceptions.NotLeaderException;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.store.WriteRequest;
 import org.joyqueue.store.WriteResult;
@@ -7,9 +10,6 @@ import org.joyqueue.store.transaction.StoreTransactionContext;
 import org.joyqueue.store.transaction.StoreTransactionId;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.toolkit.concurrent.EventListener;
-import io.journalkeeper.core.api.UpdateRequest;
-import io.journalkeeper.core.api.transaction.TransactionalJournalStore;
-import io.journalkeeper.exceptions.NotLeaderException;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,8 +66,8 @@ public class JournalKeeperTransactionStore implements TransactionStore {
 
     @Override
     public CompletableFuture<WriteResult> asyncWrite(StoreTransactionId transactionId, WriteRequest... writeRequests) {
-        List<UpdateRequest<byte []>> updateRequests = Arrays.stream(writeRequests)
-                .map(r -> new UpdateRequest<>(r.getBuffer().array(), r.getPartition(), r.getBatchSize()))
+        List<UpdateRequest> updateRequests = Arrays.stream(writeRequests)
+                .map(r -> new UpdateRequest(r.getBuffer().array(), r.getPartition(), r.getBatchSize()))
                 .collect(Collectors.toList());
         return transactionalJournalStore.append(
                 ((JournalKeeperTransactionId) transactionId).getTransactionId(),

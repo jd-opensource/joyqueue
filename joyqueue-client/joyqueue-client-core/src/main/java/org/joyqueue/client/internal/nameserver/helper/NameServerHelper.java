@@ -15,9 +15,9 @@
  */
 package org.joyqueue.client.internal.nameserver.helper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.domain.TopicName;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * NameServerHelper

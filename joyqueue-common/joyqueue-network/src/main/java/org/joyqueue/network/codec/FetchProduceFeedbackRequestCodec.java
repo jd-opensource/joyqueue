@@ -15,6 +15,7 @@
  */
 package org.joyqueue.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.FetchProduceFeedbackRequest;
 import org.joyqueue.network.command.JoyQueueCommandType;
 import org.joyqueue.network.command.TxStatus;
@@ -22,7 +23,6 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 /**
  * FetchProduceFeedbackRequestCodec

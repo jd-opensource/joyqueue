@@ -15,6 +15,7 @@
  */
 package org.joyqueue.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.Authorization;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.serializer.Serializer;
@@ -22,7 +23,6 @@ import org.joyqueue.network.session.Language;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Header;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 /**
  * @author wylixiaobin

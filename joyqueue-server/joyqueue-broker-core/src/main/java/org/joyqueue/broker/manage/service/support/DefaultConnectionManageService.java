@@ -17,9 +17,9 @@ package org.joyqueue.broker.manage.service.support;
 
 import com.google.common.collect.Lists;
 import org.joyqueue.broker.manage.service.ConnectionManageService;
+import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.session.Producer;
-import org.joyqueue.broker.monitor.SessionManager;
 
 import java.util.List;
 

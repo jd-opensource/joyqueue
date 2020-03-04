@@ -15,10 +15,6 @@
  */
 package org.joyqueue.handler.binder;
 
-import org.joyqueue.handler.annotation.PageQuery;
-import org.joyqueue.model.Pagination;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.Query;
 import com.jd.laf.binding.Plugin;
 import com.jd.laf.binding.binder.Binder;
 import com.jd.laf.binding.converter.Scope;
@@ -26,6 +22,10 @@ import com.jd.laf.binding.marshaller.Marshaller;
 import com.jd.laf.binding.marshaller.Unmarshaller;
 import com.jd.laf.binding.reflect.exception.ReflectionException;
 import io.vertx.ext.web.RoutingContext;
+import org.joyqueue.handler.annotation.PageQuery;
+import org.joyqueue.model.Pagination;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.Query;
 
 import java.util.Map;
 

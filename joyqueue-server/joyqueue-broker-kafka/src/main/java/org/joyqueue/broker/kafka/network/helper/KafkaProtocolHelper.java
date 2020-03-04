@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.kafka.network.helper;
 
-import org.joyqueue.broker.kafka.KafkaCommandType;
 import io.netty.buffer.ByteBuf;
+import org.joyqueue.broker.kafka.KafkaCommandType;
 
 /**
  * KafkaProtocolHelper

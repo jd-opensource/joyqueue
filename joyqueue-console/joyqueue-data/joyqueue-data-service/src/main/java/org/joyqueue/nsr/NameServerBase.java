@@ -16,12 +16,6 @@
 package org.joyqueue.nsr;
 
 import com.alibaba.fastjson.JSON;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.OperLog;
-import org.joyqueue.service.OperLogService;
-import org.joyqueue.toolkit.security.EscapeUtils;
-import org.joyqueue.util.HttpUtil;
-import org.joyqueue.util.LocalSession;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.Charsets;
 import org.apache.http.HttpStatus;
@@ -31,6 +25,12 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.OperLog;
+import org.joyqueue.service.OperLogService;
+import org.joyqueue.toolkit.security.EscapeUtils;
+import org.joyqueue.util.HttpUtil;
+import org.joyqueue.util.LocalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

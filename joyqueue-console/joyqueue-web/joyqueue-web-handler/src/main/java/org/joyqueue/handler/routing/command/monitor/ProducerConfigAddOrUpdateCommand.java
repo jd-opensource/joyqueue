@@ -16,11 +16,6 @@
 package org.joyqueue.handler.routing.command.monitor;
 
 
-import org.joyqueue.handler.annotation.Operator;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.Producer;
-import org.joyqueue.model.domain.ProducerConfig;
-import org.joyqueue.service.ProducerService;
 import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
@@ -28,6 +23,11 @@ import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.joyqueue.handler.annotation.Operator;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.Producer;
+import org.joyqueue.model.domain.ProducerConfig;
+import org.joyqueue.service.ProducerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

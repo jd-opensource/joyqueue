@@ -16,16 +16,16 @@
 package org.joyqueue.broker.kafka.network.codec;
 
 import com.google.common.collect.Maps;
-import org.joyqueue.broker.kafka.command.SyncGroupAssignment;
-import org.joyqueue.broker.kafka.message.serializer.KafkaSyncGroupAssignmentSerializer;
-import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.kafka.KafkaCommandType;
+import org.joyqueue.broker.kafka.command.SyncGroupAssignment;
 import org.joyqueue.broker.kafka.command.SyncGroupRequest;
 import org.joyqueue.broker.kafka.command.SyncGroupResponse;
+import org.joyqueue.broker.kafka.message.serializer.KafkaSyncGroupAssignmentSerializer;
 import org.joyqueue.broker.kafka.network.KafkaHeader;
+import org.joyqueue.broker.kafka.network.KafkaPayloadCodec;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.Collections;
 import java.util.Map;

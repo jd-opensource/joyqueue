@@ -18,13 +18,13 @@ package org.joyqueue.broker.consumer.converter;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.broker.consumer.converter.kafka.KafkaBufferUtils;
 import org.joyqueue.broker.consumer.converter.kafka.KafkaCompressionCodec;
 import org.joyqueue.broker.consumer.converter.kafka.KafkaCompressionCodecFactory;
 import org.joyqueue.broker.consumer.converter.kafka.compressor.stream.ByteBufferInputStream;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

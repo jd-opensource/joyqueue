@@ -17,6 +17,7 @@ package org.joyqueue.client.internal.producer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.exception.ClientException;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
@@ -52,7 +53,6 @@ import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.domain.BrokerNode;
 import org.joyqueue.toolkit.retry.RetryPolicy;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

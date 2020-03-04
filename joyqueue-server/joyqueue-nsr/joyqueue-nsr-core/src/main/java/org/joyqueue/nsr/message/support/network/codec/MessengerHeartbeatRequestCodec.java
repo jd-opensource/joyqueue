@@ -15,12 +15,12 @@
  */
 package org.joyqueue.nsr.message.support.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.nsr.message.support.network.command.MessengerHeartbeatRequest;
 import org.joyqueue.nsr.network.command.NsrCommandType;
-import io.netty.buffer.ByteBuf;
 
 /**
  * MessengerPublishRequestCodec

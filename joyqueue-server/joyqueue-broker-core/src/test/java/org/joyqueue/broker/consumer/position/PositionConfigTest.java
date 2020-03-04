@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.consumer.position;
 
-import org.joyqueue.broker.consumer.position.PositionConfig;
 import org.joyqueue.toolkit.util.BaseDirUtils;
 import org.junit.After;
 import org.junit.Assert;

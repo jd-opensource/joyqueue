@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.consumer;
 
-import org.joyqueue.broker.consumer.DelayHandler;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.junit.Assert;

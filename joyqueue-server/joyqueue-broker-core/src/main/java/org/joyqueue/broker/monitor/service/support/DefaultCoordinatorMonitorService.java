@@ -16,14 +16,14 @@
 package org.joyqueue.broker.monitor.service.support;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.coordinator.CoordinatorService;
 import org.joyqueue.broker.coordinator.domain.CoordinatorDetail;
 import org.joyqueue.broker.coordinator.group.GroupMetadataManager;
 import org.joyqueue.broker.coordinator.group.domain.GroupMemberMetadata;
 import org.joyqueue.broker.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.monitor.service.CoordinatorMonitorService;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;

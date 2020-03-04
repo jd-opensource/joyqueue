@@ -15,17 +15,17 @@
  */
 package org.joyqueue.broker.mqtt.network;
 
-import org.joyqueue.broker.mqtt.transport.MqttCommandInvocation;
-import org.joyqueue.broker.BrokerContext;
-import org.joyqueue.broker.mqtt.handler.MqttHandlerDispatcher;
-import org.joyqueue.broker.network.protocol.support.DefaultProtocolHandlerPipeline;
-import org.joyqueue.network.handler.ConnectionHandler;
-import org.joyqueue.network.protocol.Protocol;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
+import org.joyqueue.broker.BrokerContext;
+import org.joyqueue.broker.mqtt.handler.MqttHandlerDispatcher;
+import org.joyqueue.broker.mqtt.transport.MqttCommandInvocation;
+import org.joyqueue.broker.network.protocol.support.DefaultProtocolHandlerPipeline;
+import org.joyqueue.network.handler.ConnectionHandler;
+import org.joyqueue.network.protocol.Protocol;
 
 /**
  * @author majun8

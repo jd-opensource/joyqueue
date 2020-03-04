@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.kafka.command;
 
-import org.joyqueue.broker.kafka.coordinator.CoordinatorType;
 import org.joyqueue.broker.kafka.KafkaCommandType;
+import org.joyqueue.broker.kafka.coordinator.CoordinatorType;
 
 /**
  * Created by zhangkepeng on 17-2-9.

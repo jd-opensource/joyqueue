@@ -15,19 +15,19 @@
  */
 package org.joyqueue.handler.routing.command.broker;
 
-import org.joyqueue.exception.ValidationException;
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.handler.routing.command.CommandSupport;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.model.domain.Broker;
-import org.joyqueue.model.domain.BrokerGroup;
-import org.joyqueue.model.query.QBrokerGroup;
-import org.joyqueue.service.BrokerGroupService;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.joyqueue.exception.ValidationException;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.handler.routing.command.CommandSupport;
+import org.joyqueue.model.domain.Broker;
+import org.joyqueue.model.domain.BrokerGroup;
+import org.joyqueue.model.query.QBrokerGroup;
+import org.joyqueue.service.BrokerGroupService;
 
 
 /**

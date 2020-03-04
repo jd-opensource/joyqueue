@@ -15,8 +15,8 @@
  */
 package org.joyqueue.network.transport.codec;
 
-import org.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
+import org.joyqueue.network.transport.exception.TransportException;
 
 /**
  * 对象解码

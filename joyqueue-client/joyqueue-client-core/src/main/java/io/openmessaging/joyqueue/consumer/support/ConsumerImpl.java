@@ -15,13 +15,8 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import com.google.common.collect.Lists;
-import org.joyqueue.client.internal.consumer.MessageConsumer;
-import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
-import org.joyqueue.client.internal.consumer.domain.FetchIndexData;
-import org.joyqueue.network.command.RetryType;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.MessageListener;
 import io.openmessaging.consumer.MessageReceipt;
@@ -39,6 +34,11 @@ import io.openmessaging.joyqueue.support.AbstractServiceLifecycle;
 import io.openmessaging.message.Message;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.client.internal.consumer.MessageConsumer;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import org.joyqueue.client.internal.consumer.domain.FetchIndexData;
+import org.joyqueue.network.command.RetryType;
 
 import java.util.Collections;
 import java.util.List;

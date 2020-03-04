@@ -16,6 +16,7 @@
 package org.joyqueue.broker.kafka.coordinator.transaction.log;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.model.PullResult;
@@ -28,7 +29,6 @@ import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.toolkit.network.IpUtil;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

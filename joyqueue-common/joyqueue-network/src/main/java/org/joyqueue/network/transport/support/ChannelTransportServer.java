@@ -15,9 +15,9 @@
  */
 package org.joyqueue.network.transport.support;
 
+import io.netty.channel.ChannelHandler;
 import org.joyqueue.network.transport.TransportServerSupport;
 import org.joyqueue.network.transport.config.ServerConfig;
-import io.netty.channel.ChannelHandler;
 
 /**
  * ChannelTransportServer

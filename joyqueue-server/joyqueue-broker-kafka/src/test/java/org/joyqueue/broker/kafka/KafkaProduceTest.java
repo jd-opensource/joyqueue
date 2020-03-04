@@ -15,10 +15,10 @@
  */
 package org.joyqueue.broker.kafka;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.joyqueue.broker.kafka.conf.KafkaConfigs;
 import org.joyqueue.broker.kafka.producer.Producer;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.kafka.clients.producer.ProducerRecord;
 
 /**
  * KafkaTest

@@ -16,6 +16,7 @@
 package org.joyqueue.network.codec;
 
 import com.google.common.collect.Lists;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.FetchAssignedPartitionData;
 import org.joyqueue.network.command.FetchAssignedPartitionRequest;
 import org.joyqueue.network.command.JoyQueueCommandType;
@@ -23,7 +24,6 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 

@@ -15,10 +15,10 @@
  */
 package org.joyqueue.network.transport.command.handler;
 
-import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.Transport;
-import org.joyqueue.network.transport.exception.TransportException;
+import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.provider.ExecutorServiceProvider;
+import org.joyqueue.network.transport.exception.TransportException;
 
 /**
  * 命令处理器抽象，具体的处理器实现类用于处理特定的命令类型。

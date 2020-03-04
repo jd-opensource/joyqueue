@@ -15,11 +15,11 @@
  */
 package org.joyqueue.handler.error;
 
-import org.joyqueue.exception.ServiceException;
 import com.jd.laf.web.vertx.response.ErrorSupplier;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.apache.commons.lang.StringUtils;
+import org.joyqueue.exception.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;

@@ -17,8 +17,8 @@ package org.joyqueue.network.serializer;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import org.joyqueue.message.BrokerMessage;
 import org.apache.commons.lang3.ArrayUtils;
+import org.joyqueue.message.BrokerMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

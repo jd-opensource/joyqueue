@@ -15,11 +15,11 @@
  */
 package org.joyqueue.network.transport.codec;
 
-import org.joyqueue.domain.QosLevel;
-import org.joyqueue.network.transport.command.Direction;
-import org.joyqueue.network.serializer.Serializer;
-import org.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
+import org.joyqueue.domain.QosLevel;
+import org.joyqueue.network.serializer.Serializer;
+import org.joyqueue.network.transport.command.Direction;
+import org.joyqueue.network.transport.exception.TransportException;
 
 /**
  * JoyQueueHeaderCodec

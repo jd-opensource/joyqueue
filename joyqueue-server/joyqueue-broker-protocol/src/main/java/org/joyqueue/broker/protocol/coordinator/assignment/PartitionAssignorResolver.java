@@ -16,6 +16,10 @@
 package org.joyqueue.broker.protocol.coordinator.assignment;
 
 import com.google.common.collect.Maps;
+import com.jd.laf.extension.ExtensionPoint;
+import com.jd.laf.extension.ExtensionPointLazy;
+import com.jd.laf.extension.SpiLoader;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.protocol.config.JoyQueueConfig;
 import org.joyqueue.broker.protocol.coordinator.domain.GroupMemberMetadata;
 import org.joyqueue.broker.protocol.coordinator.domain.GroupMetadata;
@@ -23,10 +27,6 @@ import org.joyqueue.broker.protocol.coordinator.domain.PartitionAssignment;
 import org.joyqueue.broker.protocol.exception.JoyQueueException;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.exception.JoyQueueCode;
-import com.jd.laf.extension.ExtensionPoint;
-import com.jd.laf.extension.ExtensionPointLazy;
-import com.jd.laf.extension.SpiLoader;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

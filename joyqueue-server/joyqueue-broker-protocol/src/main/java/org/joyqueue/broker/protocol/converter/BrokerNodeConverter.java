@@ -15,10 +15,10 @@
  */
 package org.joyqueue.broker.protocol.converter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.DataCenter;
 import org.joyqueue.network.domain.BrokerNode;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * BrokerNodeConverter

@@ -16,7 +16,6 @@
 package org.joyqueue.tools;
 
 import com.beust.jcommander.JCommander;
-import org.joyqueue.tools.config.ConsoleConsumerConfig;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
@@ -28,6 +27,7 @@ import io.openmessaging.joyqueue.domain.JoyQueueNameServerBuiltinKeys;
 import io.openmessaging.message.Header;
 import io.openmessaging.message.Message;
 import org.apache.commons.lang.StringUtils;
+import org.joyqueue.tools.config.ConsoleConsumerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

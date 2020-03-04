@@ -15,11 +15,11 @@
  */
 package org.joyqueue.client.internal.producer.support;
 
+import com.jd.laf.extension.Extension;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import org.joyqueue.network.domain.BrokerNode;
-import com.jd.laf.extension.Extension;
 
 import java.math.BigInteger;
 import java.util.List;

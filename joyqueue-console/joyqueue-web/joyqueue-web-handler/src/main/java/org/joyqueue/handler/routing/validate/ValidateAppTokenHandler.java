@@ -15,17 +15,17 @@
  */
 package org.joyqueue.handler.routing.validate;
 
-import org.joyqueue.handler.error.ConfigException;
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.model.domain.Application;
-import org.joyqueue.model.domain.ApplicationToken;
-import org.joyqueue.service.ApplicationService;
-import org.joyqueue.service.ApplicationTokenService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.parameter.Parameter;
 import com.jd.laf.web.vertx.parameter.Parameters.RequestParameter;
 import io.vertx.ext.web.RoutingContext;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.error.ConfigException;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.model.domain.Application;
+import org.joyqueue.model.domain.ApplicationToken;
+import org.joyqueue.service.ApplicationService;
+import org.joyqueue.service.ApplicationTokenService;
 
 import java.util.Date;
 

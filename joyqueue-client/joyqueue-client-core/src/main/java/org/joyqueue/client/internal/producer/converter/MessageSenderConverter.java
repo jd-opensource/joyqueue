@@ -16,6 +16,7 @@
 package org.joyqueue.client.internal.producer.converter;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.producer.domain.FeedbackData;
 import org.joyqueue.client.internal.producer.domain.FetchFeedbackData;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
@@ -23,12 +24,11 @@ import org.joyqueue.client.internal.producer.domain.SendBatchResultData;
 import org.joyqueue.client.internal.producer.domain.SendResult;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.message.BrokerMessage;
-import org.joyqueue.network.command.FetchProduceFeedbackResponse;
 import org.joyqueue.network.command.FetchProduceFeedbackAckData;
+import org.joyqueue.network.command.FetchProduceFeedbackResponse;
 import org.joyqueue.network.command.ProduceMessageAckData;
 import org.joyqueue.network.command.ProduceMessageAckItemData;
 import org.joyqueue.network.command.ProduceMessageData;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
 

@@ -15,6 +15,8 @@
  */
 package org.joyqueue.broker.consumer;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.model.OwnerShip;
@@ -26,8 +28,6 @@ import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

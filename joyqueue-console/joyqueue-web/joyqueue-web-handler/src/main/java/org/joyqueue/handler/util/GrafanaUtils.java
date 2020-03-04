@@ -17,12 +17,12 @@ package org.joyqueue.handler.util;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.collect.Maps;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.model.domain.grafana.GrafanaConfig;
 import org.joyqueue.model.domain.grafana.GrafanaVariable;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

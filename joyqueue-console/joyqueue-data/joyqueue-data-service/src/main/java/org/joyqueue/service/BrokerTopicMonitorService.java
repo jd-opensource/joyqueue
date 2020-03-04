@@ -17,11 +17,11 @@ package org.joyqueue.service;
 
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.BrokerTopicMonitor;
+import org.joyqueue.model.query.QMonitor;
 import org.joyqueue.monitor.BrokerMonitorInfo;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.Client;
-import org.joyqueue.model.domain.BrokerTopicMonitor;
-import org.joyqueue.model.query.QMonitor;
 
 /**
  * Created by wangxiaofei1 on 2019/3/13.

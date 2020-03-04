@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.kafka.command;
 
-import org.joyqueue.broker.kafka.coordinator.group.domain.GroupDescribe;
 import org.joyqueue.broker.kafka.KafkaCommandType;
+import org.joyqueue.broker.kafka.coordinator.group.domain.GroupDescribe;
 
 import java.util.List;
 

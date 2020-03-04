@@ -15,13 +15,13 @@
  */
 package org.joyqueue.server.retry.remote.command.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.server.retry.remote.command.UpdateRetry;
-import io.netty.buffer.ByteBuf;
 
 /**
  * Created by chengzhiliang on 2018/9/17.

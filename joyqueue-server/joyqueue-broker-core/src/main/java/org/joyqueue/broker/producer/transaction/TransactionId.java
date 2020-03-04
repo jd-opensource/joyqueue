@@ -15,9 +15,9 @@
  */
 package org.joyqueue.broker.producer.transaction;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.store.transaction.StoreTransactionId;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.atomic.AtomicLong;
 

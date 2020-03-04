@@ -15,12 +15,12 @@
  */
 package org.joyqueue.service;
 
-import org.joyqueue.model.domain.BaseModel;
-import org.joyqueue.model.exception.RepositoryException;
 import org.joyqueue.model.ListQuery;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.Query;
+import org.joyqueue.model.domain.BaseModel;
+import org.joyqueue.model.exception.RepositoryException;
 
 import java.util.List;
 

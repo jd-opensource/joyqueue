@@ -15,8 +15,8 @@
  */
 package org.joyqueue.toolkit.io;
 
-import org.joyqueue.toolkit.lang.Close;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.joyqueue.toolkit.lang.Close;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

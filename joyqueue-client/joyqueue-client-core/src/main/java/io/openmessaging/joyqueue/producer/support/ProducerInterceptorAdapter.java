@@ -15,13 +15,13 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
+import io.openmessaging.interceptor.Context;
+import io.openmessaging.joyqueue.producer.interceptor.ContextAdapter;
+import io.openmessaging.joyqueue.producer.message.OMSProduceMessage;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import org.joyqueue.client.internal.producer.domain.SendResult;
 import org.joyqueue.client.internal.producer.interceptor.ProduceContext;
 import org.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
-import io.openmessaging.interceptor.Context;
-import io.openmessaging.joyqueue.producer.interceptor.ContextAdapter;
-import io.openmessaging.joyqueue.producer.message.OMSProduceMessage;
 
 import java.util.List;
 

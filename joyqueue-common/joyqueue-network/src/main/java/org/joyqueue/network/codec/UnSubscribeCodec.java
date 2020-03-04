@@ -15,6 +15,7 @@
  */
 package org.joyqueue.network.codec;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.domain.Subscription;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
@@ -23,7 +24,6 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Header;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.ArrayList;
 import java.util.List;

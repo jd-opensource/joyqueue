@@ -15,13 +15,13 @@
  */
 package org.joyqueue.network.transport.command.support;
 
+import io.netty.channel.Channel;
 import org.joyqueue.network.transport.RequestBarrier;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportHelper;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandDispatcher;
 import org.joyqueue.network.transport.command.Direction;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

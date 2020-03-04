@@ -15,11 +15,11 @@
  */
 package org.joyqueue.repository.mybatis.interceptor;
 
-import org.joyqueue.model.QPageQuery;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Plugin;
+import org.joyqueue.model.QPageQuery;
 
 import java.util.Properties;
 

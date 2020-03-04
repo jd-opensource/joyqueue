@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.kafka.coordinator.group.domain;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.broker.kafka.command.SyncGroupAssignment;
 import org.joyqueue.broker.kafka.coordinator.group.callback.JoinCallback;
 import org.joyqueue.broker.kafka.coordinator.group.callback.SyncCallback;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;

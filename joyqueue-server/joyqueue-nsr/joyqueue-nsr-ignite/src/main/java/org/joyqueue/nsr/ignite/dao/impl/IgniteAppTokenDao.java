@@ -15,13 +15,6 @@
  */
 package org.joyqueue.nsr.ignite.dao.impl;
 
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.nsr.ignite.dao.AppTokenDao;
-import org.joyqueue.nsr.ignite.dao.IgniteDao;
-import org.joyqueue.nsr.ignite.model.IgniteAppToken;
-import org.joyqueue.nsr.model.AppTokenQuery;
-import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheMode;
@@ -29,17 +22,24 @@ import org.apache.ignite.cache.QueryEntity;
 import org.apache.ignite.cache.QueryIndex;
 import org.apache.ignite.cache.query.SqlQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
+import org.joyqueue.nsr.ignite.dao.AppTokenDao;
+import org.joyqueue.nsr.ignite.dao.IgniteDao;
+import org.joyqueue.nsr.ignite.model.IgniteAppToken;
+import org.joyqueue.nsr.ignite.model.IgniteBaseModel;
+import org.joyqueue.nsr.model.AppTokenQuery;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static org.joyqueue.nsr.ignite.model.IgniteAppToken.COLUMN_ID;
 import static org.joyqueue.nsr.ignite.model.IgniteAppToken.COLUMN_APP;
-import static org.joyqueue.nsr.ignite.model.IgniteAppToken.COLUMN_TOKEN;
 import static org.joyqueue.nsr.ignite.model.IgniteAppToken.COLUMN_EFFECTIVE_TIME;
 import static org.joyqueue.nsr.ignite.model.IgniteAppToken.COLUMN_EXPIRATION_TIME;
+import static org.joyqueue.nsr.ignite.model.IgniteAppToken.COLUMN_ID;
+import static org.joyqueue.nsr.ignite.model.IgniteAppToken.COLUMN_TOKEN;
 
 public class IgniteAppTokenDao implements AppTokenDao {
 

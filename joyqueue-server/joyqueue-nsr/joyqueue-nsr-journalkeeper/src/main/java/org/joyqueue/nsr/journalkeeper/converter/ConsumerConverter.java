@@ -16,6 +16,7 @@
 package org.joyqueue.nsr.journalkeeper.converter;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.ClientType;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.TopicName;
@@ -23,7 +24,6 @@ import org.joyqueue.domain.TopicType;
 import org.joyqueue.nsr.journalkeeper.domain.ConsumerDTO;
 import org.joyqueue.nsr.journalkeeper.helper.JsonHelper;
 import org.joyqueue.toolkit.retry.RetryPolicy;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;

@@ -15,6 +15,9 @@
  */
 package org.joyqueue.client.internal;
 
+import com.jd.laf.extension.ExtensionPoint;
+import com.jd.laf.extension.ExtensionPointLazy;
+import com.jd.laf.extension.SpiLoader;
 import org.joyqueue.client.internal.common.compress.Compressor;
 import org.joyqueue.client.internal.consumer.BrokerLoadBalance;
 import org.joyqueue.client.internal.consumer.converter.MessageConverter;
@@ -22,9 +25,6 @@ import org.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import org.joyqueue.client.internal.producer.PartitionSelector;
 import org.joyqueue.client.internal.producer.interceptor.ProducerInterceptor;
 import org.joyqueue.client.internal.trace.Trace;
-import com.jd.laf.extension.ExtensionPoint;
-import com.jd.laf.extension.ExtensionPointLazy;
-import com.jd.laf.extension.SpiLoader;
 
 public interface Plugins {
     /**

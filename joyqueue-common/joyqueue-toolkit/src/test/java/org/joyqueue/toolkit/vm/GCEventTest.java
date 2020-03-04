@@ -18,12 +18,6 @@ package org.joyqueue.toolkit.vm;
 
 import com.sun.management.GarbageCollectionNotificationInfo;
 import com.sun.management.GcInfo;
-import org.joyqueue.toolkit.vm.DefaultGCNotificationParser;
-import org.joyqueue.toolkit.vm.GCEvent;
-import org.joyqueue.toolkit.vm.GCEventListener;
-import org.joyqueue.toolkit.vm.GarbageCollectorMonitor;
-import org.joyqueue.toolkit.vm.JVMMemorySectionInfo;
-import org.joyqueue.toolkit.vm.MemoryStat;
 import org.junit.Test;
 import sun.misc.SharedSecrets;
 

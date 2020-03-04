@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.consumer;
 
-import org.joyqueue.broker.consumer.AcknowledgeSupport;
 import org.joyqueue.message.MessageLocation;
 import org.junit.Test;
 

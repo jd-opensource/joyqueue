@@ -16,6 +16,7 @@
 package org.joyqueue.client.internal.producer.support;
 
 import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
@@ -36,7 +37,6 @@ import org.joyqueue.client.internal.producer.interceptor.ProducerInterceptorMana
 import org.joyqueue.client.internal.producer.transport.ProducerClientManager;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

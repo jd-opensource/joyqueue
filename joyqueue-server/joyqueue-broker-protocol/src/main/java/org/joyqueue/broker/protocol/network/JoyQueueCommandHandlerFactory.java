@@ -16,12 +16,12 @@
 package org.joyqueue.broker.protocol.network;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.JoyQueueContextAware;
 import org.joyqueue.network.transport.command.support.DefaultCommandHandlerFactory;
-import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
 

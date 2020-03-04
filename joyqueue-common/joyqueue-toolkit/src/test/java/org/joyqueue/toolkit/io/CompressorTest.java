@@ -16,11 +16,6 @@
 package org.joyqueue.toolkit.io;
 
 import com.google.common.base.Charsets;
-import org.joyqueue.toolkit.io.Compressor;
-import org.joyqueue.toolkit.io.Compressors;
-import org.joyqueue.toolkit.io.Snappy;
-import org.joyqueue.toolkit.io.Zip;
-import org.joyqueue.toolkit.io.Zlib;
 import org.junit.Assert;
 import org.junit.Test;
 

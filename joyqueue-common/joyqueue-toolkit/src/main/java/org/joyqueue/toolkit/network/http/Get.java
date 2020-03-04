@@ -15,8 +15,8 @@
  */
 package org.joyqueue.toolkit.network.http;
 
-import org.joyqueue.toolkit.URL;
 import com.google.common.base.Charsets;
+import org.joyqueue.toolkit.URL;
 
 import java.io.BufferedReader;
 import java.io.IOException;

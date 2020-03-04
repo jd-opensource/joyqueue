@@ -15,11 +15,11 @@
  */
 package org.joyqueue.network.transport.codec.support;
 
-import org.joyqueue.network.transport.codec.Codec;
-import org.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import org.joyqueue.network.transport.codec.Codec;
+import org.joyqueue.network.transport.exception.TransportException;
 
 import java.util.List;
 

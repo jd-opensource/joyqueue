@@ -15,10 +15,10 @@
  */
 package org.joyqueue.broker.protocol.network.helper;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.JoyQueueCommandType;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.JoyQueueHeaderCodec;
-import io.netty.buffer.ByteBuf;
 
 /**
  * JoyQueueProtocolHelper

@@ -15,11 +15,11 @@
  */
 package org.joyqueue.service.impl;
 
-import org.joyqueue.model.domain.BaseModel;
 import org.joyqueue.model.ListQuery;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.Query;
+import org.joyqueue.model.domain.BaseModel;
 import org.joyqueue.repository.PageRepository;
 import org.joyqueue.service.PageService;
 

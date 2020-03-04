@@ -16,12 +16,12 @@
 package org.joyqueue.client.internal.consumer.converter.kafka.compressor.lz4;
 
 
-import org.joyqueue.client.internal.consumer.converter.kafka.KafkaBufferUtils;
 import net.jpountz.lz4.LZ4Exception;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4SafeDecompressor;
 import net.jpountz.xxhash.XXHash32;
 import net.jpountz.xxhash.XXHashFactory;
+import org.joyqueue.client.internal.consumer.converter.kafka.KafkaBufferUtils;
 
 import java.io.FilterInputStream;
 import java.io.IOException;

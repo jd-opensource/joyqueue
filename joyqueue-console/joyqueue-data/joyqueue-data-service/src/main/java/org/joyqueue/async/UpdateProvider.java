@@ -15,8 +15,8 @@
  */
 package org.joyqueue.async;
 
-import org.joyqueue.domain.PartitionGroup;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.joyqueue.domain.PartitionGroup;
 
 /**
  *

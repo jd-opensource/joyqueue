@@ -17,6 +17,7 @@ package org.joyqueue.broker.config;
 
 import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
+
 import static org.joyqueue.toolkit.config.Property.APPLICATION_DATA_PATH;
 
 /**

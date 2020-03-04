@@ -16,6 +16,7 @@
 package org.joyqueue.broker.protocol.coordinator.assignment.support;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.config.JoyQueueConfig;
 import org.joyqueue.broker.protocol.coordinator.GroupMemberTimeoutCallback;
@@ -27,7 +28,6 @@ import org.joyqueue.broker.protocol.coordinator.domain.GroupMemberMetadata;
 import org.joyqueue.broker.protocol.coordinator.domain.GroupMetadata;
 import org.joyqueue.broker.protocol.coordinator.domain.PartitionAssignment;
 import org.joyqueue.domain.PartitionGroup;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

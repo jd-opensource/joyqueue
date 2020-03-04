@@ -15,12 +15,12 @@
  */
 package org.joyqueue.client.internal.producer.interceptor;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.client.internal.producer.config.ProducerConfig;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import org.joyqueue.client.internal.producer.domain.SendResult;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;

@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.consumer.filter;
 
+import com.jd.laf.extension.Extension;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.BrokerMessage;
-import com.jd.laf.extension.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

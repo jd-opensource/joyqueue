@@ -15,11 +15,11 @@
  */
 package org.joyqueue.nsr.journalkeeper.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.helper.PortHelper;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

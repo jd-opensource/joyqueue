@@ -15,13 +15,13 @@
  */
 package io.openmessaging.joyqueue.producer.support;
 
-import org.joyqueue.client.internal.producer.MessageProducer;
-import org.joyqueue.client.internal.producer.TransactionMessageProducer;
-import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
 import io.openmessaging.joyqueue.producer.message.MessageAdapter;
 import io.openmessaging.message.Message;
 import io.openmessaging.producer.TransactionalResult;
+import org.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.producer.TransactionMessageProducer;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 
 /**
  * TransactionalResultAdapter

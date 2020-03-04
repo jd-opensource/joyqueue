@@ -15,13 +15,13 @@
  */
 package io.openmessaging.joyqueue.producer.message;
 
-import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.KeyValue;
 import io.openmessaging.consumer.MessageReceipt;
 import io.openmessaging.extension.ExtensionHeader;
 import io.openmessaging.joyqueue.message.EmptyMessageReceipt;
 import io.openmessaging.joyqueue.message.ExtensionMessage;
 import io.openmessaging.message.Header;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 
 import java.util.Optional;
 

@@ -15,6 +15,7 @@
  */
 package org.joyqueue.network.transport.support;
 
+import io.netty.channel.Channel;
 import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.transport.ChannelTransport;
 import org.joyqueue.network.transport.TransportAttribute;
@@ -26,7 +27,6 @@ import org.joyqueue.network.transport.config.TransportConfig;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.time.SystemClock;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

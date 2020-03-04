@@ -15,12 +15,12 @@
  */
 package org.joyqueue.broker.kafka.handler;
 
-import org.joyqueue.broker.kafka.KafkaContextAware;
-import org.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.KafkaContext;
+import org.joyqueue.broker.kafka.KafkaContextAware;
 import org.joyqueue.broker.kafka.command.HeartbeatRequest;
 import org.joyqueue.broker.kafka.command.HeartbeatResponse;
+import org.joyqueue.broker.kafka.coordinator.group.GroupCoordinator;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.slf4j.Logger;

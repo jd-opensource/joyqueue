@@ -16,11 +16,11 @@
 package org.joyqueue.broker.kafka.consumer;
 
 
-import org.joyqueue.broker.kafka.conf.KafkaConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.joyqueue.broker.kafka.conf.KafkaConfigs;
 
 import java.util.Properties;
 

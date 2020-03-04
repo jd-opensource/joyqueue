@@ -16,7 +16,6 @@
 package org.joyqueue.broker.consumer.position;
 
 import org.joyqueue.broker.consumer.model.ConsumePartition;
-import org.joyqueue.broker.consumer.position.LocalFileStore;
 import org.joyqueue.broker.consumer.position.model.Position;
 import org.junit.After;
 import org.junit.Assert;

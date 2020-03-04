@@ -15,9 +15,9 @@
  */
 package io.openmessaging.joyqueue.consumer.interceptor;
 
-import org.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
 import io.openmessaging.KeyValue;
 import io.openmessaging.interceptor.Context;
+import org.joyqueue.client.internal.consumer.interceptor.ConsumeContext;
 
 /**
  * ContextAdapter

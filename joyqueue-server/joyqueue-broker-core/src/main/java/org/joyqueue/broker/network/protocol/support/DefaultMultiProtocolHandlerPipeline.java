@@ -16,14 +16,14 @@
 package org.joyqueue.broker.network.protocol.support;
 
 import com.google.common.collect.Maps;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
 import org.joyqueue.broker.network.protocol.ProtocolContext;
 import org.joyqueue.broker.network.protocol.ProtocolHandlerPipelineFactory;
 import org.joyqueue.broker.network.protocol.ProtocolManager;
 import org.joyqueue.broker.network.protocol.ProtocolResolver;
 import org.joyqueue.network.protocol.ProtocolService;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
 
 import java.util.Map;
 

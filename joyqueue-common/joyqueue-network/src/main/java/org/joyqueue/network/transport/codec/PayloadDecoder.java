@@ -15,8 +15,8 @@
  */
 package org.joyqueue.network.transport.codec;
 
-import org.joyqueue.network.transport.command.Header;
 import io.netty.buffer.ByteBuf;
+import org.joyqueue.network.transport.command.Header;
 
 /**
  * PayloadDecoder

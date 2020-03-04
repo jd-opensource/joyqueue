@@ -15,10 +15,9 @@
  */
 package org.joyqueue.broker.archive;
 
-import org.joyqueue.broker.archive.ArchiveSerializer;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;

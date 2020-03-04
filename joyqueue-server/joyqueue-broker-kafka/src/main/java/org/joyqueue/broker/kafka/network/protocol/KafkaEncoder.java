@@ -15,14 +15,13 @@
  */
 package org.joyqueue.broker.kafka.network.protocol;
 
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.kafka.command.KafkaRequestOrResponse;
 import org.joyqueue.broker.kafka.network.KafkaHeader;
 import org.joyqueue.network.transport.codec.DefaultEncoder;
 import org.joyqueue.network.transport.codec.PayloadCodecFactory;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.exception.TransportException;
-
-import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

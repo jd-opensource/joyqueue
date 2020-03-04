@@ -15,8 +15,6 @@
  */
 package org.joyqueue.repository.mybatis.interceptor;
 
-import org.joyqueue.model.Pagination;
-import org.joyqueue.model.QPageQuery;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
@@ -30,6 +28,8 @@ import org.apache.ibatis.reflection.factory.DefaultObjectFactory;
 import org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
+import org.joyqueue.model.Pagination;
+import org.joyqueue.model.QPageQuery;
 
 import java.sql.Connection;
 import java.util.List;

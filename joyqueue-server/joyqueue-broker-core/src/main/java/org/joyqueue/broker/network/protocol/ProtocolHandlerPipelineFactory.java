@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.network.protocol;
 
-import org.joyqueue.network.protocol.Protocol;
 import io.netty.channel.ChannelHandler;
+import org.joyqueue.network.protocol.Protocol;
 
 /**
  * ProtocolHandlerPipelineFactory

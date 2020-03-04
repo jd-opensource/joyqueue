@@ -18,6 +18,7 @@ package org.joyqueue.network.codec;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.network.command.CommitAckData;
 import org.joyqueue.network.command.CommitAckRequest;
 import org.joyqueue.network.command.JoyQueueCommandType;
@@ -26,7 +27,6 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 import java.util.Map;

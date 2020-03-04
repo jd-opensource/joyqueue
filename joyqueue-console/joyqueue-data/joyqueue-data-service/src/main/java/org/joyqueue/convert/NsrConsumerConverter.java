@@ -15,6 +15,7 @@
  */
 package org.joyqueue.convert;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.ClientType;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.domain.TopicType;
@@ -25,7 +26,6 @@ import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.domain.Topic;
 import org.joyqueue.toolkit.retry.RetryPolicy;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;

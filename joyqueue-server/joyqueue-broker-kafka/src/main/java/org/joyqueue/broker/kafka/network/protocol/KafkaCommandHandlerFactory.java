@@ -16,13 +16,13 @@
 package org.joyqueue.broker.kafka.network.protocol;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.kafka.KafkaCommandHandler;
 import org.joyqueue.broker.kafka.KafkaContext;
 import org.joyqueue.broker.kafka.KafkaContextAware;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
 import org.joyqueue.network.transport.command.support.DefaultCommandHandlerFactory;
-import com.jd.laf.extension.ExtensionManager;
 
 import java.util.List;
 

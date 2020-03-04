@@ -15,15 +15,15 @@
  */
 package org.joyqueue.broker.mqtt.cluster;
 
-import org.joyqueue.broker.mqtt.subscriptions.TopicFilter;
+import io.netty.util.internal.ConcurrentSet;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.mqtt.subscriptions.MqttSubscription;
+import org.joyqueue.broker.mqtt.subscriptions.TopicFilter;
 import org.joyqueue.domain.ClientType;
 import org.joyqueue.domain.Subscription;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.service.Service;
-import io.netty.util.internal.ConcurrentSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
