@@ -58,6 +58,8 @@ public class TransportConfig {
     private  int maxOneway = 10240;
     // 非阻塞oneway
     private boolean nonBlockOneway = false;
+    // 非阻塞异步
+    private boolean nonBlockAsync = false;
     // 最大异步请求数
     private  int maxAsync = 10240;
     // 异步回调线程数量
@@ -277,6 +279,14 @@ public class TransportConfig {
 
     public boolean isNonBlockOneway() {
         return nonBlockOneway;
+    }
+
+    public void setNonBlockAsync(boolean nonBlockAsync) {
+        this.nonBlockAsync = nonBlockAsync;
+    }
+
+    public boolean isNonBlockAsync() {
+        return nonBlockAsync;
     }
 
     public void setAcceptThreadName(String acceptThreadName) {
