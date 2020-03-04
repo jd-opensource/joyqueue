@@ -9243,7 +9243,7 @@ span.dui-radio + * {
   box-shadow: 0 0 0 2px fade(#E36262, 20%); }
 
 .dui-select-dropdown {
-  /*max-height: 200px;*/
+  max-height: 200px;
   overflow: auto;
   margin: 5px 0;
   background-color: #fff;
@@ -12737,7 +12737,7 @@ span.dui-radio + * {
   position: relative;
   padding: 0;
   width: inherit;
-  /*max-height: 200px;*/
+  max-height: 200px;
   font-size: 0;
   border-radius: 4px;
   background-color: #FFF;

@@ -208,12 +208,15 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     /**
      * Replica log max position snapshots
      **/
-    public void snapshotReplicaLag(){
-        Map<String, TopicStat>  topicStatMap=brokerStat.getTopicStats();
-        for(TopicStat topicStat:topicStatMap.values()){
-            Map<Integer, PartitionGroupStat> partitionGroupStatMap= topicStat.getPartitionGroupStatMap();
-            for(PartitionGroupStat partitionGroupStat:partitionGroupStatMap.values()){
-                StoreManagementService.PartitionGroupMetric partitionGroupMetric=storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(),partitionGroupStat.getPartitionGroup());
+    public void snapshotReplicaLag() {
+        Map<String, TopicStat> topicStatMap = brokerStat.getTopicStats();
+        for (TopicStat topicStat : topicStatMap.values()) {
+            Map<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
+            for (PartitionGroupStat partitionGroupStat : partitionGroupStatMap.values()) {
+                StoreManagementService.PartitionGroupMetric partitionGroupMetric = storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(), partitionGroupStat.getPartitionGroup());
+                if (partitionGroupMetric != null) {
+                    partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
+                }
             }
         }
     }

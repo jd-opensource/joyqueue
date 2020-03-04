@@ -33,7 +33,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -353,12 +355,14 @@ public class PositioningStoreTest {
     }
 
     private PositioningStore<ByteBuffer> prepareStore(PreloadBufferPool bufferPool) throws IOException {
+        return prepareStore(bufferPool, new PositioningStore.Config());
+    }
+
+    private PositioningStore<ByteBuffer> prepareStore(PreloadBufferPool bufferPool, PositioningStore.Config config) throws IOException {
         StoreMessageSerializer storeMessageSerializer = new StoreMessageSerializer(2 * 1024);
-
-
         bufferPool.addPreLoad(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, 2, 5);
         PositioningStore<ByteBuffer> store =
-                new PositioningStore<>(logBase, new PositioningStore.Config(),
+                new PositioningStore<>(logBase, config,
                         bufferPool,
                         storeMessageSerializer);
         store.recover();
@@ -420,7 +424,7 @@ public class PositioningStoreTest {
         }
         long t = SystemClock.now();
         long spendTimeMs = t - start;
-        long mbps = size * 1000 / spendTimeMs / 1024 / 1024;
+        long mbps = spendTimeMs > 0 ? size * 1000 / spendTimeMs / 1024 / 1024 : 0;
 
         logger.info("Final write size: {}, write performance: {} MBps.", size, mbps);
 
@@ -429,7 +433,7 @@ public class PositioningStoreTest {
         }
         t = SystemClock.now();
         spendTimeMs = t - start;
-        mbps = size * 1000 / spendTimeMs / 1024 / 1024;
+        mbps = spendTimeMs > 0 ? size * 1000 / spendTimeMs / 1024 / 1024 : 0;
 
         logger.info("Flush performance: {} MBps.", mbps);
         virtualThreadPool.stop();
@@ -495,6 +499,65 @@ public class PositioningStoreTest {
     }
 
     // delete
+
+    @Test
+    public void deleteTest() throws Exception {
+        // 每条消息消息体大小
+        int logSize = 1024;
+
+        ByteBuffer buffer = MessageTestUtils.createMessage(new byte[logSize]);
+
+        // 总共写入消息的的大小
+        long maxSize = 10 * 1024 * 1024;
+
+        int fileSize = 1024 * buffer.capacity();
+
+        PreloadBufferPool bufferPool = PreloadBufferPool.getInstance();
+        try (PositioningStore<ByteBuffer> store = prepareStore(bufferPool, new PositioningStore.Config(fileSize, 128, 90))) {
+            write(store, maxSize, buffer);
+            long currentRight = store.right();
+            // 删除一个文件
+            Assert.assertEquals(fileSize, store.physicalDeleteLeftFile());
+            Assert.assertEquals(fileSize, store.left());
+
+            // 给定位置删除半个文件，由于不够一个文件的长度，什么都没有删除
+            Assert.assertEquals(0L, store.physicalDeleteTo(fileSize + buffer.capacity() * 512));
+            Assert.assertEquals(fileSize, store.left());
+
+            // 给定位置删除1.5个文件，实际删除一个文件。
+            Assert.assertEquals(fileSize, store.physicalDeleteTo( fileSize + fileSize + buffer.capacity() * 512));
+            Assert.assertEquals(fileSize + fileSize, store.left());
+
+            while (store.physicalDeleteLeftFile() > 0) {
+               // nothing to do
+            }
+
+
+
+            Assert.assertEquals(currentRight, store.left());
+            Assert.assertEquals(currentRight, store.flushPosition());
+            Assert.assertEquals(currentRight, store.right());
+
+            store.setRight(0L);
+
+            AtomicBoolean stop = new AtomicBoolean(false);
+
+            Thread t = new Thread(() -> {
+                while (!stop.get()) {
+                    try {
+                        store.physicalDeleteLeftFile();
+                    } catch (Exception e) {
+                        logger.warn("Exception: ", e);
+                    }
+                }
+            });
+            t.start();
+            write(store, maxSize, buffer);
+            stop.set(true);
+
+        }
+
+    }
 
 
     @Before

@@ -59,6 +59,18 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.METADATA_DELAY);
     }
 
+    public boolean getMetadataCacheEnable() {
+        return getConfig(KafkaConfigKey.METADATA_CACHE_ENABLE);
+    }
+
+    public int getMetadataCacheExpireTime() {
+        return getConfig(KafkaConfigKey.METADATA_CACHE_EXPIRE_TIME);
+    }
+
+    public boolean getFuzzySearchEnable() {
+        return getConfig(KafkaConfigKey.METADATA_FUZZY_SEARCH_ENABLE);
+    }
+
     public boolean getFetchDelay() {
         return getConfig(KafkaConfigKey.FETCH_DELAY);
     }

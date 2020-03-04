@@ -94,4 +94,12 @@ public class ArchiveConfig {
     public String getTracerType() {
         return PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE);
     }
+
+    public boolean isReamingEnable() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_REAMING_ENABLE);
+    }
+
+    public boolean isBacklogEnable() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_BACKLOG_ENABLE);
+    }
 }

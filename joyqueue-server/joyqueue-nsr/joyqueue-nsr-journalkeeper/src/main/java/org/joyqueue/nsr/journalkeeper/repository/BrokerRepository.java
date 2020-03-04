@@ -15,12 +15,11 @@
  */
 package org.joyqueue.nsr.journalkeeper.repository;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.nsr.journalkeeper.domain.BrokerDTO;
 import org.joyqueue.nsr.model.BrokerQuery;
-import io.journalkeeper.sql.client.SQLOperator;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/16
  */
-public class BrokerRepository extends BaseRepository {
+public class BrokerRepository {
 
     private static final String TABLE = "broker";
     private static final String COLUMNS = "id, ip, port, data_center, retry_type, permission";
@@ -45,20 +44,22 @@ public class BrokerRepository extends BaseRepository {
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?", TABLE);
 
-    public BrokerRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public BrokerRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public BrokerDTO getById(long id) {
-        return queryOnce(BrokerDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(BrokerDTO.class, GET_BY_ID, id);
     }
 
     public BrokerDTO getByIpAndPort(String ip, int port) {
-        return queryOnce(BrokerDTO.class, GET_BY_IP_AND_PORT, ip, port);
+        return baseRepository.queryOnce(BrokerDTO.class, GET_BY_IP_AND_PORT, ip, port);
     }
 
     public List<BrokerDTO> getByRetryType(String retryType) {
-        return query(BrokerDTO.class, GET_BY_RETRY_TYPE, retryType);
+        return baseRepository.query(BrokerDTO.class, GET_BY_RETRY_TYPE, retryType);
     }
 
     public List<BrokerDTO> getByIds(List ids) {
@@ -71,18 +72,18 @@ public class BrokerRepository extends BaseRepository {
             }
         }
         idsSql.append(")");
-        return query(BrokerDTO.class, GET_BY_IDS + idsSql.toString(), ids);
+        return baseRepository.query(BrokerDTO.class, GET_BY_IDS + idsSql.toString(), ids);
     }
 
     public List<BrokerDTO> getAll() {
-        return query(BrokerDTO.class, GET_ALL);
+        return baseRepository.query(BrokerDTO.class, GET_ALL);
     }
 
     public int getSearchCount(BrokerQuery query) {
         List<Object> params = new LinkedList<>();
         String sql = getSearchSql(String.format("SELECT COUNT(*) FROM %s WHERE 1 = 1", TABLE), query, params);
 
-        return count(sql, params.toArray(new Object[]{}));
+        return baseRepository.count(sql, params.toArray(new Object[]{}));
     }
 
     public List<BrokerDTO> search(QPageQuery<BrokerQuery> pageQuery) {
@@ -94,7 +95,7 @@ public class BrokerRepository extends BaseRepository {
             sql.append(String.format(" LIMIT %s, %s", ((pagination.getPage() - 1) * pagination.getSize()), pagination.getSize()));
         }
 
-        return query(BrokerDTO.class, sql.toString(), params.toArray(new Object[]{}));
+        return baseRepository.query(BrokerDTO.class, sql.toString(), params.toArray(new Object[]{}));
     }
 
     protected String getSearchSql(String prefix, BrokerQuery query, List<Object> params) {
@@ -129,18 +130,18 @@ public class BrokerRepository extends BaseRepository {
     }
 
     public BrokerDTO add(BrokerDTO brokerDTO) {
-        insert(ADD, brokerDTO.getId(), brokerDTO.getIp(), brokerDTO.getPort(), brokerDTO.getDataCenter(),
+        baseRepository.insert(ADD, brokerDTO.getId(), brokerDTO.getIp(), brokerDTO.getPort(), brokerDTO.getDataCenter(),
                 brokerDTO.getRetryType(), brokerDTO.getPermission());
         return brokerDTO;
     }
 
     public BrokerDTO update(BrokerDTO brokerDTO) {
-        update(UPDATE_BY_ID, brokerDTO.getIp(), brokerDTO.getPort(), brokerDTO.getDataCenter(),
+        baseRepository.update(UPDATE_BY_ID, brokerDTO.getIp(), brokerDTO.getPort(), brokerDTO.getDataCenter(),
                 brokerDTO.getRetryType(), brokerDTO.getPermission(), brokerDTO.getId());
         return brokerDTO;
     }
 
     public int deleteById(long id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }

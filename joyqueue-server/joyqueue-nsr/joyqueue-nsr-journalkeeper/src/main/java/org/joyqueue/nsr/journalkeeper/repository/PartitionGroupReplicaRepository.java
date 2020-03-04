@@ -16,7 +16,6 @@
 package org.joyqueue.nsr.journalkeeper.repository;
 
 import org.joyqueue.nsr.journalkeeper.domain.PartitionGroupReplicaDTO;
-import io.journalkeeper.sql.client.SQLOperator;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2019/8/16
  */
-public class PartitionGroupReplicaRepository extends BaseRepository {
+public class PartitionGroupReplicaRepository {
 
     private static final String TABLE = "partition_group_replica";
     private static final String COLUMNS = "id, topic, namespace, broker_id, `group`";
@@ -48,43 +47,45 @@ public class PartitionGroupReplicaRepository extends BaseRepository {
     private static final String DELETE_BY_ID = String.format("DELETE FROM %s WHERE id = ?",
             TABLE);
 
-    public PartitionGroupReplicaRepository(SQLOperator sqlOperator) {
-        super(sqlOperator);
+    private BaseRepository baseRepository;
+
+    public PartitionGroupReplicaRepository(BaseRepository baseRepository) {
+        this.baseRepository = baseRepository;
     }
 
     public PartitionGroupReplicaDTO getById(String id) {
-        return queryOnce(PartitionGroupReplicaDTO.class, GET_BY_ID, id);
+        return baseRepository.queryOnce(PartitionGroupReplicaDTO.class, GET_BY_ID, id);
     }
 
     public List<PartitionGroupReplicaDTO> getByTopic(String topic, String namespace) {
-        return query(PartitionGroupReplicaDTO.class, GET_BY_TOPIC, topic, namespace);
+        return baseRepository.query(PartitionGroupReplicaDTO.class, GET_BY_TOPIC, topic, namespace);
     }
 
     public List<PartitionGroupReplicaDTO> getByTopicAndGroup(String topic, String namespace, int group) {
-        return query(PartitionGroupReplicaDTO.class, GET_BY_TOPIC_AND_GROUP, topic, namespace, group);
+        return baseRepository.query(PartitionGroupReplicaDTO.class, GET_BY_TOPIC_AND_GROUP, topic, namespace, group);
     }
 
     public List<PartitionGroupReplicaDTO> getByBrokerId(long brokerId) {
-        return query(PartitionGroupReplicaDTO.class, GET_BY_BROKER, brokerId);
+        return baseRepository.query(PartitionGroupReplicaDTO.class, GET_BY_BROKER, brokerId);
     }
 
     public List<PartitionGroupReplicaDTO> getAll() {
-        return query(PartitionGroupReplicaDTO.class, GET_ALL);
+        return baseRepository.query(PartitionGroupReplicaDTO.class, GET_ALL);
     }
 
     public PartitionGroupReplicaDTO add(PartitionGroupReplicaDTO partitionGroupReplicaDTO) {
-        insert(ADD, partitionGroupReplicaDTO.getId(), partitionGroupReplicaDTO.getTopic(), partitionGroupReplicaDTO.getNamespace(),
+        baseRepository.insert(ADD, partitionGroupReplicaDTO.getId(), partitionGroupReplicaDTO.getTopic(), partitionGroupReplicaDTO.getNamespace(),
                 partitionGroupReplicaDTO.getBrokerId(), partitionGroupReplicaDTO.getGroup());
         return partitionGroupReplicaDTO;
     }
 
     public PartitionGroupReplicaDTO update(PartitionGroupReplicaDTO partitionGroupReplicaDTO) {
-        update(UPDATE_BY_ID, partitionGroupReplicaDTO.getTopic(), partitionGroupReplicaDTO.getNamespace(),
+        baseRepository.update(UPDATE_BY_ID, partitionGroupReplicaDTO.getTopic(), partitionGroupReplicaDTO.getNamespace(),
                 partitionGroupReplicaDTO.getBrokerId(), partitionGroupReplicaDTO.getGroup(), partitionGroupReplicaDTO.getId());
         return partitionGroupReplicaDTO;
     }
 
     public int deleteById(String id) {
-        return delete(DELETE_BY_ID, id);
+        return baseRepository.delete(DELETE_BY_ID, id);
     }
 }

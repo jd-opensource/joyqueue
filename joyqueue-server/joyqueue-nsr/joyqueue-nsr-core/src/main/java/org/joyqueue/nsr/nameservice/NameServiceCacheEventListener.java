@@ -70,7 +70,10 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
 
     @Override
     public void onEvent(MetaEvent event) {
-        nameServiceCacheManager.lock();
+        if (!nameServiceCacheManager.tryLock()) {
+            nameServiceCacheManager.updateVersion();
+            return;
+        }
         try {
             AllMetadataCache newCache = nameServiceCacheManager.getCache().clone();
             doUpdateCache(event, newCache);

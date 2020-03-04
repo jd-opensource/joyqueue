@@ -47,6 +47,7 @@ public class PositioningStore<T> implements Closeable {
     private final int fileHeaderSize;
     private final int fileDataSize;
     private final int diskFullRatio;
+    private final int maxMessageLength;
     private final File base;
     private final LogSerializer<T> serializer;
     private final PreloadBufferPool bufferPool;
@@ -58,7 +59,7 @@ public class PositioningStore<T> implements Closeable {
 
     private final Lock writeLock = new ReentrantLock();
     private final Lock flushLock = new ReentrantLock();
-    private final Lock deleteLock = new ReentrantLock();
+    private final ReentrantLock deleteLock = new ReentrantLock();
 
     // 正在写入的
     private StoreFile<T> writeStoreFile = null;
@@ -67,6 +68,7 @@ public class PositioningStore<T> implements Closeable {
         this.base = base;
         this.fileHeaderSize = config.fileHeaderSize;
         this.fileDataSize = config.fileDataSize;
+        this.maxMessageLength = config.maxMessageLength;
         if(config.diskFullRatio <= 0 || config.diskFullRatio > 100) {
             logger.warn("Invalid config diskFullRatio: {}, using default: {}.", config.diskFullRatio, Config.DEFAULT_DISK_FULL_RATIO);
             diskFullRatio = Config.DEFAULT_DISK_FULL_RATIO;
@@ -284,7 +286,8 @@ public class PositioningStore<T> implements Closeable {
 
     private long toLogTail(long position) {
         T t = null;
-        while (position >= left()) {
+        long seekEndPosition = Math.max(position - 2 * maxMessageLength, left());
+        while (position >= seekEndPosition) {
             try {
                 t = tryRead(position--);
             } catch (Throwable ignored) {
@@ -297,7 +300,8 @@ public class PositioningStore<T> implements Closeable {
     public long toLogStart(long position) {
 
         T t = null;
-        while (position >= left()) {
+        long seekEndPosition = Math.max(position - 2 * maxMessageLength, left());
+        while (position >= seekEndPosition) {
             try {
                 t = tryRead(position--);
             } catch (Throwable ignored) {
@@ -508,7 +512,7 @@ public class PositioningStore<T> implements Closeable {
     }
 
     public long physicalSize() {
-        return storeFileMap.values().stream().map(StoreFile::file).mapToLong(File::length).sum();
+        return right() - left();
     }
 
     /**
@@ -523,7 +527,7 @@ public class PositioningStore<T> implements Closeable {
         StoreFile<T> storeFile;
         try {
             deleteLock.lock();
-            while (storeFileMap.size() > 1 &&
+            while (storeFileMap.size() > 0 &&
                     (entry = storeFileMap.firstEntry()) != null &&
                     entry.getKey() +
                             (fileDataSize =
@@ -532,19 +536,45 @@ public class PositioningStore<T> implements Closeable {
                                             storeFile.fileDataSize())
                             <= position) {
 
-                if (storeFileMap.remove(entry.getKey(), storeFile)) {
-                    leftPosition.addAndGet(fileDataSize);
-                    forceDeleteStoreFile(storeFile);
-                    if(writeStoreFile == storeFile) {
-                        writeStoreFile = null;
+                if (storeFile == writeStoreFile) {
+                    deleteLock.unlock();
+                    try {
+                        // 注意锁的顺序必须一致，避免死锁。
+                        flushLock.lock();
+                        writeLock.lock();
+                        deleteLock.lock();
+                        if (storeFileMap.remove(entry.getKey(), storeFile)) {
+                            this.writeStoreFile = null;
+                            forceDeleteStoreFile(storeFile);
+                            deleteSize += fileDataSize;
+                            leftPosition.addAndGet(fileDataSize);
+                            if(flushPosition.get() < leftPosition.get()) {
+                                flushPosition.set(leftPosition.get());
+                            }
+                        } else {
+                            break;
+                        }
+
+                    } finally {
+                        deleteLock.unlock();
+                        writeLock.unlock();
+                        flushLock.unlock();
                     }
-                    deleteSize += fileDataSize;
+
                 } else {
-                    break;
+                    if (storeFileMap.remove(entry.getKey(), storeFile)) {
+                        leftPosition.addAndGet(fileDataSize);
+                        forceDeleteStoreFile(storeFile);
+                        deleteSize += fileDataSize;
+                    } else {
+                        break;
+                    }
                 }
             }
         } finally {
-            deleteLock.unlock();
+            if(deleteLock.isHeldByCurrentThread()) {
+                deleteLock.unlock();
+            }
         }
         return deleteSize;
     }
@@ -649,6 +679,7 @@ public class PositioningStore<T> implements Closeable {
         public static final int DEFAULT_FILE_HEADER_SIZE = 128;
         public static final int DEFAULT_FILE_DATA_SIZE = 128 * 1024 * 1024;
         public static final int DEFAULT_DISK_FULL_RATIO = 90;
+        public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
 
         /**
          * 文件头长度
@@ -660,6 +691,8 @@ public class PositioningStore<T> implements Closeable {
         private final int fileDataSize;
 
         private final int diskFullRatio;
+
+        private final int maxMessageLength;
 
         public Config() {
             this(DEFAULT_FILE_DATA_SIZE,
@@ -675,9 +708,13 @@ public class PositioningStore<T> implements Closeable {
             this(fileDataSize, fileHeaderSize, DEFAULT_DISK_FULL_RATIO);
         }
         public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio) {
+            this(fileDataSize, fileHeaderSize, diskFullRatio, DEFAULT_MAX_MESSAGE_LENGTH);
+        }
+        public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio, int maxMessageLength) {
             this.fileDataSize = fileDataSize;
             this.fileHeaderSize = fileHeaderSize;
             this.diskFullRatio = diskFullRatio;
+            this.maxMessageLength = maxMessageLength;
         }
     }
 

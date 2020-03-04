@@ -85,6 +85,9 @@ public class DefaultRateLimiterManager extends AbstractRateLimiterManager implem
         if (traffic <= 0) {
             traffic = Integer.MAX_VALUE;
         }
+
+        logger.info("rate limit config changed, topic: {}, app: {}, type: {}, tps: {}, traffic: {}",
+                topic, app, type, tps, traffic);
         return new LimiterConfig(tps, traffic);
     }
 

@@ -211,6 +211,9 @@ public class ConsumeArchiveService extends Service {
      * @return
      */
     public long getRemainConsumeLogFileNum() {
+        if (!archiveConfig.isReamingEnable()) {
+            return 0;
+        }
         int localFileNum = repository.getLocalFileNum();
         return (long) localFileNum * repository.getPageSize();
     }

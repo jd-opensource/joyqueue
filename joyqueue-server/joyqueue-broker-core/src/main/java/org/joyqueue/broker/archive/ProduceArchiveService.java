@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -235,7 +236,7 @@ public class ProduceArchiveService extends Service {
                     long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
                     item.setReadIndex(minIndex);
 
-                    logger.info("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
+                    logger.debug("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
 
                 }
 
@@ -245,7 +246,7 @@ public class ProduceArchiveService extends Service {
                     long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
                     item.setReadIndex(maxIndex);
 
-                    logger.warn("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
+                    logger.debug("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
 
                 }
 
@@ -268,7 +269,7 @@ public class ProduceArchiveService extends Service {
                 // 计数
                 counter += messageSize;
                 if (logger.isDebugEnabled()) {
-                    logger.info("produce archive: {} messages put into the archive queue.", size);
+                    logger.debug("produce archive: {} messages put into the archive queue.", size);
                 }
             }
         }
@@ -351,7 +352,7 @@ public class ProduceArchiveService extends Service {
         sendLog.setTopic(brokerMessage.getTopic());
         sendLog.setSendTime(brokerMessage.getStartTime());
         sendLog.setBusinessId(brokerMessage.getBusinessId() == null ? "" : brokerMessage.getBusinessId());
-        sendLog.setMessageId(brokerMessage.getTopic() + brokerMessage.getPartition() + brokerMessage.getMsgIndexNo());
+        sendLog.setMessageId(ArchiveUtils.messageId(brokerMessage.getTopic(),brokerMessage.getPartition(), brokerMessage.getMsgIndexNo()));
         sendLog.setBrokerId(clusterManager.getBrokerId());
         sendLog.setApp(brokerMessage.getApp());
         sendLog.setClientIp(brokerMessage.getClientIp());
@@ -359,7 +360,6 @@ public class ProduceArchiveService extends Service {
         sendLog.setMessageBody(buffer.array());
         sendLog.setPartition(brokerMessage.getPartition());
         sendLog.setIndex(brokerMessage.getMsgIndexNo());
-
         return sendLog;
     }
 
@@ -478,6 +478,9 @@ public class ProduceArchiveService extends Service {
     }
 
     public Map<String, Long> getArchivePosition() {
+        if (!archiveConfig.isBacklogEnable()) {
+            return Collections.emptyMap();
+        }
         Map<String, Long> result = new HashMap<>();
         List<SendArchiveItem> allList = itemList.getAll();
         for (SendArchiveItem sai : allList) {
@@ -493,6 +496,9 @@ public class ProduceArchiveService extends Service {
      * @return
      */
     public long remainMessagesSum() {
+        if (!archiveConfig.isReamingEnable()) {
+            return 0;
+        }
         List<TopicConfig> topics = clusterManager.getTopics();
         long sum = topics.stream().mapToLong(topic -> remainMessagesSum(topic.getName().getFullName())).sum();
         return sum;

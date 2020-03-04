@@ -20,10 +20,10 @@
     <parent>
         <artifactId>joyqueue-web</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.3-SNAPSHOT</version>
+        <version>4.2.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.2.3-SNAPSHOT</version>
+    <version>4.2.4-SNAPSHOT</version>
 
     <artifactId>joyqueue-web-handler</artifactId>
     <name>JoyQueue-Web-Handler</name>
@@ -38,6 +38,11 @@
         <dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-data-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-broker-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--<dependency>-->

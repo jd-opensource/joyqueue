@@ -84,8 +84,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
         if (!config.getCompensationEnable()) {
             return;
         }
-        AllMetadataCache oldCache = nameServiceCacheManager.getCache();
-        if (oldCache == null) {
+        if (nameServiceCacheManager.getCache() == null) {
             AllMetadata allMetadata = delegate.getAllMetadata();
             AllMetadataCache newCache = nameServiceCacheManager.buildCache(allMetadata);
 
@@ -95,29 +94,50 @@ public class NameServiceCompensateThread extends Service implements Runnable {
 
             nameServiceCacheManager.fillCache(newCache);
         } else {
-            if (nameServiceCacheManager.isLocked()) {
+            if (!nameServiceCacheManager.tryLock()) {
                 return;
             }
+            try {
+                AllMetadataCache newCache = null;
+                AllMetadataCache oldCache = nameServiceCacheManager.getCache();
+                int version = nameServiceCacheManager.getVersion();
 
-            int oldVersion = nameServiceCacheManager.getVersion();
+                for (int i = 0; i <= config.getCompensationRetryTimes(); i++) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
+                    }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
-            }
+                    AllMetadata allMetadata = delegate.getAllMetadata();
+                    newCache = nameServiceCacheManager.buildCache(allMetadata);
 
-            AllMetadata allMetadata = delegate.getAllMetadata();
-            AllMetadataCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
+                                JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
+                    }
 
-            if (logger.isDebugEnabled()) {
-                logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
-                        JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
-            }
+                    if (config.getCompensationEnable()) {
+                        nameServiceCompensator.compensate(oldCache, newCache);
+                    }
 
-            if (!nameServiceCacheManager.isLocked() && nameServiceCacheManager.getVersion() == oldVersion) {
-                if (config.getCompensationEnable()) {
-                    nameServiceCompensator.compensate(oldCache, newCache);
+                    int currentVersion = nameServiceCacheManager.getVersion();
+                    if (version == currentVersion) {
+                        break;
+                    } else {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("doCompensate retry, oldVersion: {}, currentVersion: {}", version, currentVersion);
+                        }
+                        version = currentVersion;
+                        oldCache = newCache;
+                        try {
+                            Thread.currentThread().sleep(config.getCompensationRetryInterval());
+                        } catch (Exception e) {
+                        }
+                    }
                 }
+
                 nameServiceCacheManager.fillCache(newCache);
+            } finally {
+                nameServiceCacheManager.unlock();
             }
         }
     }

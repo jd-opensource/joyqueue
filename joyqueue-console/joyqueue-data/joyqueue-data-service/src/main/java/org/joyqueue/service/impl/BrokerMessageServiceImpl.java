@@ -32,6 +32,7 @@ import org.joyqueue.async.RetrieveProvider;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.exception.ServiceException;
 import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.ApplicationToken;
 import org.joyqueue.model.domain.Broker;
@@ -60,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Arrays;
@@ -67,6 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import static org.joyqueue.exception.ServiceException.INTERNAL_SERVER_ERROR;
 
 
 @Service("brokerMessageService")
@@ -83,6 +86,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     private HttpRestService httpRestService;
     @Autowired
     private MessagePreviewService messagePreviewService;
+    @Autowired
     private ReplicaServerService replicaServerService;
     @Autowired
     private BrokerNameServerService brokerNameServerService;
@@ -132,7 +136,8 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
                 }
             }
         }catch (Exception e){
-            logger.info("parse broker message error",e);
+            logger.error("parse broker message error", e);
+            throw new ServiceException(INTERNAL_SERVER_ERROR,"Message can't be parse");
         }
         return simplifiedBrokeMessages;
     }
@@ -280,7 +285,14 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         message.setStoreTime(m.getStoreTime());
         message.setBusinessId(m.getBusinessId());
         if(m.getBody()!=null) {
-            message.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(m.getBody())));
+            try {
+                message.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(m.getBody())));
+            }catch(Throwable e){
+                if(logger.isDebugEnabled()) {
+                    logger.debug("may old broker", e);
+                }
+                message.setBody(messagePreviewService.preview(messageDecodeType, m.getBody().getBytes(Charset.forName("utf-8"))));
+            }
         }
         message.setAttributes(m.getAttributes());
         message.setFlag(m.isAck());

@@ -75,6 +75,14 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_INTERVAL);
     }
 
+    public int getCompensationRetryTimes() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_RETRY_TIMES);
+    }
+
+    public int getCompensationRetryInterval() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_RETRY_INTERVAL);
+    }
+
     public boolean getCompensationTopicEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_TOPIC_ENABLE);
     }
