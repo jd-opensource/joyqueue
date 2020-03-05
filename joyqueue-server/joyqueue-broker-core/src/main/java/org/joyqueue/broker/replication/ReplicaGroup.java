@@ -432,7 +432,7 @@ public class ReplicaGroup extends Service implements CommandSender{
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
                     }
                     long t1 = usTime();
-                    if (brokerConfig.getLogDetail(topicPartitionGroup.getTopic()) && t1  - startTimeUs > 1000L * 1000 /* 1S */) {
+                    if (t1  - startTimeUs > MAX_PROCESS_TIME ) {
                         logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
                                         "generate entries elapse {} us",
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), t1 - startTimeUs);
@@ -441,7 +441,7 @@ public class ReplicaGroup extends Service implements CommandSender{
                             electionConfig.getSendCommandTimeout(),
                             new AppendEntriesRequestCallback(replica, startTimeUs, request.getEntriesLength()));
                     long t2 = usTime();
-                    if (brokerConfig.getLogDetail(topicPartitionGroup.getTopic()) && t2  - t1 > 1000L * 1000 /* 1S */) {
+                    if (t2  - t1 > MAX_PROCESS_TIME) {
                         logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
                                         "send async command elapse {} us",
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), t2 - t1);
