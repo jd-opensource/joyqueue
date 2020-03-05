@@ -176,7 +176,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
     public List<BrokerMessageInfo> decodeBrokerMessage(List<BrokerMessageInfo> msgs,String decodeType){
         for(BrokerMessageInfo m:msgs){
             if(m.getBody()!=null){
-                m.setBody(messagePreviewService.preview(decodeType,Base64.getDecoder().decode(m.getBody())));
+                compliantPreviewDecode(m,decodeType);
             }
         }
         return msgs;
@@ -274,25 +274,40 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         }
     }
 
+
+    /**
+     * compliant old version broker decode
+     *
+     **/
+    public void compliantPreviewDecode(BrokerMessageInfo message, String messageDecodeType){
+
+        try {
+            message.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(message.getBody())));
+        }catch(Throwable e){
+            if(logger.isDebugEnabled()) {
+                logger.debug("may old broker", e);
+            }
+            try {
+                message.setBody(messagePreviewService.preview(messageDecodeType, message.getBody().getBytes(Charset.forName("utf-8"))));
+            }catch (Throwable ex){
+                logger.debug("incorrect message format", ex);
+                throw new ServiceException(INTERNAL_SERVER_ERROR,"Message can't be parse");
+            }
+        }
+    }
+
     /**
      * @param messageDecodeType  message deserialize type
      **/
     private SimplifiedBrokeMessage simpleBrokerMessageConvert(BrokerMessageInfo m,String messageDecodeType) {
         SimplifiedBrokeMessage message = new SimplifiedBrokeMessage();
-//        message.setQueryId(response.getKey());
         message.setId(m.getPartition() + "-" + m.getMsgIndexNo());
         message.setSendTime(m.getStartTime());
         message.setStoreTime(m.getStoreTime());
         message.setBusinessId(m.getBusinessId());
         if(m.getBody()!=null) {
-            try {
-                message.setBody(messagePreviewService.preview(messageDecodeType,Base64.getDecoder().decode(m.getBody())));
-            }catch(Throwable e){
-                if(logger.isDebugEnabled()) {
-                    logger.debug("may old broker", e);
-                }
-                message.setBody(messagePreviewService.preview(messageDecodeType, m.getBody().getBytes(Charset.forName("utf-8"))));
-            }
+            compliantPreviewDecode(m,messageDecodeType);
+            message.setBody(m.getBody());
         }
         message.setAttributes(m.getAttributes());
         message.setFlag(m.isAck());
