@@ -138,7 +138,7 @@ public class ReplicaGroup extends Service implements CommandSender{
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop-" + topicPartitionGroup.toString());
         clientConfig.setMaxAsync(100);
-        clientConfig.setIoThread(1);
+        clientConfig.setIoThread(2);
         clientConfig.setSocketBufferSize(1024 * 1024 * 1);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
 
