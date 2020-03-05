@@ -26,7 +26,6 @@ import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.replication.ReplicableStore;
-import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -34,13 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -59,9 +54,7 @@ public class ReplicationManager extends Service {
     private StoreService storeService;
     private Consume consume;
 
-    private ExecutorService replicateExecutor;
     private ScheduledExecutorService replicateTimerExecutor;
-    private BlockingDeque replicateQueue;
 
     public ReplicationManager(ElectionConfig electionConfig, BrokerConfig brokerConfig, StoreService storeService,
                               Consume consume, BrokerMonitor brokerMonitor) {
@@ -81,39 +74,30 @@ public class ReplicationManager extends Service {
 
         replicaGroups = new ConcurrentHashMap<>();
 
-        replicateQueue = new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize());
-        replicateExecutor = new ThreadPoolExecutor(electionConfig.getReplicateThreadNumMin(), electionConfig.getReplicateThreadNumMax(),
-                60, TimeUnit.SECONDS, replicateQueue,
-                new NamedThreadFactory("Replicate-sendCommand"));
+        replicateTimerExecutor = Executors.newScheduledThreadPool(1);
 
-        replicateTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum());
-
-        replicateTimerExecutor.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ConcurrentHashMap<TopicPartitionGroup, ReplicaGroup> replicaGroups = ReplicationManager.this.replicaGroups;
-                    int replicaGroupCount = 0;
-                    int replicaLeaderCount = 0;
-                    for (ReplicaGroup replicaGroup : replicaGroups.values()) {
-                        replicaGroupCount++;
-                        if (replicaGroup.isLeader()) {
-                            replicaLeaderCount++;
-                        }
+        replicateTimerExecutor.scheduleWithFixedDelay(() -> {
+            try {
+                ConcurrentHashMap<TopicPartitionGroup, ReplicaGroup> replicaGroups = ReplicationManager.this.replicaGroups;
+                int replicaGroupCount = 0;
+                int replicaLeaderCount = 0;
+                for (ReplicaGroup replicaGroup : replicaGroups.values()) {
+                    replicaGroupCount++;
+                    if (replicaGroup.isLeader()) {
+                        replicaLeaderCount++;
                     }
-                    logger.info("ReplicationManager, managed replica group count {} ,leader count {} , replicate queue capacity is {}, current size is {}",
-                            replicaGroupCount, replicaLeaderCount, electionConfig.getCommandQueueSize(), replicateQueue.size());
-                } catch (Throwable th) {
-                    logger.warn("ReplicateManger schedule error.", th);
                 }
+                logger.info("ReplicationManager, managed replica group count {} ,leader count {}.",
+                        replicaGroupCount, replicaLeaderCount);
+            } catch (Throwable th) {
+                logger.warn("ReplicateManger schedule error.", th);
             }
         }, 30, 30, TimeUnit.SECONDS);
     }
 
     @Override
     public void doStop() {
-        Close.close(replicateExecutor);
-
+        Close.close(replicateTimerExecutor);
         super.doStop();
     }
 
@@ -135,7 +119,7 @@ public class ReplicationManager extends Service {
                     "%d failed, replicable store is null", topic, partitionGroup));
         }
         replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig, brokerConfig,
-                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
+                consume, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
         try {
             replicaGroup.start();
         } catch (Exception e) {

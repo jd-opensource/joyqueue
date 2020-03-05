@@ -26,9 +26,14 @@ public enum ElectionConfigKey implements PropertyDef {
     ELECTION_METADATA("election.metadata.file", "raft_metafile.dat", Type.STRING),
     ELECTION_TIMEOUT("election.election.timeout", 1000 * 5, Type.INT),
     VOTE_TIMEOUT("election.vote.timeout", 1000 * 5, Type.INT),
-    EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 10, Type.INT),
-    EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 50, Type.INT),
-    TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 10, Type.INT),
+    // 每个ReplicaGroup Executor 核心线程数
+    EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 1, Type.INT),
+    // 每个ReplicaGroup Executor 最大线程数
+    EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 10, Type.INT),
+    // 每个ReplicaGroup Executor Queue Size
+    COMMAND_QUEUE_SIZE("election.command.queue.size", 5, Type.INT),
+    // 每个ReplicaGroup定时器线程数
+    TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 5, Type.INT),
     HEARTBEAT_TIMEOUT("election.heartbeat.timeout", 1000, Type.INT),
     SEND_COMMAND_TIMEOUT("election.send.command.timeout", 1000 * 5, Type.INT),
     MAX_BATCH_REPLICATE_SIZE("election.max.replicate.length", 1024 * 1024, Type.INT),
@@ -36,9 +41,6 @@ public enum ElectionConfigKey implements PropertyDef {
     LISTEN_PORT("election.listen.port", 18001, Type.INT),
     TRANSFER_LEADER_TIMEOUT("election.transfer.leader.timeout", 1000 * 10, Type.INT),
     REPLICATE_CONSUME_POS_INTERVAL("election.replicate.consume.pos.interval", 1000 * 5, Type.INT),
-    REPLICATE_THREAD_NUM_MIN("election.replicate.thread.num.min", 10, Type.INT),
-    REPLICATE_THREAD_NUM_MAX("election.replicate.thread.num.max", 100, Type.INT),
-    COMMAND_QUEUE_SIZE("election.command.queue.size", 1024, Type.INT),
     LOG_INTERVAL("election.log.interval", 3000, Type.INT),
     TRANSFER_LEADER_MIN_LAG("election.transfer.leader.min.lag", 10 * 1024 * 1024L, Type.LONG),
     ENABLE_REBALANCE_LEADER("election.enable.rebalance.leader", false, Type.BOOLEAN),
