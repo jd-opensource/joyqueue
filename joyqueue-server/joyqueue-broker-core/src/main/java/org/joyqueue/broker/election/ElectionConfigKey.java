@@ -27,11 +27,11 @@ public enum ElectionConfigKey implements PropertyDef {
     ELECTION_TIMEOUT("election.election.timeout", 1000 * 5, Type.INT),
     VOTE_TIMEOUT("election.vote.timeout", 1000 * 5, Type.INT),
     // 每个ReplicaGroup Executor 核心线程数
-    EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 5, Type.INT),
+    EXECUTOR_THREAD_NUM_MIN("election.executor.thread.num.min", 1, Type.INT),
     // 每个ReplicaGroup Executor 最大线程数
     EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 10, Type.INT),
     // 每个ReplicaGroup Executor Queue Size
-    COMMAND_QUEUE_SIZE("election.command.queue.size", 10, Type.INT),
+    COMMAND_QUEUE_SIZE("election.command.queue.size", 5, Type.INT),
     // 每个ReplicaGroup定时器线程数
     TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 5, Type.INT),
     HEARTBEAT_TIMEOUT("election.heartbeat.timeout", 1000, Type.INT),
