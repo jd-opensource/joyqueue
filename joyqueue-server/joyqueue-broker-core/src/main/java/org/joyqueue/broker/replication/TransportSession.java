@@ -16,39 +16,38 @@
 package org.joyqueue.broker.replication;
 
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
-import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.transport.Transport;
-import org.joyqueue.network.transport.TransportAttribute;
 import org.joyqueue.network.transport.TransportClient;
+import org.joyqueue.network.transport.command.Command;
+import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.joyqueue.network.transport.support.DefaultTransportAttribute;
-import org.joyqueue.toolkit.concurrent.EventListener;
+import org.joyqueue.toolkit.time.SystemClock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author LiYue
  * Date: 2020/3/5
  */
-public class TransportSession{
-    private final Transport transport;
+public class TransportSession {
+
+    protected static final Logger logger = LoggerFactory.getLogger(TransportSession.class);
+
     private final TransportClient transportClient;
-    private final EventListener<TransportEvent> eventEventListener;
-    TransportSession(String address, ClientConfig clientConfig, EventListener<TransportEvent> eventEventListener) {
-        transportClient = new BrokerTransportClientFactory().create(clientConfig);
-        transport = transportClient.createTransport(address);
-        this.eventEventListener = eventEventListener;
-        TransportAttribute attribute = transport.attr();
-        if (attribute == null) {
-            attribute = new DefaultTransportAttribute();
-            transport.attr(attribute);
-        }
-        attribute.set("address", address);
+    private Transport transport;
+    private String address;
+    private volatile long lastReconnect;
+
+    TransportSession(String address, ClientConfig clientConfig) {
+        this.address = address;
+        this.transportClient = new BrokerTransportClientFactory().create(clientConfig);
+        this.transport = initTransport();
     }
 
     public void start() throws TransportException {
         try {
             transportClient.start();
-            transportClient.addListener(eventEventListener);
         } catch (TransportException te) {
             throw te;
         } catch (Exception e ) {
@@ -56,12 +55,37 @@ public class TransportSession{
         }
     }
 
-    public Transport getTransport() {
-        return transport;
+    public void sendCommand(Command request, int timeout, CommandCallback callback) {
+        if (transport == null) {
+            // TODO 参数化
+            if (SystemClock.now() - lastReconnect < 1000) {
+                callback.onException(request, new TransportException.ConnectionException(address));
+                return;
+            }
+            transport = initTransport();
+            if (transport == null) {
+                callback.onException(request, new TransportException.ConnectionException(address));
+                return;
+            }
+        }
+        transport.async(request, timeout, callback);
     }
 
     public void stop() {
-        transport.stop();
+        if (transport != null) {
+            transport.stop();
+        }
         transportClient.stop();
+    }
+
+    protected Transport initTransport() {
+        try {
+            return transportClient.createTransport(address);
+        } catch (Exception e) {
+            logger.error("create transport session exception, address: {}", address, e);
+            return null;
+        } finally {
+            lastReconnect = SystemClock.now();
+        }
     }
 }

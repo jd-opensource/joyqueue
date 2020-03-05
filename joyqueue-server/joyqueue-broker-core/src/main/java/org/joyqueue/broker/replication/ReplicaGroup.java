@@ -35,8 +35,6 @@ import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
-import org.joyqueue.network.event.TransportEvent;
-import org.joyqueue.network.transport.TransportAttribute;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
@@ -44,7 +42,6 @@ import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.store.replication.ReplicableStore;
-import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
@@ -991,38 +988,15 @@ public class ReplicaGroup extends Service implements CommandSender{
                     clientConfig.setMaxAsync(100);
                     clientConfig.setIoThread(2);
                     clientConfig.setSocketBufferSize(1024 * 1024 * 1);
-                    session = new TransportSession(address, clientConfig, new ClientEventListener());
+                    clientConfig.setConnectionTimeout(100);
+                    session = new TransportSession(address, clientConfig);
                     session.start();
                     sessions.put(address, session);
                 }
             }
         }
 
-        session.getTransport().async(command, timeout, callback);
-    }
-
-
-
-    private class ClientEventListener implements EventListener<TransportEvent> {
-        @Override
-        public void onEvent(TransportEvent event) {
-            switch (event.getType()) {
-                case EXCEPTION:
-                case CLOSE:
-                    TransportAttribute attribute = event.getTransport().attr();
-                    String address = attribute.get("address");
-                    TransportSession session = sessions.remove(address);
-                    if (null != session) {
-                        try {
-                            session.stop();
-                        } catch (Throwable ignored) {}
-                    }
-                    logger.info("Replication manager transport of {} closed", (String)attribute.get("address"));
-                    break;
-                default:
-                    break;
-            }
-        }
+        session.sendCommand(command, timeout, callback);
     }
 
     private class DelayedCommand implements Delayed {
