@@ -72,13 +72,11 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     private static Logger logger = LoggerFactory.getLogger(ElectionManager.class);
 
     private Map<TopicPartitionGroup, LeaderElection> leaderElections;
-    private TransportClient transportClient;
 
     protected ElectionConfig electionConfig;
     private ClusterManager clusterManager;
 
     // 发送给一个broker的命令使用同一个连接
-    private final Map<String, Transport> sessions = new ConcurrentHashMap<>();
     private ScheduledExecutorService electionTimerExecutor;
     private ExecutorService electionExecutor;
 
@@ -156,14 +154,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         addListener(brokerMonitor.new ElectionListener());
         leaderElections = new ConcurrentHashMap<>();
 
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("joyqueue-election-io-eventLoop");
-        transportClient = new BrokerTransportClientFactory().create(clientConfig);
-        transportClient.start();
-
-        EventListener<TransportEvent> clientEventListener = new ClientEventListener();
-        transportClient.addListener(clientEventListener);
-
         electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum(), new NamedThreadFactory("Election-Timer"));
         electionExecutor = new ThreadPoolExecutor(electionConfig.getExecutorThreadNumMin(), electionConfig.getExecutorThreadNumMax(),
                 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
@@ -192,12 +182,10 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElections.clear();
-        sessions.clear();
 
         Close.close(electionTimerExecutor);
         Close.close(electionExecutor);
         Close.close(electionEventManager);
-        Close.close(transportClient);
         Close.close(replicationManager);
 
         super.doStop();
@@ -403,7 +391,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         } else if (electType == PartitionGroup.ElectType.raft) {
             leaderElection = new RaftLeaderElection(topicPartitionGroup, electionConfig, this, clusterManager,
                     electionMetadataManager, replicableStore, replicaGroup, electionTimerExecutor,
-                    electionExecutor, electionEventManager, localNodeId, allNodes, learners);
+                    electionExecutor, electionEventManager, localNodeId, allNodes, learners, replicaGroup);
         } else {
             throw new ElectionException("Incorrect election type {}" + electType);
         }
@@ -495,61 +483,9 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         electionMetadataManager.updateTerm(topic, partitionGroup, term);
     }
 
-    /**
-     * 向目标节点发送命令，采用异步方式
-     *
-     * @param address 目标broker地址, ip + ":" + port
-     * @param command 发送的命令
-     * @throws TransportException 异常
-     */
-    void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
-        if (!isStarted()) {
-            logger.info("Send election command but election manager is stopped");
-            return;
-        }
-
-        Transport transport = sessions.get(address);
-        if (transport == null) {
-            synchronized (sessions) {
-                transport = sessions.get(address);
-                if (transport == null) {
-                    logger.info("Send election command, create transport of address {}", address);
-
-                    transport = transportClient.createTransport(address);
-                    TransportAttribute attribute = transport.attr();
-                    if (attribute == null) {
-                        attribute = new DefaultTransportAttribute();
-                        transport.attr(attribute);
-                    }
-                    attribute.set("address", address);
-                    sessions.put(address, transport);
-                }
-            }
-        }
-
-        transport.async(command, timeout, callback);
-    }
-
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
     }
 
-    private class ClientEventListener implements EventListener<TransportEvent> {
-        @Override
-        public void onEvent(TransportEvent event) {
-            switch (event.getType()) {
-                case CONNECT:
-                    break;
-                case EXCEPTION:
-                case CLOSE:
-                    TransportAttribute attribute = event.getTransport().attr();
-                    sessions.remove(attribute.get("address"));
-                    logger.info("Election manager transport of {} closed", (String) attribute.get("address"));
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
 }

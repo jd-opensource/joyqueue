@@ -77,13 +77,12 @@ import static org.joyqueue.broker.election.ElectionNode.State.TRANSFERRING;
  * email: zhuduohui@jd.com
  * date: 2018/9/26
  */
-public class ReplicaGroup extends Service {
+public class ReplicaGroup extends Service implements CommandSender{
     private static Logger logger = LoggerFactory.getLogger(ReplicaGroup.class);
 
     private ElectionConfig electionConfig;
     private BrokerConfig brokerConfig;
     private TopicPartitionGroup topicPartitionGroup;
-    private ReplicationManager replicationManager;
 
     private List<Replica> replicas;
     private List<Replica> replicasWithoutLearners;
@@ -129,7 +128,6 @@ public class ReplicaGroup extends Service {
         this.electionConfig = electionConfig;
         this.brokerConfig = brokerConfig;
         this.topicPartitionGroup = topicPartitionGroup;
-        this.replicationManager = replicationManager;
         this.localReplicaId = localReplicaId;
         this.leaderId = leaderId;
         this.consume = consume;
@@ -985,7 +983,7 @@ public class ReplicaGroup extends Service {
      * @param command 要发送的命令
      * @throws TransportException
      */
-    protected void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
+    public void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
         Transport transport = sessions.get(address);
         if (transport == null) {
             synchronized (sessions) {
