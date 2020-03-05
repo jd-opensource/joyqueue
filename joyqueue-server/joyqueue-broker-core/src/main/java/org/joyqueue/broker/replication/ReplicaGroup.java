@@ -989,6 +989,7 @@ public class ReplicaGroup extends Service implements CommandSender{
                     clientConfig.setIoThread(2);
                     clientConfig.setSocketBufferSize(1024 * 1024 * 1);
                     clientConfig.setConnectionTimeout(100);
+                    clientConfig.setCallbackThreads(1);
                     session = new TransportSession(address, clientConfig);
                     session.start();
                     sessions.put(address, session);
