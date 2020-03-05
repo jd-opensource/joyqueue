@@ -71,12 +71,6 @@ public class ElectionConfigTest {
         int replicateConsumePosInterval = electionConfig.getReplicateConsumePosInterval();
         Assert.assertEquals(replicateConsumePosInterval, ElectionConfigKey.REPLICATE_CONSUME_POS_INTERVAL.getValue());
 
-        int minReplicateThreadNum = electionConfig.getReplicateThreadNumMin();
-        Assert.assertEquals(minReplicateThreadNum, ElectionConfigKey.REPLICATE_THREAD_NUM_MIN.getValue());
-
-        int maxReplicateThreadNum = electionConfig.getReplicateThreadNumMax();
-        Assert.assertEquals(maxReplicateThreadNum, ElectionConfigKey.REPLICATE_THREAD_NUM_MAX.getValue());
-
         int sendCommandTimeout = electionConfig.getSendCommandTimeout();
         Assert.assertEquals(sendCommandTimeout, ElectionConfigKey.SEND_COMMAND_TIMEOUT.getValue());
 

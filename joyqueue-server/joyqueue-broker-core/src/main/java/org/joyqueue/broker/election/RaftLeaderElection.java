@@ -90,8 +90,7 @@ public class RaftLeaderElection extends LeaderElection  {
     RaftLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionConfig electionConfig,
                        ElectionManager electionManager, ClusterManager clusterManager,
                        ElectionMetadataManager metadataManager, ReplicableStore replicableStore,
-                       ReplicaGroup replicaGroup, ScheduledExecutorService electionTimerExecutor,
-                       ExecutorService electionExecutor, EventBus<ElectionEvent> electionEventManager,
+                       ReplicaGroup replicaGroup, EventBus<ElectionEvent> electionEventManager,
                        int localNodeId, List<DefaultElectionNode> allNodes,
                        Set<Integer> learners, CommandSender commandSender) {
         this.topicPartitionGroup = topicPartitionGroup;
@@ -101,8 +100,8 @@ public class RaftLeaderElection extends LeaderElection  {
         this.electionMetadataManager = metadataManager;
         this.replicableStore = replicableStore;
         this.replicaGroup = replicaGroup;
-        this.electionTimerExecutor = electionTimerExecutor;
-        this.electionExecutor = electionExecutor;
+        this.electionTimerExecutor = replicaGroup.getReplicateScheduledExecutor();
+        this.electionExecutor = replicaGroup.getReplicateExecutor();
         this.electionEventManager = electionEventManager;
         this.localNodeId = localNodeId;
         this.learners = learners;

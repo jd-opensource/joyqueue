@@ -76,10 +76,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     protected ElectionConfig electionConfig;
     private ClusterManager clusterManager;
 
-    // 发送给一个broker的命令使用同一个连接
-    private ScheduledExecutorService electionTimerExecutor;
-    private ExecutorService electionExecutor;
-
     private EventBus<ElectionEvent> electionEventManager;
     private ElectionMetadataManager electionMetadataManager;
     private ReplicationManager replicationManager;
@@ -154,11 +150,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         addListener(brokerMonitor.new ElectionListener());
         leaderElections = new ConcurrentHashMap<>();
 
-        electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum(), new NamedThreadFactory("Election-Timer"));
-        electionExecutor = new ThreadPoolExecutor(electionConfig.getExecutorThreadNumMin(), electionConfig.getExecutorThreadNumMax(),
-                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
-                new NamedThreadFactory("Election-sendCommand"));
-
         replicationManager = new ReplicationManager(electionConfig, brokerConfig, storeService, consume, brokerMonitor);
         replicationManager.start();
 
@@ -183,8 +174,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         }
         leaderElections.clear();
 
-        Close.close(electionTimerExecutor);
-        Close.close(electionExecutor);
         Close.close(electionEventManager);
         Close.close(replicationManager);
 
@@ -390,8 +379,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                     localNodeId, allNodes);
         } else if (electType == PartitionGroup.ElectType.raft) {
             leaderElection = new RaftLeaderElection(topicPartitionGroup, electionConfig, this, clusterManager,
-                    electionMetadataManager, replicableStore, replicaGroup, electionTimerExecutor,
-                    electionExecutor, electionEventManager, localNodeId, allNodes, learners, replicaGroup);
+                    electionMetadataManager, replicableStore, replicaGroup, electionEventManager, localNodeId, allNodes, learners, replicaGroup);
         } else {
             throw new ElectionException("Incorrect election type {}" + electType);
         }
