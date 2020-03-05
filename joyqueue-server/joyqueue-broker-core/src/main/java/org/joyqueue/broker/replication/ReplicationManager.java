@@ -26,7 +26,6 @@ import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.replication.ReplicableStore;
-import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -34,13 +33,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
