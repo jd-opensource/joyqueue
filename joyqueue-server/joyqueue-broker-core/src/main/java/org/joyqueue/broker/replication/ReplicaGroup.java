@@ -431,11 +431,21 @@ public class ReplicaGroup extends Service implements CommandSender{
                                         "read entries elapse {} us",
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
                     }
-
+                    long t1 = usTime();
+                    if (t1  - startTimeUs > MAX_PROCESS_TIME ) {
+                        logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
+                                        "generate entries elapse {} us",
+                                topicPartitionGroup, leaderId, request, replica.replicaId(), t1 - startTimeUs);
+                    }
                     this.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(),
                             new AppendEntriesRequestCallback(replica, startTimeUs, request.getEntriesLength()));
-
+                    long t2 = usTime();
+                    if (t2  - t1 > MAX_PROCESS_TIME) {
+                        logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
+                                        "send async command elapse {} us",
+                                topicPartitionGroup, leaderId, request, replica.replicaId(), t2 - t1);
+                    }
                 } catch (Throwable t) {
                     logger.warn("Partition group {}/ node {} send append entries to {} fail",
                             topicPartitionGroup, localReplicaId, replica.replicaId(), t);
