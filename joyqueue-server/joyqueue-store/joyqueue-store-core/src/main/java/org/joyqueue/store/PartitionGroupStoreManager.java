@@ -969,6 +969,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         try {
             if (started.compareAndSet(true, false)) {
                 System.out.println("Waiting for flush finished...");
+                logger.info("Waiting for flush finished, topic: {}, group: {}.", topic, partitionGroup);
                 try {
                     while (!isAllStoreClean()) {
                         Thread.sleep(50);
@@ -977,18 +978,21 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     logger.error(e.getMessage(), e);
                 }
                 System.out.println("Stopping flush thread...");
+                logger.info("Stopping flush thread, topic: {}, group: {}.", topic, partitionGroup);
                 stopFlushThread();
                 flushCheckpoint();
                 System.out.println("Stopping callback thread...");
+                logger.info("Stopping callback thread, topic: {}, group: {}.", topic, partitionGroup);
 
 //                stopCallbackThread();
                 if (config.printMetricIntervalMs > 0) {
                     metricThread.stop();
                 }
                 System.out.println("Store stopped. " + base.getAbsolutePath());
+                logger.info("Store stopped. " + base.getAbsolutePath());
             }
         } catch (Throwable t) {
-            logger.error(t.getMessage(),t);
+            logger.error("Stop partition group exception, topic: {}, group: {}.", topic, partitionGroup,t);
         }
     }
 
