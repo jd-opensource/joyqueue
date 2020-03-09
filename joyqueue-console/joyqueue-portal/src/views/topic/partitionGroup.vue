@@ -183,10 +183,6 @@ export default {
             method: 'on-removePartition'
           },
           {
-            txt: '删除',
-            method: 'on-del'
-          },
-          {
             txt: '主从同步监控',
             method: 'on-position'
           },
