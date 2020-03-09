@@ -35,15 +35,18 @@ import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
+import org.joyqueue.network.event.TransportEvent;
+import org.joyqueue.network.transport.Transport;
+import org.joyqueue.network.transport.TransportAttribute;
+import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.Direction;
-import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
+import org.joyqueue.network.transport.support.DefaultTransportAttribute;
 import org.joyqueue.store.replication.ReplicableStore;
-import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
-import org.joyqueue.toolkit.lang.Close;
+import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.toolkit.validate.annotation.NotNull;
@@ -59,10 +62,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -76,12 +75,13 @@ import static org.joyqueue.broker.election.ElectionNode.State.TRANSFERRING;
  * email: zhuduohui@jd.com
  * date: 2018/9/26
  */
-public class ReplicaGroup extends Service implements CommandSender{
+public class ReplicaGroup extends Service {
     private static Logger logger = LoggerFactory.getLogger(ReplicaGroup.class);
 
     private ElectionConfig electionConfig;
     private BrokerConfig brokerConfig;
     private TopicPartitionGroup topicPartitionGroup;
+    private ReplicationManager replicationManager;
 
     private List<Replica> replicas;
     private List<Replica> replicasWithoutLearners;
@@ -102,11 +102,11 @@ public class ReplicaGroup extends Service implements CommandSender{
 
     private LeaderElection leaderElection;
     private ExecutorService replicateExecutor;
-    private ScheduledExecutorService replicateScheduledExecutor;
 
     private Consume consume;
     private BrokerMonitor brokerMonitor;
-    private final ConcurrentMap<String, TransportSession> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Transport> sessions = new ConcurrentHashMap<>();
+    private final TransportClient transportClient;
 
     private static final long ONE_SECOND_NANO = 1000 * 1000 * 1000;
     private static final long ONE_MS_NANO     = 1000 * 1000;
@@ -114,24 +114,30 @@ public class ReplicaGroup extends Service implements CommandSender{
 
     ReplicaGroup(TopicPartitionGroup topicPartitionGroup, ReplicationManager replicationManager,
                  ReplicableStore replicableStore, ElectionConfig electionConfig, BrokerConfig brokerConfig,
-                 Consume consume, BrokerMonitor brokerMonitor,
-                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId
+                 Consume consume, ExecutorService replicateExecutor, BrokerMonitor brokerMonitor,
+                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId,
+                 TransportClient transportClient
     ) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(topicPartitionGroup != null, "topic partition group is null");
         Preconditions.checkArgument(replicationManager != null, "replication manager is null");
         Preconditions.checkArgument(consume != null,  "consume is null");
         Preconditions.checkArgument(brokerMonitor != null, "broker monitor is null");
+        Preconditions.checkArgument(replicateExecutor != null, "replicate executor is null");
         Preconditions.checkArgument(replicableStore != null, "replicable store is null");
+        Preconditions.checkArgument(transportClient !=null, "transport client can not be null");
         this.electionConfig = electionConfig;
         this.brokerConfig = brokerConfig;
         this.topicPartitionGroup = topicPartitionGroup;
+        this.replicationManager = replicationManager;
         this.localReplicaId = localReplicaId;
         this.leaderId = leaderId;
         this.consume = consume;
         this.brokerMonitor = brokerMonitor;
+        this.replicateExecutor = replicateExecutor;
         this.replicableStore = replicableStore;
 
+        this.transportClient = transportClient;
 
         replicas = allNodes.stream()
                 .map(n -> new Replica(n.getNodeId(), n.getAddress()))
@@ -145,10 +151,7 @@ public class ReplicaGroup extends Service implements CommandSender{
     @Override
     public void doStart() throws Exception {
         super.doStart();
-        replicateScheduledExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum(), new NamedThreadFactory("Replication-Timer-" + topicPartitionGroup.toString()));
-        replicateExecutor = new ThreadPoolExecutor(electionConfig.getExecutorThreadNumMin(), electionConfig.getExecutorThreadNumMax(),
-                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
-                new NamedThreadFactory("Replication-executor-" + topicPartitionGroup.toString()));
+        transportClient.addListener(new ClientEventListener());
 
         replicateResponseQueue = new DelayQueue<>();
 
@@ -158,8 +161,6 @@ public class ReplicaGroup extends Service implements CommandSender{
 
     @Override
     public void doStop() {
-        Close.close(replicateExecutor);
-        Close.close(replicateScheduledExecutor);
         while (replicateThread.isAlive()) {
             replicateThread.interrupt();
             try {
@@ -168,13 +169,14 @@ public class ReplicaGroup extends Service implements CommandSender{
             }
         }
 
-        if (!sessions.isEmpty()) {
-            for (TransportSession session : sessions.values()) {
-                if (session != null) {
-                    session.stop();
+        if (sessions != null && !sessions.isEmpty()) {
+            for (Transport transport : sessions.values()) {
+                if (transport != null) {
+                    transport.stop();
                 }
             }
         }
+
         super.doStop();
     }
 
@@ -431,21 +433,11 @@ public class ReplicaGroup extends Service implements CommandSender{
                                         "read entries elapse {} us",
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
                     }
-                    long t1 = usTime();
-                    if (t1  - startTimeUs > MAX_PROCESS_TIME ) {
-                        logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
-                                        "generate entries elapse {} us",
-                                topicPartitionGroup, leaderId, request, replica.replicaId(), t1 - startTimeUs);
-                    }
+
                     this.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(),
                             new AppendEntriesRequestCallback(replica, startTimeUs, request.getEntriesLength()));
-                    long t2 = usTime();
-                    if (t2  - t1 > MAX_PROCESS_TIME) {
-                        logger.info("Partition group {}/node {} send append entries request {} to node {}, " +
-                                        "send async command elapse {} us",
-                                topicPartitionGroup, leaderId, request, replica.replicaId(), t2 - t1);
-                    }
+
                 } catch (Throwable t) {
                     logger.warn("Partition group {}/ node {} send append entries to {} fail",
                             topicPartitionGroup, localReplicaId, replica.replicaId(), t);
@@ -986,28 +978,47 @@ public class ReplicaGroup extends Service implements CommandSender{
      * @param command 要发送的命令
      * @throws TransportException
      */
-    public void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
-        TransportSession session = sessions.get(address);
-        if (session == null) {
+    protected void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
+        Transport transport = sessions.get(address);
+        if (transport == null) {
             synchronized (sessions) {
-                session = sessions.get(address);
-                if (session == null) {
+                transport = sessions.get(address);
+                if (transport == null) {
                     logger.info("Replication manager create transport of {}", address);
-                    ClientConfig clientConfig = new ClientConfig();
-                    clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop-" + topicPartitionGroup.toString());
-                    clientConfig.setMaxAsync(100);
-                    clientConfig.setIoThread(2);
-                    clientConfig.setSocketBufferSize(1024 * 1024 * 1);
-                    clientConfig.setConnectionTimeout(100);
-                    clientConfig.setCallbackThreads(1);
-                    session = new TransportSession(address, clientConfig);
-                    session.start();
-                    sessions.put(address, session);
+
+                    transport = transportClient.createTransport(address);
+                    TransportAttribute attribute = transport.attr();
+                    if (attribute == null) {
+                        attribute = new DefaultTransportAttribute();
+                        transport.attr(attribute);
+                    }
+                    attribute.set("address", address);
+                    sessions.put(address, transport);
                 }
             }
         }
 
-        session.sendCommand(command, timeout, callback);
+        transport.async(command, timeout, callback);
+    }
+
+
+
+    private class ClientEventListener implements EventListener<TransportEvent> {
+        @Override
+        public void onEvent(TransportEvent event) {
+            switch (event.getType()) {
+                case CONNECT:
+                    break;
+                case EXCEPTION:
+                case CLOSE:
+                    TransportAttribute attribute = event.getTransport().attr();
+                    sessions.remove(attribute.get("address"));
+                    logger.info("Replication manager transport of {} closed", (String)attribute.get("address"));
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private class DelayedCommand implements Delayed {
@@ -1046,13 +1057,5 @@ public class ReplicaGroup extends Service implements CommandSender{
 
     private long usTime() {
         return System.nanoTime() / 1000;
-    }
-
-    public ExecutorService getReplicateExecutor() {
-        return replicateExecutor;
-    }
-
-    public ScheduledExecutorService getReplicateScheduledExecutor() {
-        return replicateScheduledExecutor;
     }
 }

@@ -105,6 +105,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private static final long FLUSH_CHECKPOINT_INTERVAL_MS = 60 * 1000L;
     private long lastFlushCheckpointTimestamp = 0L;
     static final String CHECKPOINT_FILE= "checkpoint.json";
+    private int lastEntryTerm = -1;
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool) {
@@ -174,6 +175,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
             logger.info("Recovering message store {}...", base.getAbsolutePath());
             store.recover();
+            resetLastEntryTerm();
             logger.info("Recovering index store {}...", base.getAbsolutePath());
             indexPosition = recoverPartitions();
             long safeIndexPosition = indexPosition;
@@ -199,6 +201,15 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             logger.info("Store recovered: {}...", base.getAbsolutePath());
         } catch (IOException e) {
             throw new StoreInitializeException(e);
+        }
+    }
+
+    private void resetLastEntryTerm() {
+        if(store.right() > 0) {
+            long lastLogPosition = store.toLogStart(store.right());
+            lastEntryTerm = getEntryTerm(lastLogPosition);
+        } else {
+            lastEntryTerm = -1;
         }
     }
 
@@ -606,6 +617,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
                 // 写入消息
                 position = store.append(byteBuffer);
+                updateLastEntryTerm(byteBuffer);
                 // 写入索引
 
                 if (BatchMessageParser.isBatch(byteBuffer)) {
@@ -1108,7 +1120,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
         store.setRight(position);
 
-
+        resetLastEntryTerm();
     }
 
     private void flushCheckpointPeriodically() throws IOException {
@@ -1217,6 +1229,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     }
 
                     writeIndex(indexItem, partition.store);
+                    updateLastEntryTerm(byteBuffer);
                     byteBuffer.position(byteBuffer.position() + indexItem.getLength());
                     counter++;
                 }
@@ -1235,6 +1248,15 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             }
         } finally {
             writeLock.unlock();
+        }
+    }
+
+    private void updateLastEntryTerm(ByteBuffer byteBuffer) {
+        int term = MessageParser.getInt(byteBuffer, MessageParser.TERM);
+        if(term >= 0) {
+            lastEntryTerm = term;
+        } else {
+            throw new WriteException(String.format("Invalid term %d at position %d!", term, byteBuffer.position()));
         }
     }
 
@@ -1291,6 +1313,11 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         return store.position(position, offsetCount);
     }
 
+
+    @Override
+    public int lastEntryTerm(){
+        return lastEntryTerm;
+    }
 
     /**
      * LEADER 收到半数以上回复后，调用此方法提交
