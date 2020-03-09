@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -150,7 +151,7 @@ public class HttpUtil {
                         request.getURI().toString(), request.toString(), statusCode, EntityUtils.toString(response.getEntity()));
                 throw new IllegalStateException(message);
             }
-            String result = EntityUtils.toString(response.getEntity());
+            String result = EntityUtils.toString(response.getEntity(), Charset.forName("utf-8"));
             logger.info("request[{}] response[{}]", request.toString(), result);
             return result;
         } finally {
