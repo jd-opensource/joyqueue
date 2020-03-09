@@ -53,6 +53,7 @@ import org.joyqueue.security.Authentication;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.config.Property;
+import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
@@ -62,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -235,12 +237,35 @@ public class BrokerService extends Service {
     }
 
     private void enrichConfiguration(Configuration configuration) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Map<String, String> configMap = ClassScanner.getEnumConstantsConfig();
+        Map<String, String> configMap = getEnumConstantsConfig("org.joyqueue");
         for(Map.Entry<String,String> entry:configMap.entrySet()){
             if(!configuration.contains(entry.getKey())) {
                 configuration.addProperty(entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    private Map<String, String> getEnumConstantsConfig(String... pkgNames) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Map<String, String> configMap = new HashMap<>(10);
+        for (String pkgName : pkgNames) {
+            Set<Class<?>> classes = ClassScanner.search(pkgName);
+            for (Class<?> clazz : classes) {
+                List<Class<?>> impls = Arrays.asList(clazz.getInterfaces());
+                if (impls.contains(PropertyDef.class) && clazz.isEnum()) {
+                    Method method = clazz.getMethod("values");
+                    if (method.getReturnType().isArray()) {
+                        Object[] values = (Object[]) method.invoke(null);
+                        for (Object obj : values) {
+                            if (obj instanceof PropertyDef) {
+                                PropertyDef propertyDef = (PropertyDef) obj;
+                                configMap.put(propertyDef.getName(), String.valueOf(propertyDef.getValue()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return configMap;
     }
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
