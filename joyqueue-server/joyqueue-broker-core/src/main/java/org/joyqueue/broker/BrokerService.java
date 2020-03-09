@@ -22,6 +22,7 @@ import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.config.Configuration;
 import org.joyqueue.broker.config.ConfigurationManager;
+import org.joyqueue.broker.config.scan.ClassScanner;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
@@ -60,10 +61,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 /**
  * BrokerService
@@ -215,6 +214,7 @@ public class BrokerService extends Service {
         //build consume policy
         this.brokerContext.consumerPolicy(buildGlobalConsumePolicy(configuration));
         this.extensionManager.after();
+        enrichConfiguration(configuration);
 
     }
 
@@ -232,6 +232,15 @@ public class BrokerService extends Service {
 
         key = BrokerConfig.BROKER_BACKEND_SERVER_CONFIG_PREFIX + TransportConfigSupport.TRANSPORT_SERVER_PORT;
         configuration.addProperty(key, String.valueOf(PortHelper.getBackendPort(port)));
+    }
+
+    private void enrichConfiguration(Configuration configuration) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Map<String, String> configMap = ClassScanner.getEnumConstantsConfig();
+        for(Map.Entry<String,String> entry:configMap.entrySet()){
+            if(!configuration.contains(entry.getKey())) {
+                configuration.addProperty(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
