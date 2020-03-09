@@ -18,6 +18,10 @@ package org.joyqueue.broker.config.scan;
 import java.util.*;
 import java.util.function.Predicate;
 
+/**
+ * @author jiangnan53
+ * refer to https://blog.csdn.net/a729913162/article/details/81698109
+ */
 public class ClassScanner {
 
     public static Set<Class<?>> search(String packageName) {

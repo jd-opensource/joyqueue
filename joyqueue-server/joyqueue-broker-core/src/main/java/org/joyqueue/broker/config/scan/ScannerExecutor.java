@@ -19,6 +19,10 @@ package org.joyqueue.broker.config.scan;
 import java.util.Set;
 import java.util.function.Predicate;
 
+/**
+ * @author jiangnan53
+ * refer to https://blog.csdn.net/a729913162/article/details/81698109
+ */
 public class ScannerExecutor implements Scanner {
 
     private static volatile ScannerExecutor instance;

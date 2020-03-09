@@ -21,6 +21,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
+/**
+ * @author jiangnan53
+ * refer to https://blog.csdn.net/a729913162/article/details/81698109
+ */
 public class FileScanner implements Scanner {
 
     private String defaultClassPath = FileScanner.class.getResource("/").getPath();

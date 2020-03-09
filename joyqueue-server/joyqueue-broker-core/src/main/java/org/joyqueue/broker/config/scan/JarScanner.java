@@ -26,6 +26,10 @@ import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * @author jiangnan53
+ * refer to https://blog.csdn.net/a729913162/article/details/81698109
+ */
 public class JarScanner implements Scanner {
 
     @Override
