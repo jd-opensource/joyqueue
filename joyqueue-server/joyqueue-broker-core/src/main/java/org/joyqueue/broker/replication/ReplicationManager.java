@@ -23,10 +23,7 @@ import org.joyqueue.broker.election.ElectionConfig;
 import org.joyqueue.broker.election.ElectionException;
 import org.joyqueue.broker.election.TopicPartitionGroup;
 import org.joyqueue.broker.monitor.BrokerMonitor;
-import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.network.transport.Transport;
-import org.joyqueue.network.transport.TransportClient;
-import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
@@ -62,7 +59,6 @@ public class ReplicationManager extends Service {
     private StoreService storeService;
     private Consume consume;
 
-    private TransportClient transportClient;
     private ExecutorService replicateExecutor;
     private ScheduledExecutorService replicateTimerExecutor;
     private BlockingDeque replicateQueue;
@@ -84,14 +80,6 @@ public class ReplicationManager extends Service {
         super.doStart();
 
         replicaGroups = new ConcurrentHashMap<>();
-
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop");
-        clientConfig.setMaxAsync(1000);
-        clientConfig.setIoThread(32);
-        clientConfig.setSocketBufferSize(1024 * 1024 * 1);
-        transportClient = new BrokerTransportClientFactory().create(clientConfig);
-        transportClient.start();
 
         replicateQueue = new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize());
         replicateExecutor = new ThreadPoolExecutor(electionConfig.getReplicateThreadNumMin(), electionConfig.getReplicateThreadNumMax(),
@@ -124,7 +112,6 @@ public class ReplicationManager extends Service {
 
     @Override
     public void doStop() {
-        Close.close(transportClient);
         Close.close(replicateExecutor);
 
         super.doStop();
@@ -148,7 +135,7 @@ public class ReplicationManager extends Service {
                     "%d failed, replicable store is null", topic, partitionGroup));
         }
         replicaGroup = new ReplicaGroup(topicPartitionGroup, this, replicableStore, electionConfig, brokerConfig,
-                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId,transportClient);
+                consume, replicateExecutor, brokerMonitor, allNodes, learners, localReplicaId, leaderId);
         try {
             replicaGroup.start();
         } catch (Exception e) {
