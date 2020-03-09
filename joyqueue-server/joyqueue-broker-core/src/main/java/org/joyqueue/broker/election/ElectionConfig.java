@@ -104,6 +104,15 @@ public class ElectionConfig {
     public int getReplicateConsumePosInterval() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.REPLICATE_CONSUME_POS_INTERVAL);
     }
+
+    public int getReplicateThreadNumMin() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.REPLICATE_THREAD_NUM_MIN);
+    }
+
+    public int getReplicateThreadNumMax() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.REPLICATE_THREAD_NUM_MAX);
+    }
+
     public int getCommandQueueSize() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.COMMAND_QUEUE_SIZE);
     }

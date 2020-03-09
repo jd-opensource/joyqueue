@@ -35,18 +35,13 @@ import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
-import org.joyqueue.network.event.TransportEvent;
-import org.joyqueue.network.transport.Transport;
-import org.joyqueue.network.transport.TransportAttribute;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.Direction;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.joyqueue.network.transport.support.DefaultTransportAttribute;
 import org.joyqueue.store.replication.ReplicableStore;
-import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.toolkit.validate.annotation.NotNull;
@@ -105,7 +100,7 @@ public class ReplicaGroup extends Service {
 
     private Consume consume;
     private BrokerMonitor brokerMonitor;
-    private final ConcurrentMap<String, Transport> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, TransportSession> sessions = new ConcurrentHashMap<>();
     private final TransportClient transportClient;
 
     private static final long ONE_SECOND_NANO = 1000 * 1000 * 1000;
@@ -151,7 +146,6 @@ public class ReplicaGroup extends Service {
     @Override
     public void doStart() throws Exception {
         super.doStart();
-        transportClient.addListener(new ClientEventListener());
 
         replicateResponseQueue = new DelayQueue<>();
 
@@ -170,7 +164,7 @@ public class ReplicaGroup extends Service {
         }
 
         if (sessions != null && !sessions.isEmpty()) {
-            for (Transport transport : sessions.values()) {
+            for (TransportSession transport : sessions.values()) {
                 if (transport != null) {
                     transport.stop();
                 }
@@ -979,46 +973,20 @@ public class ReplicaGroup extends Service {
      * @throws TransportException
      */
     protected void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
-        Transport transport = sessions.get(address);
+        TransportSession transport = sessions.get(address);
         if (transport == null) {
             synchronized (sessions) {
                 transport = sessions.get(address);
                 if (transport == null) {
                     logger.info("Replication manager create transport of {}", address);
 
-                    transport = transportClient.createTransport(address);
-                    TransportAttribute attribute = transport.attr();
-                    if (attribute == null) {
-                        attribute = new DefaultTransportAttribute();
-                        transport.attr(attribute);
-                    }
-                    attribute.set("address", address);
+                    transport = new TransportSession(address, transportClient);
                     sessions.put(address, transport);
                 }
             }
         }
 
-        transport.async(command, timeout, callback);
-    }
-
-
-
-    private class ClientEventListener implements EventListener<TransportEvent> {
-        @Override
-        public void onEvent(TransportEvent event) {
-            switch (event.getType()) {
-                case CONNECT:
-                    break;
-                case EXCEPTION:
-                case CLOSE:
-                    TransportAttribute attribute = event.getTransport().attr();
-                    sessions.remove(attribute.get("address"));
-                    logger.info("Replication manager transport of {} closed", (String)attribute.get("address"));
-                    break;
-                default:
-                    break;
-            }
-        }
+        transport.sendCommand(command, timeout, callback);
     }
 
     private class DelayedCommand implements Delayed {

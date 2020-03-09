@@ -23,7 +23,6 @@ import org.joyqueue.broker.election.command.TimeoutNowRequest;
 import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.election.command.VoteRequest;
 import org.joyqueue.broker.election.command.VoteResponse;
-import org.joyqueue.broker.replication.CommandSender;
 import org.joyqueue.broker.replication.ReplicaGroup;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
@@ -84,15 +83,16 @@ public class RaftLeaderElection extends LeaderElection  {
     private ScheduledFuture reportLeaderFuture;
     private ScheduledFuture leaderRebalanceFuture;
     private ExecutorService electionExecutor;
-    private final CommandSender commandSender;
+
     private long lastRebalanceTime;
 
     RaftLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionConfig electionConfig,
                        ElectionManager electionManager, ClusterManager clusterManager,
                        ElectionMetadataManager metadataManager, ReplicableStore replicableStore,
-                       ReplicaGroup replicaGroup, EventBus<ElectionEvent> electionEventManager,
+                       ReplicaGroup replicaGroup, ScheduledExecutorService electionTimerExecutor,
+                       ExecutorService electionExecutor, EventBus<ElectionEvent> electionEventManager,
                        int localNodeId, List<DefaultElectionNode> allNodes,
-                       Set<Integer> learners, CommandSender commandSender) {
+                       Set<Integer> learners) {
         this.topicPartitionGroup = topicPartitionGroup;
         this.electionConfig = electionConfig;
         this.electionManager = electionManager;
@@ -100,12 +100,12 @@ public class RaftLeaderElection extends LeaderElection  {
         this.electionMetadataManager = metadataManager;
         this.replicableStore = replicableStore;
         this.replicaGroup = replicaGroup;
-        this.electionTimerExecutor = replicaGroup.getReplicateScheduledExecutor();
-        this.electionExecutor = replicaGroup.getReplicateExecutor();
+        this.electionTimerExecutor = electionTimerExecutor;
+        this.electionExecutor = electionExecutor;
         this.electionEventManager = electionEventManager;
         this.localNodeId = localNodeId;
         this.learners = learners;
-        this.commandSender = commandSender;
+
         setAllNodes(allNodes, learners);
         this.localNode = getNode(localNodeId);
     }
@@ -398,7 +398,7 @@ public class RaftLeaderElection extends LeaderElection  {
                         topicPartitionGroup, localNode, node);
 
                 try {
-                    commandSender.sendCommand(node.getAddress(), command,
+                    electionManager.sendCommand(node.getAddress(), command,
                             electionConfig.getSendCommandTimeout(), new VoteRequestCallback(currentTerm, node));
                 } catch (Exception e) {
                     logger.info("Partition group {}/node{} send pre vote request to node {} fail",
@@ -445,7 +445,7 @@ public class RaftLeaderElection extends LeaderElection  {
                         topicPartitionGroup, localNode, node);
 
                 try {
-                    commandSender.sendCommand(node.getAddress(), command,
+                    electionManager.sendCommand(node.getAddress(), command,
                             electionConfig.getSendCommandTimeout(), new VoteRequestCallback(currentTerm, node));
                 } catch (Exception e) {
                     logger.info("Partition group {}/node{} send vote request to node {} fail",
@@ -834,7 +834,7 @@ public class RaftLeaderElection extends LeaderElection  {
                     logger.debug("Partition group {}/node{} send heartbeat request {} to {}",
                             topicPartitionGroup, localNode, appendEntriesRequest, node.getNodeId());
                     try {
-                        commandSender.sendCommand(node.getAddress(), command,
+                        electionManager.sendCommand(node.getAddress(), command,
                                 electionConfig.getSendCommandTimeout(), new HeartbeatRequestCallback(node));
                     } catch (Exception e) {
                         logger.warn("Partition group {}/node{} send heartbeat to {} fail",

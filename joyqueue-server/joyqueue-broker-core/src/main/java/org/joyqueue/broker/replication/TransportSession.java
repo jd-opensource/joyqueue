@@ -15,12 +15,10 @@
  */
 package org.joyqueue.broker.replication;
 
-import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
-import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -34,14 +32,17 @@ public class TransportSession {
 
     protected static final Logger logger = LoggerFactory.getLogger(TransportSession.class);
 
-    private final TransportClient transportClient;
+    // TODO 参数化
+    private static final long RECONNECT_INTERVAL = 1000 * 60;
+
+    private TransportClient transportClient;
     private Transport transport;
     private String address;
     private volatile long lastReconnect;
 
-    TransportSession(String address, ClientConfig clientConfig) {
+    public TransportSession(String address, TransportClient transportClient) {
         this.address = address;
-        this.transportClient = new BrokerTransportClientFactory().create(clientConfig);
+        this.transportClient = transportClient;
         this.transport = initTransport();
     }
 
@@ -57,8 +58,7 @@ public class TransportSession {
 
     public void sendCommand(Command request, int timeout, CommandCallback callback) {
         if (transport == null) {
-            // TODO 参数化
-            if (SystemClock.now() - lastReconnect < 1000) {
+            if (SystemClock.now() - lastReconnect < RECONNECT_INTERVAL) {
                 callback.onException(request, new TransportException.ConnectionException(address));
                 return;
             }
@@ -75,7 +75,6 @@ public class TransportSession {
         if (transport != null) {
             transport.stop();
         }
-        transportClient.stop();
     }
 
     protected Transport initTransport() {

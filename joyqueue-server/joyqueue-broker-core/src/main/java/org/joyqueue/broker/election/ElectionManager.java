@@ -23,15 +23,23 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.monitor.BrokerMonitor;
+import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.broker.replication.ReplicaGroup;
 import org.joyqueue.broker.replication.ReplicationManager;
+import org.joyqueue.broker.replication.TransportSession;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.network.transport.TransportClient;
+import org.joyqueue.network.transport.command.Command;
+import org.joyqueue.network.transport.command.CommandCallback;
+import org.joyqueue.network.transport.config.ClientConfig;
+import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -43,6 +51,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -55,9 +69,15 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     private static Logger logger = LoggerFactory.getLogger(ElectionManager.class);
 
     private Map<TopicPartitionGroup, LeaderElection> leaderElections;
+    private TransportClient transportClient;
 
     protected ElectionConfig electionConfig;
     private ClusterManager clusterManager;
+
+    // 发送给一个broker的命令使用同一个连接
+    private final Map<String, TransportSession> sessions = new ConcurrentHashMap<>();
+    private ScheduledExecutorService electionTimerExecutor;
+    private ExecutorService electionExecutor;
 
     private EventBus<ElectionEvent> electionEventManager;
     private ElectionMetadataManager electionMetadataManager;
@@ -133,6 +153,18 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         addListener(brokerMonitor.new ElectionListener());
         leaderElections = new ConcurrentHashMap<>();
 
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.setIoThreadName("joyqueue-election-io-eventLoop");
+        clientConfig.setConnectionTimeout(300 * 1);
+        clientConfig.getRetryPolicy().setRetryDelay(1000 * 60);
+        transportClient = new BrokerTransportClientFactory().create(clientConfig);
+        transportClient.start();
+
+        electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum(), new NamedThreadFactory("Election-Timer"));
+        electionExecutor = new ThreadPoolExecutor(electionConfig.getExecutorThreadNumMin(), electionConfig.getExecutorThreadNumMax(),
+                60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
+                new NamedThreadFactory("Election-sendCommand"));
+
         replicationManager = new ReplicationManager(electionConfig, brokerConfig, storeService, consume, brokerMonitor);
         replicationManager.start();
 
@@ -156,8 +188,14 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElections.clear();
+        for (Map.Entry<String, TransportSession> entry : sessions.entrySet()) {
+            entry.getValue().stop();
+        }
 
+        Close.close(electionTimerExecutor);
+        Close.close(electionExecutor);
         Close.close(electionEventManager);
+        Close.close(transportClient);
         Close.close(replicationManager);
 
         super.doStop();
@@ -362,7 +400,8 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                     localNodeId, allNodes);
         } else if (electType == PartitionGroup.ElectType.raft) {
             leaderElection = new RaftLeaderElection(topicPartitionGroup, electionConfig, this, clusterManager,
-                    electionMetadataManager, replicableStore, replicaGroup, electionEventManager, localNodeId, allNodes, learners, replicaGroup);
+                    electionMetadataManager, replicableStore, replicaGroup, electionTimerExecutor,
+                    electionExecutor, electionEventManager, localNodeId, allNodes, learners);
         } else {
             throw new ElectionException("Incorrect election type {}" + electType);
         }
@@ -454,9 +493,37 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         electionMetadataManager.updateTerm(topic, partitionGroup, term);
     }
 
+    /**
+     * 向目标节点发送命令，采用异步方式
+     *
+     * @param address 目标broker地址, ip + ":" + port
+     * @param command 发送的命令
+     * @throws TransportException 异常
+     */
+    void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
+        if (!isStarted()) {
+            logger.info("Send election command but election manager is stopped");
+            return;
+        }
+
+        TransportSession transport = sessions.get(address);
+        if (transport == null) {
+            synchronized (sessions) {
+                transport = sessions.get(address);
+                if (transport == null) {
+                    logger.info("Send election command, create transport of address {}", address);
+
+                    transport = new TransportSession(address, transportClient);
+                    sessions.put(address, transport);
+                }
+            }
+        }
+
+        transport.sendCommand(command, timeout, callback);
+    }
+
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
     }
-
 }
