@@ -38,6 +38,7 @@ import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.LoopThread;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -50,6 +51,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -73,6 +78,10 @@ public class PositionManager extends Service {
     private LoopThread thread;
     // 最近应答时间跟踪器
     private Map<ConsumePartition, /* 最新应答时间 */ AtomicLong> lastAckTimeTrace = new ConcurrentHashMap<>();
+    // 刷新线程
+    private ExecutorService flushIndexThread;
+    // 后刷新时间
+    private AtomicLong lastFlushIndexTimestamp = new AtomicLong();
 
     public PositionManager(ClusterManager clusterManager, StoreService storeService, ConsumeConfig consumeConfig) {
         this.clusterManager = clusterManager;
@@ -93,6 +102,8 @@ public class PositionManager extends Service {
                 ((LocalFileStore) positionStore).setBasePath(config.getConsumePositionPath());
             }
         }
+        flushIndexThread = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(10), new NamedThreadFactory("joyqueue-consume-flush-index-threads", true));
     }
 
     @Override
@@ -141,7 +152,8 @@ public class PositionManager extends Service {
     @Override
     protected void doStop() {
         super.doStop();
-
+        flushIndexThread.shutdownNow();
+        positionStore.forceFlush();
         positionStore.stop();
 
         logger.info("PositionManager is stopped.");
@@ -216,8 +228,9 @@ public class PositionManager extends Service {
                 Position val = entry.getValue();
                 positionStore.put(key, val);
             });
+
             // 刷盘
-            positionStore.forceFlush();
+            tryForceFlush();
         } catch (Exception ex) {
             logger.error("set consume position error.", ex);
             return false;
@@ -589,8 +602,26 @@ public class PositionManager extends Service {
                 logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}", consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition());
             }
         }
-
         positionStore.forceFlush();
+    }
+
+    protected void tryForceFlush() {
+        if (config.getIndexFlushInterval() <= 0) {
+            positionStore.forceFlush();
+            return;
+        }
+
+        long now = SystemClock.now();
+        long lastFlushTimestamp = this.lastFlushIndexTimestamp.get();
+        if (now - lastFlushTimestamp < config.getIndexFlushInterval()) {
+            return;
+        }
+        if (!this.lastFlushIndexTimestamp.compareAndSet(lastFlushTimestamp, now)) {
+            return;
+        }
+        flushIndexThread.execute(() -> {
+            positionStore.forceFlush();
+        });
     }
 
     /**

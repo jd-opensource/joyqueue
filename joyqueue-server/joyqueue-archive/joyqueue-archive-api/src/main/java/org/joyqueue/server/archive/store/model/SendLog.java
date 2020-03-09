@@ -15,6 +15,8 @@
  */
 package org.joyqueue.server.archive.store.model;
 
+import java.util.Arrays;
+
 /**
  * 发送日志
  * <p>
@@ -168,5 +170,22 @@ public class SendLog {
 
     public void setRowKeyStart(String rowKeyStart) {
         this.rowKeyStart = rowKeyStart;
+    }
+
+    @Override
+    public String toString() {
+        return "SendLog{" +
+                "topic='" + topic + '\'' +
+                ", sendTime=" + sendTime +
+                ", messageId='" + messageId + '\'' +
+                ", brokerId=" + brokerId +
+                ", app='" + app + '\'' +
+                ", clientIp=" + Arrays.toString(clientIp) +
+                ", clientIpStr='" + clientIpStr + '\'' +
+                ", topicId=" + topicId +
+                ", appId=" + appId +
+                ", partition=" + partition +
+                ", index=" + index +
+                '}';
     }
 }

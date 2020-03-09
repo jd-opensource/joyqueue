@@ -626,7 +626,7 @@ public class ClusterManager extends Service {
             logger.error("topic[{}] app[{}] cant't be write on broker [{}] has no partitionGroups", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
-        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()))) {
+        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()) && partitionGroup.getReplicas().contains(broker.getId()))) {
             logger.error("topic[{}] cant't be write on broker [] ", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -654,7 +654,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (group == null || !group.getLeader().equals(broker.getId())) {
+        if (group == null || !group.getLeader().equals(broker.getId()) || !group.getReplicas().contains(broker.getId())) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -715,7 +715,7 @@ public class ClusterManager extends Service {
             return BooleanResponse.failed(JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP);
         }
         // 当前主题在该broker上有角色是master的分区组
-        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()))) {
+        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()) && partitionGroup.getReplicas().contains(broker.getId()))) {
             logger.error("topic[{}],app[{}],error[{}]", topic, app, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -742,7 +742,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (group == null || !group.getLeader().equals(broker.getId())) {
+        if (group == null || !group.getLeader().equals(broker.getId()) || !group.getReplicas().contains(broker.getId())) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }

@@ -19,6 +19,7 @@ import org.joyqueue.store.PositionOverflowException;
 import org.joyqueue.store.PositionUnderflowException;
 import org.joyqueue.store.utils.PreloadBufferPool;
 import org.joyqueue.toolkit.format.Format;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -622,6 +623,7 @@ public class PositioningStore<T> implements Closeable {
      */
     public long position(long position, int offsetCount) {
 
+        long t0 = SystemClock.now();
         int offset = 0;
         long pos = position;
         if (pos < left()) {
@@ -643,6 +645,11 @@ public class PositioningStore<T> implements Closeable {
                 offset--;
             }
 
+        }
+        long t1 = SystemClock.now();
+
+        if(t1 - t0 > 300) {
+            logger.info("Find log position takes: {}ms, store: {}", t1 - t0, base.getAbsolutePath());
         }
 
         return pos;

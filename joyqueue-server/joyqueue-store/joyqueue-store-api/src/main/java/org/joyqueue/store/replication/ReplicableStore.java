@@ -114,6 +114,11 @@ public interface ReplicableStore {
     long position(long position, int offsetCount) throws IOException;
 
     /**
+     * 最后一条消息的Term
+     */
+    int lastEntryTerm();
+
+    /**
      * LEADER 收到半数以上回复后，调用此方法提交位置。
      * FOLLOWER
      */

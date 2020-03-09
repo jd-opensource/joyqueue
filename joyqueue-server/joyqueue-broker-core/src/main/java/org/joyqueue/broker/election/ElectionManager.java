@@ -26,18 +26,15 @@ import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.broker.replication.ReplicaGroup;
 import org.joyqueue.broker.replication.ReplicationManager;
+import org.joyqueue.broker.replication.TransportSession;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
-import org.joyqueue.network.event.TransportEvent;
-import org.joyqueue.network.transport.Transport;
-import org.joyqueue.network.transport.TransportAttribute;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.joyqueue.network.transport.support.DefaultTransportAttribute;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.toolkit.concurrent.EventBus;
@@ -78,7 +75,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     private ClusterManager clusterManager;
 
     // 发送给一个broker的命令使用同一个连接
-    private final Map<String, Transport> sessions = new ConcurrentHashMap<>();
+    private final Map<String, TransportSession> sessions = new ConcurrentHashMap<>();
     private ScheduledExecutorService electionTimerExecutor;
     private ExecutorService electionExecutor;
 
@@ -158,11 +155,10 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setIoThreadName("joyqueue-election-io-eventLoop");
+        clientConfig.setConnectionTimeout(300 * 1);
+        clientConfig.getRetryPolicy().setRetryDelay(1000 * 60);
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
-
-        EventListener<TransportEvent> clientEventListener = new ClientEventListener();
-        transportClient.addListener(clientEventListener);
 
         electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum(), new NamedThreadFactory("Election-Timer"));
         electionExecutor = new ThreadPoolExecutor(electionConfig.getExecutorThreadNumMin(), electionConfig.getExecutorThreadNumMax(),
@@ -192,7 +188,9 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElections.clear();
-        sessions.clear();
+        for (Map.Entry<String, TransportSession> entry : sessions.entrySet()) {
+            entry.getValue().stop();
+        }
 
         Close.close(electionTimerExecutor);
         Close.close(electionExecutor);
@@ -508,48 +506,24 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             return;
         }
 
-        Transport transport = sessions.get(address);
+        TransportSession transport = sessions.get(address);
         if (transport == null) {
             synchronized (sessions) {
                 transport = sessions.get(address);
                 if (transport == null) {
                     logger.info("Send election command, create transport of address {}", address);
 
-                    transport = transportClient.createTransport(address);
-                    TransportAttribute attribute = transport.attr();
-                    if (attribute == null) {
-                        attribute = new DefaultTransportAttribute();
-                        transport.attr(attribute);
-                    }
-                    attribute.set("address", address);
+                    transport = new TransportSession(address, transportClient);
                     sessions.put(address, transport);
                 }
             }
         }
 
-        transport.async(command, timeout, callback);
+        transport.sendCommand(command, timeout, callback);
     }
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
-    }
-
-    private class ClientEventListener implements EventListener<TransportEvent> {
-        @Override
-        public void onEvent(TransportEvent event) {
-            switch (event.getType()) {
-                case CONNECT:
-                    break;
-                case EXCEPTION:
-                case CLOSE:
-                    TransportAttribute attribute = event.getTransport().attr();
-                    sessions.remove(attribute.get("address"));
-                    logger.info("Election manager transport of {} closed", (String) attribute.get("address"));
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

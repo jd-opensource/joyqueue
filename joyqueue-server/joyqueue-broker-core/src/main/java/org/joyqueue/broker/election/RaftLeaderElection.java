@@ -274,30 +274,7 @@ public class RaftLeaderElection extends LeaderElection  {
      * @return 最后一条log的term
      */
     private int getLastLogTerm() {
-        long startTime = SystemClock.now();
-
-        try {
-            long leftPosition = replicableStore.leftPosition();
-            long rightPosition = replicableStore.rightPosition();
-            if (leftPosition == rightPosition) {
-                logger.info("Partition group {}/node get last log term left position {} " +
-                        "equals right position", topicPartitionGroup, localNode, leftPosition);
-                return -1;
-            }
-            long prevPosition = replicableStore.position(rightPosition, -1);
-            int term = replicableStore.getEntryTerm(prevPosition);
-
-            logger.info("Partition group {}/node {} get last log term elapse {} ms, " +
-                            "previous position is {}, term is {}",
-                    topicPartitionGroup, localNode, SystemClock.now() - startTime, prevPosition, term);
-
-            return term;
-
-        } catch (Exception e) {
-            logger.warn("Partition group {}/node {} get last log term fail",
-                    topicPartitionGroup, localNode, e);
-            return -1;
-        }
+        return replicableStore.lastEntryTerm();
 
     }
 
