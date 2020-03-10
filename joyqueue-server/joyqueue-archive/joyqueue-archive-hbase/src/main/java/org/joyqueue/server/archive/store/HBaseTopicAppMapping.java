@@ -15,13 +15,16 @@
  */
 package org.joyqueue.server.archive.store;
 
+import org.apache.hadoop.hbase.util.Bytes;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.hbase.HBaseClient;
 import org.joyqueue.toolkit.lang.Pair;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by chengzhiliang on 2018/12/10.
  */
 public class HBaseTopicAppMapping {
+
+    protected static final Logger logger = LoggerFactory.getLogger(HBaseTopicAppMapping.class);
 
     private final String mappingTable = "topic_app_mapping";
     private final String autoTopicIncreaseRowKey = "topic_increaseId";
@@ -199,15 +204,21 @@ public class HBaseTopicAppMapping {
      * @param val
      */
     private void update(byte[] cf, byte[] col, String rowKey, String val) throws IOException {
-        List<Pair<byte[], byte[]>> list = new LinkedList<>();
-        // 待更新的记录
-        list.add(new Pair<>(Bytes.toBytes(rowKey), Bytes.toBytes(val)));
-        // 待插入的记录
-        String key = rowKey.split(separator)[0] + separator + val;
-        String value = rowKey.split(separator)[1];
-        list.add(new Pair<>(Bytes.toBytes(key), Bytes.toBytes(value)));
-        // 批量插入
-        hbaseClient.put(namespace, mappingTable, cf, col, list);
+        try {
+            List<Pair<byte[], byte[]>> list = new LinkedList<>();
+            // 待更新的记录
+            list.add(new Pair<>(Bytes.toBytes(rowKey), Bytes.toBytes(val)));
+            // 待插入的记录
+            String key = rowKey.split(separator)[0] + separator + val;
+            String value = rowKey.split(separator)[1];
+            list.add(new Pair<>(Bytes.toBytes(key), Bytes.toBytes(value)));
+            // 批量插入
+            hbaseClient.put(namespace, mappingTable, cf, col, list);
+        } catch (Exception e) {
+            logger.error("hbase update exception, cf: {}, col: {}, rowKey: {}, val: {}",
+                    Arrays.toString(cf), Arrays.toString(col), rowKey, val);
+            throw e;
+        }
     }
 
     /**

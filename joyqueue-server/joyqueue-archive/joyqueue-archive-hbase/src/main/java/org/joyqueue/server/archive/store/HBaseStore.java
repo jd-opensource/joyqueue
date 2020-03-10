@@ -110,6 +110,7 @@ public class HBaseStore implements ArchiveStore {
 
     @Override
     public void putConsumeLog(List<ConsumeLog> consumeLogList, PointTracer tracer) throws JoyQueueException {
+        TraceStat stat = tracer.begin("org.joyqueue.server.archive.store.HBaseStore.putConsumeLog");
         List<Pair<byte[], byte[]>> logList = new LinkedList<>();
         try {
             for (ConsumeLog consumeLog : consumeLogList) {
@@ -122,16 +123,18 @@ public class HBaseStore implements ArchiveStore {
                 logList.add(pair);
             }
 
-            TraceStat stat = tracer.begin("org.joyqueue.server.archive.store.HBaseStore.putConsumeLog");
             hBaseClient.put(namespace, consumeLogTable, cf, col, logList);
             tracer.end(stat);
         } catch (IOException e) {
+            tracer.error(stat);
+            logger.error("putConsumeLog exception, consumeLogList: {}", consumeLogList);
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
     }
 
     @Override
     public void putSendLog(List<SendLog> sendLogList, PointTracer tracer) throws JoyQueueException {
+        TraceStat stat = tracer.begin("org.joyqueue.server.archive.store.HBaseStore.putSendLog");
         try {
             List<Pair<byte[], byte[]>> logList = new LinkedList<>();
             for (SendLog log : sendLogList) {
@@ -150,10 +153,11 @@ public class HBaseStore implements ArchiveStore {
 
             }
             // 写HBASE
-            TraceStat stat = tracer.begin("org.joyqueue.server.archive.store.HBaseStore.putSendLog");
             hBaseClient.put(namespace, sendLogTable, cf, col, logList);
             tracer.end(stat);
         } catch (Exception e) {
+            tracer.error(stat);
+            logger.error("putSendLog exception, sendLogList: {}", sendLogList);
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
     }

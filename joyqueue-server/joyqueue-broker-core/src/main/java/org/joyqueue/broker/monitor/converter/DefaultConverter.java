@@ -553,7 +553,8 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         String[] metrics = {PG_SLICE_ELECTION_TERM, PG_SLICE_ELECTION_TYPE, PG_SLICE_REPLICA_STAT};
         List<MonitorRecord> electionAndReplicaRecords = buildEmptyRecords(electionRecord, metrics);
         // compose value
-        if (partitionGroupStat.getReplicationStat().getStat().getState() != null) {
+        if (partitionGroupStat.getReplicationStat().getStat().getState() != null
+                && partitionGroupStat.getElectionEventStat().getState() != null) {
             // term
             electionAndReplicaRecords.get(0).setValue(partitionGroupStat.getElectionEventStat().getTerm());
             // type

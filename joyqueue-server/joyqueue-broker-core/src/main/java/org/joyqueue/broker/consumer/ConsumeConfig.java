@@ -67,6 +67,10 @@ public class ConsumeConfig {
         return propertySupplier.getValue(ConsumeConfigKey.RETRY_RATE);
     }
 
+    public int getIndexFlushInterval() {
+        return propertySupplier.getValue(ConsumeConfigKey.INDEX_FLUSH_INTERVAL);
+    }
+
     /**
      * Get consumer level config from
      *

@@ -16,8 +16,6 @@
 package org.joyqueue.broker.election;
 
 import org.joyqueue.broker.config.Configuration;
-import org.joyqueue.broker.election.ElectionConfig;
-import org.joyqueue.broker.election.ElectionConfigKey;
 import org.junit.Assert;
 import org.junit.Test;
 

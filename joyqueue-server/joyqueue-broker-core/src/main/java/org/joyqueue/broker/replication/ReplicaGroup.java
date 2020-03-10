@@ -33,22 +33,15 @@ import org.joyqueue.broker.election.command.ReplicateConsumePosResponse;
 import org.joyqueue.broker.election.command.TimeoutNowRequest;
 import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.monitor.BrokerMonitor;
-import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
-import org.joyqueue.network.event.TransportEvent;
-import org.joyqueue.network.transport.Transport;
-import org.joyqueue.network.transport.TransportAttribute;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.Direction;
-import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.joyqueue.network.transport.support.DefaultTransportAttribute;
 import org.joyqueue.store.replication.ReplicableStore;
-import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.toolkit.validate.annotation.NotNull;
@@ -107,7 +100,7 @@ public class ReplicaGroup extends Service {
 
     private Consume consume;
     private BrokerMonitor brokerMonitor;
-    private final ConcurrentMap<String, Transport> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, TransportSession> sessions = new ConcurrentHashMap<>();
     private final TransportClient transportClient;
 
     private static final long ONE_SECOND_NANO = 1000 * 1000 * 1000;
@@ -117,7 +110,8 @@ public class ReplicaGroup extends Service {
     ReplicaGroup(TopicPartitionGroup topicPartitionGroup, ReplicationManager replicationManager,
                  ReplicableStore replicableStore, ElectionConfig electionConfig, BrokerConfig brokerConfig,
                  Consume consume, ExecutorService replicateExecutor, BrokerMonitor brokerMonitor,
-                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId
+                 List<DefaultElectionNode> allNodes, Set<Integer> learners, int localReplicaId, int leaderId,
+                 TransportClient transportClient
     ) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(topicPartitionGroup != null, "topic partition group is null");
@@ -126,6 +120,7 @@ public class ReplicaGroup extends Service {
         Preconditions.checkArgument(brokerMonitor != null, "broker monitor is null");
         Preconditions.checkArgument(replicateExecutor != null, "replicate executor is null");
         Preconditions.checkArgument(replicableStore != null, "replicable store is null");
+        Preconditions.checkArgument(transportClient !=null, "transport client can not be null");
         this.electionConfig = electionConfig;
         this.brokerConfig = brokerConfig;
         this.topicPartitionGroup = topicPartitionGroup;
@@ -137,12 +132,7 @@ public class ReplicaGroup extends Service {
         this.replicateExecutor = replicateExecutor;
         this.replicableStore = replicableStore;
 
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop-" + topicPartitionGroup.toString());
-        clientConfig.setMaxAsync(100);
-        clientConfig.setIoThread(1);
-        clientConfig.setSocketBufferSize(1024 * 1024 * 1);
-        transportClient = new BrokerTransportClientFactory().create(clientConfig);
+        this.transportClient = transportClient;
 
         replicas = allNodes.stream()
                 .map(n -> new Replica(n.getNodeId(), n.getAddress()))
@@ -156,8 +146,6 @@ public class ReplicaGroup extends Service {
     @Override
     public void doStart() throws Exception {
         super.doStart();
-        transportClient.start();
-        transportClient.addListener(new ClientEventListener());
 
         replicateResponseQueue = new DelayQueue<>();
 
@@ -176,14 +164,13 @@ public class ReplicaGroup extends Service {
         }
 
         if (sessions != null && !sessions.isEmpty()) {
-            for (Transport transport : sessions.values()) {
+            for (TransportSession transport : sessions.values()) {
                 if (transport != null) {
                     transport.stop();
                 }
             }
         }
 
-        transportClient.stop();
         super.doStop();
     }
 
@@ -986,46 +973,20 @@ public class ReplicaGroup extends Service {
      * @throws TransportException
      */
     protected void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
-        Transport transport = sessions.get(address);
+        TransportSession transport = sessions.get(address);
         if (transport == null) {
             synchronized (sessions) {
                 transport = sessions.get(address);
                 if (transport == null) {
                     logger.info("Replication manager create transport of {}", address);
 
-                    transport = transportClient.createTransport(address);
-                    TransportAttribute attribute = transport.attr();
-                    if (attribute == null) {
-                        attribute = new DefaultTransportAttribute();
-                        transport.attr(attribute);
-                    }
-                    attribute.set("address", address);
+                    transport = new TransportSession(address, transportClient);
                     sessions.put(address, transport);
                 }
             }
         }
 
-        transport.async(command, timeout, callback);
-    }
-
-
-
-    private class ClientEventListener implements EventListener<TransportEvent> {
-        @Override
-        public void onEvent(TransportEvent event) {
-            switch (event.getType()) {
-                case CONNECT:
-                    break;
-                case EXCEPTION:
-                case CLOSE:
-                    TransportAttribute attribute = event.getTransport().attr();
-                    sessions.remove(attribute.get("address"));
-                    logger.info("Replication manager transport of {} closed", (String)attribute.get("address"));
-                    break;
-                default:
-                    break;
-            }
-        }
+        transport.sendCommand(command, timeout, callback);
     }
 
     private class DelayedCommand implements Delayed {
