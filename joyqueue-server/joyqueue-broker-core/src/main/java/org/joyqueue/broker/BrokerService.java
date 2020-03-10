@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.config.Configuration;
 import org.joyqueue.broker.config.ConfigurationManager;
+import org.joyqueue.broker.config.scan.ClassScanner;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
@@ -52,6 +53,7 @@ import org.joyqueue.security.Authentication;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.config.Property;
+import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
@@ -60,10 +62,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * BrokerService
@@ -168,7 +169,7 @@ public class BrokerService extends Service {
 
         // build message retry
         this.retryManager = getMessageRetry(brokerContext);
-        if(null != this.retryManager) {
+        if (null != this.retryManager) {
             this.retryManager.setSupplier(configuration);
         }
         this.brokerContext.retryManager(retryManager);
@@ -189,7 +190,7 @@ public class BrokerService extends Service {
                 clusterManager, storeService, electionService);
 
         // manage service
-        this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
+        this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration, brokerConfig),
                 brokerMonitorService,
                 clusterManager,
                 storeService.getManageService(),
@@ -215,7 +216,8 @@ public class BrokerService extends Service {
         //build consume policy
         this.brokerContext.consumerPolicy(buildGlobalConsumePolicy(configuration));
         this.extensionManager.after();
-
+        //
+        enrichConfiguration(configuration);
     }
 
     private void enrichServicePorts(Configuration configuration) {
@@ -224,8 +226,9 @@ public class BrokerService extends Service {
         Property basePortProperty = configuration.getOrCreateProperty(key);
         int port = ServerConfig.DEFAULT_TRANSPORT_PORT;
         try {
-                port = basePortProperty.getInteger();
-        } catch (NullPointerException | NumberFormatException ignored) {}
+            port = basePortProperty.getInteger();
+        } catch (NullPointerException | NumberFormatException ignored) {
+        }
         configuration.addProperty(key, String.valueOf(port));
 
         // broker.backend-server.transport.server.port	50089	内部端口，JoyQueue Server各节点之间通信的端口
@@ -233,6 +236,38 @@ public class BrokerService extends Service {
         key = BrokerConfig.BROKER_BACKEND_SERVER_CONFIG_PREFIX + TransportConfigSupport.TRANSPORT_SERVER_PORT;
         configuration.addProperty(key, String.valueOf(PortHelper.getBackendPort(port)));
     }
+
+    private void enrichConfiguration(Configuration configuration) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Map<String, String> configMap = getEnumConstantsConfig();
+        for (Map.Entry<String, String> entry : configMap.entrySet()) {
+            if (!configuration.contains(entry.getKey())) {
+                configuration.addProperty(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private Map<String, String> getEnumConstantsConfig() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Map<String, String> configMap = new HashMap<>(10);
+        Set<Class<?>> classes = ClassScanner.defaultSearch();
+        for (Class<?> clazz : classes) {
+            List<Class<?>> impls = Arrays.asList(clazz.getInterfaces());
+            if (impls.contains(PropertyDef.class) && clazz.isEnum()) {
+                // Enum::values
+                Method method = clazz.getMethod("values");
+                if (method.getReturnType().isArray()) {
+                    Object[] values = (Object[]) method.invoke(null);
+                    for (Object obj : values) {
+                        if (obj instanceof PropertyDef) {
+                            PropertyDef propertyDef = (PropertyDef) obj;
+                            configMap.put(propertyDef.getName(), String.valueOf(propertyDef.getValue()));
+                        }
+                    }
+                }
+            }
+        }
+        return configMap;
+    }
+
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
@@ -400,8 +435,6 @@ public class BrokerService extends Service {
     public BrokerContext getBrokerContext() {
         return brokerContext;
     }
-
-
 
 
     private class ConfigProviderImpl implements ConfigurationManager.ConfigProvider {
