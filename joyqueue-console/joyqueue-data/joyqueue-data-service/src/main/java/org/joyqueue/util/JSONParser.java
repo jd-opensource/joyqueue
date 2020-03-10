@@ -15,7 +15,7 @@
  */
 package org.joyqueue.util;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.monitor.RestResponse;
 import org.joyqueue.monitor.RestResponseCode;
@@ -55,7 +55,7 @@ public class JSONParser {
     public static <T> RestResponse<T> parse(String content,Type type) {
         RestResponse<T> response = null;
         try {
-            response = JSON.parseObject(content, type);
+            response = JSONObject.parseObject(content).toJavaObject(type);
             if (response.getCode() != RestResponseCode.SUCCESS.getCode()) {
                 throw new ServiceException(response.getCode(), response.getMessage());
             }

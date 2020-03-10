@@ -47,6 +47,17 @@ public class QMetric extends QKeyword {
      * metric provider
      */
     private String provider;
+    /**
+     * metric user permission
+     */
+    private Boolean userPermission;
+
+    public QMetric() {}
+
+    public QMetric(Boolean userPermission) {
+        this.userPermission = userPermission;
+        return;
+    }
 
     public String getCode() {
         return code;
@@ -104,5 +115,15 @@ public class QMetric extends QKeyword {
         this.provider = provider;
     }
 
+    public void setAliasCode(String aliasCode) {
+        this.aliasCode = aliasCode;
+    }
 
+    public Boolean getUserPermission() {
+        return userPermission;
+    }
+
+    public void setUserPermission(Boolean userPermission) {
+        this.userPermission = userPermission;
+    }
 }
