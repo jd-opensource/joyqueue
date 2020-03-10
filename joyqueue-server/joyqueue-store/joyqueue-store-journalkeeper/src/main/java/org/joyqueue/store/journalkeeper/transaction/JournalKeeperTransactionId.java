@@ -1,4 +1,4 @@
-package org.chubao.joyqueue.store.journalkeeper.transaction;
+package org.joyqueue.store.journalkeeper.transaction;
 
 import io.journalkeeper.core.api.transaction.TransactionId;
 import org.joyqueue.store.transaction.StoreTransactionId;

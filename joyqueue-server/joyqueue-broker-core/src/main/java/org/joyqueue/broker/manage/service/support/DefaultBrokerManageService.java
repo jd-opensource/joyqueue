@@ -28,6 +28,7 @@ import org.joyqueue.manage.PartitionMetric;
 import org.joyqueue.manage.TopicMetric;
 import org.joyqueue.monitor.BrokerMessageInfo;
 import org.joyqueue.monitor.PartitionAckMonitorInfo;
+import org.joyqueue.toolkit.io.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,7 +173,16 @@ public class DefaultBrokerManageService implements BrokerManageService {
     public void removeTopic(String topic) {
         storeManageService.removeTopic(topic);
     }
+
     @Override
+    public Directory storeTreeView(boolean recursive) {
+        return storeManageService.storeTreeView(recursive);
+    }
+
+    @Override
+    public boolean deleteGarbageFile(String fileName,boolean retain) {
+        return storeManageService.deleteGarbageFile(fileName,retain);
+    }    @Override
     public List<String> topics() {
         return storeManageService.topics();
     }

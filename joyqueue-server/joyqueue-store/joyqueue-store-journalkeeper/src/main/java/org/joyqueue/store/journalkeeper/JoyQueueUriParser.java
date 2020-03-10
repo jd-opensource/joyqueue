@@ -1,4 +1,4 @@
-package org.chubao.joyqueue.store.journalkeeper;
+package org.joyqueue.store.journalkeeper;
 
 import io.journalkeeper.rpc.URIParser;
 import io.journalkeeper.utils.spi.Singleton;

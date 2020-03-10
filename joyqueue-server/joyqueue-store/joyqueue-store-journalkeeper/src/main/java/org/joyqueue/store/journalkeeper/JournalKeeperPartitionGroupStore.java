@@ -1,4 +1,4 @@
-package org.chubao.joyqueue.store.journalkeeper;
+package org.joyqueue.store.journalkeeper;
 
 import io.journalkeeper.core.api.AdminClient;
 import io.journalkeeper.core.api.ClusterConfiguration;
@@ -11,8 +11,8 @@ import io.journalkeeper.exceptions.NotLeaderException;
 import io.journalkeeper.journalstore.JournalStoreClient;
 import io.journalkeeper.journalstore.JournalStoreServer;
 import io.journalkeeper.utils.event.EventWatcher;
-import org.chubao.joyqueue.store.journalkeeper.entry.JoyQueueEntryParser;
-import org.chubao.joyqueue.store.journalkeeper.transaction.JournalKeeperTransactionStore;
+import org.joyqueue.store.journalkeeper.entry.JoyQueueEntryParser;
+import org.joyqueue.store.journalkeeper.transaction.JournalKeeperTransactionStore;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.store.PartitionGroupStore;
@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
  * @author LiYue
  * Date: 2019-09-19
  */
-// TODO： 复制消费位置 com.jd.journalq.broker.election.handler.ReplicateConsumePosRequestHandler， com.jd.journalq.broker.replication.ReplicaGroup#maybeReplicateConsumePos
 public class JournalKeeperPartitionGroupStore extends Service implements PartitionGroupStore {
     private static final Logger logger = LoggerFactory.getLogger(JournalKeeperPartitionGroupStore.class);
     private final JournalStoreServer server;

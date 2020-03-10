@@ -1,4 +1,4 @@
-package org.chubao.joyqueue.store.journalkeeper.entry;
+package org.joyqueue.store.journalkeeper.entry;
 
 
 import java.nio.ByteBuffer;

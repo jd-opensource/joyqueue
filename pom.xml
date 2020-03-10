@@ -467,7 +467,7 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-store-core</artifactId>
+                <artifactId>joyqueue-store-journalkeeper</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
