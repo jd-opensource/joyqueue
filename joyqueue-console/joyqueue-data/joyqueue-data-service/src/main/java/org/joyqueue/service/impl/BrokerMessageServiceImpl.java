@@ -242,7 +242,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
             throw new RuntimeException("topic not exist");
         }
 
-        if (CollectionUtils.isNotEmpty(applicationTokens)) {
+        if (CollectionUtils.isEmpty(applicationTokens)) {
             ApplicationToken applicationToken = new ApplicationToken();
             applicationToken.setApplication(new Identity(application.getId(), application.getCode()));
             try {
