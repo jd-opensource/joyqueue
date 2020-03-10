@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.cluster.ClusterClientManager;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.consumer.BaseMessageListener;
@@ -26,6 +27,7 @@ import org.joyqueue.client.internal.consumer.exception.ConsumerException;
 import org.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import org.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptorManager;
 import org.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
+import org.joyqueue.client.internal.metadata.domain.PartitionGroupMetadata;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.client.internal.nameserver.helper.NameServerHelper;
@@ -78,7 +80,7 @@ public class TopicMessageConsumer extends Service {
 
     @Override
     protected void validate() throws Exception {
-        messagePoller = createMessageConsumer(topic);
+        messagePoller = createMessagePoller(topic);
         messageConsumerDispatcher = new TopicMessageConsumerDispatcher(topic, config, nameServerConfig, messagePoller, messageListenerManager, consumerInterceptorManager);
         messageConsumerScheduler = new TopicMessageConsumerScheduler(topic, config, messagePoller, messageConsumerDispatcher);
     }
@@ -119,7 +121,7 @@ public class TopicMessageConsumer extends Service {
         messageConsumerScheduler.resume();
     }
 
-    protected MessagePoller createMessageConsumer(String topic) {
+    protected MessagePoller createMessagePoller(String topic) {
         TopicName topicName = TopicName.parse(NameServerHelper.getTopicFullName(topic, nameServerConfig));
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getAppFullName());
 
@@ -128,6 +130,16 @@ public class TopicMessageConsumer extends Service {
         }
         if (topicMetadata.getConsumerPolicy() == null) {
             throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, config.getAppFullName()), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+        }
+
+        if (config.getThread() == ConsumerConfig.NONE_THREAD) {
+            if (CollectionUtils.isNotEmpty(topicMetadata.getPartitionGroups())) {
+                int maxPartition = 0;
+                for (PartitionGroupMetadata partitionGroup : topicMetadata.getPartitionGroups()) {
+                    maxPartition = Math.max(partitionGroup.getPartitions().size(), maxPartition);
+                }
+                config.setThread(maxPartition);
+            }
         }
 
         if (topicMetadata.getType().equals(TopicType.BROADCAST)) {
