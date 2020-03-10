@@ -227,8 +227,7 @@ public class BrokerService extends Service {
         int port = ServerConfig.DEFAULT_TRANSPORT_PORT;
         try {
             port = basePortProperty.getInteger();
-        } catch (NullPointerException | NumberFormatException ignored) {
-        }
+        } catch (NullPointerException | NumberFormatException ignored) { }
         configuration.addProperty(key, String.valueOf(port));
 
         // broker.backend-server.transport.server.port	50089	内部端口，JoyQueue Server各节点之间通信的端口
@@ -237,15 +236,13 @@ public class BrokerService extends Service {
         configuration.addProperty(key, String.valueOf(PortHelper.getBackendPort(port)));
     }
 
-    private void enrichConfiguration(Configuration configuration) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, ClassNotFoundException {
-        long now = SystemClock.now();
+    private void enrichConfiguration(Configuration configuration){
         Map<String, String> configMap = ClassScanner.defaultScanner(PropertyDef.class);
         for (Map.Entry<String, String> entry : configMap.entrySet()) {
             if (!configuration.contains(entry.getKey())) {
                 configuration.addProperty(entry.getKey(), entry.getValue());
             }
         }
-        logger.info("scan duration:{}", SystemClock.now() - now);
     }
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
