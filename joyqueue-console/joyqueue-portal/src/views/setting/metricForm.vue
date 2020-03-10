@@ -21,6 +21,9 @@
     <d-form-item label="提供方:" prop="source"  >
       <d-input style="width: 60%" v-model="formData.provider" placeholder="指标提供方"></d-input>
     </d-form-item>
+    <d-form-item label="用户是否开放权限:"  >
+      <d-switch v-model="formData.userPermission"></d-switch>
+    </d-form-item>
     <d-form-item label="描述:"  >
       <d-input style="width: 60%" v-model="formData.description" placeholder="描述"></d-input>
     </d-form-item>
@@ -47,7 +50,8 @@ export default {
           aggregator: '',
           groupField: '',
           groupFieldArray: [],
-          summaryLevel: ''
+          summaryLevel: '',
+          userPermission: 0
         }
       }
     }
