@@ -229,8 +229,8 @@ public class BrokerService extends Service {
         Property basePortProperty = configuration.getOrCreateProperty(key);
         int port = ServerConfig.DEFAULT_TRANSPORT_PORT;
         try {
-            port = basePortProperty.getInteger();
-        } catch (NullPointerException | NumberFormatException ignored) { }
+                port = basePortProperty.getInteger();
+        } catch (NullPointerException | NumberFormatException ignored) {}
         configuration.addProperty(key, String.valueOf(port));
 
         // broker.backend-server.transport.server.port	50089	内部端口，JoyQueue Server各节点之间通信的端口
