@@ -59,6 +59,7 @@ import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,7 +172,7 @@ public class BrokerService extends Service {
 
         // build message retry
         this.retryManager = getMessageRetry(brokerContext);
-        if (null != this.retryManager) {
+        if(null != this.retryManager) {
             this.retryManager.setSupplier(configuration);
         }
         this.brokerContext.retryManager(retryManager);
@@ -192,7 +193,7 @@ public class BrokerService extends Service {
                 clusterManager, storeService, electionService);
 
         // manage service
-        this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration, brokerConfig),
+        this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
                 brokerMonitorService,
                 clusterManager,
                 storeService.getManageService(),
