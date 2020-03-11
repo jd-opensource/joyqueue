@@ -12,7 +12,7 @@
         </d-form-item>
       </grid-col>
     </grid-row>
-    <d-form-item label="限制IP生产">
+    <d-form-item label="限制IP生产" prop ="blackList">
       <d-input type="textarea" rows="4" v-model="formData.blackList" placeholder="请输入要限制的IP，多个IP之间请用英文逗号隔开"/>
     </d-form-item>
   </d-form>
@@ -48,10 +48,30 @@ export default {
     }
   },
   data () {
+    let validateIp = (rule, value ,callback) => {
+      if (!this.formData.blackList) {
+        callback()
+      }
+      let reg = new RegExp(`^(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])$`);
+      let blackList = this.formData.blackList.split(',')
+      let flag = true
+      blackList.forEach(ip => {
+        if(!reg.test(ip)){
+          flag = false
+        }
+      });
+      if(!flag){
+        callback(new Error('请输入正确格式的ip'));
+      }else{
+        callback();
+      }
+    };
     return {
       formData: this.data,
       rules: {
-
+        blackList: [
+          { validator: validateIp, trigger: 'blur'}
+        ]
       }
     }
   },

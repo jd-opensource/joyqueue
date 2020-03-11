@@ -292,8 +292,12 @@ export default {
       this.getList()
     },
     configConfirm () {
-      this.configData = this.$refs.configForm.getFormData()
-      this.config(this.configData, 'configDialog')
+      this.$refs.configForm.$refs.form.validate((valid) => {
+        if(valid){
+          this.configData = this.$refs.configForm.getFormData()
+          this.config(this.configData, 'configDialog')
+        }
+      })
     },
     weightConfigConfirm () {
       let configData = {

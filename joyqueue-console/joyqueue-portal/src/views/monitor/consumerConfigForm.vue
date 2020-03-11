@@ -80,7 +80,7 @@
         </d-form-item>
     </grid-col>
   </grid-row>
-    <d-form-item label="禁止消费IP">
+    <d-form-item label="禁止消费IP" prop ="blackList">
       <d-input
         type="textarea"
         rows="3"
@@ -150,7 +150,25 @@ export default {
       } else {
         callback()
       }
-    }
+    };
+    let validateIp = (rule, value ,callback) => {
+      if (!this.formData.blackList) {
+        callback()
+      }
+      let reg = new RegExp(`^(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])$`);
+      let blackList = this.formData.blackList.split(',')
+      let flag = true
+      blackList.forEach(ip => {
+        if(!reg.test(ip)){
+          flag = false
+        }
+      });
+      if(!flag){
+        callback(new Error('请输入正确格式的ip'));
+      }else{
+        callback();
+      }
+    };
     return {
       formData: {},
       rules: {
@@ -219,7 +237,9 @@ export default {
             hint: '过期时间0~259200000',
             required: false
           }
-        ]
+        ],
+        blackList: [
+          { validator: validateIp, trigger: 'blur' }]
       }
     }
   },
