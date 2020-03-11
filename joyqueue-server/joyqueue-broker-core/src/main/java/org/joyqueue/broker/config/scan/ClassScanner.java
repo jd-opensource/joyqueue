@@ -23,7 +23,7 @@ import java.util.*;
  * if you want to print the configuration in the console, you should follow the steps:
  * 1. create directory named 'scanner' in classpath  -> resources/scanner
  * 2. create the file named 'cfg.txt' in scanner -> resources/scanner/cfg.txt
- * 3. add absolutely name of the class (implement {@link org.joyqueue.toolkit.config.PropertyDef}) which you want to print it constant configuration in the console
+ * 3. add absolute name of the class (implement {@link org.joyqueue.toolkit.config.PropertyDef}) which you want to print it constant configuration in the console
  */
 public class ClassScanner {
 
