@@ -13,13 +13,13 @@
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-edit="edit" @on-del="del">
     </my-table>
 
-      <!--新建-->
-      <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="dialogCancel('addDialog')">
-        <metric-form ref="addForm" :type="$store.getters.addFormType" />
-      </my-dialog>
-      <my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="dialogCancel('editDialog')">
-        <metric-form ref="editForm" :data="editData"  :type="$store.getters.editFormType" />
-      </my-dialog>
+    <!--新建-->
+    <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="dialogCancel('addDialog')">
+      <metric-form ref="addForm" :type="$store.getters.addFormType" />
+    </my-dialog>
+    <my-dialog :dialog="editDialog" @on-dialog-confirm="editConfirm()" @on-dialog-cancel="dialogCancel('editDialog')">
+      <metric-form ref="editForm" :data="editData"  :type="$store.getters.editFormType" />
+    </my-dialog>
   </div>
 </template>
 
@@ -79,6 +79,13 @@ export default {
           {
             title: '指标来源',
             key: 'source'
+          },
+          {
+            title: '用户是否有权限',
+            key: 'userPermission',
+            formatter (row) {
+              return row.userPermission ? '是' : '否'
+            }
           }
         ],
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
@@ -132,6 +139,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.label{text-align: right; line-height: 32px;}
-.val{}
+  .label{text-align: right; line-height: 32px;}
+  .val{}
 </style>
