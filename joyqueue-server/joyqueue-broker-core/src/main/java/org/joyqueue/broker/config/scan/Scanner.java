@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.joyqueue.broker.config.scan;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Set;
 
 /**
  * @author jiangnan53
- * if you want to print the configuration in the console, you should follow the steps:
- * 1. create directory named 'scanner' in classpath  -> resources/scanner
- * 2. create the file named 'cfg.txt' in scanner -> resources/scanner/cfg.txt
- * 3. add absolutely name of the class (implement {@link org.joyqueue.toolkit.config.PropertyDef}) which you want to print it constant configuration in the console
  */
-public class ClassScanner {
+public interface Scanner {
 
-    public static Set<Class<?>> search(String packageName) throws ClassNotFoundException, IOException {
-        return ScannerExecutor.getInstance().search(packageName);
+    String DEFAULT_SCAN_DIR = "scanner";
 
-    }
+    String CONFIG_PRINTER_TXT = "cfg.txt";
+
+    Set<Class<?>> search(String pkgName) throws ClassNotFoundException, IOException;
 }

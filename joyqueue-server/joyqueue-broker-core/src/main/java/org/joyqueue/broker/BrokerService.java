@@ -23,6 +23,7 @@ import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.config.Configuration;
 import org.joyqueue.broker.config.ConfigurationManager;
 import org.joyqueue.broker.config.scan.ClassScanner;
+import org.joyqueue.broker.config.scan.Scanner;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
@@ -58,12 +59,13 @@ import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -236,14 +238,38 @@ public class BrokerService extends Service {
         configuration.addProperty(key, String.valueOf(PortHelper.getBackendPort(port)));
     }
 
-    private void enrichConfiguration(Configuration configuration){
-        Map<String, String> configMap = ClassScanner.defaultScanner(PropertyDef.class);
-        for (Map.Entry<String, String> entry : configMap.entrySet()) {
-            if (!configuration.contains(entry.getKey())) {
+    private void enrichConfiguration(Configuration configuration) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, ClassNotFoundException, IOException {
+        Map<String, String> configMap = getEnumConstantsConfig(Scanner.DEFAULT_SCAN_DIR);
+        for(Map.Entry<String,String> entry:configMap.entrySet()){
+            if(!configuration.contains(entry.getKey())) {
                 configuration.addProperty(entry.getKey(), entry.getValue());
             }
         }
     }
+
+    private Map<String, String> getEnumConstantsConfig(String... dirs) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException, IOException {
+        Map<String, String> configMap = new HashMap<>(10);
+        for (String dir : dirs) {
+            Set<Class<?>> classes = ClassScanner.search(dir);
+            for (Class<?> clazz : classes) {
+                List<Class<?>> impls = Arrays.asList(clazz.getInterfaces());
+                if (impls.contains(PropertyDef.class) && clazz.isEnum()) {
+                    Method method = clazz.getMethod("values");
+                    if (method.getReturnType().isArray()) {
+                        Object[] values = (Object[]) method.invoke(null);
+                        for (Object obj : values) {
+                            if (obj instanceof PropertyDef) {
+                                PropertyDef propertyDef = (PropertyDef) obj;
+                                configMap.put(propertyDef.getName(), String.valueOf(propertyDef.getValue()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return configMap;
+    }
+
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
