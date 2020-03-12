@@ -1226,9 +1226,11 @@ public class RaftLeaderElection extends LeaderElection  {
             return;
         }
 
-        logger.info("Partition group {}/node {} enable report leader periodically is {}, state is {}",
-                topicPartitionGroup, localNode,
-                electionConfig.enableReportLeaderPeriodically(), state());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Partition group {}/node {} enable report leader periodically is {}, state is {}",
+                    topicPartitionGroup, localNode,
+                    electionConfig.enableReportLeaderPeriodically(), state());
+        }
 
         if (electionConfig.enableReportLeaderPeriodically() && state() == LEADER) {
             if (electionConfig.enableReportLeaderPeriodicallyForce()) {
@@ -1299,11 +1301,13 @@ public class RaftLeaderElection extends LeaderElection  {
                 return;
             }
 
-            logger.info("Partition group {}/node {} rebalance leader, recommend leader is {}, lag length is {} " +
-                            "last rebalance time is {}, enable is {}",
-                    topicPartitionGroup, localNode, recommendLeader,
-                    replicaGroup.lagLength(recommendLeader), lastRebalanceTime,
-                    electionConfig.enableRebalanceLeader());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Partition group {}/node {} rebalance leader, recommend leader is {}, lag length is {} " +
+                                "last rebalance time is {}, enable is {}",
+                        topicPartitionGroup, localNode, recommendLeader,
+                        replicaGroup.lagLength(recommendLeader), lastRebalanceTime,
+                        electionConfig.enableRebalanceLeader());
+            }
 
             if (shouldRebalanceLeader(recommendLeader)) {
                 logger.info("Partition group {}/node {} transfer leadership to {}",
@@ -1314,7 +1318,7 @@ public class RaftLeaderElection extends LeaderElection  {
                 lastRebalanceTime = SystemClock.now();
             }
         } catch (Exception e) {
-            logger.info("Partition group {}/node {} rebalance leader fail",
+            logger.warn("Partition group {}/node {} rebalance leader fail",
                     topicPartitionGroup, localNode, e);
         }
     }
