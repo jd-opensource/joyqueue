@@ -67,7 +67,7 @@
     </distributionManagement>
 
     <properties>
-        <journalkeeper.version>0.1.6</journalkeeper.version>
+        <journalkeeper.version>0.1.5</journalkeeper.version>
         <fastjson.version>1.2.58</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.9.0</log4j.version>
