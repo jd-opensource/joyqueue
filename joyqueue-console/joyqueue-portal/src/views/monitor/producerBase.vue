@@ -413,14 +413,22 @@ export default {
     getList () {
       // 查询数据库里的数据
       this.showTablePin = true
+      let query = {}
+      if(this.keyword == null || this.keyword === "" || this.keyword ===undefined){
+        query = {
+          keyword: this.keyword
+        }
+      }else{
+        query = {
+          app: this.keyword
+        }
+      }
       let data = {
         pagination: {
           page: this.page.page,
           size: this.page.size
         },
-        query: {
-          keyword: this.keyword
-        }
+        query: query
       }
       for (let i in this.search) {
         if (this.search.hasOwnProperty(i)) {
