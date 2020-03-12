@@ -151,18 +151,7 @@ export default {
         callback()
       }
     }
-    let validateIp = (rule, value ,callback) => {
-      if (!this.formData.blackList) {
-        callback()
-      }
-      let ipPattern ='(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
-      let reg = new RegExp('^'+ipPattern+'(,'+ipPattern+')*$');
-      if(!reg.test(value)){
-        callback(new Error('请输入正确格式的ip'));
-      }else{
-        callback();
-      }
-    }
+    let ipPattern ='(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
     return {
       formData: {},
       rules: {
@@ -233,7 +222,11 @@ export default {
           }
         ],
         blackList: [
-          { validator: validateIp, trigger: 'blur'}
+          {
+            pattern: '^'+ipPattern+'(,'+ipPattern+')*$',
+            message: '请输入正确格式的ip',
+            required: false,
+            trigger: 'blur'}
         ]
       }
     }
