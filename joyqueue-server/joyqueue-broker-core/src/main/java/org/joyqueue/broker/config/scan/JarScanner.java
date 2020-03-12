@@ -16,6 +16,7 @@
 
 package org.joyqueue.broker.config.scan;
 
+import org.joyqueue.toolkit.config.PropertyDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,13 +51,17 @@ public class JarScanner implements Scanner {
                             while (jarEntryEnumeration.hasMoreElements()) {
                                 JarEntry entry = jarEntryEnumeration.nextElement();
                                 String entryName = entry.getName();
-                                if (entryName.contains(CONFIG_PRINTER_TXT)) {
+                                if (entryName.contains(PropertyDef.class.getName())) {
                                     Properties properties = new Properties();
                                     properties.load(jarFile.getInputStream(entry));
                                     Enumeration<?> enumeration = properties.propertyNames();
                                     while (enumeration.hasMoreElements()) {
                                         String key = (String) enumeration.nextElement();
-                                        clazzSet.add(Class.forName(key));
+                                        try {
+                                            clazzSet.add(Class.forName(key));
+                                        }catch (ClassNotFoundException e){
+                                            logger.error(e.getMessage());
+                                        }
                                     }
                                 }
                             }

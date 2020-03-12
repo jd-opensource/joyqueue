@@ -21,14 +21,16 @@ import java.util.*;
 /**
  * @author jiangnan53
  * if you want to print the configuration in the console, you should follow the steps:
- * 1. create directory named 'scanner' in classpath  -> resources/scanner
- * 2. create the file named 'cfg.txt' in scanner -> resources/scanner/cfg.txt
- * 3. add absolute name of the class (implement {@link org.joyqueue.toolkit.config.PropertyDef}) which you want to print it constant configuration in the console
+ * 1. create a file named org.joyqueue.toolkit.config.PropertyDef in META-INF/services like spi
+ * 2. add absolute name of the class (implement {@link org.joyqueue.toolkit.config.PropertyDef}) which you want to print it constant configuration in the console
  */
 public class ClassScanner {
 
     public static Set<Class<?>> search(String packageName) throws ClassNotFoundException, IOException {
         return ScannerExecutor.getInstance().search(packageName);
+    }
 
+    public static Set<Class<?>> defaultSearch() throws ClassNotFoundException, IOException {
+        return ScannerExecutor.getInstance().search(Scanner.DEFAULT_SCAN_DIR);
     }
 }

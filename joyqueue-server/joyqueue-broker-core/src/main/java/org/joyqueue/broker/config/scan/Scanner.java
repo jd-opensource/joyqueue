@@ -24,9 +24,7 @@ import java.util.Set;
  */
 public interface Scanner {
 
-    String DEFAULT_SCAN_DIR = "scanner";
-
-    String CONFIG_PRINTER_TXT = "cfg.txt";
+    String DEFAULT_SCAN_DIR = "META-INF/services/";
 
     Set<Class<?>> search(String pkgName) throws ClassNotFoundException, IOException;
 }

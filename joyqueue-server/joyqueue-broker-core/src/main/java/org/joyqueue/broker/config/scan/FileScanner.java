@@ -16,6 +16,10 @@
 
 package org.joyqueue.broker.config.scan;
 
+import org.joyqueue.toolkit.config.PropertyDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.util.HashSet;
@@ -26,6 +30,9 @@ import java.util.Set;
  * @author jiangnan53
  */
 public class FileScanner implements Scanner {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileScanner.class);
+
     private String defaultClassPath = FileScanner.class.getResource("/").getPath();
 
     public String getDefaultClassPath() {
@@ -65,10 +72,14 @@ public class FileScanner implements Scanner {
                     }
                 }
             } else {
-                if (file.isAbsolute() && file.getName().endsWith(CONFIG_PRINTER_TXT) && file.exists()) {
+                if (file.isAbsolute() && file.getName().equals(PropertyDef.class.getName()) && file.exists()) {
                     List<String> classNames = Files.readAllLines(file.toPath());
                     for (String className : classNames) {
-                        classPaths.add(Class.forName(className));
+                        try {
+                            classPaths.add(Class.forName(className));
+                        }catch (ClassNotFoundException e){
+                            logger.error(e.getMessage());
+                        }
                     }
                 }
             }
