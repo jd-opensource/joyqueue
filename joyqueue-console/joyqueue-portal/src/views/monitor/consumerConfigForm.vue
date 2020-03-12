@@ -155,15 +155,9 @@ export default {
       if (!this.formData.blackList) {
         callback()
       }
-      let reg = new RegExp(`^(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])$`);
-      let blackList = this.formData.blackList.split(',')
-      let flag = true
-      blackList.forEach(ip => {
-        if(!reg.test(ip)){
-          flag = false
-        }
-      });
-      if(!flag){
+      let ipPattern ='(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
+      let reg = new RegExp('^'+ipPattern+'(,'+ipPattern+')*$');
+      if(!reg.test(value)){
         callback(new Error('请输入正确格式的ip'));
       }else{
         callback();
