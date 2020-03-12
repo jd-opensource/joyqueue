@@ -127,7 +127,7 @@ public class HBaseStore implements ArchiveStore {
             tracer.end(stat);
         } catch (IOException e) {
             tracer.error(stat);
-            logger.error("putConsumeLog exception, consumeLogList: {}", consumeLogList);
+            logger.error("putConsumeLog exception, consumeLogList: {}", consumeLogList, e);
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
     }
@@ -157,7 +157,7 @@ public class HBaseStore implements ArchiveStore {
             tracer.end(stat);
         } catch (Exception e) {
             tracer.error(stat);
-            logger.error("putSendLog exception, sendLogList: {}", sendLogList);
+            logger.error("putSendLog exception, sendLogList: {}", sendLogList, e);
             throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
         }
     }
