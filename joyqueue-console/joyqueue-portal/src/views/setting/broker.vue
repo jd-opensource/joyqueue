@@ -107,7 +107,6 @@ export default {
       default: function () {
         return {
           search: '/broker/search',
-          groupSearch: '/broker/groupSearch',
           del: '/broker/delete',
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
