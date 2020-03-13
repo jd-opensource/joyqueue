@@ -99,6 +99,7 @@ export default {
       type: Object,
       default: function () {
         return {
+          keyword: ''
         }
       }
     },
