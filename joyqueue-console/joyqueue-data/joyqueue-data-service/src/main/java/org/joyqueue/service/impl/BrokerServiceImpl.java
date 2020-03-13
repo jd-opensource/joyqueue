@@ -62,8 +62,6 @@ public class BrokerServiceImpl implements BrokerService {
     private BrokerGroupRelatedService brokerGroupRelatedService;
     @Autowired
     private PartitionGroupReplicaService partitionGroupReplicaService;
-    @Autowired
-    private BrokerGroupService brokerGroupService;
 
     @Override
     public Broker findById(Integer id) throws Exception {
