@@ -29,7 +29,6 @@ import org.joyqueue.model.query.QBroker;
 import org.joyqueue.model.query.QBrokerGroupRelated;
 import org.joyqueue.nsr.BrokerNameServerService;
 import org.joyqueue.service.BrokerGroupRelatedService;
-import org.joyqueue.service.BrokerGroupService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.PartitionGroupReplicaService;
 import org.joyqueue.util.NullUtil;
