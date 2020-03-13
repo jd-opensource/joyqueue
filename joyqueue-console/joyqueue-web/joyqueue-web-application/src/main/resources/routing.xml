@@ -453,9 +453,6 @@
         <route inherit="post"
                path="/v1/broker/search" handlers="broker#search render"
                errors="error"/>
-        <route inherit="post"
-               path="/v1/broker/groupSearch" handlers="broker#groupSearch render"
-               errors="error"/>
         <route inherit="get"
                path="/v1/broker/get/:id" handlers="broker#get render"
                errors="error"/>

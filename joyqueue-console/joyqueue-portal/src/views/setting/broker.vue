@@ -230,8 +230,7 @@ export default {
       }
       this.showTablePin = true
       let data = this.getSearchVal()
-      let url = this.searchData.group!=null&&this.searchData.group!==""?this.urlOrigin.groupSearch:this.urlOrigin.search
-      apiRequest.post(url, {}, data).then((data) => {
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         data.data = data.data || []
         data.pagination = data.pagination || {
           totalRecord: data.data.length

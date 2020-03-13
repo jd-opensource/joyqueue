@@ -46,20 +46,6 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
         return Responses.success(result.getPagination(), result.getResult());
     }
 
-    /**
-     * 根据group搜broker
-     * @param qPageQuery
-     * @return
-     * @throws Exception
-     */
-    @Path("groupSearch")
-    public Response groupPageQuery(@PageQuery QPageQuery<QBroker> qPageQuery) throws Exception {
-        Preconditions.checkArgument(qPageQuery!=null, "Illegal args.");
-
-        PageResult<Broker> result  = service.search(qPageQuery);
-        return Responses.success(result.getPagination(), result.getResult());
-    }
-
     @Override
     @Path("delete")
     public Response delete(@QueryParam(Constants.ID) String id) throws Exception {
