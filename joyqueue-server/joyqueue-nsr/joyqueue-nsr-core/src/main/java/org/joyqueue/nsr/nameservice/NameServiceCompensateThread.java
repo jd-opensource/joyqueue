@@ -93,11 +93,16 @@ public class NameServiceCompensateThread extends Service implements Runnable {
             }
 
             nameServiceCacheManager.fillCache(newCache);
+            nameServiceCacheManager.flushCache();
         } else {
+            if (nameServiceCompensator.getBrokerId() < 0) {
+                return;
+            }
             if (!nameServiceCacheManager.tryLock()) {
                 return;
             }
             try {
+                AllMetadata allMetadata = null;
                 AllMetadataCache newCache = null;
                 AllMetadataCache oldCache = nameServiceCacheManager.getCache();
                 int version = nameServiceCacheManager.getVersion();
@@ -107,7 +112,13 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                         logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
                     }
 
-                    AllMetadata allMetadata = delegate.getAllMetadata();
+                    try {
+                        allMetadata = delegate.getAllMetadata();
+                    } catch (Exception e) {
+                        logger.error("getAllMetadata exception", e);
+                        continue;
+                    }
+
                     newCache = nameServiceCacheManager.buildCache(allMetadata);
 
                     if (logger.isDebugEnabled()) {
@@ -135,7 +146,10 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                     }
                 }
 
-                nameServiceCacheManager.fillCache(newCache);
+                if (newCache != null) {
+                    nameServiceCacheManager.fillCache(newCache);
+                    nameServiceCacheManager.flushCache();
+                }
             } finally {
                 nameServiceCacheManager.unlock();
             }

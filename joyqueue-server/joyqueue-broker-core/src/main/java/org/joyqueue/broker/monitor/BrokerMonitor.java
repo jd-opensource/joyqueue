@@ -189,6 +189,7 @@ public class BrokerMonitor extends Service implements ConsumerMonitor, ProducerM
         consumerStat.getDeQueueStat().mark(time, size, count);
         consumerPartitionGroupStat.getDeQueueStat().mark(time, size, count);
         consumerPartitionGroupStat.getOrCreatePartitionStat(partition).getDeQueueStat().mark(time, size, count);
+        consumerPartitionGroupStat.getOrCreatePartitionStat(partition).lastPullTime(SystemClock.now());
 
 //            partitionGroupStat.getDeQueueStat().mark(time, size, count);
 //            partitionStat.getDeQueueStat().mark(time, size, count);
