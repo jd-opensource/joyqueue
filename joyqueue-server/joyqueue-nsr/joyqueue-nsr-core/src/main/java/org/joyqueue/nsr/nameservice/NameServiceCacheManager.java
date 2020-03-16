@@ -218,11 +218,8 @@ public class NameServiceCacheManager extends Service {
     }
 
     public void fillCache(AllMetadataCache cache) {
-        this.cache = cache;
-    }
-
-    public void flushCache() {
         nameServiceCacheDoubleCopy.flush(cache);
+        this.cache = cache;
     }
 
     public Broker getBroker(int brokerId) {

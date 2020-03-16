@@ -473,7 +473,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
     @Override
     public AllMetadata getAllMetadata() {
         Command request = new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.NSR_GET_ALL_METADATA_REQUEST), new GetAllMetadataRequest());
-        Command response = send(request, nameServiceConfig.getAllMetadataTransportTimeout());
+        Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("getAllMetadata error request {},response {}", request, response);
             throw new RuntimeException(String.format("getAppToken error request {},response {}", request, response));

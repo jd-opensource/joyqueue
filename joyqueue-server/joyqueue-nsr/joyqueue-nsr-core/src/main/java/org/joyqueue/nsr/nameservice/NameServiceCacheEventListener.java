@@ -17,7 +17,6 @@ package org.joyqueue.nsr.nameservice;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections.MapUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.PartitionGroup;
@@ -77,10 +76,7 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
         }
         try {
             AllMetadataCache newCache = nameServiceCacheManager.getCache().clone();
-            boolean updateCache = doUpdateCache(event, newCache);
-            if (!updateCache) {
-                return;
-            }
+            doUpdateCache(event, newCache);
             doOnEvent(event);
             nameServiceCacheManager.fillCache(newCache);
             nameServiceCacheManager.updateVersion();
@@ -89,7 +85,7 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
         }
     }
 
-    protected boolean doUpdateCache(MetaEvent event, AllMetadataCache cache) {
+    protected void doUpdateCache(MetaEvent event, AllMetadataCache cache) {
         switch (event.getEventType()) {
             case ADD_TOPIC: {
                 AddTopicEvent addTopicEvent = (AddTopicEvent) event;
@@ -184,12 +180,6 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 }
 
                 PartitionGroup oldPartitionGroup = updatePartitionGroupEvent.getOldPartitionGroup();
-
-                if (MapUtils.isEmpty(oldTopicConfig.getPartitionGroups()) ||
-                        !oldPartitionGroup.equals(oldTopicConfig.getPartitionGroups().get(oldPartitionGroup.getGroup()))) {
-                    return false;
-                }
-
                 PartitionGroup newPartitionGroup = updatePartitionGroupEvent.getNewPartitionGroup();
                 List<Integer> removedReplica = Lists.newLinkedList();
 
@@ -399,7 +389,6 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 break;
             }
         }
-        return true;
     }
 
     protected void doOnEvent(MetaEvent event) {

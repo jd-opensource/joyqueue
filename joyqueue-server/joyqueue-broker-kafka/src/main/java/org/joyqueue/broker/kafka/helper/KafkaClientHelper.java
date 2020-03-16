@@ -27,7 +27,6 @@ public class KafkaClientHelper {
 
     private static final String SEPARATOR = "-";
     private static final String[] REPLACE = {"spark-executor-"};
-    private static final String[] METADATA_FUZZY_SEARCH = {"MetadataFuzzySearch"};
 
     public static String parseClient(String clientId) {
         if (StringUtils.isBlank(clientId)) {
@@ -41,18 +40,5 @@ public class KafkaClientHelper {
             return strings[0];
         }
         return clientId;
-    }
-
-    public static boolean isMetadataFuzzySearch(String clientId) {
-        if (StringUtils.isBlank(clientId)) {
-            return false;
-        }
-        String[] strings = StringUtils.splitByWholeSeparator(clientId, SEPARATOR);
-        for (String fuzzySearch : METADATA_FUZZY_SEARCH) {
-            if (strings[strings.length - 1].equals(fuzzySearch)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

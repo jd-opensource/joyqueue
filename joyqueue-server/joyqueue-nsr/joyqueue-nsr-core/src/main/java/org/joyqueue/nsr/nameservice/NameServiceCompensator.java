@@ -76,10 +76,6 @@ public class NameServiceCompensator extends Service {
         this.eventBus = eventBus;
     }
 
-    public int getBrokerId() {
-        return brokerId;
-    }
-
     public void setBrokerId(int brokerId) {
         this.brokerId = brokerId;
     }

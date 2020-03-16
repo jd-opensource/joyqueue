@@ -91,7 +91,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
 
         Map<String, TopicConfig> topicConfigs = Collections.emptyMap();
         if (CollectionUtils.isEmpty(topicMetadataRequest.getTopics()) && StringUtils.isNotBlank(clientId)) {
-            if (config.getMetadataFuzzySearchEnable() && KafkaClientHelper.isMetadataFuzzySearch(topicMetadataRequest.getClientId())) {
+            if (config.getFuzzySearchEnable()) {
                 topicConfigs = getAllTopicConfigs(clientId);
             }
         } else {

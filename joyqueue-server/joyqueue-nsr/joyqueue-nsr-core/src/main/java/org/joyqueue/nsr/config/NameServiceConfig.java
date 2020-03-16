@@ -55,10 +55,6 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_HANDLER_KEEPALIVE);
     }
 
-    public int getAllMetadataTransportTimeout() {
-        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_TRANSPORT_TIMEOUT);
-    }
-
     public boolean getAllMetadataCacheEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_CACHE_ENABLE);
     }
