@@ -23,6 +23,7 @@ public enum NameServiceConfigKey implements PropertyDef {
     NAMESERVER_HANDLER_THREADS("nameservice.handler.threads", Runtime.getRuntime().availableProcessors() * 4, Type.INT),
     NAMESERVER_HANDLER_QUEUES("nameservice.handler.queues", 102400, Type.INT),
     NAMESERVER_HANDLER_KEEPALIVE("nameservice.messenger.handler.keepalive", 1000 * 60, Type.INT),
+    NAMESERVER_ALL_METADATA_TRANSPORT_TIMEOUT("nameservice.allmetadata.transport.timeout", 1000 * 10, Type.INT),
     NAMESERVER_ALL_METADATA_CACHE_ENABLE("nameservice.allmetadata.cache.enable", true, Type.BOOLEAN),
     NAMESERVER_ALL_METADATA_CACHE_FILE("nameservice.allmetadata.cache.file", "/metadata/cache", Type.STRING),
     NAMESERVER_ALL_METADATA_CACHE_EXPIRE_TIME("nameservice.allmetadata.cache.expire.time", 1000 * 10, Type.INT),

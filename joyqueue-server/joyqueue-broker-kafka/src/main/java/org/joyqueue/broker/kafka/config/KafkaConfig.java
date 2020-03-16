@@ -67,6 +67,10 @@ public class KafkaConfig {
         return getConfig(KafkaConfigKey.METADATA_CACHE_EXPIRE_TIME);
     }
 
+    public boolean getMetadataFuzzySearchEnable() {
+        return getConfig(KafkaConfigKey.METADATA_FUZZY_SEARCH_ENABLE);
+    }
+
     public boolean getFuzzySearchEnable() {
         return getConfig(KafkaConfigKey.METADATA_FUZZY_SEARCH_ENABLE);
     }
