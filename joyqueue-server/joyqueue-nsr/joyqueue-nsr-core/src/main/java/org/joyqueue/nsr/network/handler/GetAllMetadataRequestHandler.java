@@ -57,10 +57,9 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
         this.refreshCacheThread = new Thread(() -> {
             while (true) {
                 try {
-                    if (!config.getAllMetadataCacheEnable()) {
-                        continue;
+                    if (config.getAllMetadataCacheEnable()) {
+                        allMetadataCache = doGetAllMetadata();
                     }
-                    allMetadataCache = doGetAllMetadata();
                     Thread.currentThread().sleep(config.getAllMetadataCacheExpireTime());
                 } catch (Exception e) {
                     logger.error("refresh cache exception", e);
