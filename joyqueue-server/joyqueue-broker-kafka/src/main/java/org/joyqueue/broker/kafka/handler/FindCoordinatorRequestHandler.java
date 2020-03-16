@@ -16,6 +16,8 @@
 package org.joyqueue.broker.kafka.handler;
 
 
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.KafkaContext;
 import org.joyqueue.broker.kafka.KafkaContextAware;
@@ -28,12 +30,9 @@ import org.joyqueue.broker.kafka.coordinator.transaction.TransactionCoordinator;
 import org.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import org.joyqueue.broker.kafka.model.KafkaBroker;
 import org.joyqueue.domain.Broker;
-import org.joyqueue.domain.Subscription;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.nsr.NameService;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,16 +75,16 @@ public class FindCoordinatorRequestHandler extends AbstractKafkaCommandHandler i
 
         Broker coordinator = null;
         if (coordinatorType.equals(CoordinatorType.GROUP)) {
-            if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.CONSUMPTION)) {
-                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist, {}", coordinatorKey, transport);
-                return new Command(new FindCoordinatorResponse(KafkaErrorCode.GROUP_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
-            }
+//            if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.CONSUMPTION)) {
+//                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist, {}", coordinatorKey, transport);
+//                return new Command(new FindCoordinatorResponse(KafkaErrorCode.GROUP_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
+//            }
             coordinator = groupCoordinator.findCoordinator(coordinatorKey);
         } else if (coordinatorType.equals(CoordinatorType.TRANSACTION)) {
-            if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.PRODUCTION)) {
-                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist, {}", coordinatorKey, transport);
-                return new Command(new FindCoordinatorResponse(KafkaErrorCode.TRANSACTIONAL_ID_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
-            }
+//            if (!nameService.hasSubscribe(coordinatorKey, Subscription.Type.PRODUCTION)) {
+//                logger.warn("find subscribe for coordinatorKey {}, subscribe not exist, {}", coordinatorKey, transport);
+//                return new Command(new FindCoordinatorResponse(KafkaErrorCode.TRANSACTIONAL_ID_AUTHORIZATION_FAILED.getCode(), KafkaBroker.INVALID));
+//            }
             coordinator = transactionCoordinator.findCoordinator(coordinatorKey);
         }
 
