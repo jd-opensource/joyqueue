@@ -61,7 +61,7 @@ public enum KafkaConfigKey implements PropertyDef {
     METADATA_DELAY("kafka.metadata.delay", 1000 * 5, Type.INT),
     METADATA_CACHE_ENABLE("kafka.metadata.enable", true, Type.BOOLEAN),
     METADATA_CACHE_EXPIRE_TIME("kafka.metadata.expire.time", 1000 * 60 * 1, Type.INT),
-    METADATA_FUZZY_SEARCH_ENABLE("kafka.metadata.fuzzy.enable", false, Type.BOOLEAN),
+    METADATA_FUZZY_SEARCH_ENABLE("kafka.metadata.fuzzy.enable", true, Type.BOOLEAN),
     // 拉取延迟
     FETCH_DELAY("kafka.fetch.delay", true, Type.BOOLEAN),
     // 写入超时
