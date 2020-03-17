@@ -16,11 +16,13 @@
 package org.joyqueue.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.ListQuery;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Broker;
+import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.BrokerGroupRelated;
 import org.joyqueue.model.domain.PartitionGroupReplica;
 import org.joyqueue.model.query.QBroker;
@@ -193,18 +195,46 @@ public class BrokerServiceImpl implements BrokerService {
 
     @Override
     public PageResult<Broker> search(QPageQuery<QBroker> qPageQuery) throws Exception {
-        PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
-        if (pageResult !=null && pageResult.getResult() != null && pageResult.getResult().size() >0) {
-            List<Broker> brokerList = pageResult.getResult();
-            Iterator<Broker> iterator = brokerList.iterator();
-            while (iterator.hasNext()) {
-                Broker broker = iterator.next();
-                BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
-                if (brokerRelated != null && brokerRelated.getGroup() != null) {
-                    broker.setGroup(brokerRelated.getGroup());
-                    broker.setStatus(0);
+        if(qPageQuery.getQuery()!=null
+                && qPageQuery.getQuery().getGroup()!=null
+                && StringUtils.isNotBlank(qPageQuery.getQuery().getGroup().getCode())){
+            return groupSearch(qPageQuery);
+        }else {
+            PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
+            if (pageResult != null && pageResult.getResult() != null && pageResult.getResult().size() > 0) {
+                List<Broker> brokerList = pageResult.getResult();
+                Iterator<Broker> iterator = brokerList.iterator();
+                while (iterator.hasNext()) {
+                    Broker broker = iterator.next();
+                    BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
+                    if (brokerRelated != null && brokerRelated.getGroup() != null) {
+                        broker.setGroup(brokerRelated.getGroup());
+                        broker.setStatus(0);
+                    }
                 }
             }
+            return pageResult;
+        }
+    }
+
+    public PageResult<Broker> groupSearch(QPageQuery<QBroker> qPageQuery) throws Exception {
+        QBrokerGroupRelated qBrokerGroupRelated =  new QBrokerGroupRelated();
+        String groupCode = qPageQuery.getQuery().getGroup().getCode();
+        qBrokerGroupRelated.setGroup(new Identity(groupCode));
+        QPageQuery<QBrokerGroupRelated> brokerGroupRelatedPageQuery = new QPageQuery<>();
+        brokerGroupRelatedPageQuery.setQuery(qBrokerGroupRelated);
+        brokerGroupRelatedPageQuery.setPagination(qPageQuery.getPagination());
+        PageResult<BrokerGroupRelated> brokerGroupRelatedPageResult = brokerGroupRelatedService.findByQuery(brokerGroupRelatedPageQuery);
+
+        PageResult<Broker> pageResult = new PageResult<>();
+        if (brokerGroupRelatedPageResult !=null && brokerGroupRelatedPageResult.getResult() != null && brokerGroupRelatedPageResult.getResult().size() >0) {
+            List<Integer> brokerIds = brokerGroupRelatedPageResult.getResult().stream().map(brokerGroup -> (int)brokerGroup.getId()).collect(Collectors.toList());
+            List<Broker> brokers = brokerNameServerService.getByIdsBroker(brokerIds);
+            for(Broker broker:brokers){
+                broker.setGroup(new Identity(groupCode));
+            }
+            pageResult.setPagination(qPageQuery.getPagination());
+            pageResult.setResult(brokers);
         }
         return pageResult;
     }
