@@ -307,10 +307,14 @@ export default {
       this.config(configData, 'weightDialog')
     },
     rateLimitConfirm () {
-      let configData = this.configData
-      configData.limitTps = this.$refs.rateLimit.tps
-      configData.limitTraffic = this.$refs.rateLimit.traffic
-      this.config(configData, 'rateLimitDialog')
+      this.$refs.rateLimit.$refs.form.validate((valid) => {
+        if (valid) {
+          let configData = this.configData
+          configData.limitTps = this.$refs.rateLimit.formData.limitTps
+          configData.limitTraffic = this.$refs.rateLimit.formData.limitTraffic
+          this.config(configData, 'rateLimitDialog')
+        }
+      })
     },
     sendMessageConfirm () {
       let formData = this.$refs.sendMessageForm.formData
