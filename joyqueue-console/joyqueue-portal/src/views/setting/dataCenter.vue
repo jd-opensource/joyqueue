@@ -8,7 +8,7 @@
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">新建数据中心<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
+    <my-table :data="tableData" :showPin="showTablePin" :showPagination="false" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-edit="edit" @on-del="del">
     </my-table>
@@ -76,6 +76,7 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
+import {getClientHeight, getScrollHeight, getScrollTop} from "../../utils/lazyLoad";
 export default {
   name: 'application',
   components: {
@@ -88,6 +89,8 @@ export default {
       // urls: {
       //   del: '/datacenter'
       // },
+      curIndex: 0,
+      cacheList: [],
       searchData: {
         code: ''
       },
@@ -245,10 +248,55 @@ export default {
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()
+    },
+    getList () {
+      this.showTablePin = true
+      let data = this.getSearchVal()
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        if(data.data.length>this.page.size) {
+          this.tableData.rowData = data.data.slice(0, this.page.size)
+          this.curIndex = this.page.size-1
+        } else {
+          this.tableData.rowData = data.data
+          this.curIndex = data.data.length-1
+        }
+        this.cacheList = data.data
+        this.showTablePin = false
+      })
+    },
+    // 滚动事件触发下拉加载
+    onScroll() {
+      if (getScrollHeight() - getClientHeight() - getScrollTop() <= 0) {
+        if (this.curIndex < this.cacheList.length-1) {
+          for (let i = 0; i < 10; i++) {
+            if (this.curIndex < this.cacheList.length-1) {
+              this.curIndex += 1
+              if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+                this.tableData.rowData.push(this.cacheList[this.curIndex])
+              }
+            }else{
+              break
+            }
+          }
+        }
+      }
     }
   },
   mounted () {
     this.getList()
+    this.$nextTick(function () { // 解决视图渲染，数据未更新
+      window.addEventListener('scroll', this.onScroll);
+    })
   }
 }
 </script>

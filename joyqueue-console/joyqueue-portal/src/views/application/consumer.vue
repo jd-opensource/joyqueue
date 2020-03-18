@@ -1,6 +1,6 @@
 <template>
   <div>
-    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
+    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
                    :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
