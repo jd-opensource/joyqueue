@@ -16,7 +16,7 @@
       </d-button-group>
     </div>
 
-    <my-table :data="tableData" :showPin="showTablePin" :page="page"
+    <my-table :data="tableData" :showPin="showTablePin" :page="page" :showPagination="this.showPagination"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
@@ -71,6 +71,7 @@ import msgPreview from './msgPreview.vue'
 import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
 import RateLimit from './rateLimit'
+import {getClientHeight, getScrollHeight, getScrollTop} from "../../utils/lazyLoad";
 
 export default {
   name: 'consumer-base',
@@ -161,6 +162,9 @@ export default {
     colData: { // 消费者 列表表头
       type: Array
     },
+    showPagination: {
+      type: Boolean
+    },
     search: {// 查询条件，我的应用：app:{id:0,code:'',namespace:{id:0,code:''}}  ， 主题中心：topic:{id:0,code:'',namespace:{id:0,code:''}}
       type: Object
     },
@@ -176,6 +180,8 @@ export default {
   },
   data () {
     return {
+      curIndex: 0,
+      cacheList: [],
       urls: {
         search: `/consumer/search`,
         getMonitor: `/monitor/find`,
@@ -486,7 +492,8 @@ export default {
       })
     },
     // 查询
-    getList () {
+    // 原来的getList方法
+    getList2 () {
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
@@ -525,6 +532,73 @@ export default {
           this.getMonitor(this.tableData.rowData[i], i)
         }
       })
+    },
+    // 实现懒加载的getList方法
+    getList () {
+      this.tableData.rowData = []
+      // 查询数据库里的数据
+      this.showTablePin = true
+      let query = {}
+      if(this.keyword == null || this.keyword === "" || this.keyword ===undefined){
+        query = {
+          keyword: this.keyword
+        }
+      }else{
+        query = {
+          app: this.keyword
+        }
+      }
+      let data = {
+        pagination: {
+          page: this.page.page,
+          size: this.page.size
+        },
+        query: query
+      }
+      for (let i in this.search) {
+        if (this.search.hasOwnProperty(i)) {
+          data.query[i] = this.search[i]
+        }
+      }
+      apiRequest.post(this.urls.search, {}, data).then((data) => {
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        if (data.data.length > this.page.size) {
+          this.tableData.rowData = data.data.slice(0,this.page.size)
+          this.curIndex = this.page.size -1
+        } else {
+          this.tableData.rowData = data.data
+          this.curIndex = this.page.size
+        }
+        this.cacheList = data.data
+        this.showTablePin = false
+        for (let i = 0; i < this.tableData.rowData.length; i++) {
+          this.getMonitor(this.tableData.rowData[i], i)
+        }
+      })
+    },
+    // 滚动事件触发下拉加载
+    onScroll() {
+      if (getScrollHeight() - getClientHeight() - getScrollTop() <= 0) {
+        if (this.curIndex < this.cacheList.length-1) {
+          for (let i = 0; i < 10; i++) {
+            if (this.curIndex < this.cacheList.length-1) {
+              this.curIndex += 1
+              if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+                this.tableData.rowData.push(this.cacheList[this.curIndex])
+                this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
+              }
+            }else{
+              break
+            }
+          }
+        }
+      }
     }
   },
   mounted () {
@@ -542,6 +616,9 @@ export default {
         }
 
       })
+    this.$nextTick(function () { // 解决视图渲染，数据未更新
+      window.addEventListener('scroll', this.onScroll);
+    })
   }
 }
 </script>
