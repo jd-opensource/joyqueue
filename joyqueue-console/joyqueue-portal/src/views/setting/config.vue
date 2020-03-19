@@ -92,6 +92,7 @@ export default {
   },
   methods: {
     getList () {
+      this.tableData.rowData = []
       this.showTablePin = true
       let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {

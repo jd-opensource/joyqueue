@@ -535,6 +535,7 @@ export default {
     },
     // 实现懒加载的getList方法
     getList () {
+      this.tableData.rowData = []
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
