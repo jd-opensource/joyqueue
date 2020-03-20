@@ -30,9 +30,7 @@ import org.joyqueue.exception.ServiceException;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,33 +38,36 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-@Component
 public class AsyncHttpClient {
 
     private static final int ASYNC_TIMEOUT = 2000;
-    private static final Logger logger= LoggerFactory.getLogger(AsyncHttpClient.class);
-    private static CloseableHttpAsyncClient httpclient = HttpAsyncClients.custom()
-            .setDefaultRequestConfig(RequestConfig.custom()
-            .setConnectTimeout(ASYNC_TIMEOUT)
-            .setSocketTimeout(ASYNC_TIMEOUT)
-            .setConnectionRequestTimeout(ASYNC_TIMEOUT).build()).build();
+    private static final Logger logger = LoggerFactory.getLogger(AsyncHttpClient.class);
+    private static CloseableHttpAsyncClient httpclient;
+
+    static {
+        httpclient = HttpAsyncClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectTimeout(ASYNC_TIMEOUT)
+                        .setSocketTimeout(ASYNC_TIMEOUT)
+                        .setConnectionRequestTimeout(ASYNC_TIMEOUT).build()).build();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (null != httpclient) {
+                try {
+                    httpclient.close();
+                    logger.info("close async http client success.");
+                } catch (IOException e) {
+                    logger.error("close async http client error.", e);
+                    httpclient = null;
+                }
+            }
+        }));
+    }
 
     public static void AsyncRequest(HttpUriRequest request, FutureCallback<HttpResponse> asyncCallBack){
          httpclient.start();
          request.setHeader("Content-Type", "application/json;charset=utf-8");
          httpclient.execute(request,asyncCallBack);
-    }
-
-    @PreDestroy
-    public static void destroy() {
-        if (null != httpclient) {
-            try {
-                httpclient.close();
-            } catch (IOException e) {
-                logger.error("close async http client error.", e);
-                httpclient = null;
-            }
-        }
     }
 
     @Deprecated
