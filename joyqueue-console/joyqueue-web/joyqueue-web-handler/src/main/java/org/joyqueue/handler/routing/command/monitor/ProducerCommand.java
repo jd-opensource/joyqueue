@@ -71,12 +71,14 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QProducer> qPageQuery) throws Exception {
         QProducer query = qPageQuery.getQuery();
-        List<Producer> producers = Collections.emptyList();
+        List<Producer> producers = new ArrayList<>(0);
 
-        if (query.getApp() != null) {
+        if (query.getApp() != null && query.getTopic()==null) {
             producers = service.findByApp(query.getApp().getCode());
-        } else if (query.getTopic() != null) {
+        } else if (query.getTopic() != null && query.getApp() ==null) {
             producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
+        } else if (query.getTopic() != null && query.getApp() !=null){
+            producers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(),query.getTopic().getCode(),query.getApp().getCode()));
         }
 
         if (CollectionUtils.isNotEmpty(producers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
