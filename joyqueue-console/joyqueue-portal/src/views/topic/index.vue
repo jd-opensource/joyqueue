@@ -68,7 +68,7 @@ export default {
           {
             txt: '删除',
             method: 'on-del',
-            isAdmin: true
+            isAdmin: 1
           }
         ]
       }

@@ -30,8 +30,8 @@
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
       <grid-row :v-if="configDialogTip">{{configDialogTip}}</grid-row>
       <producer-config-form ref="configForm" :data="configData"
-      :archive-config-enabled="configData.archive || !forbidEnableArchive"
-      :nearby-config-enabled="configData.nearBy || !forbidEnableNearby"/>
+                            :archive-config-enabled="configData.archive || !forbidEnableArchive"
+                            :nearby-config-enabled="configData.nearBy || !forbidEnableNearby"/>
     </my-dialog>
     <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
       <producer-weight-form ref="weightForm" :producerId="producerId"/>
@@ -182,7 +182,7 @@ export default {
       rateLimitDialog: {
         visible: false,
         title: '限流',
-        width: '400',
+        width: '450',
         showFooter: true,
         limitTps: 0,
         limitTraffic: 0
@@ -260,7 +260,7 @@ export default {
         namespace: item.namespace.code,
         app: item.app.code,
         message: ''
-      };
+      }
       this.sendMessageDialog.visible = true
     },
     cancelSubscribe (item) {
@@ -329,7 +329,7 @@ export default {
         namespace: formData.namespace,
         app: formData.app,
         message: formData.message
-      };
+      }
       apiRequest.post(this.urls.sendMessage, null, data, true).then((data) => {
         data.data = data.data || []
         if (data.code !== this.$store.getters.successCode) {
@@ -425,11 +425,11 @@ export default {
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
-      if(this.keyword == null || this.keyword === "" || this.keyword ===undefined){
+      if (this.keyword == null || this.keyword === '' || this.keyword === undefined) {
         query = {
           keyword: this.keyword
         }
-      }else{
+      } else {
         query = {
           app: this.keyword
         }
@@ -554,6 +554,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.label{text-align: right; line-height: 32px;}
-.val{}
+  .label{text-align: right; line-height: 32px;}
+  .val{}
 </style>

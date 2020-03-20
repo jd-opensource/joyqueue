@@ -1,6 +1,6 @@
 
 // 获取滚动条当前的位置
-export function getScrollTop() {
+export function getScrollTop () {
   let scrollTop = 0
   if (document.documentElement && document.documentElement.scrollTop) {
     scrollTop = document.documentElement.scrollTop
@@ -11,7 +11,7 @@ export function getScrollTop() {
 }
 
 // 获取当前可视范围的高度
-export function getClientHeight() {
+export function getClientHeight () {
   let clientHeight = 0
   if (document.body.clientHeight && document.documentElement.clientHeight) {
     clientHeight = Math.min(document.body.clientHeight, document.documentElement.clientHeight)
@@ -22,6 +22,6 @@ export function getClientHeight() {
 }
 
 // 获取文档完整的高度
-export function getScrollHeight() {
+export function getScrollHeight () {
   return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
 }

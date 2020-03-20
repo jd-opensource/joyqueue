@@ -141,7 +141,7 @@ export default {
           {
             txt: this.langConfig['colData']['btnDelete'],
             method: 'on-del',
-            isAdmin: true
+            isAdmin: 1
           }
         ]
       }
