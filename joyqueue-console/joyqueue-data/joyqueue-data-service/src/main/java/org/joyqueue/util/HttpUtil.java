@@ -30,9 +30,7 @@ import org.joyqueue.model.exception.BusinessException;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +41,6 @@ import java.util.concurrent.TimeUnit;
  *  HTTP服务 公共方法
  * Created by wangxiaofei1 on 2018/10/17.
  */
-@Component
 public class HttpUtil {
     private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
     protected static final long DEFAULT_HTTP_CONN_TIME_TO_LIVE = 60;
@@ -69,8 +66,7 @@ public class HttpUtil {
     private static RequestConfig requestConfig;
     private static IdleConnectionMonitorThread monitorThread;
 
-    @PostConstruct
-    public void init() {
+    static {
         clientConnManager = new PoolingHttpClientConnectionManager(DEFAULT_HTTP_CONN_TIME_TO_LIVE, TimeUnit.SECONDS);
         clientConnManager.setMaxTotal(DEFAULT_HTTP_CONN_MAX_TOTAL);
         clientConnManager.setDefaultMaxPerRoute(DEFAULT_HTTP_CONN_MAX_PER_ROUTE);
@@ -83,9 +79,22 @@ public class HttpUtil {
         httpClientBuilder = HttpClientBuilder.create()
                 .setConnectionManager(clientConnManager);
         client = httpClientBuilder.build();
+
         monitorThread = new IdleConnectionMonitorThread(clientConnManager);
         monitorThread.setName("HTTP-IO-MONITOR-THREAD");
+        monitorThread.setDaemon(true);
         monitorThread.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                client.close();
+                monitorThread.shutdown();
+                clientConnManager.close();
+                logger.info("close http client success. ");
+            } catch (IOException e) {
+                logger.error("close http client error.", e);
+            }
+        }));
     }
 
     public static String createUrl(String url, String uri) {
