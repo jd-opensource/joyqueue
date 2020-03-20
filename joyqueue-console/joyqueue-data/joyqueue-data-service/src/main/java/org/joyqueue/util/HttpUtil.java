@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,8 +68,7 @@ public class HttpUtil {
     private static RequestConfig requestConfig;
     private static IdleConnectionMonitorThread monitorThread;
 
-    @PostConstruct
-    public void init() {
+    static {
         clientConnManager = new PoolingHttpClientConnectionManager(DEFAULT_HTTP_CONN_TIME_TO_LIVE, TimeUnit.SECONDS);
         clientConnManager.setMaxTotal(DEFAULT_HTTP_CONN_MAX_TOTAL);
         clientConnManager.setDefaultMaxPerRoute(DEFAULT_HTTP_CONN_MAX_PER_ROUTE);
