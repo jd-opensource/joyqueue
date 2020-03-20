@@ -38,7 +38,7 @@
     <!--Msg detail dialog-->
     <my-dialog :dialog="msgDetailDialog" @on-dialog-cancel="dialogCancel('msgDetailDialog')">
       <msg-detail ref="msgDetail" :message-types="messageTypes" :app="msgDetailDialog.app" :topic="msgDetailDialog.topic" :namespace="msgDetailDialog.namespace"
-                   :type="type" :subscribeGroup="msgDetailDialog.subscribeGroup" :messageType="messageType" @update:messageType="messageType = $event"/>
+                  :type="type" :subscribeGroup="msgDetailDialog.subscribeGroup" :messageType="messageType" @update:messageType="messageType = $event"/>
     </my-dialog>
 
     <!--Config dialog-->
@@ -50,12 +50,13 @@
         :archive-disabled="archiveConfigDisabled"
         :nearby-disabled="nearbyConfigDisabled"
         :concurrent-disabled="concurrentConfigDisabled"
-        />
+      />
     </my-dialog>
 
     <!--Rate limit dialog-->
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
-      <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
+      <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"
+                  :is-consumer="1"/>
     </my-dialog>
 
   </div>
@@ -206,7 +207,7 @@ export default {
       rateLimitDialog: {
         visible: false,
         title: '限流',
-        width: '400',
+        width: '450',
         showFooter: true,
         // doSearch: false,
         limitTps: 0,
@@ -277,14 +278,14 @@ export default {
           code: ''
         }
       },
-      messageType:undefined,
+      messageType: undefined,
       messageTypes: [
         'UTF8 TEXT'
       ],
-       monitorUIds: {
-         detail: this.$store.getters.uIds.consumer.detail,
-         summary: this.$store.getters.uIds.consumer.summary
-       }
+      monitorUIds: {
+        detail: this.$store.getters.uIds.consumer.detail,
+        summary: this.$store.getters.uIds.consumer.summary
+      }
     }
   },
   methods: {
@@ -309,7 +310,7 @@ export default {
       this.msgPreviewDialog.namespace.id = item.namespace.id
       this.msgPreviewDialog.namespace.code = item.namespace.code
       this.msgPreviewDialog.title = '消息预览 [App: ' + this.msgPreviewDialog.app.code +
-              ', Topic: ' + this.msgPreviewDialog.topic.code + ']'
+          ', Topic: ' + this.msgPreviewDialog.topic.code + ']'
       this.openAndQueryDialog('msgPreviewDialog', 'msgPreview')
     },
     openMsgDetailDialog (item) {
@@ -321,7 +322,7 @@ export default {
       this.msgDetailDialog.namespace.id = item.namespace.id
       this.msgDetailDialog.namespace.code = item.namespace.code
       this.msgDetailDialog.title = '消息查询 [App: ' + this.msgDetailDialog.app.code +
-        ', Topic: ' + this.msgDetailDialog.topic.code + ']'
+          ', Topic: ' + this.msgDetailDialog.topic.code + ']'
       this.openDialog('msgDetailDialog')
     },
     openConfigDialog (item) {
@@ -330,9 +331,9 @@ export default {
       this.configDialog.visible = true
     },
     openRateLimitDialog (item) {
-      this.configData = item.config || {}
+      this.configData = Object.assign({}, item.config)
+      this.configData['consumerId'] = item.id
       this.rateLimitDialog.limitTps = item.config.limitTps
-      this.configConsumerData['consumerId'] = item.id
       this.rateLimitDialog.limitTraffic = item.config.limitTraffic
       this.rateLimitDialog.visible = true
     },
@@ -394,7 +395,7 @@ export default {
               url += '&'
             }
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-              getAppCode(item.app, item.subscribeGroup)
+                getAppCode(item.app, item.subscribeGroup)
             window.open(url)
           }
         })
@@ -414,7 +415,7 @@ export default {
               url += '&'
             }
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-              getAppCode(item.app, item.subscribeGroup)
+                getAppCode(item.app, item.subscribeGroup)
             window.open(url)
           }
         })
@@ -434,7 +435,7 @@ export default {
               url += '&'
             }
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-              getAppCode(item.app, item.subscribeGroup)
+                getAppCode(item.app, item.subscribeGroup)
             window.open(url)
           }
         })
@@ -465,8 +466,8 @@ export default {
     },
     configConsumerConfirm () {
       this.$refs['configForm'].validate(() => {
-          let configData = this.$refs.configForm.getFormData()
-          this.config(configData, 'configDialog')
+        let configData = this.$refs.configForm.getFormData()
+        this.config(configData, 'configDialog')
       })
     },
     config (configData, dialog) {
@@ -497,11 +498,11 @@ export default {
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
-      if(this.keyword == null || this.keyword === "" || this.keyword ===undefined){
+      if (this.keyword == null || this.keyword === '' || this.keyword === undefined) {
         query = {
           keyword: this.keyword
         }
-      }else{
+      } else {
         query = {
           app: this.keyword
         }
@@ -614,7 +615,6 @@ export default {
         } else {
           console.error('Property message-types can not be empty!')
         }
-
       })
     this.$nextTick(function () { // 解决视图渲染，数据未更新
       window.addEventListener('scroll', this.onScroll);
