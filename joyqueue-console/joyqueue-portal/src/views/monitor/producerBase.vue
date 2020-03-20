@@ -471,7 +471,6 @@ export default {
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
-      console.log(this.searchFor)
       if (this.searchFor === 'topic') {
         query.keyword=this.keyword
       } else if (this.searchFor === 'app') {
