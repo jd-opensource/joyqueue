@@ -2,7 +2,7 @@
   <div>
     <consumer-base ref="consumerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
-                   :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
+                   :search="search" :search-for="searchFor" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
 </template>
 
@@ -24,6 +24,10 @@ export default {
   },
   data () {
     return {
+      // searchFor要和keywordName对应
+      // keywordName:应用 -> searchFor:app
+      // keywordName:主题 -> searchFor:topic
+      searchFor: 'topic',
       keywordTip: '请输入主题',
       keywordName: '主题',
       colData: [

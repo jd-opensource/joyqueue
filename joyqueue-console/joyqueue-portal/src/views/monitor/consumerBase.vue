@@ -108,6 +108,9 @@ export default {
     keywordName: {
       type: String
     },
+    searchFor: {
+      type: String
+    },
     btns: {
       type: Array,
       default: function () {
@@ -540,13 +543,13 @@ export default {
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
-      if(this.keyword == null || this.keyword === "" || this.keyword ===undefined){
-        query = {
-          keyword: this.keyword
-        }
-      }else{
-        query = {
-          app: this.keyword
+      if (this.searchFor === 'topic') {
+        query.keyword=this.keyword
+      } else if (this.searchFor === 'app') {
+        if (this.keyword === '') {
+          query.keyword = ''
+        }else {
+          query.app = this.keyword
         }
       }
       let data = {
