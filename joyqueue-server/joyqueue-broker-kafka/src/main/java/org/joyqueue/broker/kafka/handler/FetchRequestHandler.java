@@ -128,7 +128,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJoyQueueCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode());
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
-                    traffic.record(topic.getFullName(), 0);
+                    traffic.record(topic.getFullName(), 0, 0);
                     continue;
                 }
 
@@ -138,7 +138,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 currentBytes += partitionResponse.getBytes();
                 partitionResponses.add(partitionResponse);
-                traffic.record(topic.getFullName(), (partitionResponse.getMessages() == null ? 0 : partitionResponse.getMessages().size()));
+                traffic.record(topic.getFullName(), partitionResponse.getBytes(), partitionResponse.getSize());
             }
 
             fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);
@@ -146,6 +146,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
         FetchResponse fetchResponse = new FetchResponse();
         fetchResponse.setPartitionResponses(fetchPartitionResponseMap);
+        fetchResponse.setTraffic(traffic);
         Command response = new Command(fetchResponse);
 
         // 如果当前拉取消息量小于最小限制，那么延迟响应

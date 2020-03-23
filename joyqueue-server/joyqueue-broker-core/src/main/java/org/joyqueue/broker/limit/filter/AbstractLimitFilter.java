@@ -17,7 +17,7 @@ package org.joyqueue.broker.limit.filter;
 
 import org.joyqueue.broker.network.protocol.ProtocolCommandHandlerFilter;
 import org.joyqueue.broker.network.traffic.Traffic;
-import org.joyqueue.broker.network.traffic.TrafficPayload;
+import org.joyqueue.broker.network.traffic.ResponseTrafficPayload;
 import org.joyqueue.broker.network.traffic.TrafficType;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
@@ -45,11 +45,11 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
             return response;
         }
 
-        TrafficPayload trafficPayload = null;
-        if (response != null && response.getPayload() instanceof TrafficPayload) {
-            trafficPayload = (TrafficPayload) response.getPayload();
-        } else if (request != null && request.getPayload() instanceof TrafficPayload) {
-            trafficPayload = (TrafficPayload) request.getPayload();
+        ResponseTrafficPayload trafficPayload = null;
+        if (response != null && response.getPayload() instanceof ResponseTrafficPayload) {
+            trafficPayload = (ResponseTrafficPayload) response.getPayload();
+        } else if (request != null && request.getPayload() instanceof ResponseTrafficPayload) {
+            trafficPayload = (ResponseTrafficPayload) request.getPayload();
         }
 
         if (trafficPayload == null) {
@@ -59,15 +59,17 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
         return maybeLimit(invocation.getTransport(), invocation.getRequest(), response, trafficPayload);
     }
 
-    protected Command maybeLimit(Transport transport, Command request, Command response, TrafficPayload trafficPayload) {
-        if (!(trafficPayload instanceof TrafficType) || trafficPayload.getTraffic() == null) {
+    protected Command maybeLimit(Transport transport, Command request, Command response, ResponseTrafficPayload trafficPayload) {
+        Traffic traffic = trafficPayload.getTraffic();
+        if (!(trafficPayload instanceof TrafficType) || traffic == null) {
             return response;
         }
 
-        if (!limitIfNeeded((TrafficType) trafficPayload, trafficPayload.getTraffic())) {
+        if (!limitIfNeeded((TrafficType) trafficPayload, traffic)) {
             return response;
         }
 
+        trafficPayload.onLimited();
         return doLimit(transport, request, response);
     }
 

@@ -16,6 +16,7 @@
 package org.joyqueue.broker.kafka.command;
 
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.message.KafkaBrokerMessage;
@@ -53,6 +54,15 @@ public class FetchResponse extends KafkaRequestOrResponse implements FetchTraffi
     @Override
     public Traffic getTraffic() {
         return traffic;
+    }
+
+    @Override
+    public void onLimited() {
+        for (Map.Entry<String, List<PartitionResponse>> entry : partitionResponses.entrySet()) {
+            for (PartitionResponse partitionResponse : entry.getValue()) {
+                partitionResponse.getMessages().clear();
+            }
+        }
     }
 
     @Override
@@ -138,6 +148,13 @@ public class FetchResponse extends KafkaRequestOrResponse implements FetchTraffi
 
         public void setBytes(int bytes) {
             this.bytes = bytes;
+        }
+
+        public int getSize() {
+            if (CollectionUtils.isEmpty(messages)) {
+                return 0;
+            }
+            return messages.size();
         }
 
         public int getBytes() {

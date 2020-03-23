@@ -23,7 +23,9 @@ import org.joyqueue.network.transport.command.Payload;
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public interface TrafficPayload extends Payload {
+public interface ResponseTrafficPayload extends Payload {
 
     Traffic getTraffic();
+
+    void onLimited();
 }

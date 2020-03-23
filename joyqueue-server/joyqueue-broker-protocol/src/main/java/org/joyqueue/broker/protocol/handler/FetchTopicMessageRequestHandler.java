@@ -96,7 +96,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
             if (!checkResult.isSuccess()) {
                 logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJoyQueueCode());
                 result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
-                traffic.record(topic, 0);
+                traffic.record(topic, 0, 0);
                 continue;
             }
 
@@ -119,7 +119,7 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
                 }
             }
 
-            traffic.record(topic, fetchTopicMessageAckData.getSize());
+            traffic.record(topic, fetchTopicMessageAckData.getTraffic(), fetchTopicMessageAckData.getSize());
             result.put(topic, fetchTopicMessageAckData);
         }
 

@@ -32,6 +32,7 @@ import java.util.Map;
 public class Traffic {
 
     private Map<String, Integer> topicTraffic;
+    private Map<String, Integer> topicTps;
     private String app;
 
     public Traffic() {
@@ -47,7 +48,20 @@ public class Traffic {
         this.app = app;
     }
 
-    public void record(String topic, int traffic) {
+    public void record(String topic, int traffic, int tps) {
+        recordTps(topic, tps);
+        recordTraffic(topic, traffic);
+    }
+
+    public void recordTps(String topic, int tps) {
+        if (topicTps == null) {
+            topicTps = Maps.newHashMap();
+        }
+        tps = ObjectUtils.defaultIfNull(topicTps.get(topic), 0) + tps;
+        topicTps.put(topic, tps);
+    }
+
+    public void recordTraffic(String topic, int traffic) {
         if (topicTraffic == null) {
             topicTraffic = Maps.newHashMap();
         }
@@ -71,5 +85,12 @@ public class Traffic {
             return 0;
         }
         return topicTraffic.get(topic);
+    }
+
+    public int getTps(String topic) {
+        if (topicTps == null) {
+            return 1;
+        }
+        return topicTps.get(topic);
     }
 }

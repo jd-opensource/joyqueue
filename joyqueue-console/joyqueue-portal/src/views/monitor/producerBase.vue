@@ -116,8 +116,7 @@ export default {
           },
           {
             txt: '限流',
-            method: 'on-rateLimit',
-            isAdmin: true
+            method: 'on-rateLimit'
           }
         ]
       }

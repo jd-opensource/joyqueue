@@ -127,7 +127,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             for (ProduceRequest.PartitionRequest partitionRequest : entry.getValue()) {
                 if (producer == null) {
                     buildPartitionResponse(partitionRequest.getPartition(), null, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode(), partitionRequest.getMessages(), partitionResponses);
-                    traffic.record(topic.getFullName(), 0);
+                    traffic.record(topic.getFullName(), 0, 0);
                     latch.countDown();
                     isNeedDelay[0] = true;
                     continue;
@@ -136,7 +136,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 short checkCode = checkPartitionRequest(transport, produceRequest, partitionRequest, topic, producer, clientIp);
                 if (checkCode != KafkaErrorCode.NONE.getCode()) {
                     buildPartitionResponse(partitionRequest.getPartition(), null, checkCode, partitionRequest.getMessages(), partitionResponses);
-                    traffic.record(topic.getFullName(), 0);
+                    traffic.record(topic.getFullName(), 0, 0);
                     latch.countDown();
                     isNeedDelay[0] = true;
                     continue;
@@ -248,7 +248,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             brokerMessages.add(brokerMessage);
         }
 
-        traffic.record(topic.getFullName(), (partitionRequest.getMessages() == null ? 0 : partitionRequest.getMessages().size()));
+        traffic.recordTraffic(topic.getFullName(), partitionRequest.getTraffic());
         producePartitionGroupRequest.getPartitions().add(partitionRequest.getPartition());
         producePartitionGroupRequest.getMessages().addAll(brokerMessages);
         producePartitionGroupRequest.getMessageMap().put(partitionRequest.getPartition(), brokerMessages);

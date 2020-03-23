@@ -62,7 +62,7 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
         if (rateLimiter == null) {
             return false;
         }
-        return !rateLimiter.tryAcquireTps() || !rateLimiter.tryAcquireTraffic(traffic.getTraffic(topic));
+        return !rateLimiter.tryAcquireTps(traffic.getTps(topic)) || !rateLimiter.tryAcquireTraffic(traffic.getTraffic(topic));
     }
 
     @Override

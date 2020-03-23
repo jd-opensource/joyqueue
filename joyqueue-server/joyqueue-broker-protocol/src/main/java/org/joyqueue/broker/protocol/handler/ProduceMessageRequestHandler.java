@@ -109,7 +109,7 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
             } catch (JoyQueueException e) {
                 logger.warn("checkMessage error, transport: {}, topic: {}, app: {}", transport, topic, produceMessageRequest.getApp(), e);
                 resultData.put(topic, buildResponse(produceMessageData, JoyQueueCode.valueOf(e.getCode())));
-                traffic.record(topic, 0);
+                traffic.record(topic, 0, 0);
                 latch.countDown();
                 continue;
             }
@@ -119,14 +119,14 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
             if (!checkResult.isSuccess()) {
                 logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJoyQueueCode());
                 resultData.put(topic, buildResponse(produceMessageData, CheckResultConverter.convertProduceCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
-                traffic.record(topic, 0);
+                traffic.record(topic, 0, 0);
                 latch.countDown();
                 continue;
             }
 
             produceMessage(connection, topic, produceMessageRequest.getApp(), produceMessageData, (data) -> {
                 resultData.put(topic, data);
-                traffic.record(topic, produceMessageData.getSize());
+                traffic.recordTraffic(topic, produceMessageData.getTraffic());
                 latch.countDown();
             });
         }
