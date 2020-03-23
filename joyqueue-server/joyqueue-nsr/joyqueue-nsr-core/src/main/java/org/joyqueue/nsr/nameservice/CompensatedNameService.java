@@ -578,7 +578,8 @@ public class CompensatedNameService extends Service implements NameService, Prop
     }
 
     protected void setNameserverNotAvailable() {
-        if (nameserverLastAvailableTime == 0) {
+        if (nameserverLastAvailableTime == 0
+                || SystemClock.now() - nameserverLastAvailableTime > config.getCompensationErrorRetryInterval()) {
             nameserverLastAvailableTime = SystemClock.now();
         }
         nameserverNotAvailableCounter.incrementAndGet();

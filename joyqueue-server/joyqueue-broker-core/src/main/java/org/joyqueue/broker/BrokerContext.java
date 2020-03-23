@@ -23,6 +23,7 @@ import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.position.PositionManager;
 import org.joyqueue.broker.coordinator.CoordinatorService;
 import org.joyqueue.broker.election.ElectionService;
+import org.joyqueue.broker.event.BrokerEventBus;
 import org.joyqueue.broker.manage.BrokerManageService;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.monitor.BrokerMonitorService;
@@ -61,6 +62,7 @@ public class BrokerContext {
     private Consumer.ConsumerPolicy globalConsumerPolicy;
     private Producer.ProducerPolicy globalproducerPolicy;
     private MessageConvertSupport messageConvertSupport;
+    private BrokerEventBus brokerEventBus;
 
     public BrokerContext() {
     }
@@ -266,6 +268,11 @@ public class BrokerContext {
 
     public BrokerContext messageConvertSupport(MessageConvertSupport messageConvertSupport) {
         this.messageConvertSupport = messageConvertSupport;
+        return this;
+    }
+
+    public BrokerContext eventBus(BrokerEventBus brokerEventBus) {
+        this.brokerEventBus = brokerEventBus;
         return this;
     }
 

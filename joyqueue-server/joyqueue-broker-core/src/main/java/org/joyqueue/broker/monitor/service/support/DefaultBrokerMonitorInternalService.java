@@ -225,11 +225,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         }
     }
 
-    @Override
-    public BrokerStartupInfo getStartInfo() {
-        return brokerStartupInfo;
-    }
-
     /**
      *  GC event listener
      *

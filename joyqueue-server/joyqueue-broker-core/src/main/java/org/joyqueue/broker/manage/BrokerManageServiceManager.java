@@ -149,6 +149,16 @@ public class BrokerManageServiceManager extends Service {
         } catch (Throwable t) {
 
         }
+
+        try (InputStream propFile = BrokerManageServiceManager.class.getClassLoader().getResourceAsStream("joyqueue/version.properties")) {
+            if (propFile != null) {
+                Properties properties = new Properties();
+                properties.load(propFile);
+                brokerStartupInfo.setVersion(properties.getProperty("version"));
+            }
+        } catch (Throwable t) {
+
+        }
         brokerStartupInfo.setCommitDate(commitDate);
         brokerStartupInfo.setRevision(revision);
         return brokerStartupInfo;

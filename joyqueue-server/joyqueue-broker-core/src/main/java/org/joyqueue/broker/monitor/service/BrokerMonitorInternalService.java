@@ -18,7 +18,6 @@ package org.joyqueue.broker.monitor.service;
 import org.joyqueue.broker.monitor.stat.BrokerStatExt;
 import org.joyqueue.broker.monitor.stat.JVMStat;
 import org.joyqueue.monitor.BrokerMonitorInfo;
-import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.toolkit.vm.GCEventListener;
 
 /**
@@ -43,14 +42,6 @@ public interface BrokerMonitorInternalService {
      * @return broker扩展信息
      */
     BrokerStatExt getExtendBrokerStat(long timeStamp);
-
-    /**
-     * 获取启动信息
-     *
-     * @return
-     */
-    @Deprecated
-    BrokerStartupInfo getStartInfo();
 
     /***
      *

@@ -173,6 +173,12 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         electionMetadataManager = new ElectionMetadataManager(electionConfig.getMetadataPath());
         electionMetadataManager.recover(this);
 
+        for (Map.Entry<TopicPartitionGroup, ElectionMetadata> entry : electionMetadataManager.getAllElectionMetadata().entrySet()) {
+            TopicPartitionGroup topicPartitionGroup = entry.getKey();
+            ElectionMetadata electionMetadata = entry.getValue();
+            electionEventManager.add(new ElectionEvent(ElectionEvent.Type.START_ELECTION, electionMetadata.getCurrentTerm(), electionMetadata.getLeaderId(), topicPartitionGroup));
+        }
+
         logger.info("Election manager started.");
     }
 

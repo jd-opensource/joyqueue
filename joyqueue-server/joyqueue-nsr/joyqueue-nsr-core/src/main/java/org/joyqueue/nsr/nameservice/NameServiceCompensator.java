@@ -121,7 +121,7 @@ public class NameServiceCompensator extends Service {
                 if (newTopicConfig.isReplica(brokerId)) {
                     publishEvent(new AddTopicEvent(newTopicConfig, Lists.newArrayList(newTopicConfig.getPartitionGroups().values())));
 
-                    for (PartitionGroup partitionGroup : newTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                    for (PartitionGroup partitionGroup : newTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
                         publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), partitionGroup));
                     }
                 }

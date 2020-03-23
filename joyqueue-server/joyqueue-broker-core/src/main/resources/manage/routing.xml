@@ -7,10 +7,6 @@
                handlers="brokerMonitorService.getBrokerInfo"/>
 
         <!-- deprecated -->
-        <route path="/startInfo" inherit="get"
-               handlers="brokerMonitorService.getStartInfo"/>
-
-        <!-- deprecated -->
         <route path="/monitor/broker/brokerStatExt" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
 
