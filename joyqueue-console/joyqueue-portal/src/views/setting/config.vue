@@ -125,7 +125,7 @@ export default {
     },
     getRestList() {
       if (this.curIndex < this.cacheList.length-1) {
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < this.page.size; i++) {
           if (this.curIndex < this.cacheList.length-1) {
             this.curIndex += 1
             if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
