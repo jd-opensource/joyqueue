@@ -18,6 +18,9 @@
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog" @on-cancel-subscribe="cancelSubscribe"
               @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
+    <d-button class="right" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
+      <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+    </d-button>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -58,7 +61,6 @@ import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 import RateLimit from './rateLimit'
 import ProducerSendMessageForm from './producerSendMessageForm'
 import ButtonGroup from '../../components/button/button-group'
-import {getClientHeight, getScrollHeight, getScrollTop} from "../../utils/lazyLoad";
 
 export default {
   name: 'producer-base',
@@ -528,19 +530,17 @@ export default {
       })
     },
     // 滚动事件触发下拉加载
-    onScroll() {
-      if (getScrollHeight() - getClientHeight() - getScrollTop() <= 0) {
-        if (this.curIndex < this.cacheList.length-1) {
-          for (let i = 0; i < 10; i++) {
-            if (this.curIndex < this.cacheList.length-1) {
-              this.curIndex += 1
-              if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
-                this.tableData.rowData.push(this.cacheList[this.curIndex])
-                this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
-              }
-            }else{
-              break
+    getRestList() {
+      if (this.curIndex < this.cacheList.length-1) {
+        for (let i = 0; i < this.page.size; i++) {
+          if (this.curIndex < this.cacheList.length-1) {
+            this.curIndex += 1
+            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+              this.tableData.rowData.push(this.cacheList[this.curIndex])
+              this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
             }
+          }else{
+            break
           }
         }
       }
@@ -548,9 +548,6 @@ export default {
   },
   mounted () {
     // this.getList();
-    this.$nextTick(function () { // 解决视图渲染，数据未更新
-      window.addEventListener('scroll', this.onScroll);
-    })
   }
 }
 </script>
