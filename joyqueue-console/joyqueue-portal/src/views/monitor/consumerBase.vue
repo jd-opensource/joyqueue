@@ -215,7 +215,7 @@ export default {
       rateLimitDialog: {
         visible: false,
         title: '限流',
-        width: '450',
+        width: '500',
         showFooter: true,
         // doSearch: false,
         limitTps: 0,
@@ -578,8 +578,8 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         if (data.data.length > this.page.size) {
-          this.tableData.rowData = data.data.slice(0,this.page.size)
-          this.curIndex = this.page.size -1
+          this.tableData.rowData = data.data.slice(0, this.page.size)
+          this.curIndex = this.page.size - 1
         } else {
           this.tableData.rowData = data.data
           this.curIndex = this.page.size
