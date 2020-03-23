@@ -13,6 +13,11 @@
               @on-edit="edit" @on-del="del">
     </my-table>
 
+    <d-button class="right" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+      <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+    </d-button>
+
+
     <!--新建数据中心-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submitForm('addData')" @on-dialog-cancel="addCancel()">
       <d-form :model="addData" :rules="rules" ref="addData" label-width="120px" class="demo-ruleForm">
@@ -76,12 +81,14 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
-import {getClientHeight, getScrollHeight, getScrollTop} from "../../utils/lazyLoad";
+import ButtonGroup from '../../components/button/button-group'
+
 export default {
   name: 'application',
   components: {
     myTable,
-    myDialog
+    myDialog,
+    ButtonGroup
   },
   mixins: [ crud ],
   data () {
@@ -276,18 +283,16 @@ export default {
       })
     },
     // 滚动事件触发下拉加载
-    onScroll() {
-      if (getScrollHeight() - getClientHeight() - getScrollTop() <= 0) {
-        if (this.curIndex < this.cacheList.length-1) {
-          for (let i = 0; i < 10; i++) {
-            if (this.curIndex < this.cacheList.length-1) {
-              this.curIndex += 1
-              if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
-                this.tableData.rowData.push(this.cacheList[this.curIndex])
-              }
-            }else{
-              break
+    getRestList() {
+      if (this.curIndex < this.cacheList.length-1) {
+        for (let i = 0; i < 10; i++) {
+          if (this.curIndex < this.cacheList.length-1) {
+            this.curIndex += 1
+            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+              this.tableData.rowData.push(this.cacheList[this.curIndex])
             }
+          }else{
+            break
           }
         }
       }
@@ -295,9 +300,6 @@ export default {
   },
   mounted () {
     this.getList()
-    this.$nextTick(function () { // 解决视图渲染，数据未更新
-      window.addEventListener('scroll', this.onScroll);
-    })
   }
 }
 </script>
