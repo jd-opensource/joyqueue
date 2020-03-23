@@ -133,6 +133,51 @@ export default {
               }
               return h('div', html)
             }
+          },
+          {
+            title: '重试数',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              var list = params.item.brokerTopicMonitorRecordList
+              var html = []
+              if (list !== undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', list[i].retryCount)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '重试tps',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              var list = params.item.brokerTopicMonitorRecordList
+              var html = []
+              if (list !== undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', list[i].retryTps)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '重试ump连接',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              var list = params.item.brokerTopicMonitorRecordList
+              var html = []
+              if (list !== undefined) {
+                for (var i = 0; i < list.length; i++) {
+                  var p = h('div', list[i].retryUmpUrl)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
           }
         ]
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
