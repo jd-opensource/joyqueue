@@ -25,7 +25,7 @@ public class StoreNodes {
         this.nodes = nodes;
     }
 
-    public StoreNode getWRNode() {
+    public StoreNode getRWNode() {
         for (StoreNode node : nodes) {
             if (node.isWritable() && node.isReadable()) {
                 return node;

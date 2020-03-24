@@ -94,7 +94,7 @@ public class CompensatedNameServiceTest {
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getApp(), "test_app");
         }
-//        Assert.assertEquals(propertySupplier.getProperty(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD.getName()).getInteger().intValue(), NameServiceTest.EXCEPTION_COUNTER);
+        Assert.assertEquals(propertySupplier.getProperty(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD.getName()).getInteger().intValue(), NameServiceTest.EXCEPTION_COUNTER);
 
         NameServiceTest.THROW_EXCEPTION = false;
         Thread.currentThread().sleep(propertySupplier.getProperty(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL.getName()).getInteger());

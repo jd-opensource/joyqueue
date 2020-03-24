@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * CompensatedNameService
@@ -72,7 +73,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
     private NameServiceCompensator nameServiceCompensator;
     private NameServiceCompensateThread nameServiceCompensateThread;
     private int brokerId;
-    private volatile long nameserverLastAvailableTime = 0;
+    private AtomicLong nameserverLastAvailableTime = new AtomicLong();
     private AtomicInteger nameserverNotAvailableCounter = new AtomicInteger(0);
 
     public CompensatedNameService(NameService delegate) {
@@ -157,7 +158,28 @@ public class CompensatedNameService extends Service implements NameService, Prop
 
     @Override
     public boolean hasSubscribe(String app, Subscription.Type subscribe) {
-        return delegate.hasSubscribe(app, subscribe);
+        if (config.getCompensationEnable()) {
+            return hasSubscribeByCache(app, subscribe);
+        }
+        if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
+            return hasSubscribeByCache(app, subscribe);
+        }
+        try {
+            boolean result = delegate.hasSubscribe(app, subscribe);
+            setNameserverAvailable();
+            return result;
+        } catch (Exception e) {
+            logger.error("hasSubscribe exception, app: {}, subscribe: {}", app, subscribe, e);
+            setNameserverNotAvailable();
+            if (config.getCompensationErrorCacheEnable()) {
+                return hasSubscribeByCache(app, subscribe);
+            }
+            throw new NsrException(e);
+        }
+    }
+
+    protected boolean hasSubscribeByCache(String app, Subscription.Type subscribe) {
+        return false;
     }
 
     @Override
@@ -572,21 +594,24 @@ public class CompensatedNameService extends Service implements NameService, Prop
     }
 
     protected boolean nameserverIsAvailable() {
-        return nameserverLastAvailableTime == 0
+        long now = SystemClock.now();
+        long nameserverLastAvailableTime = this.nameserverLastAvailableTime.get();
+        return (nameserverLastAvailableTime == 0
                 || config.getCompensationErrorThreshold() > nameserverNotAvailableCounter.get()
-                || SystemClock.now() - nameserverLastAvailableTime > config.getCompensationErrorRetryInterval();
+                || now - nameserverLastAvailableTime > config.getCompensationErrorRetryInterval()) && this.nameserverLastAvailableTime.compareAndSet(nameserverLastAvailableTime, now);
     }
 
     protected void setNameserverNotAvailable() {
-        if (nameserverLastAvailableTime == 0
-                || SystemClock.now() - nameserverLastAvailableTime > config.getCompensationErrorRetryInterval()) {
-            nameserverLastAvailableTime = SystemClock.now();
+        if (nameserverLastAvailableTime.get() == 0
+                || SystemClock.now() - nameserverLastAvailableTime.get() > config.getCompensationErrorRetryInterval()) {
+            nameserverLastAvailableTime.set(SystemClock.now());
+            nameserverNotAvailableCounter.set(0);
         }
         nameserverNotAvailableCounter.incrementAndGet();
     }
 
     protected void setNameserverAvailable() {
-        nameserverLastAvailableTime = 0;
+        nameserverLastAvailableTime.set(0);
         nameserverNotAvailableCounter.set(0);
     }
 

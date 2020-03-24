@@ -7,8 +7,8 @@ import org.joyqueue.store.StoreNodes;
  * author: gaohaoxiang
  * date: 2020/3/20
  */
-// 启动需要发一次全部分组的变更事件
 public class StoreNodeChangeEvent extends StoreNodeEvent {
+
     private String topic;
     private int group;
     private StoreNodes nodes;

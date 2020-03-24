@@ -107,7 +107,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.groupOffsetManager = new GroupOffsetManager(config, brokerContext.getClusterManager(), this.groupMetadataManager, coordinator.getSessionManager());
         this.groupBalanceManager = new GroupBalanceManager(config, this.groupMetadataManager);
         this.groupOffsetHandler = new GroupOffsetHandler(config, coordinator, this.groupMetadataManager, groupBalanceManager, groupOffsetManager);
-        this.groupBalanceHandler = new GroupBalanceHandler(config, this.groupMetadataManager, groupBalanceManager);
+        this.groupBalanceHandler = new GroupBalanceHandler(brokerContext.getPropertySupplier(), config, this.groupMetadataManager, groupBalanceManager);
         this.groupCoordinator = new GroupCoordinator(coordinator, groupBalanceHandler, groupOffsetHandler, this.groupMetadataManager);
 
         this.producerIdManager = new ProducerIdManager();

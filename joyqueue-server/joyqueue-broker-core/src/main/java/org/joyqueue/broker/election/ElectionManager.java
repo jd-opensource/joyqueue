@@ -79,7 +79,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     private ScheduledExecutorService electionTimerExecutor;
     private ExecutorService electionExecutor;
 
-    private EventBus<ElectionEvent> electionEventManager;
+    private EventBus<ElectionEvent> electionEventManager = new EventBus<>("LeaderElectionEvent");
     private ElectionMetadataManager electionMetadataManager;
     private ReplicationManager replicationManager;
 
@@ -148,7 +148,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     public void doStart() throws Exception {
         super.doStart();
 
-        electionEventManager = new EventBus<>("LeaderElectionEvent");
         electionEventManager.start();
         addListener(brokerMonitor.new ElectionListener());
         leaderElections = new ConcurrentHashMap<>();

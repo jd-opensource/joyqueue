@@ -276,6 +276,10 @@ public class BrokerContext {
         return this;
     }
 
+    public BrokerEventBus getEventBus() {
+        return brokerEventBus;
+    }
+
     public Broker getBroker() {
         return null==clusterManager?null:clusterManager.getBroker();
     }

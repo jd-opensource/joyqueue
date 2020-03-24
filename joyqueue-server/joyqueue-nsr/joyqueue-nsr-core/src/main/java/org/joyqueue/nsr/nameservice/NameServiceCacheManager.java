@@ -277,6 +277,10 @@ public class NameServiceCacheManager extends Service {
         return ObjectUtils.defaultIfNull(cache.getTopicConfigBrokerMap().get(brokerId), Collections.emptyMap());
     }
 
+    public Map<TopicName, Producer> getProducerByApp(String app) {
+        return cache.getProducerAppMap().get(app);
+    }
+
     public Producer getProducerByTopicAndApp(TopicName topic, String app) {
         checkCacheStatus();
         Map<String, Producer> producerMap = cache.getProducerTopicMap().get(topic);
@@ -284,6 +288,10 @@ public class NameServiceCacheManager extends Service {
             return null;
         }
         return producerMap.get(app);
+    }
+
+    public Map<TopicName, Consumer> gettConsumerByApp(String app) {
+        return cache.getConsumerAppMap().get(app);
     }
 
     public Consumer getConsumerByTopicAndApp(TopicName topic, String app) {

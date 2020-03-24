@@ -23,6 +23,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
+import org.joyqueue.broker.cluster.entry.ClusterNode;
 import org.joyqueue.broker.cluster.event.CompensateEvent;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.ConsumeConfigKey;
@@ -110,6 +111,7 @@ public class ClusterManager extends Service {
     private EventBus<MetaEvent> eventBus = new EventBus("joyqueue-cluster-eventBus");
 
     private BrokerContext brokerContext;
+    private ClusterNodeManager clusterNodeManager;
 
     public ClusterManager(BrokerConfig brokerConfig, NameService nameService, BrokerContext brokerContext) {
         this.brokerConfig = brokerConfig;
@@ -137,6 +139,9 @@ public class ClusterManager extends Service {
         if (localCache == null) {
             localCache = new MetaDataLocalCache(nameService);
         }
+        if (clusterNodeManager == null) {
+            clusterNodeManager = new ClusterNodeManager(nameService, brokerContext.getEventBus());
+        }
     }
 
 
@@ -146,6 +151,8 @@ public class ClusterManager extends Service {
         localCache.start();
         eventBus.start();
         register();
+        clusterNodeManager.setBroker(broker);
+        clusterNodeManager.start();
         localCache.initCache();
         logger.info("clusterManager is started");
     }
@@ -567,7 +574,7 @@ public class ClusterManager extends Service {
             return false;
         }
         PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByGroup(partitionGroupId);
-        return (partitionGroup != null && getBrokerId().equals(partitionGroup.getLeader()));
+        return (partitionGroup != null && isLeader(partitionGroup));
     }
 
     public boolean isLeader(TopicName topic, short partition) {
@@ -576,7 +583,18 @@ public class ClusterManager extends Service {
             return false;
         }
         PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition(partition);
-        return (partitionGroup != null && getBrokerId().equals(partitionGroup.getLeader()));
+        return (partitionGroup != null && isLeader(partitionGroup));
+    }
+
+    public boolean isLeader(PartitionGroup partitionGroup) {
+        if (!partitionGroup.getReplicas().contains(getBrokerId())) {
+            return false;
+        }
+        ClusterNode clusterNode = clusterNodeManager.getTopicGroupNode(partitionGroup.getTopic().getFullName(), partitionGroup.getGroup());
+        if (clusterNode == null) {
+            return false;
+        }
+        return (clusterNode.getLeader() == getBrokerId());
     }
 
     /**
@@ -620,13 +638,8 @@ public class ClusterManager extends Service {
                 return BooleanResponse.failed(JoyQueueCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
             }
         }
-        Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
-        if (CollectionUtils.isEmpty(partitionGroups)) {
-            // 没有partitionGroup
-            logger.error("topic[{}] app[{}] cant't be write on broker [{}] has no partitionGroups", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
-            return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
-        }
-        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()) && partitionGroup.getReplicas().contains(broker.getId()))) {
+        Collection<PartitionGroup> partitionGroups = topicConfig.fetchTopicPartitionGroupsByBrokerId(broker.getId());
+        if (partitionGroups.stream().noneMatch(partitionGroup -> isLeader(partitionGroup))) {
             logger.error("topic[{}] cant't be write on broker [] ", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -654,7 +667,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (group == null || !group.getLeader().equals(broker.getId()) || !group.getReplicas().contains(broker.getId())) {
+        if (group == null || !isLeader(group)) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -708,14 +721,9 @@ public class ClusterManager extends Service {
                 return BooleanResponse.failed(JoyQueueCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }
         }
-        Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
-        if (CollectionUtils.isEmpty(partitionGroups)) {
-            // 没有partitionGroup
-            logger.error("topic[{}],app[{}],error[{}]", topic, app, JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getMessage());
-            return BooleanResponse.failed(JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP);
-        }
+        Collection<PartitionGroup> partitionGroups = topicConfig.fetchTopicPartitionGroupsByBrokerId(broker.getId());
         // 当前主题在该broker上有角色是master的分区组
-        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()) && partitionGroup.getReplicas().contains(broker.getId()))) {
+        if (partitionGroups.stream().noneMatch(partitionGroup -> isLeader(partitionGroup))) {
             logger.error("topic[{}],app[{}],error[{}]", topic, app, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -742,7 +750,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (group == null || !group.getLeader().equals(broker.getId()) || !group.getReplicas().contains(broker.getId())) {
+        if (group == null || !isLeader(group)) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -1323,7 +1331,14 @@ public class ClusterManager extends Service {
                         Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
                         topicPartitionGroups.remove(partitionGroup.getGroup());
                         oldTopicConfig.setPartitionGroups(topicPartitionGroups);
-                        buildTopicConfigCache(oldTopicConfig);
+                        TopicConfig newTopiConfig =  buildTopicConfigCache(oldTopicConfig);
+
+                        if (CollectionUtils.isEmpty(newTopiConfig.fetchTopicPartitionGroupsByBrokerId(getBrokerId()))) {
+                            topicPartitionsCache.remove(newTopiConfig.getName().getFullName());
+                            consumerCache.remove(newTopiConfig.getName().getFullName());
+                            producerCache.remove(newTopiConfig.getName().getFullName());
+                        }
+
                         break;
                     }
                     case ADD_CONSUMER: {
@@ -1439,6 +1454,9 @@ public class ClusterManager extends Service {
         }
         if (localCache.isStarted()) {
             localCache.stop();
+        }
+        if (clusterNodeManager.isStarted()) {
+            clusterNodeManager.stop();
         }
         logger.info("clusterManager is stopped");
     }

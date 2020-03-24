@@ -64,7 +64,7 @@ public class GetPartitionGroupClusterResponse extends JoyQueuePayload {
             nodes.add(node);
         }
 
-        public PartitionGroupNode getWRNode() {
+        public PartitionGroupNode getRWNode() {
             for (PartitionGroupNode node : nodes) {
                 if (node.isWritable() && node.isReadable()) {
                     return node;

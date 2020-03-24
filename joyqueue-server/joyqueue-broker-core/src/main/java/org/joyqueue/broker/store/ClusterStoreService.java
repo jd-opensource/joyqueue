@@ -1,5 +1,6 @@
 package org.joyqueue.broker.store;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.laf.extension.Extension;
 import org.joyqueue.broker.BrokerContext;
@@ -43,27 +44,32 @@ import java.util.List;
 public class ClusterStoreService extends Service implements StoreService, LifeCycle, Closeable, PropertySupplierAware, BrokerContextAware {
 
     private StoreService storeService;
+    private BrokerContext brokerContext;
     private ElectionService electionService;
 
     private EventBus eventBus = new EventBus("joyqueue-cluster-store-eventBus");
 
-    @Override
-    public void setBrokerContext(BrokerContext brokerContext) {
+    protected StoreService loadStoreService() {
         Iterator<StoreService> storeServiceIterator = Plugins.STORE.extensions().iterator();
         while (storeServiceIterator.hasNext()) {
             StoreService storeService = storeServiceIterator.next();
             if (!storeService.getClass().equals(getClass())) {
-                this.storeService = storeService;
-                break;
+                return storeService;
             }
         }
-        this.electionService = brokerContext.getElectionService();
+        return null;
+    }
+
+    @Override
+    public void setBrokerContext(BrokerContext brokerContext) {
+        this.brokerContext = brokerContext;
     }
 
     @Override
     protected void validate() throws Exception {
-        electionService.addListener((event) -> {
-            LeaderElection leaderElection = electionService.getLeaderElection(TopicName.parse(event.getTopicPartitionGroup().getTopic()), event.getTopicPartitionGroup().getPartitionGroupId());
+        this.electionService = brokerContext.getElectionService();
+        this.electionService.addListener((event) -> {
+            LeaderElection leaderElection = this.electionService.getLeaderElection(TopicName.parse(event.getTopicPartitionGroup().getTopic()), event.getTopicPartitionGroup().getPartitionGroupId());
             if (leaderElection == null) {
                 return;
             }
@@ -73,17 +79,19 @@ public class ClusterStoreService extends Service implements StoreService, LifeCy
     }
 
     @Override
-    public void start() throws Exception {
+    protected void doStart() throws Exception {
         if (storeService instanceof LifeCycle) {
             ((LifeCycle) storeService).start();
         }
+        eventBus.start();
     }
 
     @Override
-    public void stop() {
+    protected void doStop() {
         if (storeService instanceof LifeCycle) {
             ((LifeCycle) storeService).stop();
         }
+        eventBus.stop();
     }
 
     @Override
@@ -95,6 +103,9 @@ public class ClusterStoreService extends Service implements StoreService, LifeCy
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
+        this.storeService = loadStoreService();
+        Preconditions.checkArgument(storeService != null, "storeService can not be null.");
+
         if (storeService instanceof PropertySupplierAware) {
             ((PropertySupplierAware) storeService).setSupplier(supplier);
         }
@@ -121,12 +132,12 @@ public class ClusterStoreService extends Service implements StoreService, LifeCy
 
     @Override
     public void addListener(EventListener<StoreEvent> listener) {
-        eventBus.add(listener);
+        eventBus.addListener(listener);
     }
 
     @Override
     public void removeListener(EventListener<StoreEvent> listener) {
-        eventBus.add(listener);
+        eventBus.removeListener(listener);
     }
 
     @Override
