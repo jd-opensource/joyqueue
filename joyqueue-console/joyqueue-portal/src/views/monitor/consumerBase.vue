@@ -22,6 +22,10 @@
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
               @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
 
+    <d-button class="right" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+      <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+    </d-button>
+
     <!--Consumer subscribe dialog-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
@@ -72,7 +76,7 @@ import msgPreview from './msgPreview.vue'
 import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
 import RateLimit from './rateLimit'
-import {getClientHeight, getScrollHeight, getScrollTop} from "../../utils/lazyLoad";
+import ButtonGroup from '../../components/button/button-group'
 
 export default {
   name: 'consumer-base',
@@ -83,7 +87,8 @@ export default {
     myDialog,
     subscribe,
     msgPreview,
-    consumerConfigForm
+    consumerConfigForm,
+    ButtonGroup
   },
   props: {
     configDialogTips: {
@@ -587,19 +592,17 @@ export default {
       })
     },
     // 滚动事件触发下拉加载
-    onScroll() {
-      if (getScrollHeight() - getClientHeight() - getScrollTop() <= 0) {
-        if (this.curIndex < this.cacheList.length-1) {
-          for (let i = 0; i < 10; i++) {
-            if (this.curIndex < this.cacheList.length-1) {
-              this.curIndex += 1
-              if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
-                this.tableData.rowData.push(this.cacheList[this.curIndex])
-                this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
-              }
-            }else{
-              break
+    getRestList() {
+      if (this.curIndex < this.cacheList.length-1) {
+        for (let i = 0; i < this.page.size; i++) {
+          if (this.curIndex < this.cacheList.length-1) {
+            this.curIndex += 1
+            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+              this.tableData.rowData.push(this.cacheList[this.curIndex])
+              this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
             }
+          }else{
+            break
           }
         }
       }
@@ -619,9 +622,6 @@ export default {
           console.error('Property message-types can not be empty!')
         }
       })
-    this.$nextTick(function () { // 解决视图渲染，数据未更新
-      window.addEventListener('scroll', this.onScroll);
-    })
   }
 }
 </script>
