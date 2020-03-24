@@ -14,11 +14,11 @@
         </d-button>
       </d-button-group>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :showPagination="this.showPagination" :page="page" @on-size-change="handleSizeChange"
+    <my-table style="z-index: 1" :data="tableData" :showPin="showTablePin" :showPagination="this.showPagination" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog" @on-cancel-subscribe="cancelSubscribe"
               @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
-    <d-button class="right" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
+    <d-button class="right load-btn" style="z-index: 2" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
 
@@ -325,7 +325,7 @@ export default {
     },
     sendMessageConfirm () {
       let formData = this.$refs.sendMessageForm.formData
-      if (!formData.message || formData.message == '' || formData.message.trim() == '') {
+      if (!formData.message || formData.message === '' || formData.message.trim() === '') {
         this.$Message.error('消息体不能为空')
         return
       }
@@ -467,18 +467,17 @@ export default {
         }
       })
     },
-    // 实现懒加载的getList方法
     getList () {
       this.tableData.rowData = []
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
       if (this.searchFor === 'topic') {
-        query.keyword=this.keyword
+        query.keyword = this.keyword
       } else if (this.searchFor === 'app') {
         if (this.keyword === '') {
           query.keyword = ''
-        }else {
+        } else {
           query.app = this.keyword
         }
       }
@@ -503,11 +502,11 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         if (data.data.length > this.page.size) {
-          this.tableData.rowData = data.data.slice(0,this.page.size)
-          this.curIndex = this.page.size -1
+          this.tableData.rowData = data.data.slice(0, this.page.size)
+          this.curIndex = this.page.size - 1
         } else {
           this.tableData.rowData = data.data
-          this.curIndex =  data.data.length - 1
+          this.curIndex = data.data.length - 1
         }
         this.cacheList = data.data
         this.showTablePin = false
@@ -529,17 +528,16 @@ export default {
       }).catch(() => {
       })
     },
-    // 滚动事件触发下拉加载
-    getRestList() {
-      if (this.curIndex < this.cacheList.length-1) {
+    getRestList () {
+      if (this.curIndex < this.cacheList.length - 1) {
         for (let i = 0; i < this.page.size; i++) {
-          if (this.curIndex < this.cacheList.length-1) {
+          if (this.curIndex < this.cacheList.length - 1) {
             this.curIndex += 1
-            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
               this.tableData.rowData.push(this.cacheList[this.curIndex])
               this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
             }
-          }else{
+          } else {
             break
           }
         }
@@ -556,4 +554,5 @@ export default {
 <style scoped>
   .label{text-align: right; line-height: 32px;}
   .val{}
+  .load-btn { margin-right: 50px;margin-top: -100px;position: relative}
 </style>

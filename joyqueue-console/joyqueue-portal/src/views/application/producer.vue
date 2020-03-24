@@ -23,9 +23,6 @@ export default {
   },
   data () {
     return {
-      // searchFor要和keywordName对应
-      // keywordName:应用 -> searchFor:app
-      // keywordName:主题 -> searchFor:topic
       searchFor: 'topic',
       keywordTip: '请输入主题',
       keywordName: '主题',
@@ -47,24 +44,24 @@ export default {
           key: 'topic.code',
           width: 100,
           render: (h, params) => {
-              const topic = params.item.topic
-              const namespace = params.item.namespace
-              const topicId = getTopicCodeByCode(topic.code, namespace.code)
-              return h('d-button', {
-                  props: {
-                      type: 'borderless',
-                      color: 'primary'
-                  },
-                  style: {
-                      color: '#3366FF'
-                  },
-                  on: {
-                      click: () => {
-                          this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-                              query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'producer' }})
-                      }
-                  }
-              }, topic.code)
+            const topic = params.item.topic
+            const namespace = params.item.namespace
+            const topicId = getTopicCodeByCode(topic.code, namespace.code)
+            return h('d-button', {
+              props: {
+                type: 'borderless',
+                color: 'primary'
+              },
+              style: {
+                color: '#3366FF'
+              },
+              on: {
+                click: () => {
+                  this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
+                    query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'producer' }})
+                }
+              }
+            }, topic.code)
           }
         },
         {

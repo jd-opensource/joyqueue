@@ -24,9 +24,6 @@ export default {
   },
   data () {
     return {
-      // searchFor要和keywordName对应
-      // keywordName:应用 -> searchFor:app
-      // keywordName:主题 -> searchFor:topic
       searchFor: 'app',
       keywordTip: '请输入应用',
       keywordName: '应用',
@@ -35,31 +32,31 @@ export default {
         {
           title: '应用',
           key: 'app.code',
-          formatter(row) {
-              return getAppCode(row.app, row.subscribeGroup)
+          formatter (row) {
+            return getAppCode(row.app, row.subscribeGroup)
           },
           render: (h, params) => {
             const app = params.item.app
             return h('d-button', {
-                props: {
-                    type: 'borderless',
-                    color: 'primary'
-                },
-                style: {
-                    color: '#3366FF'
-                },
-                on: {
-                    click: () => {
-                        this.$router.push({
-                            name: `/${this.$i18n.locale}/application/detail`,
-                            query: {
-                                id: app.id,
-                                app: app.code,
-                                tab: 'producer'
-                            }
-                        })
+              props: {
+                type: 'borderless',
+                color: 'primary'
+              },
+              style: {
+                color: '#3366FF'
+              },
+              on: {
+                click: () => {
+                  this.$router.push({
+                    name: `/${this.$i18n.locale}/application/detail`,
+                    query: {
+                      id: app.id,
+                      app: app.code,
+                      tab: 'producer'
                     }
+                  })
                 }
+              }
             }, app.code)
           }
         },
@@ -108,17 +105,17 @@ export default {
           title: '限制IP发送',
           key: 'config.blackList',
           render: (h, params) => {
-              const value = params.item.config ? params.item.config.blackList : ''
-              return h('d-tooltip', {
-                      props: {
-                          content: value
-                      }
-                  }, [h('div', {
-                      attrs: {
-                          style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
-                      }
-                  }, value)]
-              )
+            const value = params.item.config ? params.item.config.blackList : ''
+            return h('d-tooltip', {
+              props: {
+                content: value
+              }
+            }, [h('div', {
+              attrs: {
+                style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+              }
+            }, value)]
+            )
           }
         },
         {

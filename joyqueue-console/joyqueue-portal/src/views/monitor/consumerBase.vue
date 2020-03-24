@@ -22,7 +22,7 @@
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
               @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
 
-    <d-button class="right" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+    <d-button class="right load-btn" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
 
@@ -549,11 +549,11 @@ export default {
       this.showTablePin = true
       let query = {}
       if (this.searchFor === 'topic') {
-        query.keyword=this.keyword
+        query.keyword = this.keyword
       } else if (this.searchFor === 'app') {
         if (this.keyword === '') {
           query.keyword = ''
-        }else {
+        } else {
           query.app = this.keyword
         }
       }
@@ -578,8 +578,8 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         if (data.data.length > this.page.size) {
-          this.tableData.rowData = data.data.slice(0,this.page.size)
-          this.curIndex = this.page.size -1
+          this.tableData.rowData = data.data.slice(0, this.page.size)
+          this.curIndex = this.page.size - 1
         } else {
           this.tableData.rowData = data.data
           this.curIndex = this.page.size
@@ -592,16 +592,16 @@ export default {
       })
     },
     // 滚动事件触发下拉加载
-    getRestList() {
-      if (this.curIndex < this.cacheList.length-1) {
+    getRestList () {
+      if (this.curIndex < this.cacheList.length - 1) {
         for (let i = 0; i < this.page.size; i++) {
-          if (this.curIndex < this.cacheList.length-1) {
+          if (this.curIndex < this.cacheList.length - 1) {
             this.curIndex += 1
-            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
               this.tableData.rowData.push(this.cacheList[this.curIndex])
               this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
             }
-          }else{
+          } else {
             break
           }
         }
@@ -630,4 +630,5 @@ export default {
 <style scoped>
   .label{text-align: right; line-height: 32px;}
   .val{}
+  .load-btn { margin-right: 50px;margin-top: -100px;position: relative}
 </style>
