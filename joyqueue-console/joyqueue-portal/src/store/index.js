@@ -47,13 +47,13 @@ const state = {
   },
   uIds: {
     producer: {
-      detail: 'pd',
+      detail: 'pm',
       summary: 'pt',
       performance: 'pp',
       compare: 'pmc'
     },
     consumer: {
-      detail: 'cd',
+      detail: 'cm',
       summary: 'ct',
       performance: 'cp',
       compare: 'cmc'

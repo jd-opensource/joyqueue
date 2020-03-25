@@ -38,7 +38,7 @@ public enum JournalkeeperConfigKey implements PropertyDef {
     JOURNAL_RETENTION_MIN_KEY("nameserver.journalkeeper.journal.retention.min", 0, PropertyDef.Type.INT),
 
     RPC_TIMEOUT("nameserver.journalkeeper.rpc.timeout", 1000 * 60 * 1, PropertyDef.Type.INT),
-    EXECUTE_TIMEOUT("nameserver.journalkeeper.execute.timeout", 1000 * 3, PropertyDef.Type.INT),
+    EXECUTE_TIMEOUT("nameserver.journalkeeper.execute.timeout", 1000 * 20, PropertyDef.Type.INT),
 
     FLUSH_INTERVAL("nameserver.journalkeeper.flush.interval", 50, PropertyDef.Type.INT),
 
