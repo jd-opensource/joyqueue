@@ -80,10 +80,6 @@ export default {
                 props: {
                   row: params.row,
                   colData: [
-                    // {
-                    //   title: 'ID',
-                    //   key: 'partitionGroup'
-                    // },
                     {
                       title: '分区',
                       key: 'partition'

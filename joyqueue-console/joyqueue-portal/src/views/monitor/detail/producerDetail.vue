@@ -48,14 +48,6 @@ export default {
                 props: {
                   row: params.row,
                   colData: [
-                    // {
-                    //   title: 'ID',
-                    //   key: 'partitionGroup'
-                    // },
-                    // {
-                    //   title: '主分片',
-                    //   key: 'ip'
-                    // },
                     {
                       title: '分区',
                       key: 'partition'
@@ -65,7 +57,7 @@ export default {
                       key: 'enQuence.count'
                     },
                     {
-                      'title': 'TPS',
+                      title: 'TPS',
                       key: 'enQuence.tps'
                     },
                     {
