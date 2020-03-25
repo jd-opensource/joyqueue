@@ -47,12 +47,16 @@ const state = {
   },
   uIds: {
     producer: {
-      detail: 'pd',
-      summary: 'pt'
+      detail: 'pm',
+      summary: 'pt',
+      performance: 'pp',
+      compare: 'pmc'
     },
     consumer: {
-      detail: 'cd',
-      summary: 'ct'
+      detail: 'cm',
+      summary: 'ct',
+      performance: 'cp',
+      compare: 'cmc'
     },
     broker: 'broker',
     host: 'host',

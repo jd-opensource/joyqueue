@@ -57,18 +57,22 @@ export default {
         colData: [
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '30%'
           },
           {
             title: '键',
-            key: 'key'
+            key: 'key',
+            width: '30%'
           },
           {
             title: '分组',
-            key: 'group'
+            key: 'group',
+            width: '30%'
           }, {
             title: '值',
-            key: 'value'
+            key: 'value',
+            width: '10%'
           }
         ],
         btns: [
