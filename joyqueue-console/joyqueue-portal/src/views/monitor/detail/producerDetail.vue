@@ -48,20 +48,20 @@ export default {
                   row: params.row,
                   colData: [
                     {
-                      title: 'ID',
-                      key: 'partitionGroup'
-                    },
-                    // {
-                    //   title: '主分片',
-                    //   key: 'ip'
-                    // },
-                    {
                       title: '分区',
                       key: 'partition'
                     },
                     {
                       title: '入队数',
                       key: 'enQuence.count'
+                    },
+                    {
+                      title: 'TPS',
+                      key: 'enQuence.tps'
+                    },
+                    {
+                      title: '流量',
+                      key: 'enQuence.traffic'
                     }
                   ],
                   subscribe: params.row.subscribe,

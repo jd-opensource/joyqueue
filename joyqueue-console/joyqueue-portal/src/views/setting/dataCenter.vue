@@ -17,7 +17,6 @@
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
 
-
     <!--新建数据中心-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submitForm('addData')" @on-dialog-cancel="addCancel()">
       <d-form :model="addData" :rules="rules" ref="addData" label-width="120px" class="demo-ruleForm">
@@ -257,7 +256,7 @@ export default {
       this.$refs[formName].resetFields()
     },
     getList () {
-      this.tableData.rowData =[]
+      this.tableData.rowData = []
       this.showTablePin = true
       let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
@@ -271,27 +270,27 @@ export default {
         this.page.total = data.pagination.totalRecord
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
-        if(data.data.length>this.page.size) {
+        if (data.data.length > this.page.size) {
           this.tableData.rowData = data.data.slice(0, this.page.size)
-          this.curIndex = this.page.size-1
+          this.curIndex = this.page.size - 1
         } else {
           this.tableData.rowData = data.data
-          this.curIndex = data.data.length-1
+          this.curIndex = data.data.length - 1
         }
         this.cacheList = data.data
         this.showTablePin = false
       })
     },
     // 滚动事件触发下拉加载
-    getRestList() {
-      if (this.curIndex < this.cacheList.length-1) {
+    getRestList () {
+      if (this.curIndex < this.cacheList.length - 1) {
         for (let i = 0; i < this.page.size; i++) {
-          if (this.curIndex < this.cacheList.length-1) {
+          if (this.curIndex < this.cacheList.length - 1) {
             this.curIndex += 1
-            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
               this.tableData.rowData.push(this.cacheList[this.curIndex])
             }
-          }else{
+          } else {
             break
           }
         }

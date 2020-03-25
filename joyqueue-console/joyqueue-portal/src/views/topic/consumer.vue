@@ -32,35 +32,35 @@ export default {
       keywordName: '应用',
       isRetryEnable: false,
       colData: [
-          {
-            title: '应用',
-            key: 'app.code',
-            width: 80,
-            render: (h, params) => {
-                const app = params.item.app
-                const appFullName = getAppCode(app, params.item.subscribeGroup)
-                return h('d-button', {
-                    props: {
-                        type: 'borderless',
-                        color: 'primary'
-                    },
-                    style: {
-                        color: '#3366FF'
-                    },
-                    on: {
-                        click: () => {
-                            this.$router.push({
-                                name: `/${this.$i18n.locale}/application/detail`,
-                                query: {
-                                    id: app.id,
-                                    app: app.code,
-                                    tab: 'consumer'
-                                }
-                            })
-                        }
+        {
+          title: '应用',
+          key: 'app.code',
+          width: 80,
+          render: (h, params) => {
+            const app = params.item.app
+            const appFullName = getAppCode(app, params.item.subscribeGroup)
+            return h('d-button', {
+              props: {
+                type: 'borderless',
+                color: 'primary'
+              },
+              style: {
+                color: '#3366FF'
+              },
+              on: {
+                click: () => {
+                  this.$router.push({
+                    name: `/${this.$i18n.locale}/application/detail`,
+                    query: {
+                      id: app.id,
+                      app: app.code,
+                      tab: 'consumer'
                     }
-                }, appFullName)
-            }
+                  })
+                }
+              }
+            }, appFullName)
+          }
         },
         {
           title: '主题',
@@ -86,13 +86,13 @@ export default {
           key: 'pending.count',
           width: 150,
           render: (h, params) => {
-              const pending = params.item.pending
-              if (!pending) {
-                return h('label', '')
-              } else {
-                const formatNumFilter = Vue.filter('formatNum')
-                return h('label', formatNumFilter(pending.count))
-              }
+            const pending = params.item.pending
+            if (!pending) {
+              return h('label', '')
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              return h('label', formatNumFilter(pending.count))
+            }
           }
         },
         {
@@ -118,8 +118,8 @@ export default {
             const formatNumFilter = Vue.filter('formatNum')
             return h('label', {
               style: {
-                  cursor: 'pointer',
-                  color: '#3366FF'
+                cursor: 'pointer',
+                color: '#3366FF'
               },
               on: {
                 click: () => {
@@ -151,14 +151,14 @@ export default {
           render: (h, params) => {
             const value = params.item.config ? params.item.config.blackList : ''
             return h('d-tooltip', {
-                props: {
-                  content: value
-                }
-              }, [h('div', {
-                attrs: {
-                  style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
-                }
-              }, value)]
+              props: {
+                content: value
+              }
+            }, [h('div', {
+              attrs: {
+                style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+              }
+            }, value)]
             )
           }
         },
