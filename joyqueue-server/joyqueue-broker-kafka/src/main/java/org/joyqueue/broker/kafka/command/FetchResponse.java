@@ -20,7 +20,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.message.KafkaBrokerMessage;
-import org.joyqueue.broker.network.traffic.FetchTrafficPayload;
+import org.joyqueue.broker.network.traffic.FetchResponseTrafficPayload;
 import org.joyqueue.broker.network.traffic.Traffic;
 
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Created by zhangkepeng on 16-8-4.
  */
-public class FetchResponse extends KafkaRequestOrResponse implements FetchTrafficPayload {
+public class FetchResponse extends KafkaRequestOrResponse implements FetchResponseTrafficPayload {
 
     private Traffic traffic;
     private Map<String, List<PartitionResponse>> partitionResponses;

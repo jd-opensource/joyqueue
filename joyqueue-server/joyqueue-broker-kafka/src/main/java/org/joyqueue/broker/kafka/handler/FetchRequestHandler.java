@@ -36,8 +36,11 @@ import org.joyqueue.broker.kafka.converter.CheckResultConverter;
 import org.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import org.joyqueue.broker.kafka.message.KafkaBrokerMessage;
 import org.joyqueue.broker.kafka.message.converter.KafkaMessageConverter;
+import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.broker.network.traffic.Traffic;
+import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.message.BrokerMessage;
@@ -76,6 +79,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     private ClusterManager clusterManager;
     private MessageConvertSupport messageConvertSupport;
     private SessionManager sessionManager;
+    private BrokerMonitor brokerMonitor;
     private DelayedOperationManager<DelayedOperation> delayPurgatory;
 
     @Override
@@ -85,6 +89,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
         this.messageConvertSupport = kafkaContext.getBrokerContext().getMessageConvertSupport();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
+        this.brokerMonitor = kafkaContext.getBrokerContext().getBrokerMonitor();
         this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-delay");
         this.delayPurgatory.start();
     }
@@ -97,7 +102,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
 //        IsolationLevel isolationLevel = IsolationLevel.valueOf(fetchRequest.getIsolationLevel());
         int maxBytes = fetchRequest.getMaxBytes();
-        Traffic traffic = new Traffic(clientId);
+        Traffic traffic = fetchRequest.getTraffic();
 
         Map<String, List<FetchResponse.PartitionResponse>> fetchPartitionResponseMap = Maps.newHashMapWithExpectedSize(partitionRequestMap.size());
         int currentBytes = 0;
@@ -118,7 +123,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                     continue;
                 }
 
-                if (currentBytes > maxBytes) {
+                if (traffic.isLimited(topic.getFullName()) || currentBytes > maxBytes) {
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode()));
                     continue;
                 }
@@ -144,7 +149,23 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
             fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);
         }
 
-        FetchResponse fetchResponse = new FetchResponse();
+        FetchResponse fetchResponse = new FetchResponse() {
+            @Override
+            public void onLimited() {
+                for (Map.Entry<String, List<PartitionResponse>> entry : fetchPartitionResponseMap.entrySet()) {
+                    TopicConfig topicConfig = clusterManager.getTopicConfig(TopicName.parse(entry.getKey()));
+                    for (PartitionResponse partitionResponse : entry.getValue()) {
+                        PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition((short) partitionResponse.getPartition());
+                        if (partitionGroup != null) {
+                            brokerMonitor.onGetMessage(entry.getKey(), clientId, partitionGroup.getGroup()
+                                    , (short) partitionResponse.getPartition(), -partitionResponse.getMessages().size(), -partitionResponse.getBytes(), 0);
+                        }
+                        partitionResponse.getMessages().clear();
+                    }
+                }
+            }
+        };
+
         fetchResponse.setPartitionResponses(fetchPartitionResponseMap);
         fetchResponse.setTraffic(traffic);
         Command response = new Command(fetchResponse);

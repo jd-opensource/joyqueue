@@ -50,6 +50,9 @@ public class DefaultRateLimiter implements RateLimiter {
 
     @Override
     public boolean tryAcquireTps(int tps) {
+        if (tps <= 0) {
+            return true;
+        }
         return tpsRateLimiter.tryAcquire(Math.min(tps, this.tps));
     }
 

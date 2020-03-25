@@ -33,6 +33,8 @@ public class Traffic {
 
     private Map<String, Integer> topicTraffic;
     private Map<String, Integer> topicTps;
+    private Map<String, Boolean> isLimited;
+    private boolean limited = false;
     private String app;
 
     public Traffic() {
@@ -40,11 +42,6 @@ public class Traffic {
     }
 
     public Traffic(String app) {
-        this.app = app;
-    }
-
-    public Traffic(Map<String, Integer> topicTraffic, String app) {
-        this.topicTraffic = topicTraffic;
         this.app = app;
     }
 
@@ -74,6 +71,35 @@ public class Traffic {
             return Collections.emptyList();
         }
         return Lists.newArrayList(topicTraffic.keySet());
+    }
+
+    public void limited(boolean limited) {
+        this.limited = limited;
+    }
+
+    public void limited(String topic, boolean limited) {
+        if (isLimited == null) {
+            isLimited = Maps.newHashMap();
+        }
+        isLimited.put(topic, limited);
+    }
+
+    public boolean isLimited(String topic) {
+        if (limited) {
+            return true;
+        }
+        if (isLimited == null) {
+            return false;
+        }
+        Boolean result = isLimited.get(topic);
+        if (result == null) {
+            return false;
+        }
+        return result;
+    }
+
+    public void setApp(String app) {
+        this.app = app;
     }
 
     public String getApp() {

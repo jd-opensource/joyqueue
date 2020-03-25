@@ -21,7 +21,7 @@ package org.joyqueue.broker.network.traffic;
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public interface ProduceTrafficPayload extends ResponseTrafficPayload, TrafficType {
+public interface ProduceResponseTrafficPayload extends ResponseTrafficPayload, TrafficType {
 
     String TYPE = "produce";
 

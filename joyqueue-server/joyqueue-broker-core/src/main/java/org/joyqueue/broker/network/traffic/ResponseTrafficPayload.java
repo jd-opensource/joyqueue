@@ -15,17 +15,13 @@
  */
 package org.joyqueue.broker.network.traffic;
 
-import org.joyqueue.network.transport.command.Payload;
-
 /**
- * TrafficCommand
+ * ResponseTrafficPayload
  *
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public interface ResponseTrafficPayload extends Payload {
-
-    Traffic getTraffic();
+public interface ResponseTrafficPayload extends TrafficPayload {
 
     void onLimited();
 }

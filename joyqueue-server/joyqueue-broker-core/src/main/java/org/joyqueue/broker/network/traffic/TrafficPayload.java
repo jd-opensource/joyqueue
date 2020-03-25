@@ -13,27 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.protocol.command;
+package org.joyqueue.broker.network.traffic;
 
-import org.joyqueue.broker.network.traffic.FetchResponseTrafficPayload;
-import org.joyqueue.broker.network.traffic.Traffic;
+import org.joyqueue.network.transport.command.Payload;
 
 /**
- * FetchTopicMessageResponse
+ * TrafficPayload
  *
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public class FetchTopicMessageResponse extends org.joyqueue.network.command.FetchTopicMessageResponse implements FetchResponseTrafficPayload {
+public interface TrafficPayload extends Payload {
 
-    private Traffic traffic;
-
-    public void setTraffic(Traffic traffic) {
-        this.traffic = traffic;
-    }
-
-    @Override
-    public Traffic getTraffic() {
-        return traffic;
-    }
+    Traffic getTraffic();
 }
