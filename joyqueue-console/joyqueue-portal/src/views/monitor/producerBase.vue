@@ -16,8 +16,9 @@
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :showPagination="this.showPagination" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
-              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog" @on-cancel-subscribe="cancelSubscribe"
-              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
+              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog"
+              @on-cancel-subscribe="cancelSubscribe" @on-rateLimit="openRateLimitDialog" @on-compare-chart="goCompareChart"
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" />
     <d-button class="right" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
@@ -61,6 +62,7 @@ import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 import RateLimit from './rateLimit'
 import ProducerSendMessageForm from './producerSendMessageForm'
 import ButtonGroup from '../../components/button/button-group'
+import apiUrl from '../../utils/apiUrl.js'
 
 export default {
   name: 'producer-base',
@@ -124,6 +126,9 @@ export default {
         ]
       }
     },
+    btnGroups: {
+      type: Object
+    },
     colData: { // 生产者 列表表头
       type: Array
     },
@@ -162,7 +167,6 @@ export default {
       urls: {
         search: `/producer/search`,
         getMonitor: `/monitor/find`,
-        getUrl: `/grafana/getRedirectUrl`,
         del: `/producer/delete`,
         sendMessage: '/monitor/producer/sendMessage'
       },
@@ -171,7 +175,8 @@ export default {
         rowData: [],
         colData: this.colData,
         btns: this.btns,
-        operates: this.operates
+        operates: this.operates,
+        btnGroups: this.btnGroups
       },
       keyword: '',
       page: {
@@ -223,7 +228,9 @@ export default {
       configData: {},
       monitorUIds: {
         detail: this.$store.getters.uIds.producer.detail,
-        summary: this.$store.getters.uIds.producer.summary
+        summary: this.$store.getters.uIds.producer.summary,
+        performance: this.$store.getters.uIds.producer.performance,
+        compare: this.$store.getters.uIds.producer.compare
       }
     }
   },
@@ -325,7 +332,7 @@ export default {
     },
     sendMessageConfirm () {
       let formData = this.$refs.sendMessageForm.formData
-      if (!formData.message || formData.message == '' || formData.message.trim() == '') {
+      if (!formData.message) {
         this.$Message.error('消息体不能为空')
         return
       }
@@ -352,7 +359,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
           let url = data.data || ''
           if (url.indexOf('?') < 0) {
             url += '?'
@@ -369,7 +376,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
           let url = data.data || ''
           if (url.indexOf('?') < 0) {
             url += '?'
@@ -386,7 +393,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.performance, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/pp', {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + this.monitorUIds.performance, {}, {}).then((data) => {
           if (data.data) {
             let url = data.data
             if (url.indexOf('?') < 0) {
@@ -397,6 +404,23 @@ export default {
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
             window.open(url)
           }
+        })
+      }
+    },
+    goCompareChart (item) {
+      if (this.monitorUrls && this.monitorUrls.compare) {
+        window.open(replaceChartUrl(this.monitorUrls.compare, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.compare, {}, {}).then((data) => {
+          let url = data.data || ''
+          if (url.indexOf('?') < 0) {
+            url += '?'
+          } else if (!url.endsWith('?')) {
+            url += '&'
+          }
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          window.open(url)
         })
       }
     },
@@ -474,11 +498,11 @@ export default {
       this.showTablePin = true
       let query = {}
       if (this.searchFor === 'topic') {
-        query.keyword=this.keyword
+        query.keyword = this.keyword
       } else if (this.searchFor === 'app') {
         if (this.keyword === '') {
           query.keyword = ''
-        }else {
+        } else {
           query.app = this.keyword
         }
       }
@@ -530,16 +554,16 @@ export default {
       })
     },
     // 滚动事件触发下拉加载
-    getRestList() {
-      if (this.curIndex < this.cacheList.length-1) {
+    getRestList () {
+      if (this.curIndex < this.cacheList.length - 1) {
         for (let i = 0; i < this.page.size; i++) {
-          if (this.curIndex < this.cacheList.length-1) {
+          if (this.curIndex < this.cacheList.length - 1) {
             this.curIndex += 1
-            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
               this.tableData.rowData.push(this.cacheList[this.curIndex])
               this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
             }
-          }else{
+          } else {
             break
           }
         }

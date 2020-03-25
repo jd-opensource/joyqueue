@@ -19,8 +19,8 @@
     <my-table :data="tableData" :showPin="showTablePin" :page="page" :showPagination="this.showPagination"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
-              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart"  @on-rateLimit="openRateLimitDialog"
-              @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
+              @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart" @on-compare-chart="goCompareChart"
+              @on-rateLimit="openRateLimitDialog" @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
 
     <d-button class="right" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
@@ -77,6 +77,7 @@ import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
 import RateLimit from './rateLimit'
 import ButtonGroup from '../../components/button/button-group'
+import apiUrl from '../../utils/apiUrl.js'
 
 export default {
   name: 'consumer-base',
@@ -168,6 +169,9 @@ export default {
         ]
       }
     },
+    btnGroups: {
+      type: Object
+    },
     colData: { // 消费者 列表表头
       type: Array
     },
@@ -195,7 +199,6 @@ export default {
         search: `/consumer/search`,
         getMonitor: `/monitor/find`,
         previewMessage: '/monitor/preview/message',
-        getUrl: `/grafana/getRedirectUrl`,
         del: `/consumer/delete`,
         messageTypes: '/archive/message-types'
       },
@@ -204,7 +207,8 @@ export default {
         rowData: [],
         colData: this.colData,
         btns: this.btns,
-        operates: this.operates
+        operates: this.operates,
+        btnGroups: this.btnGroups
       },
       keyword: '',
       page: {
@@ -292,7 +296,8 @@ export default {
       ],
       monitorUIds: {
         detail: this.$store.getters.uIds.consumer.detail,
-        summary: this.$store.getters.uIds.consumer.summary
+        summary: this.$store.getters.uIds.consumer.summary,
+        compare: this.$store.getters.uIds.consumer.compare
       }
     }
   },
@@ -394,7 +399,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
           item.topic.code, getAppCode(item.app, item.subscribeGroup)))
       } else {
-        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
           if (data.data) {
             let url = data.data
             if (url.indexOf('?') < 0) {
@@ -414,7 +419,27 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
           item.topic.code, getAppCode(item.app, item.subscribeGroup)))
       } else {
-        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
+          if (data.data) {
+            let url = data.data
+            if (url.indexOf('?') < 0) {
+              url += '?'
+            } else if (!url.endsWith('?')) {
+              url += '&'
+            }
+            url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+              getAppCode(item.app, item.subscribeGroup)
+            window.open(url)
+          }
+        })
+      }
+    },
+    goPerformanceChart (item) {
+      if (this.monitorUrls && this.monitorUrls.performance) {
+        window.open(replaceChartUrl(this.monitorUrls.performance, item.topic.namespace.code,
+          item.topic.code, getAppCode(item.app, item.subscribeGroup)))
+      } else {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + this.monitorUIds.performance, {}, {}).then((data) => {
           if (data.data) {
             let url = data.data
             if (url.indexOf('?') < 0) {
@@ -429,12 +454,12 @@ export default {
         })
       }
     },
-    goPerformanceChart (item) {
-      if (this.monitorUrls && this.monitorUrls.performance) {
-        window.open(replaceChartUrl(this.monitorUrls.performance, item.topic.namespace.code,
+    goCompareChart (item) {
+      if (this.monitorUrls && this.monitorUrls.compare) {
+        window.open(replaceChartUrl(this.monitorUrls.compare, item.topic.namespace.code,
           item.topic.code, getAppCode(item.app, item.subscribeGroup)))
       } else {
-        apiRequest.get(this.urls.getUrl + '/cp', {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.compare, {}, {}).then((data) => {
           if (data.data) {
             let url = data.data
             if (url.indexOf('?') < 0) {
@@ -443,7 +468,7 @@ export default {
               url += '&'
             }
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-                getAppCode(item.app, item.subscribeGroup)
+              getAppCode(item.app, item.subscribeGroup)
             window.open(url)
           }
         })
@@ -549,11 +574,11 @@ export default {
       this.showTablePin = true
       let query = {}
       if (this.searchFor === 'topic') {
-        query.keyword=this.keyword
+        query.keyword = this.keyword
       } else if (this.searchFor === 'app') {
         if (this.keyword === '') {
           query.keyword = ''
-        }else {
+        } else {
           query.app = this.keyword
         }
       }
@@ -592,16 +617,16 @@ export default {
       })
     },
     // 滚动事件触发下拉加载
-    getRestList() {
-      if (this.curIndex < this.cacheList.length-1) {
+    getRestList () {
+      if (this.curIndex < this.cacheList.length - 1) {
         for (let i = 0; i < this.page.size; i++) {
-          if (this.curIndex < this.cacheList.length-1) {
+          if (this.curIndex < this.cacheList.length - 1) {
             this.curIndex += 1
-            if(!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
               this.tableData.rowData.push(this.cacheList[this.curIndex])
               this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
             }
-          }else{
+          } else {
             break
           }
         }

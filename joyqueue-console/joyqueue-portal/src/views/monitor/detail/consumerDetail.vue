@@ -80,10 +80,6 @@ export default {
                   row: params.row,
                   colData: [
                     {
-                      title: 'ID',
-                      key: 'partitionGroup'
-                    },
-                    {
                       title: '分区',
                       key: 'partition'
                     },
@@ -94,6 +90,14 @@ export default {
                     {
                       title: '出队数',
                       key: 'deQuence.count'
+                    },
+                    {
+                      title: 'TPS',
+                      key: 'deQuence.tps'
+                    },
+                    {
+                      title: '限流',
+                      key: 'deQuence.traffic'
                     }
                   ],
                   subscribe: params.row.subscribe,
