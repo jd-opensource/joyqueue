@@ -96,7 +96,7 @@ export default {
                       key: 'deQuence.tps'
                     },
                     {
-                      title: '限流',
+                      title: '流量',
                       key: 'deQuence.traffic'
                     }
                   ],
