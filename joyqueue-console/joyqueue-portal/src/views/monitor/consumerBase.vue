@@ -22,7 +22,7 @@
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart" @on-compare-chart="goCompareChart"
               @on-rateLimit="openRateLimitDialog" @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
 
-    <d-button class="right" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+    <d-button class="right load-btn" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
 
@@ -112,9 +112,6 @@ export default {
       type: String
     },
     keywordName: {
-      type: String
-    },
-    searchFor: {
       type: String
     },
     btns: {
@@ -573,15 +570,7 @@ export default {
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
-      if (this.searchFor === 'topic') {
-        query.keyword = this.keyword
-      } else if (this.searchFor === 'app') {
-        if (this.keyword === '') {
-          query.keyword = ''
-        } else {
-          query.app = this.keyword
-        }
-      }
+      query.keyword = this.keyword
       let data = {
         pagination: {
           page: this.page.page,
@@ -655,4 +644,5 @@ export default {
 <style scoped>
   .label{text-align: right; line-height: 32px;}
   .val{}
+  .load-btn { margin-right: 50px;margin-top: -100px;position: relative}
 </style>
