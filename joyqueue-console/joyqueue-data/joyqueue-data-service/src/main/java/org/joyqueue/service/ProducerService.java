@@ -28,4 +28,6 @@ public interface ProducerService extends NsrService<Producer, String> {
 
     List<Producer> findByApp(String app);
 
+    List<Producer> findByFuzzyTopicApp(String topic,String app);
+
 }

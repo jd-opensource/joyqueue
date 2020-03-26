@@ -43,6 +43,7 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
     public static final String GETBYID_PRODUCER="/producer/getById";
     public static final String GETBYTOPIC_PRODUCER="/producer/getByTopic";
     public static final String GETBYTOPICANDAPP_PRODUCER="/producer/getByTopicAndApp";
+    public static final String GETBYFUZZY_TOPICANDAPP_PRODUCER="/producer/getByFuzzyTopicAndApp";
     public static final String GETBYAPP_PRODUCER="/producer/getByApp";
 
     private NsrProducerConverter nsrProducerConverter = new NsrProducerConverter();
@@ -146,6 +147,17 @@ public class ProducerNameServerServiceImpl extends NameServerBase implements Pro
         org.joyqueue.domain.Producer producer = JSON.parseObject(result, org.joyqueue.domain.Producer.class);
         return nsrProducerConverter.revert(producer);
     }
+
+    @Override
+    public List<Producer> findByFuzzyTopicApp(String topic, String app) throws Exception {
+        ProducerQuery producerQuery = new ProducerQuery();
+        producerQuery.setApp(app);
+        producerQuery.setTopic(topic);
+        String result = post(GETBYFUZZY_TOPICANDAPP_PRODUCER,producerQuery);
+        List<org.joyqueue.domain.Producer> producerList = JSON.parseArray(result).toJavaList(org.joyqueue.domain.Producer.class);
+        return producerList.stream().map(producer -> nsrProducerConverter.revert(producer)).collect(Collectors.toList());
+    }
+
     private ProducerQuery producerQueryConvert(QProducer query){
         ProducerQuery producerQuery = new ProducerQuery();
         if (query != null) {

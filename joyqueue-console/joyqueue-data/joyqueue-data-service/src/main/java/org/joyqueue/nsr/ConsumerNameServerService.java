@@ -30,6 +30,8 @@ public interface ConsumerNameServerService extends NsrService<Consumer, String> 
 
     List<Consumer> findByApp(String app) throws Exception;
 
+    List<Consumer> findByFuzzyTopicAndApp(String topic,String app) throws Exception;
+
     List<Consumer> findAll() throws Exception;
 
     List<String> findAllSubscribeGroups() throws Exception;

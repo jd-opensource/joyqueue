@@ -47,6 +47,11 @@ public class JournalkeeperProducerInternalService implements ProducerInternalSer
     }
 
     @Override
+    public List<Producer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        return ProducerConverter.convert(producerRepository.getByFuzzyTopicAndApp(topic.getCode(),app));
+    }
+
+    @Override
     public List<Producer> getByTopic(TopicName topic) {
         return ProducerConverter.convert(producerRepository.getByTopic(topic.getCode(), topic.getNamespace()));
     }

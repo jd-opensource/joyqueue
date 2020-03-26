@@ -48,6 +48,11 @@ public class JournalkeeperConsumerInternalService implements ConsumerInternalSer
     }
 
     @Override
+    public List<Consumer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        return ConsumerConverter.convert(consumerRepository.getByFuzzyTopicAndApp(topic.getCode(), app));
+    }
+
+    @Override
     public List<Consumer> getByTopic(TopicName topic) {
         return ConsumerConverter.convert(consumerRepository.getByTopic(topic.getCode(), topic.getNamespace()));
     }

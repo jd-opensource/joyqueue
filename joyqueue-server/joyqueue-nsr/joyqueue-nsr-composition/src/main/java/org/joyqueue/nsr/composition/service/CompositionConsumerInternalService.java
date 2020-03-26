@@ -59,6 +59,20 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
     }
 
     @Override
+    public List<Consumer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        if (config.isReadIgnite()) {
+            return igniteConsumerService.getByFuzzyTopicAndApp(topic,app);
+        } else {
+            try {
+                return journalkeeperConsumerService.getByFuzzyTopicAndApp(topic,app);
+            } catch (Exception e) {
+                logger.error("getByFuzzyTopicAndApp exception, topic: {},app: {}", topic,app, e);
+                return igniteConsumerService.getByFuzzyTopicAndApp(topic,app);
+            }
+        }
+    }
+
+    @Override
     public List<Consumer> getByTopic(TopicName topic) {
         if (config.isReadIgnite()) {
             return igniteConsumerService.getByTopic(topic);

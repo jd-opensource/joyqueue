@@ -15,7 +15,9 @@
  */
 package org.joyqueue.nsr.journalkeeper.repository;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.nsr.journalkeeper.domain.ProducerDTO;
+import org.joyqueue.nsr.model.ProducerQuery;
 
 import java.util.List;
 
@@ -33,6 +35,8 @@ public class ProducerRepository {
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?",
             COLUMNS, TABLE);
     private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ? ORDER BY id",
+            COLUMNS, TABLE);
+    private static final String GET_BY_FUZZY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic like ? AND app like ? ORDER BY id",
             COLUMNS, TABLE);
     private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY id",
             COLUMNS, TABLE);
@@ -61,6 +65,10 @@ public class ProducerRepository {
         return baseRepository.queryOnce(ProducerDTO.class, GET_BY_TOPIC_AND_APP, topic, namespace, app);
     }
 
+    public List<ProducerDTO> getByFuzzyTopicAndApp(String topic,String app) {
+        return baseRepository.query(ProducerDTO.class, GET_BY_FUZZY_TOPIC_AND_APP, topic,app);
+    }
+
     public List<ProducerDTO> getByTopic(String topic, String namespace) {
         return baseRepository.query(ProducerDTO.class, GET_BY_TOPIC, topic, namespace);
     }
@@ -87,5 +95,26 @@ public class ProducerRepository {
 
     public int deleteById(String id) {
         return baseRepository.delete(DELETE_BY_ID, id);
+    }
+
+
+    protected String getSearchSql(String prefix, ProducerQuery query, List<Object> params) {
+        StringBuilder sql = new StringBuilder(prefix);
+
+        if (StringUtils.isNotBlank(query.getTopic())) {
+            sql.append(" AND topic = ?");
+            params.add(query.getTopic());
+        }
+
+        if (StringUtils.isNotBlank(query.getNamespace())) {
+            sql.append(" AND namespace = ?");
+            params.add(query.getNamespace());
+        }
+
+        if (StringUtils.isNotBlank(query.getApp())) {
+            sql.append(" AND app LIKE ? ");
+            params.add("%" + query.getApp() + "%");
+        }
+        return sql.toString();
     }
 }

@@ -34,4 +34,5 @@ public interface ProducerNameServerService extends NsrService<Producer, String> 
 
     List<Producer> findByTopic(String topic, String namespace) throws Exception;
 
+    List<Producer> findByFuzzyTopicApp(String topic, String app) throws Exception;
 }

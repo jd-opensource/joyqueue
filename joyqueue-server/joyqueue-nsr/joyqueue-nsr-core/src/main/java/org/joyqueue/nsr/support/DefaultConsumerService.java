@@ -77,6 +77,11 @@ public class DefaultConsumerService implements ConsumerService {
     }
 
     @Override
+    public List<Consumer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        return consumerInternalService.getByFuzzyTopicAndApp(topic,app);
+    }
+
+    @Override
     public List<Consumer> getByTopic(TopicName topic) {
         return consumerInternalService.getByTopic(topic);
     }

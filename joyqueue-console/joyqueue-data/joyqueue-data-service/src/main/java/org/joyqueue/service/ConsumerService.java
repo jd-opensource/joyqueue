@@ -29,6 +29,8 @@ public interface ConsumerService extends NsrService<Consumer, String> {
 
     List<Consumer> findByApp(String app) throws Exception;
 
+    List<Consumer> findByFuzzyTopicAndApp(String topic,String app) throws Exception;
+
     List<String> findAllSubscribeGroups();
 
     List<String> findAppsByTopic(String topic) throws Exception;

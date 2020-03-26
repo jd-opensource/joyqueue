@@ -61,6 +61,27 @@ public class IgniteProducerInternalService implements ProducerInternalService {
     }
 
     @Override
+    public List<Producer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        ProducerQuery producerQuery = new ProducerQuery(app,topic.getCode(),topic.getNamespace());
+        List<IgniteProducer> igniteProducers = producerDao.list(producerQuery);
+        if (null == igniteProducers || igniteProducers.size() < 1) {
+            return Collections.emptyList();
+        }
+        Map<String, IgniteProducerConfig> configs = new HashMap<>();
+        List<IgniteProducerConfig> igniteProducerConfigs = producerConfigDao.list(producerQuery);
+        if (null != igniteProducerConfigs && igniteProducerConfigs.size() > 0) {
+            igniteProducerConfigs.forEach(config -> {
+                configs.put(config.getId(), config);
+            });
+        }
+        List<Producer> producers = new ArrayList<>();
+        igniteProducers.forEach(producer -> {
+            producers.add(producer.fillConfig(configs.get(producer.getId())));
+        });
+        return producers;
+    }
+
+    @Override
     public List<Producer> getByTopic(TopicName topic) { ProducerQuery producerQuery = new ProducerQuery(topic.getCode(), topic.getNamespace());
         List<IgniteProducer> igniteProducers = producerDao.list(producerQuery);
         if (null == igniteProducers || igniteProducers.size() < 1) {

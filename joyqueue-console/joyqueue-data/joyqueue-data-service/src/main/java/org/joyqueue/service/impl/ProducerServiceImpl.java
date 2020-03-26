@@ -152,6 +152,17 @@ public class ProducerServiceImpl  implements ProducerService {
         }
     }
 
+    @Override
+    public List<Producer> findByFuzzyTopicApp(String topic, String app) {
+        try {
+            TopicName topicName = TopicName.parse(topic);
+            return fillProducers(producerNameServerService.findByFuzzyTopicApp(topicName.getCode(), app));
+        } catch (Exception e) {
+            logger.error("findByFuzyyTopicApp producer with nameServer failed, producer is {}, {}, {}", topic, app, e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private void checkArgument(Producer producer) {
         Preconditions.checkArgument(producer != null, "invalidate producer arg.");
     }

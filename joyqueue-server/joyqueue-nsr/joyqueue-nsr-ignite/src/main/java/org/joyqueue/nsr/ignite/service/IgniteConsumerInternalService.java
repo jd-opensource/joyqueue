@@ -73,6 +73,26 @@ public class IgniteConsumerInternalService implements ConsumerInternalService {
     }
 
     @Override
+    public List<Consumer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        ConsumerQuery consumerQuery = new ConsumerQuery(topic.getCode(), topic.getNamespace());
+        consumerQuery.setApp(app);
+        List<IgniteConsumer> igniteConsumers = consumerDao.list(consumerQuery);
+        if (null == igniteConsumers || igniteConsumers.size() < 1) return Collections.emptyList();
+        Map<String, IgniteConsumerConfig> configs = new HashMap<>();
+        List<IgniteConsumerConfig> igniteConsumerConfigs = consumerConfigDao.list(consumerQuery);
+        if (null != igniteConsumerConfigs && igniteConsumerConfigs.size() > 0) {
+            igniteConsumerConfigs.forEach(config -> {
+                configs.put(config.getId(), config);
+            });
+        }
+        List<Consumer> consumers = new ArrayList<>();
+        igniteConsumers.forEach(consumer -> {
+            consumers.add(consumer.fillConfig(configs.get(consumer.getId())));
+        });
+        return consumers;
+    }
+
+    @Override
     public List<Consumer> getByTopic(TopicName topic) {
         ConsumerQuery consumerQuery = new ConsumerQuery(topic.getCode(), topic.getNamespace());
         List<IgniteConsumer> igniteConsumers = consumerDao.list(consumerQuery);

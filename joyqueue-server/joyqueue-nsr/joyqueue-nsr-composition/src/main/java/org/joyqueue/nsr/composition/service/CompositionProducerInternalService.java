@@ -73,6 +73,20 @@ public class CompositionProducerInternalService implements ProducerInternalServi
     }
 
     @Override
+    public List<Producer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        if (config.isReadIgnite()) {
+            return igniteProducerService.getByFuzzyTopicAndApp(topic, app);
+        } else {
+            try {
+                return journalkeeperProducerService.getByFuzzyTopicAndApp(topic, app);
+            } catch (Exception e) {
+                logger.error("getByTopicAndApp exception, topic: {}, app: {}", topic, app, e);
+                return igniteProducerService.getByFuzzyTopicAndApp(topic, app);
+            }
+        }
+    }
+
+    @Override
     public List<Producer> getByTopic(TopicName topic) {
         if (config.isReadIgnite()) {
             return igniteProducerService.getByTopic(topic);

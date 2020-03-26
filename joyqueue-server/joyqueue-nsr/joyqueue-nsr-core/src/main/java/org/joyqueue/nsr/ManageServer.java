@@ -303,7 +303,16 @@ public class ManageServer extends Service {
                 routingContext.fail(e);
             }
         });
-
+        router.post("/producer/getByFuzzyTopicAndApp").handler(routingContext -> {
+            try{
+                ProducerQuery producerQuery = JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class);
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(producerService.getByFuzzyTopicAndApp(TopicName.parse(producerQuery.getTopic(), producerQuery.getNamespace()), producerQuery.getApp())));
+            }catch (Exception e){
+                logger.error("producer getByFuzzyTopicAndApp error request[{}]",routingContext.getBodyAsString(),e);
+                routingContext.fail(e);
+            }
+        });
         router.post("/producer/getByApp").handler(routingContext -> {
             try {
                 ProducerQuery producerQuery = JSON.parseObject(routingContext.getBodyAsString(), ProducerQuery.class);
@@ -332,6 +341,16 @@ public class ManageServer extends Service {
                 routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).end(JSON.toJSONString(consumer));
             }catch (Exception e){
                 logger.error("consumer getByTopicAndApp error,request[{}]",routingContext.getBodyAsString(),e);
+                routingContext.fail(e);
+            }
+        });
+        router.post("/consumer/getByFuzzyTopicAndApp").handler(routingContext -> {
+            try{
+                ConsumerQuery consumerQuery = JSON.parseObject(routingContext.getBodyAsString(), ConsumerQuery.class);
+                routingContext.response().putHeader(CONTENT_TYPE, APPLICATION_JSON).
+                        end(JSONArray.toJSONString(consumerService.getByFuzzyTopicAndApp(TopicName.parse(consumerQuery.getTopic(), consumerQuery.getNamespace()),consumerQuery.getApp())));
+            }catch (Exception e){
+                logger.error("consumer getByFuzzyTopicAndApp error request[{}]",routingContext.getBodyAsString(),e);
                 routingContext.fail(e);
             }
         });

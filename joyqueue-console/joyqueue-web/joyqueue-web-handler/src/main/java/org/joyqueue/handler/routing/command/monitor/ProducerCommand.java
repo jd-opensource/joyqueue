@@ -73,22 +73,11 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         List<Producer> producers = new ArrayList<>(0);
 
         if (query.getApp() != null && query.getTopic()==null) {
-            producers = service.findByApp(query.getApp().getCode());
+            producers = service.findByFuzzyTopicApp("%"+query.getKeyword()+"%",query.getApp().getCode());
         } else if (query.getTopic() != null && query.getApp() ==null) {
-            producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
+            producers = service.findByFuzzyTopicApp(query.getTopic().getCode(),"%"+query.getKeyword()+"%");
         } else if (query.getTopic() != null && query.getApp() !=null){
             producers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(),query.getTopic().getCode(),query.getApp().getCode()));
-        }
-
-        if (CollectionUtils.isNotEmpty(producers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
-            producers = Lists.newArrayList(producers);
-            Iterator<Producer> iterator = producers.iterator();
-            while (iterator.hasNext()) {
-                Producer producer = iterator.next();
-                if (!producer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
-                    iterator.remove();
-                }
-            }
         }
 
         if (CollectionUtils.isNotEmpty(producers) && session.getRole() != User.UserRole.ADMIN.value()) {

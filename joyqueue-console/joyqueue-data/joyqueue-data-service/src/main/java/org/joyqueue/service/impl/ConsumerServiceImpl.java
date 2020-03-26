@@ -133,6 +133,11 @@ public class ConsumerServiceImpl  implements ConsumerService {
     }
 
     @Override
+    public List<Consumer> findByFuzzyTopicAndApp(String topic, String app) throws Exception {
+        return fillConsumers(consumerNameServerService.findByFuzzyTopicAndApp(topic, app));
+    }
+
+    @Override
     public List<Consumer> findByTopic(String topic, String namespace) throws Exception {
         return fillConsumers(consumerNameServerService.findByTopic(topic, namespace));
     }

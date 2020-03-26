@@ -35,6 +35,8 @@ public class ConsumerRepository {
             COLUMNS, TABLE);
     private static final String GET_BY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? AND app = ? ORDER BY id",
             COLUMNS, TABLE);
+    private static final String GET_BY_FUZZY_TOPIC_AND_APP = String.format("SELECT %s FROM %s WHERE topic like ? AND app like ? ORDER BY id",
+            COLUMNS, TABLE);
     private static final String GET_BY_TOPIC = String.format("SELECT %s FROM %s WHERE topic = ? AND namespace = ? ORDER BY id",
             COLUMNS, TABLE);
     private static final String GET_BY_APP = String.format("SELECT %s FROM %s WHERE app = ? OR referer = ? ORDER BY id",
@@ -60,6 +62,10 @@ public class ConsumerRepository {
 
     public ConsumerDTO getByTopicAndApp(String topic, String namespace, String app) {
         return baseRepository.queryOnce(ConsumerDTO.class, GET_BY_TOPIC_AND_APP, topic, namespace, app);
+    }
+
+    public List<ConsumerDTO> getByFuzzyTopicAndApp(String topic, String namespace) {
+        return baseRepository.query(ConsumerDTO.class, GET_BY_FUZZY_TOPIC_AND_APP, topic, namespace);
     }
 
     public List<ConsumerDTO> getByTopic(String topic, String namespace) {

@@ -43,6 +43,14 @@ public interface ConsumerService {
     Consumer getByTopicAndApp(TopicName topic, String app);
 
     /**
+     * 根据topic，app进行模糊查询
+     * @param topic
+     * @param app
+     * @return
+     */
+    List<Consumer> getByFuzzyTopicAndApp(TopicName topic,String app);
+
+    /**
      * 根据topic获取消费者
      *
      * @param topic

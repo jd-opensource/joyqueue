@@ -42,6 +42,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
     public static final String REMOVE_CONSUMER="/consumer/remove";
     public static final String GETALL_CONSUMER="/consumer/list";
     public static final String GETTOPICAPP_CONSUMER="/consumer/getByTopicAndApp";
+    public static final String GETFUZZYTOPICAPP_CONSUMER="/consumer/getByFuzzyTopicAndApp";
     public static final String GETBYAPP_CONSUMER="/consumer/getByApp";
     public static final String GETBYTOPIC_CONSUMER="/consumer/getByTopic";
     public static final String GETBYID_CONSUMER="/consumer/getById";
@@ -110,6 +111,16 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
         String result = post(GETTOPICAPP_CONSUMER, consumerQuery);
         org.joyqueue.domain.Consumer consumer = JSON.parseObject(result, org.joyqueue.domain.Consumer.class);
         return nsrConsumerConverter.revert(consumer);
+    }
+
+    @Override
+    public List<Consumer> findByFuzzyTopicAndApp(String topic, String app) throws Exception {
+        ConsumerQuery consumerQuery = new ConsumerQuery();
+        consumerQuery.setTopic(topic);
+        consumerQuery.setApp(app);
+        String result = post(GETFUZZYTOPICAPP_CONSUMER, consumerQuery);
+        List<org.joyqueue.domain.Consumer> consumerList = JSON.parseArray(result).toJavaList(org.joyqueue.domain.Consumer.class);
+        return consumerList.stream().map(consumer -> nsrConsumerConverter.revert(consumer)).collect(Collectors.toList());
     }
 
     @Override

@@ -66,22 +66,11 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
         List<Consumer> consumers = new ArrayList<>(0);
 
         if (query.getApp() != null && query.getTopic() ==null) {
-            consumers = service.findByApp(query.getApp().getCode());
+            consumers = service.findByFuzzyTopicAndApp("%"+query.getKeyword()+"%",query.getApp().getCode());
         } else if (query.getTopic() != null && query.getApp() == null) {
-            consumers = service.findByTopic(query.getTopic().getCode(), query.getTopic().getNamespace().getCode());
+            consumers = service.findByFuzzyTopicAndApp(query.getTopic().getCode(),"%"+query.getKeyword()+"%");
         } else if (query.getApp() !=null && query.getTopic()!=null) {
             consumers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(),query.getTopic().getCode(),query.getApp().getCode(),null));
-        }
-
-        if (CollectionUtils.isNotEmpty(consumers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
-            consumers = Lists.newArrayList(consumers);
-            Iterator<Consumer> iterator = consumers.iterator();
-            while (iterator.hasNext()) {
-                Consumer consumer = iterator.next();
-                if (!consumer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
-                    iterator.remove();
-                }
-            }
         }
 
         if (CollectionUtils.isNotEmpty(consumers) && session.getRole() != User.UserRole.ADMIN.value()) {

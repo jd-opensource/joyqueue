@@ -77,6 +77,11 @@ public class DefaultProducerService implements ProducerService {
     }
 
     @Override
+    public List<Producer> getByFuzzyTopicAndApp(TopicName topic, String app) {
+        return producerInternalService.getByFuzzyTopicAndApp(topic,app);
+    }
+
+    @Override
     public List<Producer> getByTopic(TopicName topic) {
         return producerInternalService.getByTopic(topic);
     }

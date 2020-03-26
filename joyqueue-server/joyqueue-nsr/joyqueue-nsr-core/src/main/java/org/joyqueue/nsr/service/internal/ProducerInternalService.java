@@ -45,6 +45,14 @@ public interface ProducerInternalService {
     Producer getByTopicAndApp(TopicName topic, String app);
 
     /**
+     * 根据topic和app模糊查找
+     * @param topic
+     * @param app
+     * @return
+     */
+    List<Producer> getByFuzzyTopicAndApp(TopicName topic, String app);
+
+    /**
      * 根据Topic查找
      *
      * @param topic

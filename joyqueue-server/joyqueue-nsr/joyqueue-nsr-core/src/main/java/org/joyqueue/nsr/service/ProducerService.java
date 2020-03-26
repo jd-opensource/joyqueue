@@ -44,6 +44,8 @@ public interface ProducerService {
      */
     Producer getByTopicAndApp(TopicName topic, String app);
 
+    List<Producer> getByFuzzyTopicAndApp(TopicName topic, String app);
+
     /**
      * 根据Topic查找
      *
