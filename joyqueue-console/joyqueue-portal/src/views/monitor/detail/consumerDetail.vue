@@ -49,6 +49,7 @@ import offset from './offset'
 import broker from './broker.vue'
 import detailTable from './detailTable'
 import coordinatorGroupMember from './coordinatorGroupMember.vue'
+import bytesToSize from '../../../utils/byteUtils'
 
 export default {
   name: 'consumerDetail',
@@ -97,7 +98,10 @@ export default {
                     },
                     {
                       title: '流量',
-                      key: 'deQuence.traffic'
+                      key: 'deQuence.traffic',
+                      formatter (item) {
+                        return bytesToSize(item.deQuence.traffic)
+                      }
                     }
                   ],
                   subscribe: params.row.subscribe,

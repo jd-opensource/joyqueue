@@ -51,6 +51,7 @@ import crud from '../../../mixins/crud.js'
 import myDialog from '../../../components/common/myDialog.vue'
 import {getTopicCode, getAppCode} from '../../../utils/common.js'
 import {timeStampToString} from '../../../utils/dateTimeUtils'
+import bytesToSize from '../../../utils/byteUtils'
 
 export default {
   name: 'offset',
@@ -98,6 +99,17 @@ export default {
           {
             title: '应答',
             key: 'offset'
+          },
+          {
+            title: 'TPS',
+            key: 'tps'
+          },
+          {
+            title: '流量',
+            key: 'traffic',
+            formatter (item) {
+              return bytesToSize(item.traffic)
+            }
           }
         ]
       }
@@ -202,8 +214,8 @@ export default {
       this.openDialog('resetDialog')
     },
     resetPartitionOffset () {
-      if(this.partitionInfo.offset>this.partitionInfo.partition.rightIndex
-          || this.partitionInfo.offset < this.partitionInfo.partition.leftIndex) {
+      if (this.partitionInfo.offset > this.partitionInfo.partition.rightIndex ||
+          this.partitionInfo.offset < this.partitionInfo.partition.leftIndex) {
         this.$Message.error('重置位置必须在最大最小值之间')
         return
       }

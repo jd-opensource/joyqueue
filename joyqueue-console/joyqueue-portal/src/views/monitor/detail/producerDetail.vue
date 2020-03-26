@@ -22,6 +22,7 @@ import partition from './partition.vue'
 import clientConnection from './clientConnection.vue'
 import broker from './broker.vue'
 import partitionExpand from './partitionExpand'
+import bytesToSize from '../../../utils/byteUtils'
 
 export default {
   name: 'producer-detail',
@@ -61,7 +62,10 @@ export default {
                     },
                     {
                       title: '流量',
-                      key: 'enQuence.traffic'
+                      key: 'enQuence.traffic',
+                      formatter (item) {
+                        return bytesToSize(item.enQuence.traffic)
+                      }
                     }
                   ],
                   subscribe: params.row.subscribe,
