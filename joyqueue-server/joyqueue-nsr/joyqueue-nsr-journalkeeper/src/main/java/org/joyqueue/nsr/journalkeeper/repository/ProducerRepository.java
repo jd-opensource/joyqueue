@@ -15,9 +15,7 @@
  */
 package org.joyqueue.nsr.journalkeeper.repository;
 
-import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.nsr.journalkeeper.domain.ProducerDTO;
-import org.joyqueue.nsr.model.ProducerQuery;
 
 import java.util.List;
 
@@ -97,24 +95,4 @@ public class ProducerRepository {
         return baseRepository.delete(DELETE_BY_ID, id);
     }
 
-
-    protected String getSearchSql(String prefix, ProducerQuery query, List<Object> params) {
-        StringBuilder sql = new StringBuilder(prefix);
-
-        if (StringUtils.isNotBlank(query.getTopic())) {
-            sql.append(" AND topic = ?");
-            params.add(query.getTopic());
-        }
-
-        if (StringUtils.isNotBlank(query.getNamespace())) {
-            sql.append(" AND namespace = ?");
-            params.add(query.getNamespace());
-        }
-
-        if (StringUtils.isNotBlank(query.getApp())) {
-            sql.append(" AND app LIKE ? ");
-            params.add("%" + query.getApp() + "%");
-        }
-        return sql.toString();
-    }
 }
