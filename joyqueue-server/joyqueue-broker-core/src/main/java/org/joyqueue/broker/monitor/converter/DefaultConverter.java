@@ -18,15 +18,7 @@ package org.joyqueue.broker.monitor.converter;
 import com.codahale.metrics.Snapshot;
 import com.google.common.collect.Lists;
 import org.joyqueue.broker.monitor.PendingStat;
-import org.joyqueue.broker.monitor.stat.AppStat;
-import org.joyqueue.broker.monitor.stat.BrokerStat;
-import org.joyqueue.broker.monitor.stat.BrokerStatExt;
-import org.joyqueue.broker.monitor.stat.DeQueueStat;
-import org.joyqueue.broker.monitor.stat.EnQueueStat;
-import org.joyqueue.broker.monitor.stat.JVMStat;
-import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
-import org.joyqueue.broker.monitor.stat.TopicPendingStat;
-import org.joyqueue.broker.monitor.stat.TopicStat;
+import org.joyqueue.broker.monitor.stat.*;
 import org.joyqueue.model.MonitorRecord;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
@@ -34,10 +26,7 @@ import org.joyqueue.toolkit.vm.MemoryStat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -164,6 +153,9 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private static final String PG_PENDING = "pg_pending";
     private static final String PARTITION_PENDING = "partition_pending";
 
+    private static final String PARTITION_RIGHT = "partition_right";
+    private static final String PARTITION_ACK_INDEX = "partition_ack_index";
+
     private static final String PRODUCE_ARCHIVE_PENDING = "produce_archive_pending";
     private static final String CONSUME_ARCHIVE_PENDING = "consume_archive_pending";
     private static final String TOPIC_PRODUCE_ARCHIVE_PENDING = "topic_produce_archive_pending";
@@ -183,6 +175,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
     private boolean receive = true;
 
     private boolean archive = true;
+    private boolean partitionStat = true;
 
 
     @Override
@@ -219,6 +212,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             result.addAll(buildPending(brokerId, time, topicPending));
         }
 
+        if (partitionStat) {
+            result.addAll(buildPartitionRecord(brokerId, time, topicPending));
+        }
+
         if (replicate) {
             result.addAll(buildReplicate(brokerId, time, brokerStat));
         }
@@ -231,6 +228,49 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
             result.addAll(buildArchive(brokerId, time, brokerStatExt));
         }
         return result;
+    }
+
+    private Collection<? extends MonitorRecord> buildPartitionRecord(String brokerId, long time, Map<String, TopicPendingStat> topicPending) {
+        List<MonitorRecord> records = new ArrayList<>();
+
+        for (String topic :topicPending.keySet()){
+            TopicPendingStat tps = topicPending.get(topic);
+            Map<String, ConsumerPendingStat> appMap = tps.getPendingStatSubMap();
+            for (String app:appMap.keySet()){
+                ConsumerPendingStat pendingStat = appMap.get(app);
+                Map<Integer, PartitionGroupPendingStat> pgStatMap = pendingStat.getPendingStatSubMap();
+                for (Integer pg:pgStatMap.keySet()){
+                    PartitionGroupPendingStat pgStat = pgStatMap.get(pg);
+                    Map<Short, PartitionStat> partitionMap = pgStat.getPartitionStatHashMap();
+                    for (Short partition:partitionMap.keySet()){
+                        MonitorRecord record = getPartitionRecord(brokerId,time,topic,app,pg,partition);
+                        record.setValue(partitionMap.get(partition).getAckIndex());
+                        record.setMetric(PARTITION_ACK_INDEX);
+                        records.add(record);
+                        record = getPartitionRecord(brokerId,time,topic,app,pg,partition);
+                        record.setMetric(PARTITION_RIGHT);
+                        record.setValue(partitionMap.get(partition).getRight());
+                        records.add(record);
+
+                    }
+                }
+            }
+
+        }
+
+        return records;
+
+    }
+
+    private MonitorRecord getPartitionRecord(String brokerId, long time, String topic, String app, Integer pg, Short partition) {
+        MonitorRecord record = new MonitorRecord();
+        record.topic(topic);
+        record.app(app);
+        record.partitionGroup(pg + "");
+        record.partition(partition + "");
+        record.setTimestamp(time);
+        record.brokerId(brokerId);
+        return record;
     }
 
     private List<MonitorRecord> buildArchive(String brokerId, long time, BrokerStatExt brokerStat) {
