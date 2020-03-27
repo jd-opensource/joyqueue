@@ -72,9 +72,11 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         QProducer query = qPageQuery.getQuery();
         List<Producer> producers = new ArrayList<>(0);
 
+        boolean appFlag = true;
         if (query.getApp() != null && query.getTopic()==null) {
             producers = service.findByApp(query.getApp().getCode());
         } else if (query.getTopic() != null && query.getApp() ==null) {
+            appFlag = false;
             producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
         } else if (query.getTopic() != null && query.getApp() !=null){
             producers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(),query.getTopic().getCode(),query.getApp().getCode()));
@@ -85,8 +87,14 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
             Iterator<Producer> iterator = producers.iterator();
             while (iterator.hasNext()) {
                 Producer producer = iterator.next();
-                if (!producer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
-                    iterator.remove();
+                if (appFlag) {
+                    if (!producer.getTopic().getCode().contains(qPageQuery.getQuery().getKeyword())) {
+                        iterator.remove();
+                    }
+                }else {
+                    if (!producer.getApp().getCode().contains(qPageQuery.getQuery().getKeyword())) {
+                        iterator.remove();
+                    }
                 }
             }
         }
