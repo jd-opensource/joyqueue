@@ -246,8 +246,10 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
                         MonitorRecord record = getPartitionRecord(brokerId,time,topic,app,pg,partition);
                         record.setValue(partitionMap.get(partition).getAckIndex());
                         record.setMetric(PARTITION_ACK_INDEX);
+                        fillRecord(record,time);
                         records.add(record);
                         record = getPartitionRecord(brokerId,time,topic,app,pg,partition);
+                        fillRecord(record,time);
                         record.setMetric(PARTITION_RIGHT);
                         record.setValue(partitionMap.get(partition).getRight());
                         records.add(record);
