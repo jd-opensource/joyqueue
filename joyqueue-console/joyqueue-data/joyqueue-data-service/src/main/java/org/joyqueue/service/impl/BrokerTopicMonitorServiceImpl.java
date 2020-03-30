@@ -64,10 +64,6 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
     @Autowired
     private ProducerService producerService;
 
-    private static final String RETRY_UMP_URL = "http://ump2.jd.com/monitor/perfomance?" +
-            "appId=26689&appName=jmq4-server&thresholdOn=0&isSecond=0&" +
-            "frequency=1&endPointKey=jmq4-server.BrokerRetryManager.addRetry.%s.%s&platform=j-one";
-
     @Override
     public PageResult<BrokerTopicMonitor> queryTopicsPartitionMointor(QPageQuery<QMonitor> qPageQuery)  {
 
@@ -199,14 +195,6 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             if (type == SubscribeType.CONSUMER) {
                 ConsumerMonitorInfo consumerMonitorInfo = queryMonitorConsumer(topic,app,broker);
                 if(consumerMonitorInfo!=null) {
-                    if (consumerMonitorInfo.getRetry() != null) {
-                        brokerTopicMonitorRecord.setRetryCount(consumerMonitorInfo.getRetry().getCount());
-                        brokerTopicMonitorRecord.setRetryTps(consumerMonitorInfo.getRetry().getCurrent());
-                    }
-                    if(consumerMonitorInfo.getPending()!=null) {
-                        brokerTopicMonitorRecord.setBacklog(consumerMonitorInfo.getPending().getCount());
-                    }
-                    brokerTopicMonitorRecord.setRetryUmpUrl(String.format(RETRY_UMP_URL, app, topic));
                     brokerTopicMonitorRecord.setConnections(consumerMonitorInfo.getConnections());
                     brokerTopicMonitorRecord.setCount(consumerMonitorInfo.getDeQueue().getCount());
                     brokerTopicMonitorRecord.setTotalSize(consumerMonitorInfo.getDeQueue().getTotalSize());

@@ -23,11 +23,7 @@ public class BrokerTopicMonitorRecord {
     private String topic;
     private long connections;
     private long count;
-    private long retryCount;
-    private long retryTps;
-    private long backlog;
     private long totalSize;
-    private String retryUmpUrl;
 
     public String getApp() {
         return app;
@@ -69,35 +65,4 @@ public class BrokerTopicMonitorRecord {
         this.totalSize = totalSize;
     }
 
-    public long getRetryCount() {
-        return retryCount;
-    }
-
-    public void setRetryCount(long retryCount) {
-        this.retryCount = retryCount;
-    }
-
-    public long getRetryTps() {
-        return retryTps;
-    }
-
-    public void setRetryTps(long retryTps) {
-        this.retryTps = retryTps;
-    }
-
-    public void setBacklog(long backlog) {
-        this.backlog = backlog;
-    }
-
-    public long getBacklog() {
-        return backlog;
-    }
-
-    public void setRetryUmpUrl(String retryUmpUrl) {
-        this.retryUmpUrl = retryUmpUrl;
-    }
-
-    public String getRetryUmpUrl() {
-        return retryUmpUrl;
-    }
 }
