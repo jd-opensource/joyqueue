@@ -37,7 +37,7 @@ import BrokerConnectionMonitor from './brokerConnectionMonitor'
 import BrokerPartitionGroupMonitor from './brokerPartitionGroupMonitor'
 import BrokerServerMonitor from './brokerServerMonitor.vue'
 import BrokerStoreTreeViewMonitor from './brokerStoreTreeViewMonitor.vue'
-import bytesToSize from "../../utils/byteUtils";
+import bytesToSize from '../../utils/byteUtils'
 
 export default {
   name: 'brokerMonitor',
