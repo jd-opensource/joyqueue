@@ -14,15 +14,15 @@
         </d-button>
       </d-button-group>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :showPagination="this.showPagination" :page="page" @on-size-change="handleSizeChange"
+    <my-table :data="tableData" style="z-index: 1" :showPin="showTablePin" :showPagination="this.showPagination" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog"
               @on-cancel-subscribe="cancelSubscribe" @on-rateLimit="openRateLimitDialog" @on-compare-chart="goCompareChart"
-              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart"/>
-    <d-button class="right" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" />
+    <d-button class="right load-btn" style="z-index: 2" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
-4
+
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
@@ -81,9 +81,6 @@ export default {
       type: String
     },
     keywordName: {
-      type: String
-    },
-    searchFor: {
       type: String
     },
     btns: {
@@ -497,15 +494,7 @@ export default {
       // 查询数据库里的数据
       this.showTablePin = true
       let query = {}
-      if (this.searchFor === 'topic') {
-        query.keyword = this.keyword
-      } else if (this.searchFor === 'app') {
-        if (this.keyword === '') {
-          query.keyword = ''
-        } else {
-          query.app = this.keyword
-        }
-      }
+      query.keyword = this.keyword
       let data = {
         pagination: {
           page: this.page.page,
@@ -580,4 +569,5 @@ export default {
 <style scoped>
   .label{text-align: right; line-height: 32px;}
   .val{}
+  .load-btn { margin-right: 50px;margin-top: -100px;position: relative}
 </style>

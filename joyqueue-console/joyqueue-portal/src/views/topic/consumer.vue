@@ -2,7 +2,7 @@
   <div>
     <consumer-base ref="consumerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData"
-                   :search="search" :search-for="searchFor" :subscribeUrls="subscribeDialog.urls"  @on-detail="handleDetail"/>
+                   :search="search" :subscribeUrls="subscribeDialog.urls"  @on-detail="handleDetail"/>
   </div>
 </template>
 
@@ -24,10 +24,6 @@ export default {
   },
   data () {
     return {
-      // searchFor要和keywordName对应
-      // keywordName:应用 -> searchFor:app
-      // keywordName:主题 -> searchFor:topic
-      searchFor: 'app',
       keywordTip: '请输入应用',
       keywordName: '应用',
       isRetryEnable: false,
