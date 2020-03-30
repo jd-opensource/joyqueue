@@ -37,6 +37,7 @@ import BrokerConnectionMonitor from './brokerConnectionMonitor'
 import BrokerPartitionGroupMonitor from './brokerPartitionGroupMonitor'
 import BrokerServerMonitor from './brokerServerMonitor.vue'
 import BrokerStoreTreeViewMonitor from './brokerStoreTreeViewMonitor.vue'
+import bytesToSize from "../../utils/byteUtils";
 
 export default {
   name: 'brokerMonitor',
@@ -127,7 +128,7 @@ export default {
               var html = []
               if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
-                  var p = h('div', list[i].totalSize)
+                  var p = h('div', bytesToSize(list[i].totalSize))
                   html.push(p)
                 }
               }
@@ -168,15 +169,25 @@ export default {
             title: '重试ump连接',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              var list = params.item.brokerTopicMonitorRecordList
-              var html = []
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
               if (list !== undefined) {
-                for (var i = 0; i < list.length; i++) {
-                  var p = h('div', list[i].retryUmpUrl)
-                  html.push(p)
+                for (let i = 0; i < list.length; i++) {
+                  if (list[i].retryUmpUrl) {
+                    let p = h('a', {
+                      attrs: {
+                        target: '_blank',
+                        href: list[i].retryUmpUrl
+                      }
+                    }, list[i].app + '重试ump链接')
+                    html.push(p)
+                  }
+                  if (i !== list.length - 1) {
+                    html.push(h('br'))
+                  }
                 }
               }
-              return h('div', {}, html)
+              return h('a', {}, html)
             }
           }
         ]

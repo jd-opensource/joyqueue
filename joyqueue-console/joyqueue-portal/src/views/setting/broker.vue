@@ -224,8 +224,8 @@ export default {
   },
   methods: {
     getList () {
-      if(this.searchData.keyword&&this.searchData.group){
-        this.$Message.error("验证不通过，ID/IP搜索和Broker分组编号不能同时搜索")
+      if (this.searchData.keyword && this.searchData.group) {
+        this.$Message.error('验证不通过，ID/IP搜索和Broker分组编号不能同时搜索')
         return
       }
       this.showTablePin = true
