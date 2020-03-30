@@ -56,7 +56,8 @@ const state = {
       detail: 'cm',
       summary: 'ct',
       performance: 'cp',
-      compare: 'cmc'
+      compare: 'cmc',
+      offset: 'co'
     },
     broker: 'broker',
     host: 'host',
