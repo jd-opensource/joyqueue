@@ -20,7 +20,8 @@
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart" @on-compare-chart="goCompareChart"
-              @on-rateLimit="openRateLimitDialog" @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"/>
+              @on-rateLimit="openRateLimitDialog" @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"
+              @on-offset="goOffsetChart"/>
 
     <d-button class="right" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
@@ -297,7 +298,8 @@ export default {
       monitorUIds: {
         detail: this.$store.getters.uIds.consumer.detail,
         summary: this.$store.getters.uIds.consumer.summary,
-        compare: this.$store.getters.uIds.consumer.compare
+        compare: this.$store.getters.uIds.consumer.compare,
+        offset: this.$store.getters.uIds.consumer.offset
       }
     }
   },
@@ -471,6 +473,23 @@ export default {
               getAppCode(item.app, item.subscribeGroup)
             window.open(url)
           }
+        })
+      }
+    },
+    goOffsetChart (item) {
+      if (this.monitorUrls && this.monitorUrls.offset) {
+        window.open(replaceChartUrl(this.monitorUrls.offset, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.offset, {}, {}).then((data) => {
+          let url = data.data || ''
+          if (url.indexOf('?') < 0) {
+            url += '?'
+          } else if (!url.endsWith('?')) {
+            url += '&'
+          }
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          window.open(url)
         })
       }
     },

@@ -83,7 +83,7 @@ public class AsyncHttpClient {
         @Override
         public void completed(HttpResponse httpResponse) {
             try {
-                int statusCode=httpResponse.getStatusLine().getStatusCode();
+                int statusCode = httpResponse.getStatusLine().getStatusCode();
                 if (HttpStatus.SC_OK == statusCode) {
                      String response = EntityUtils.toString(httpResponse.getEntity());
 //                     logger.info(response);
