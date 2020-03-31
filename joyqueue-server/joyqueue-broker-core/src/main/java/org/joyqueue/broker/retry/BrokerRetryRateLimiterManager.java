@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentMap;
  * Consumer retry rate limiter manager
  *
  **/
-public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventListener<MetaEvent>{
+public class BrokerRetryRateLimiterManager implements RetryRateLimiter{
     protected static final Logger logger = LoggerFactory.getLogger(BrokerRetryRateLimiterManager.class);
     private ClusterManager clusterManager;
     private ConsumeConfig consumeConfig;
