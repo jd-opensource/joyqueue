@@ -1,6 +1,7 @@
 package org.joyqueue.broker.store;
 
 /**
+ * Dynamic store config interface
  *
  **/
 public interface DynamicStoreConfig {

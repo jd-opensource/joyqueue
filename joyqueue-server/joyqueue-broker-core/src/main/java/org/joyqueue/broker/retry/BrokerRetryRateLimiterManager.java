@@ -14,7 +14,6 @@ import org.joyqueue.nsr.event.RemoveConfigEvent;
 import org.joyqueue.nsr.event.RemoveConsumerEvent;
 import org.joyqueue.nsr.event.RemoveTopicEvent;
 import org.joyqueue.nsr.event.UpdateConfigEvent;
-import org.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

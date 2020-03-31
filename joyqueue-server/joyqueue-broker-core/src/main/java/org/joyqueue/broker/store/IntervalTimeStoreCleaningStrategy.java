@@ -15,11 +15,9 @@
  */
 package org.joyqueue.broker.store;
 
-import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.time.SystemClock;
-
 import java.io.IOException;
 import java.util.Map;
 
