@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.joyqueue.repository.TopicMsgFilterRepository">
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="TopicMsgFilter">
+        INSERT INTO topic_msg_filter(
+            `id`,
+            `topic_code`,
+            `filter`,
+            `user_code`,
+            `create_time`,
+            `offset_time`,
+            `app`,
+            `status`,
+            `url`,
+            `description`)
+        VALUES(
+            #{id},
+            #{topic},
+            #{filter},
+            #{userCode},
+            #{createTime},
+            #{offsetTime},
+            #{app},
+            #{status},
+            #{url},
+            #{description})
+    </insert>
+
+    <sql id="select">
+        SELECT
+            id,
+            `topic_id` AS `topic.id`,
+            `topic_code` AS `topic.code`,
+            msg_importance AS msgImportance,
+            msg_size AS msgSize,
+            msg_amount AS msgAmount,
+            consumer_tps AS consumerTps,
+            description,
+            source,
+            create_time AS createTime,
+            create_by AS `createBy.id`,
+            update_time AS  updateTime,
+            update_by AS  `updateBy.id`,
+            status
+        FROM topic_wiki
+    </sql>
+
+
+</mapper>
