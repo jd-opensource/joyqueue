@@ -184,6 +184,14 @@
                path="/v1/topic/unsubscribed/search" handlers="topic#searchUnsubscribed render"
                errors="error"/>
 
+        <!--topic message filter-->
+        <route inherit="post"
+               path="/v1/topic/msgFilter" handlers="topicMsgFilter#msgFilter render"
+               errors="error"/>
+        <route inherit="post"
+               path="/v1/topic/msgFilterStatus" handlers="topicMsgFilter#msgFilterStatus render"
+               errors="error"/>
+
         <!--BrokerGroup Broker分组 操作-->
         <route inherit="post"
                path="/v1/brokerGroup/search" handlers="brokerGroup#search render"
