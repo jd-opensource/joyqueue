@@ -62,7 +62,7 @@
     <grid-col span="8">
       <d-form-item label="批量大小" prop="batchSize">
         <d-input
-          laceholder="请输入批量数，范围1-100，默认10"
+          laceholder="请输入批量数，范围1-1000，默认10"
           v-model.number="formData.batchSize"
         />
       </d-form-item>
@@ -151,7 +151,7 @@ export default {
         callback()
       }
     }
-    let ipPattern ='(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
+    let ipPattern = '(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
     return {
       formData: {},
       rules: {
@@ -182,9 +182,9 @@ export default {
             validator: numberValidator,
             type: 'number',
             trigger: 'change',
-            max: 100,
+            max: 1000,
             min: 1,
-            hint: '批量大小1~100',
+            hint: '批量大小1~1000',
             required: false
           }
         ],
