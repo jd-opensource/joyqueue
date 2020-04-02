@@ -17,7 +17,6 @@ package org.joyqueue.store;
 
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.transaction.TransactionStore;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -50,7 +49,12 @@ public interface StoreService {
     void removePartitionGroup(String topic, int partitionGroup);
 
     /**
-     * 从磁盘恢复partition group，系统启动时调用
+     * 从磁盘恢复或新建 partition group，系统启动时调用
+     * @param topic  topic of the partition group
+     * @param partitionGroup  partition group id
+     * @param partitions  partitions included in the partition group
+     * @param brokers   replicas broker of the partition group
+     * @param thisBrokerId local broker
      */
     PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId);
 
@@ -103,10 +107,10 @@ public interface StoreService {
     void maybeRePartition(String topic, int partitionGroup, Collection<Short> partitions) throws IOException;
 
     /**
-     * 如果当前节点是Leader，执行配置变更
-     * @param newBrokerIds 变更后的新配置
+     * 如果当前节点是Leader，执行副本分布节点变更
+     * @param newReplicaBrokerIds 变更后的新配置
      */
-    void maybeUpdateConfig(String topic, int partitionGroup, Collection<Integer> newBrokerIds);
+    void maybeUpdateReplicas(String topic, int partitionGroup, Collection<Integer> newReplicaBrokerIds);
 
     /**
      * 获取管理接口 {@link StoreManagementService} 实例

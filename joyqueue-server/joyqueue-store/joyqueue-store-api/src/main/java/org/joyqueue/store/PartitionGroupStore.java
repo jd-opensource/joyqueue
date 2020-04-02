@@ -104,6 +104,13 @@ public interface PartitionGroupStore {
     ReadResult read(short partition, long index, int count, long maxSize) throws IOException;
 
     /**
+     * Update preferred leader of the partition group
+     * @param brokerId  preferred leader broker id
+     *
+     **/
+    void updatePreferredLeader(int brokerId);
+
+    /**
      * 是否可读
      * @return true： 可读， false： 不可读
      */

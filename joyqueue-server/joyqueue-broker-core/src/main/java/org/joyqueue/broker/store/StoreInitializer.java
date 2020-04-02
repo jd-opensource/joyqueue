@@ -123,7 +123,9 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
             logger.info("All stores are ready!");
         }
     }
-
+    /**
+     * Recovery from local
+     **/
     protected PartitionGroupStore doRestore(PartitionGroup group, Replica replica, Broker broker) throws IOException {
         logger.info("begin restore topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
 
