@@ -163,22 +163,26 @@ export default {
           colData: [
             {
               title: 'id',
-              key: 'connectionHost'
+              key: 'connectionHost',
+              width: '15%'
             },
             {
               title: '最新心跳时间',
               key: 'latestHeartbeat',
+              width: '15%',
               formatter (item) {
                 return timeStampToString(item.latestHeartbeat)
               }
             },
             {
               title: '会话超时',
-              key: 'sessionTimeout'
+              key: 'sessionTimeout',
+              width: '10%'
             },
             {
               title: '分区分配',
-              key: 'assignmentList'
+              key: 'assignmentList',
+              width: '60%'
             }
           ],
           urls: {
