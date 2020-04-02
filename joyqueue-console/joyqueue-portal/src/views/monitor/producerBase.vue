@@ -103,8 +103,7 @@ export default {
         return [
           {
             txt: '设置生产权重',
-            method: 'on-weight',
-            isAdmin: true
+            method: 'on-weight'
           },
           {
             txt: '发送消息',
@@ -112,8 +111,7 @@ export default {
           },
           {
             txt: '限流',
-            method: 'on-rateLimit',
-            isAdmin: true
+            method: 'on-rateLimit'
           }
         ]
       }

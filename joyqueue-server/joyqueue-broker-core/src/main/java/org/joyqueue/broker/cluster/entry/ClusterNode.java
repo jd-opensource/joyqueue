@@ -24,4 +24,11 @@ public class ClusterNode {
     public void setLeader(int leader) {
         this.leader = leader;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterNode{" +
+                "leader=" + leader +
+                '}';
+    }
 }

@@ -17,6 +17,7 @@ package org.joyqueue.broker.manage;
 
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
@@ -64,6 +65,7 @@ public class BrokerManageServiceManager extends Service {
 
     private BrokerMonitor brokerMonitor;
     private ClusterManager clusterManager;
+    private ClusterNameService clusterNameService;
     private StoreManagementService storeManagementService;
     private StoreService storeService;
     private Consume consume;
@@ -77,13 +79,14 @@ public class BrokerManageServiceManager extends Service {
     private MessageConvertSupport messageConvertSupport;
 
     public BrokerManageServiceManager(BrokerMonitor brokerMonitor, ClusterManager clusterManager,
-                                      StoreManagementService storeManagementService,
+                                      ClusterNameService clusterNameService, StoreManagementService storeManagementService,
                                       StoreService storeService, Consume consume,
                                       MessageRetry messageRetry, CoordinatorService coordinatorService,
                                       ArchiveManager archiveManager, NameService nameService, ElectionService electionManager,
                                       MessageConvertSupport messageConvertSupport) {
         this.brokerMonitor = brokerMonitor;
         this.clusterManager = clusterManager;
+        this.clusterNameService = clusterNameService;
         this.storeManagementService = storeManagementService;
         this.storeService = storeService;
         this.consume = consume;
@@ -113,7 +116,7 @@ public class BrokerManageServiceManager extends Service {
         DefaultPartitionMonitorService partitionMonitorService = new DefaultPartitionMonitorService(brokerStat, storeManagementService,electionManager);
         DefaultCoordinatorMonitorService coordinatorMonitorService = new DefaultCoordinatorMonitorService(coordinatorService);
         DefaultArchiveMonitorService archiveMonitorService = new DefaultArchiveMonitorService(archiveManager);
-        DefaultMetadataMonitorService metadataMonitorService = new DefaultMetadataMonitorService(clusterManager);
+        DefaultMetadataMonitorService metadataMonitorService = new DefaultMetadataMonitorService(clusterManager, clusterNameService);
         return new DefaultBrokerMonitorService(brokerMonitorInternalService, connectionMonitorService,
                 consumerMonitorService, producerMonitorService,
                 topicMonitorService, partitionMonitorService,

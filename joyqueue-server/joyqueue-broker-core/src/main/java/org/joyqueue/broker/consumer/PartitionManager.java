@@ -248,7 +248,7 @@ public class PartitionManager {
         }
 
         Boolean retry = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp()).getRetry();
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         if (!retry.booleanValue() || !masterPartitionList.contains((short) 0)) {
             logger.debug("retry enable is false.");
             return false;
@@ -332,7 +332,7 @@ public class PartitionManager {
 
         String clientId = consumer.getId();
         int occupyNum = counterService.getOccupyTimes(clientId);
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         int partitionNum = masterPartitionList.size();
         if (partitionNum > occupyNum) {
             isFree = true;
@@ -546,7 +546,7 @@ public class PartitionManager {
          * 移除占用
          */
         private void removeOccupyByConsumer(Consumer consumer) {
-            List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+            List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
             final String clientId = consumer.getId();
             masterPartitionList.stream().forEach(partition -> {
                 ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);

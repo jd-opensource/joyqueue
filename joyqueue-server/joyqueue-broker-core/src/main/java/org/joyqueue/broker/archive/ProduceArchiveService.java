@@ -200,7 +200,7 @@ public class ProduceArchiveService extends Service {
             if (clusterManager.checkArchiveable(name)) {
                 logger.info("Topic:{} send archive is enable.", name.getFullName());
 
-                List<Short> partitionSet = topicConfig.fetchPartitionByBroker(brokerId);
+                List<Short> partitionSet = clusterManager.getLocalPartitions(topicConfig);
                 partitionSet.stream().forEach(partition -> {
                     list.add(new SendArchiveItem(name.getFullName(), partition));
                 });
@@ -521,7 +521,7 @@ public class ProduceArchiveService extends Service {
      * @return
      */
     public long getCurrentIndexSum(String topic) {
-        List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> partitionList = clusterManager.getPartitionList(TopicName.parse(topic));
         long sum = partitionList.stream().mapToLong(partition ->
                 Math.max(0, (consume.getMaxIndex(new Consumer(topic, ""), partition) - 1))).sum();
         return sum;

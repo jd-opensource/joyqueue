@@ -7,6 +7,10 @@
                handlers="brokerMonitorService.getBrokerInfo"/>
 
         <!-- deprecated -->
+        <route path="/startInfo" inherit="get"
+               handlers="brokerMonitorService.getStartInfo"/>
+
+        <!-- deprecated -->
         <route path="/monitor/broker/brokerStatExt" inherit="get"
                handlers="brokerMonitorService.getExtendBrokerStat"/>
 
@@ -144,6 +148,8 @@
                handlers="brokerMonitorService.deleteMetadata"/>
         <route path="/monitor/metadata/configs" inherit="get"
                handlers="brokerMonitorService.getConfigsMetadata"/>
+        <route path="/monitor/metadata/config" inherit="put"
+               handlers="brokerMonitorService.updateConfigMetadata"/>
         <route path="/monitor/metadata/config" inherit="get"
                handlers="brokerMonitorService.getConfigMetadata"/>
         <route path="/monitor/metadata/cluster" inherit="get"

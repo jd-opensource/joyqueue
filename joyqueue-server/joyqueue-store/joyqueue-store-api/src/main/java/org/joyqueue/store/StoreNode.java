@@ -32,4 +32,13 @@ public class StoreNode {
     public boolean isReadable() {
         return readable;
     }
+
+    @Override
+    public String toString() {
+        return "StoreNode{" +
+                "id=" + id +
+                ", writable=" + writable +
+                ", readable=" + readable +
+                '}';
+    }
 }

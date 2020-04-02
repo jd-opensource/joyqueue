@@ -3,6 +3,7 @@ package org.joyqueue.broker.network.command;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.command.JoyQueuePayload;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,13 +13,13 @@ import java.util.Map;
  */
 public class GetPartitionGroupClusterRequest extends JoyQueuePayload {
 
-    private Map<String, Integer> groups;
+    private Map<String, List<Integer>> groups;
 
-    public void setGroups(Map<String, Integer> groups) {
+    public void setGroups(Map<String, List<Integer>> groups) {
         this.groups = groups;
     }
 
-    public Map<String, Integer> getGroups() {
+    public Map<String, List<Integer>> getGroups() {
         return groups;
     }
 

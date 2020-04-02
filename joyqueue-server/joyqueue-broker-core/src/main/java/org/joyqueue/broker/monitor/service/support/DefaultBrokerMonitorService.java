@@ -38,6 +38,7 @@ import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.model.Pager;
 import org.joyqueue.monitor.ArchiveMonitorInfo;
 import org.joyqueue.monitor.BrokerMonitorInfo;
+import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.ConnectionMonitorDetailInfo;
 import org.joyqueue.monitor.ConnectionMonitorInfo;
 import org.joyqueue.monitor.ConsumerMonitorInfo;
@@ -246,6 +247,12 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     public Pager<TopicMonitorInfo> getTopicInfos(int page, int pageSize) {
         return topicMonitorService.getTopicInfos(page, pageSize);
     }
+
+    @Override
+    public BrokerStartupInfo getStartInfo() {
+        return brokerMonitorInternalService.getStartInfo();
+    }
+
     @Override
     public void addGcEventListener(GCEventListener listener) {
         brokerMonitorInternalService.addGcEventListener(listener);
@@ -382,6 +389,11 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     @Override
     public Map<String, String> getConfigsMetadata() {
         return metadataMonitorService.getConfigsMetadata();
+    }
+
+    @Override
+    public String updateConfigMetadata(String key, String group, String value) {
+        return metadataMonitorService.updateConfigMetadata(key, group, value);
     }
 
     @Override

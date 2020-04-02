@@ -52,9 +52,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * author: gaohaoxiang
  * date: 2019/8/30
  */
-public class NameServiceCacheManager extends Service {
+public class MetadataCacheManager extends Service {
 
-    protected static final Logger logger = LoggerFactory.getLogger(NameServiceCacheManager.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MetadataCacheManager.class);
 
     private NameServiceConfig config;
 
@@ -63,7 +63,7 @@ public class NameServiceCacheManager extends Service {
     private ReentrantLock lock = new ReentrantLock();
     private AtomicInteger version = new AtomicInteger();
 
-    public NameServiceCacheManager(NameServiceConfig config) {
+    public MetadataCacheManager(NameServiceConfig config) {
         this.config = config;
     }
 
@@ -290,7 +290,7 @@ public class NameServiceCacheManager extends Service {
         return producerMap.get(app);
     }
 
-    public Map<TopicName, Consumer> gettConsumerByApp(String app) {
+    public Map<TopicName, Consumer> getConsumerByApp(String app) {
         return cache.getConsumerAppMap().get(app);
     }
 

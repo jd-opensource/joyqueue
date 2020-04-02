@@ -79,6 +79,7 @@ public class ClusterNodeManager extends Service {
         if (groupMap == null) {
             return;
         }
+        logger.info("remove topic group node, topic: {}, group: {}, leader: {}", topic, group, groupMap.get(group));
         groupMap.remove(group);
         if (groupMap.isEmpty()) {
             nodeMap.remove(topic);

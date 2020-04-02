@@ -30,14 +30,14 @@ import org.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
 import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
 import org.joyqueue.broker.monitor.stat.TopicPendingStat;
 import org.joyqueue.broker.monitor.stat.TopicStat;
-import org.joyqueue.network.session.Consumer;
-import org.joyqueue.nsr.NameService;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.monitor.BrokerMonitorInfo;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.ElectionMonitorInfo;
 import org.joyqueue.monitor.NameServerMonitorInfo;
 import org.joyqueue.monitor.StoreMonitorInfo;
+import org.joyqueue.network.session.Consumer;
+import org.joyqueue.nsr.NameService;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreService;
@@ -269,6 +269,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         return jvmStat;
     }
 
+    @Override
+    public BrokerStartupInfo getStartInfo() {
+        return brokerStartupInfo;
+    }
 
     @Override
     public void addGcEventListener(GCEventListener listener) {

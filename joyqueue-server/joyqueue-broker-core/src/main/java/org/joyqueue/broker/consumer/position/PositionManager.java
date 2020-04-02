@@ -179,7 +179,7 @@ public class PositionManager extends Service {
         Map<ConsumePartition, Position> consumeInfo = new HashMap<>();
 
         if (appList != null && !appList.isEmpty()) {
-            List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+            List<PartitionGroup> partitionGroupList = clusterManager.getLocalPartitionGroups(topic);
             for (PartitionGroup group : partitionGroupList) {
                 if (group.getGroup() == partitionGroup) {
                     Set<Short> partitions = group.getPartitions();
@@ -472,7 +472,7 @@ public class PositionManager extends Service {
         }
         checkState();
         // 从元数据中获取分组和分区数据，初始化拉取和应答位置
-        List<Short> partitionList = clusterManager.getMasterPartitionList(topic);
+        List<Short> partitionList = clusterManager.getReplicaPartitions(topic);
 
         logger.debug("add consumer partitionList:[{}]", partitionList.toString());
 

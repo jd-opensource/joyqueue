@@ -1,6 +1,7 @@
 package org.joyqueue.broker.network.codec;
 
 import io.netty.buffer.ByteBuf;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.broker.network.command.GetPartitionGroupClusterResponse;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.serializer.Serializer;
@@ -42,19 +43,23 @@ public class GetPartitionGroupClusterResponseCodec implements Type, BrokerPayloa
 
     @Override
     public void encode(GetPartitionGroupClusterResponse payload, ByteBuf buffer) throws Exception {
-        buffer.writeInt(payload.getGroups().size());
-        for (Map.Entry<String, Map<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster>> entry : payload.getGroups().entrySet()) {
-            Map<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster> clusterMap = entry.getValue();
-            Serializer.write(entry.getKey(), buffer);
-            buffer.writeInt(clusterMap.size());
-            for (Map.Entry<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster> clusterEntry : clusterMap.entrySet()) {
-                GetPartitionGroupClusterResponse.PartitionGroupCluster cluster = clusterEntry.getValue();
-                buffer.writeInt(clusterEntry.getKey());
-                buffer.writeInt(cluster.getNodes().size());
-                for (GetPartitionGroupClusterResponse.PartitionGroupNode node : cluster.getNodes()) {
-                    buffer.writeInt(node.getId());
-                    buffer.writeBoolean(node.isWritable());
-                    buffer.writeBoolean(node.isReadable());
+        if (MapUtils.isEmpty(payload.getGroups())) {
+            buffer.writeInt(0);
+        } else {
+            buffer.writeInt(payload.getGroups().size());
+            for (Map.Entry<String, Map<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster>> entry : payload.getGroups().entrySet()) {
+                Map<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster> clusterMap = entry.getValue();
+                Serializer.write(entry.getKey(), buffer);
+                buffer.writeInt(clusterMap.size());
+                for (Map.Entry<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster> clusterEntry : clusterMap.entrySet()) {
+                    GetPartitionGroupClusterResponse.PartitionGroupCluster cluster = clusterEntry.getValue();
+                    buffer.writeInt(clusterEntry.getKey());
+                    buffer.writeInt(cluster.getNodes().size());
+                    for (GetPartitionGroupClusterResponse.PartitionGroupNode node : cluster.getNodes()) {
+                        buffer.writeInt(node.getId());
+                        buffer.writeBoolean(node.isWritable());
+                        buffer.writeBoolean(node.isReadable());
+                    }
                 }
             }
         }

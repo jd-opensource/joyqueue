@@ -17,6 +17,7 @@ package org.joyqueue.broker;
 
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
@@ -45,6 +46,7 @@ import org.joyqueue.toolkit.config.PropertySupplier;
 public class BrokerContext {
     private BrokerConfig brokerConfig;
     private SessionManager sessionManager;
+    private ClusterNameService clusterNameService;
     private ClusterManager clusterManager;
     private Produce produce;
     private Consume consume;
@@ -188,6 +190,15 @@ public class BrokerContext {
     public BrokerContext sessionManager(SessionManager sessionManager) {
         this.sessionManager = sessionManager;
         return this;
+    }
+
+    public BrokerContext clusterNameService(ClusterNameService clusterNameService) {
+        this.clusterNameService = clusterNameService;
+        return this;
+    }
+
+    public ClusterNameService getClusterNameService() {
+        return clusterNameService;
     }
 
     public BrokerContext clusterManager(ClusterManager clusterManager) {

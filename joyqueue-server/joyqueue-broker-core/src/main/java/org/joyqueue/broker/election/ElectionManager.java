@@ -26,7 +26,7 @@ import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.broker.replication.ReplicaGroup;
 import org.joyqueue.broker.replication.ReplicationManager;
-import org.joyqueue.broker.replication.TransportSession;
+import org.joyqueue.broker.replication.ReplicationTransportSession;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
@@ -75,7 +75,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     private ClusterManager clusterManager;
 
     // 发送给一个broker的命令使用同一个连接
-    private final Map<String, TransportSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, ReplicationTransportSession> sessions = new ConcurrentHashMap<>();
     private ScheduledExecutorService electionTimerExecutor;
     private ExecutorService electionExecutor;
 
@@ -193,7 +193,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElections.clear();
-        for (Map.Entry<String, TransportSession> entry : sessions.entrySet()) {
+        for (Map.Entry<String, ReplicationTransportSession> entry : sessions.entrySet()) {
             entry.getValue().stop();
         }
 
@@ -511,14 +511,14 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             return;
         }
 
-        TransportSession transport = sessions.get(address);
+        ReplicationTransportSession transport = sessions.get(address);
         if (transport == null) {
             synchronized (sessions) {
                 transport = sessions.get(address);
                 if (transport == null) {
                     logger.info("Send election command, create transport of address {}", address);
 
-                    transport = new TransportSession(address, transportClient);
+                    transport = new ReplicationTransportSession(address, transportClient);
                     sessions.put(address, transport);
                 }
             }

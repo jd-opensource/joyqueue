@@ -127,6 +127,10 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD);
     }
 
+    public int getCompensationThreshold() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_THRESHOLD);
+    }
+
     public int getCompensationErrorRetryInterval() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL);
     }
@@ -137,6 +141,22 @@ public class NameServiceConfig {
 
     public boolean getMessengerIgniteEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_IGNITE_ENABLE);
+    }
+
+    public boolean getMessengerPublishLeaderChangeEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_LEADER_CHANGE_ENABLE);
+    }
+
+    public boolean getMessengerPublishTopicEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_TOPIC_ENABLE);
+    }
+
+    public boolean getMessengerPublishSubscriptionEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_SUBSCRIPTION_ENABLE);
+    }
+
+    public boolean getMessengerPublishBrokerEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_BROKER_ENABLE);
     }
 
     public int getThinTransportTimeout() {

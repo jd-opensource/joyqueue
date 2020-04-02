@@ -13,6 +13,7 @@ import org.joyqueue.store.StoreNode;
 import org.joyqueue.store.StoreNodes;
 import org.joyqueue.store.StoreService;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,16 +34,19 @@ public class GetPartitionGroupClusterRequestHandler implements Type, BrokerComma
     public Command handle(Transport transport, Command command) {
         GetPartitionGroupClusterRequest request = (GetPartitionGroupClusterRequest) command.getPayload();
         GetPartitionGroupClusterResponse response = new GetPartitionGroupClusterResponse();
-        for (Map.Entry<String, Integer> entry : request.getGroups().entrySet()) {
-            StoreNodes nodes = storeService.getNodes(entry.getKey(), entry.getValue());
-            if (nodes == null) {
-                continue;
+        for (Map.Entry<String, List<Integer>> entry : request.getGroups().entrySet()) {
+            String topic = entry.getKey();
+            for (Integer partitionGroup : entry.getValue()) {
+                StoreNodes nodes = storeService.getNodes(topic, partitionGroup);
+                if (nodes == null) {
+                    continue;
+                }
+                GetPartitionGroupClusterResponse.PartitionGroupCluster partitionGroupCluster = new GetPartitionGroupClusterResponse.PartitionGroupCluster();
+                for (StoreNode node : nodes.getNodes()) {
+                    partitionGroupCluster.addNode(new GetPartitionGroupClusterResponse.PartitionGroupNode(node.getId(), node.isWritable(), node.isReadable()));
+                }
+                response.addCluster(topic, partitionGroup, partitionGroupCluster);
             }
-            GetPartitionGroupClusterResponse.PartitionGroupCluster partitionGroupCluster = new GetPartitionGroupClusterResponse.PartitionGroupCluster();
-            for (StoreNode node : nodes.getNodes()) {
-                partitionGroupCluster.addNode(new GetPartitionGroupClusterResponse.PartitionGroupNode(node.getId(), node.isWritable(), node.isReadable()));
-            }
-            response.addCluster(entry.getKey(), entry.getValue(), partitionGroupCluster);
         }
         return new Command(response);
     }

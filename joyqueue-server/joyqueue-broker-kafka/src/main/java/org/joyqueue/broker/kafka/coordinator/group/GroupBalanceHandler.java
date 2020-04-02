@@ -78,7 +78,7 @@ public class GroupBalanceHandler extends Service {
             callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_GROUP_ID.getCode()));
             return;
         }
-        if (sessionTimeoutMs < config.getSessionMaxTimeout() || sessionTimeoutMs > config.getSessionMinTimeout()) {
+        if (sessionTimeoutMs > config.getSessionMaxTimeout() || sessionTimeoutMs < config.getSessionMinTimeout()) {
             callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_SESSION_TIMEOUT.getCode()));
             return;
         }
@@ -287,10 +287,10 @@ public class GroupBalanceHandler extends Service {
             if (group.stateIs(GroupState.DEAD) || !group.isHasMember(memberId)) {
                 return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
             }
-//            GroupMemberMetadata member = group.getMember(memberId);
-//            groupBalanceManager.removeHeartbeatForLeavingMember(group, member);
-//            groupBalanceManager.removeMemberAndUpdateGroup(group, member);
-//            group.addExpiredMember(member);
+            GroupMemberMetadata member = group.getMember(memberId);
+            groupBalanceManager.removeHeartbeatForLeavingMember(group, member);
+            groupBalanceManager.removeMemberAndUpdateGroup(group, member);
+            group.addExpiredMember(member);
             return KafkaErrorCode.NONE.getCode();
         }
     }

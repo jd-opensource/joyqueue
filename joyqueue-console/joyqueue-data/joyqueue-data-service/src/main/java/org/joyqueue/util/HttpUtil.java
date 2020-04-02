@@ -15,21 +15,23 @@
  */
 package org.joyqueue.util;
 
-import org.joyqueue.model.exception.BusinessException;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
+import org.joyqueue.model.exception.BusinessException;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -42,29 +44,64 @@ import java.util.concurrent.TimeUnit;
 public class HttpUtil {
     private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
     protected static final long DEFAULT_HTTP_CONN_TIME_TO_LIVE = 60;
-    protected static final int DEFAULT_HTTP_CONN_MAX_TOTAL = 10;
+    protected static final int DEFAULT_HTTP_CONN_MAX_TOTAL = 20;   // 连接池最大连接数
+    protected static final int DEFAULT_HTTP_CONN_MAX_PER_ROUTE = 10; // 连接池每个路由最大连接数
+    protected static final int DEFAULT_HTTP_CONN_TIMEOUT = 5 * 1000; // 创建连接超时
+    protected static final int DEFAULT_HTTP_CONN_REQUEST_TIMEOUT = 10 * 1000; // 请求数据超时
+    protected static final int DEFAULT_HTTP_CONN_SOCKET_TIMEOUT = 10 * 1000; // 从连接池获取连接超时
+    protected static final int IDLE_CONN_MONITOR_WAIT_TIME = 30 * 1000; // 定时清理连接池空闲连接频率
+
     /**
      * http client 构建器
      */
     private static HttpClientBuilder httpClientBuilder;
     /**
+     * 全局client, 线程安全
+     */
+    private static CloseableHttpClient client;
+    /**
      * 链接管理器
      */
     private static PoolingHttpClientConnectionManager clientConnManager;
     private static RequestConfig requestConfig;
+    private static IdleConnectionMonitorThread monitorThread;
 
     static {
         clientConnManager = new PoolingHttpClientConnectionManager(DEFAULT_HTTP_CONN_TIME_TO_LIVE, TimeUnit.SECONDS);
         clientConnManager.setMaxTotal(DEFAULT_HTTP_CONN_MAX_TOTAL);
-        httpClientBuilder = HttpClientBuilder.create().setConnectionManager(clientConnManager);
-        requestConfig = RequestConfig.custom().setConnectTimeout(10000).setConnectionRequestTimeout(10000).setSocketTimeout(10000).build();
+        clientConnManager.setDefaultMaxPerRoute(DEFAULT_HTTP_CONN_MAX_PER_ROUTE);
+
+        requestConfig = RequestConfig.custom()
+                .setConnectTimeout(DEFAULT_HTTP_CONN_TIMEOUT)
+                .setConnectionRequestTimeout(DEFAULT_HTTP_CONN_REQUEST_TIMEOUT)
+                .setSocketTimeout(DEFAULT_HTTP_CONN_SOCKET_TIMEOUT)
+                .build();
+        httpClientBuilder = HttpClientBuilder.create()
+                .setConnectionManager(clientConnManager);
+        client = httpClientBuilder.build();
+
+        monitorThread = new IdleConnectionMonitorThread(clientConnManager);
+        monitorThread.setName("HTTP-IO-MONITOR-THREAD");
+        monitorThread.setDaemon(true);
+        monitorThread.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                client.close();
+                monitorThread.shutdown();
+                clientConnManager.close();
+                logger.info("close http client success. ");
+            } catch (IOException e) {
+                logger.error("close http client error.", e);
+            }
+        }));
     }
 
     public static String createUrl(String url, String uri) {
         return url + uri;
     }
 
-    public static CloseableHttpResponse executeRequest(HttpRequestBase request) {
+    public static String request(HttpRequestBase request) {
         try {
             request.setConfig(requestConfig);
             try {
@@ -73,27 +110,35 @@ public class HttpUtil {
                     if (request instanceof HttpEntityEnclosingRequest) {
                         HttpEntity entity = ((HttpEntityEnclosingRequest) request).getEntity();
                         if (entity != null && entity instanceof StringEntity) {
-                            if (entity != null) {
-                                InputStream stream = entity.getContent();
-                                if (stream != null && stream.available() > 0) {
-                                    byte[] bytes = new byte[stream.available()];
-                                    stream.read(bytes);
-                                    content = new String(bytes);
-                                }
+                            InputStream stream = entity.getContent();
+                            if (stream != null && stream.available() > 0) {
+                                byte[] bytes = new byte[stream.available()];
+                                stream.read(bytes);
+                                content = new String(bytes);
                             }
                         }
                     }
-                    logger.info(String.format("communicating request[%s],entity[%s].", request.toString(), content));
+                    logger.info(String.format("communicating request [%s], entity [%s].", request.toString(), content));
                 }
             } catch (Throwable e) {
                 logger.warn("logger error.", e);
             }
+
             long startMs = SystemClock.now();
-            CloseableHttpResponse response = getClient().execute(request);
-            logger.info(String.format("communicating request[%s],time elapsed %d ms.", request.toString(), SystemClock.now() - startMs));
-            return response;
-        } catch (Exception e) {
-            String errorMsg = String.format("error occurred while communicating with  request = %s", request);
+
+            return client.execute(request, response1 -> {
+                int statusCode = response1.getStatusLine().getStatusCode();
+                if (HttpStatus.SC_OK != statusCode) {
+                    String message = String.format("monitorUrl [%s], reuqest[%s] error code [%s],response [%s]. ",
+                            request.getURI().toString(), request.toString(), statusCode, EntityUtils.toString(response1.getEntity()));
+                    throw new IllegalStateException(message);
+                }
+                String result = EntityUtils.toString(response1.getEntity(), Charset.forName("utf-8"));
+                logger.info(String.format("get response of request [%s], time elapsed %d ms. ", request.toString(), SystemClock.now() - startMs));
+                return result;
+            });
+        } catch (Throwable e) {
+            String errorMsg = String.format("error occurred while communicating with request = %s. ", request);
             logger.error(errorMsg, e);
             throw new BusinessException(errorMsg, e);
         }
@@ -106,7 +151,7 @@ public class HttpUtil {
      **/
     public static String get(String url) throws Exception {
         HttpGet get = new HttpGet(url);
-        return processResponse(executeRequest(get), get);
+        return request(get);
     }
 
 
@@ -118,7 +163,7 @@ public class HttpUtil {
     public static String put(String url, String content) throws Exception {
         HttpPut put = new HttpPut(url);
         put.setEntity(new StringEntity(content));
-        return processResponse(executeRequest(put), put);
+        return request(put);
     }
 
     /**
@@ -128,11 +173,8 @@ public class HttpUtil {
      **/
     public static String delete(String url) throws Exception {
         HttpDelete delete = new HttpDelete(url);
-        return processResponse(executeRequest(delete), delete);
+        return request(delete);
     }
-
-
-
 
     /**
      *
@@ -143,6 +185,7 @@ public class HttpUtil {
      * process http 请求的返回
      * @return string body
      **/
+    @Deprecated
     private static String processResponse(CloseableHttpResponse response, HttpUriRequest request) throws IllegalStateException, IOException {
         try {
             int statusCode = response.getStatusLine().getStatusCode();
@@ -159,7 +202,51 @@ public class HttpUtil {
         }
     }
 
-    private static CloseableHttpClient getClient() throws Exception {
-        return httpClientBuilder.build();
+    @PreDestroy
+    public void destroy() {
+        try {
+            client.close();
+            monitorThread.shutdown();
+            clientConnManager.close();
+        } catch (IOException e) {
+            logger.error("close http client error.", e);
+        }
+    }
+
+    /**
+     * 关闭到期空闲连接
+     */
+    public static class IdleConnectionMonitorThread extends Thread {
+
+        private final HttpClientConnectionManager connMgr;
+        private volatile boolean shutdown;
+
+        public IdleConnectionMonitorThread(HttpClientConnectionManager connMgr) {
+            super();
+            this.connMgr = connMgr;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while (!shutdown) {
+                    synchronized (this) {
+                        wait(IDLE_CONN_MONITOR_WAIT_TIME);
+                        // Close expired connections
+                        connMgr.closeExpiredConnections();
+                    }
+                }
+            } catch (InterruptedException ex) {
+                // terminate
+                logger.error("idle conn monitor thread is interrupted. ");
+            }
+        }
+
+        public void shutdown() {
+            shutdown = true;
+            synchronized (this) {
+                notifyAll();
+            }
+        }
     }
 }

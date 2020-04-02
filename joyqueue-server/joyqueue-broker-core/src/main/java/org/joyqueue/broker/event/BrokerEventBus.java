@@ -37,7 +37,7 @@ public class BrokerEventBus extends Service {
         eventBus.stop();
     }
 
-    protected void publishEvent(Object event) {
+    public void publishEvent(Object event) {
         eventBus.add(event);
     }
 
