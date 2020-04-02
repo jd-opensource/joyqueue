@@ -35,11 +35,7 @@ export default {
           render: (h, params) => {
             const app = params.item.app
             const appFullName = getAppCode(app, params.item.subscribeGroup)
-            return h('d-button', {
-              props: {
-                type: 'borderless',
-                color: 'primary'
-              },
+            return h('label', {
               style: {
                 color: '#3366FF'
               },
@@ -53,6 +49,9 @@ export default {
                       tab: 'consumer'
                     }
                   })
+                },
+                mousemove: (event) => {
+                  event.target.style.cursor = 'pointer'
                 }
               }
             }, appFullName)

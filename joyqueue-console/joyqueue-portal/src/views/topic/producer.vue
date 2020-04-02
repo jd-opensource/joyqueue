@@ -36,11 +36,7 @@ export default {
           },
           render: (h, params) => {
             const app = params.item.app
-            return h('d-button', {
-              props: {
-                type: 'borderless',
-                color: 'primary'
-              },
+            return h('label', {
               style: {
                 color: '#3366FF'
               },
@@ -54,6 +50,9 @@ export default {
                       tab: 'producer'
                     }
                   })
+                },
+                mousemove: (event) => {
+                  event.target.style.cursor = 'pointer'
                 }
               }
             }, app.code)

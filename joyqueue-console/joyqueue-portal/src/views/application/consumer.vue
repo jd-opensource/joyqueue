@@ -43,11 +43,7 @@ export default {
             const topic = params.item.topic
             const namespace = params.item.namespace
             const topicId = getTopicCodeByCode(topic.code, namespace.code)
-            return h('d-button', {
-              props: {
-                type: 'borderless',
-                color: 'primary'
-              },
+            return h('label', {
               style: {
                 color: '#3366FF'
               },
@@ -55,6 +51,9 @@ export default {
                 click: () => {
                   this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
                     query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'consumer' }})
+                },
+                mousemove: (event) => {
+                  event.target.style.cursor = 'pointer'
                 }
               }
             }, topic.code)
@@ -113,11 +112,7 @@ export default {
           render: (h, params) => {
             const retry = params.item.retry
             const formatNumFilter = Vue.filter('formatNum')
-            return h('d-button', {
-              props: {
-                type: 'borderless',
-                color: 'primary'
-              },
+            return h('label', {
               style: {
                 color: '#3366FF'
               },
@@ -133,6 +128,9 @@ export default {
                       tab: 'retry'
                     }
                   })
+                },
+                mousemove: (event) => {
+                  event.target.style.cursor = 'pointer'
                 }
               }
             }, retry === undefined ? 0 : formatNumFilter(retry.count))
