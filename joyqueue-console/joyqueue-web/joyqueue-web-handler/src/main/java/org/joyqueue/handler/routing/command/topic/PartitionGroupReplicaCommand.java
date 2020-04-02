@@ -20,6 +20,7 @@ import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
@@ -154,18 +155,18 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         if (query.getTopic().getBrokerGroup() != null) {
             QBrokerGroup brokerGroup = new QBrokerGroup();
             brokerGroup.setCode(query.getTopic().getBrokerGroup().getCode());
-            brokerGroups = brokerGroupService.findAll(brokerGroup).stream().filter(group -> group.getCode().equals(brokerGroup.getCode())).collect(Collectors.toList());
+            brokerGroups = brokerGroupService.findAll(brokerGroup).stream().filter(group -> StringUtils.containsIgnoreCase(group.getCode(),brokerGroup.getCode())).collect(Collectors.toList());
         }
         QBroker qBroker = new QBroker();
-        // 其实如果brokerGroups.size()>0 则brokerGroups.size()===1
         if (brokerGroups!=null && brokerGroups.size()>0) {
             ListQuery<QBrokerGroupRelated> brokerGroupRelatedListQuery = new ListQuery<>();
+            List<BrokerGroupRelated> brokerGroupRelateds = new ArrayList<>();
             for (BrokerGroup brokerGroup: brokerGroups){
                 QBrokerGroupRelated brokerGroupRelated = new QBrokerGroupRelated();
                 brokerGroupRelated.setGroup(new Identity(brokerGroup.getId(),brokerGroup.getCode()));
                 brokerGroupRelatedListQuery.setQuery(brokerGroupRelated);
+                brokerGroupRelateds.addAll(brokerGroupRelatedService.findByQuery(brokerGroupRelatedListQuery));
             }
-            List<BrokerGroupRelated> brokerGroupRelateds = brokerGroupRelatedService.findByQuery(brokerGroupRelatedListQuery);
             qBroker.setInBrokerIds(brokerGroupRelateds.stream().map(brokerGroupRelated -> (int)brokerGroupRelated.getId()).collect(Collectors.toList()));
         }
         // 如果输入broker分组,brokerGroups.size()还是为0，说明库里没有，则直接返回空数据
