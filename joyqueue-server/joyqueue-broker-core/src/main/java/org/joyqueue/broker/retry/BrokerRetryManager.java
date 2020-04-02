@@ -180,7 +180,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     protected void doStart() throws Exception {
         super.doStart();
         clusterManager.addListener(eventListener);
-
+        clusterManager.addListener(rateLimiterManager);
         retryType = clusterManager.getBroker().getRetryType();
         delegate = loadRetryManager(retryType);
     }

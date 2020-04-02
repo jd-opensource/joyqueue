@@ -14,10 +14,8 @@ import org.joyqueue.nsr.event.RemoveConfigEvent;
 import org.joyqueue.nsr.event.RemoveConsumerEvent;
 import org.joyqueue.nsr.event.RemoveTopicEvent;
 import org.joyqueue.nsr.event.UpdateConfigEvent;
-import org.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,11 +25,10 @@ import java.util.concurrent.ConcurrentMap;
  * Consumer retry rate limiter manager
  *
  **/
-public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventListener<MetaEvent>{
-    protected static final Logger logger = LoggerFactory.getLogger(BrokerRetryRateLimiterManager.class);
+public class BrokerRetryRateLimiterManager implements RetryRateLimiter{
+    protected static final Logger LOG = LoggerFactory.getLogger(BrokerRetryRateLimiterManager.class);
     private ClusterManager clusterManager;
     private ConsumeConfig consumeConfig;
-    private static final int DEFAULT_CONSUMER_RETRY_RATE=500;
     private ConcurrentMap<String /** topic **/, ConcurrentMap<String /** app **/, RateLimiter>> retryRateLimiters = Maps.newConcurrentMap();
 
     public BrokerRetryRateLimiterManager(BrokerContext context){
@@ -57,6 +54,8 @@ public class BrokerRetryRateLimiterManager implements RetryRateLimiter, EventLis
                 RateLimiter oldRateLimiter = topicRateLimiters.putIfAbsent(app, consumerRetryRateLimiter);
                 if (oldRateLimiter != null) {
                     consumerRetryRateLimiter = oldRateLimiter;
+                }else{
+                    LOG.info("New rate limiter for {},{},{}",topic,app,tps);
                 }
             }
         }

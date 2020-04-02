@@ -42,7 +42,9 @@ public class BrokerStoreConfig {
         CLEAN_STRATEGY_CLASS("store.clean.strategy.class", DEFAULT_CLEAN_STRATEGY_CLASS, Type.STRING),
         MAX_STORE_SIZE("store.max.store.size", DEFAULT_MAX_STORE_SIZE, Type.LONG),
         MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
+        MAX_STORE_TIME_TOPIC_PREFIX("store.max.store.time.", -1, Type.LONG),
         KEEP_UNCONSUMED("store.clean.keep.unconsumed", DEFAULT_KEEP_UNCONSUMED, Type.BOOLEAN),
+        KEEP_UNCONSUMED_TOPIC_PREFIX("store.clean.keep.unconsumed.",null, Type.STRING),
         CLEAN_SCHEDULE_BEGIN("store.clean.schedule.begin", DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN, Type.LONG),
         CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG),
         FORCE_RESTORE("store.force.restore", true, Type.BOOLEAN),
@@ -85,6 +87,37 @@ public class BrokerStoreConfig {
     public long getMaxStoreTime() {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.MAX_STORE_TIME, DEFAULT_MAX_STORE_TIME);
     }
+
+    /**
+     * Topic max store time
+     *
+     * @return  config order
+     *   1. topic  level
+     *   2. broker level
+     *   3. broker level default
+     *
+     **/
+    public long getMaxStoreTime(String topic){
+        long storeTime= PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.MAX_STORE_TIME_TOPIC_PREFIX.getName()+topic,
+                                                  BrokerStoreConfigKey.MAX_STORE_TIME_TOPIC_PREFIX.getType(), BrokerStoreConfigKey.MAX_STORE_TIME_TOPIC_PREFIX.getValue());
+
+        return storeTime<0?getMaxStoreTime():storeTime;
+    }
+
+    /**
+     * Topic keep unconsumed message option
+     * @return  config order
+     *   1. topic  level
+     *   2. broker level
+     *   3. broker level default
+     *
+     * */
+    public boolean keepUnconsumed(String topic){
+        String keepUnconsumed= PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.KEEP_UNCONSUMED_TOPIC_PREFIX.getName()+topic,
+                BrokerStoreConfigKey.KEEP_UNCONSUMED_TOPIC_PREFIX.getType(), BrokerStoreConfigKey.KEEP_UNCONSUMED_TOPIC_PREFIX.getValue());
+        return keepUnconsumed==null?keepUnconsumed():Boolean.valueOf(keepUnconsumed);
+    }
+
 
     public boolean keepUnconsumed() {
         return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.KEEP_UNCONSUMED, DEFAULT_KEEP_UNCONSUMED);
