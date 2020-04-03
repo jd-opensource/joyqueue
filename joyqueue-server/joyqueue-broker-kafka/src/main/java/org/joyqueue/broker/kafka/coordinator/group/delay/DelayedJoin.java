@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.kafka.coordinator.group.delay;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.coordinator.group.GroupBalanceManager;
 import org.joyqueue.broker.kafka.coordinator.group.GroupMetadataManager;
@@ -23,7 +24,6 @@ import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupState;
 import org.joyqueue.toolkit.delay.DelayedOperation;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class DelayedJoin extends DelayedOperation {
     private GroupMetadata group;
 
     public DelayedJoin(GroupBalanceManager groupBalanceManager, GroupMetadataManager groupMetadataManager, GroupMetadata group, long rebalanceTimeout) {
-        super(rebalanceTimeout);
+        super(rebalanceTimeout, group.getLock());
         this.groupBalanceManager = groupBalanceManager;
         this.groupMetadataManager = groupMetadataManager;
         this.group = group;
@@ -54,13 +54,13 @@ public class DelayedJoin extends DelayedOperation {
 
     @Override
     protected boolean tryComplete() {
-        synchronized (group) {
+        return group.inLock(() -> {
             if (group.getNotYetRejoinedMembers().isEmpty()) {
                 return forceComplete();
             } else {
                 return false;
             }
-        }
+        });
     }
 
     @Override
@@ -70,9 +70,9 @@ public class DelayedJoin extends DelayedOperation {
 
     @Override
     protected void onComplete() {
-        synchronized (group) {
+        group.inLock(() -> {
             doComplete();
-        }
+        });
     }
 
     protected void doComplete() {

@@ -20,18 +20,21 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import org.joyqueue.broker.kafka.model.OffsetAndMetadata;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.kafka.model.OffsetAndMetadata;
+import org.joyqueue.toolkit.time.SystemClock;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * GroupMetadata
@@ -52,6 +55,7 @@ public class GroupMetadata extends org.joyqueue.broker.coordinator.group.domain.
     private GroupState preState;
     private long preStateTimestamp;
     private Table<String, Integer, OffsetAndMetadata> offsetCache = HashBasedTable.create();
+    private Lock lock = new ReentrantLock();
 
     private static final Map<GroupState, Set<GroupState>> ValidPreviousStates = Maps.newHashMap();
 
@@ -75,6 +79,36 @@ public class GroupMetadata extends org.joyqueue.broker.coordinator.group.domain.
     public GroupMetadata(String groupId, String protocolType) {
         setId(groupId);
         this.protocolType = protocolType;
+    }
+
+    public <T> T inLock(Callable<T> callable) {
+        lock.lock();
+        try {
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void inLock(Runnable runnable) {
+        lock.lock();
+        try {
+            runnable.run();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void setLock(Lock lock) {
+        this.lock = lock;
+    }
+
+    public Lock getLock() {
+        return lock;
     }
 
     public GroupState getState() {

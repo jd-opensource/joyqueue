@@ -112,11 +112,11 @@ public class KafkaConfig {
     }
 
     public int getSessionMaxTimeout() {
-        return getConfig(KafkaConfigKey.SESSION_MIN_TIMEOUT);
+        return getConfig(KafkaConfigKey.SESSION_MAX_TIMEOUT);
     }
 
     public int getSessionMinTimeout() {
-        return getConfig(KafkaConfigKey.SESSION_MAX_TIMEOUT);
+        return getConfig(KafkaConfigKey.SESSION_MIN_TIMEOUT);
     }
 
     public int getRebalanceInitialDelay() {

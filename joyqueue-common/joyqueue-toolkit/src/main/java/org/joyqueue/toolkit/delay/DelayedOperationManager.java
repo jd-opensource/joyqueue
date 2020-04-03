@@ -142,11 +142,9 @@ public class DelayedOperationManager<T extends DelayedOperation> {
             }
         }
 
-        synchronized (operation) {
-            isCompletedByMe = operation.tryComplete();
-            if (isCompletedByMe) {
-                return true;
-            }
+        isCompletedByMe = operation.maybeTryComplete();
+        if (isCompletedByMe) {
+            return true;
         }
 
         // if it cannot be completed by now and hence is watched, add to the expire queue also
@@ -323,7 +321,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
                 if (curr.isCompleted()) {
                     // another thread has completed this operation, just remove it
                     iter.remove();
-                } else if (curr.safeTryComplete()) {
+                } else if (curr.maybeTryComplete()) {
                     iter.remove();
                     completed += 1;
                 }

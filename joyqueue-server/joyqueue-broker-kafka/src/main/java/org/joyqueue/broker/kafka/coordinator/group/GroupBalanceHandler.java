@@ -69,7 +69,7 @@ public class GroupBalanceHandler extends Service {
             callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_GROUP_ID.getCode()));
             return;
         }
-        if (sessionTimeoutMs < config.getSessionMaxTimeout() || sessionTimeoutMs > config.getSessionMinTimeout()) {
+        if (sessionTimeoutMs < config.getSessionMinTimeout() || sessionTimeoutMs > config.getSessionMaxTimeout()) {
             callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_SESSION_TIMEOUT.getCode()));
             return;
         }
@@ -87,9 +87,10 @@ public class GroupBalanceHandler extends Service {
             group = groupMetadataManager.getOrCreateGroup(new GroupMetadata(groupId, protocolType));
         }
 
-        synchronized (group) {
-            doJoinGroup(group, memberId, clientId, clientHost, rebalanceTimeoutMs, sessionTimeoutMs, protocolType, protocols, callback);
-        }
+        GroupMetadata finalGroup = group;
+        group.inLock(() -> {
+            doJoinGroup(finalGroup, memberId, clientId, clientHost, rebalanceTimeoutMs, sessionTimeoutMs, protocolType, protocols, callback);
+        });
     }
 
     protected void doJoinGroup(GroupMetadata group, String memberId, String clientId, String clientHost, int rebalanceTimeoutMs, int sessionTimeoutMs, String protocolType,
@@ -193,9 +194,9 @@ public class GroupBalanceHandler extends Service {
             return;
         }
 
-        synchronized (group) {
+        group.inLock(() -> {
             doSyncGroup(group, generation, memberId, groupAssignment, callback);
-        }
+        });
     }
 
     protected void doSyncGroup(GroupMetadata group, int generationId, String memberId, Map<String, SyncGroupAssignment> groupAssignment, SyncCallback callback) {
@@ -274,7 +275,7 @@ public class GroupBalanceHandler extends Service {
 
         logger.info("member leave group, memberId: {}, group: {}, state: {}", memberId, groupId, group.getState());
 
-        synchronized (group) {
+        return group.inLock(() -> {
             if (group.stateIs(GroupState.DEAD) || !group.isHasMember(memberId)) {
                 return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
             }
@@ -283,7 +284,7 @@ public class GroupBalanceHandler extends Service {
             groupBalanceManager.removeMemberAndUpdateGroup(group, member);
             group.addExpiredMember(member);
             return KafkaErrorCode.NONE.getCode();
-        }
+        });
     }
 
     public short heartbeat(String groupId, String memberId, int generationId) {
