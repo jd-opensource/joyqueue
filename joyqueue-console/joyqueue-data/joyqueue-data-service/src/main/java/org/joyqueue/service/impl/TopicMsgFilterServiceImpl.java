@@ -164,7 +164,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         consumer.start();
         QueueMetaData metaData = consumer.getQueueMetaData(msgFilter.getTopic());
         Map<Integer, Long> indexMapper = Maps.newHashMap();
-        String filePath = String.format(FILE_PATH_FORMAT, msgFilter.getUserCode(), SystemClock.now());
+        String filePath = String.format(FILE_PATH_FORMAT, msgFilter.getUserCode(),msgFilter.getUserId(), SystemClock.now());
         File file = createFile(filePath);
         long clock = SystemClock.now();
         long filterClock = clock;

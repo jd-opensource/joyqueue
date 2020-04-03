@@ -111,6 +111,11 @@
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-message-filter-default</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
