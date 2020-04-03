@@ -35,5 +35,5 @@ public interface TopicMsgFilterService extends PageService<TopicMsgFilter, QTopi
      * @param filter 过滤条件
      * @throws IOException
      */
-    void execute(QTopicMsgFilter filter) throws Exception;
+    void execute(TopicMsgFilter filter) throws Exception;
 }

@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.other.filter;
+package org.joyqueue.msg.filter;
 
 /**
  * @author jiangnan53
  * @date 2020/4/1
  **/
-@FunctionalInterface
 public interface TopicMsgFilterOutput {
 
     /**

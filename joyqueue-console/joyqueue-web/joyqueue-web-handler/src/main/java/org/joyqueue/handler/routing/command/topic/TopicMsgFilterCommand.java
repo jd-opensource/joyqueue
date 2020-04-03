@@ -26,6 +26,7 @@ import com.jd.laf.web.vertx.response.Responses;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QTopicMsgFilter;
 import org.joyqueue.service.TopicMsgFilterService;
@@ -63,13 +64,24 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         msgFilter.setUserName(session.getName());
         msgFilter.setUserCode(session.getCode());
         msgFilter.setRole(session.getRole());
-        msgFilter.setAdmin(session.getRole() == User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
-        topicMsgFilterService.execute(msgFilter);
+        topicMsgFilterService.execute(filterConvert(msgFilter));
         return Responses.success();
     }
 
     @Override
     public void clean() {
         topicMsgFilterService = null;
+    }
+
+    private TopicMsgFilter filterConvert(QTopicMsgFilter filter) {
+        TopicMsgFilter msgFilter = new TopicMsgFilter();
+        msgFilter.setApp(filter.getApp());
+        msgFilter.setTopic(filter.getTopic());
+        msgFilter.setFilter(filter.getFilter());
+        msgFilter.setQueryTime(filter.getQueryTime());
+        msgFilter.setTimestamp(filter.getTimestamp());
+        msgFilter.setUserCode(filter.getUserCode());
+        msgFilter.setUserId(filter.getUserId());
+        return msgFilter;
     }
 }

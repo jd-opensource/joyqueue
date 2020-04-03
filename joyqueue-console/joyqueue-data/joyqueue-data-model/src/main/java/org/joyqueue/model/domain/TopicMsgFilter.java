@@ -33,6 +33,8 @@ public class TopicMsgFilter extends BaseModel {
      * user code
      */
     private String userCode;
+
+    private Long userId;
     /**
      * 过滤条件
      */
@@ -41,6 +43,20 @@ public class TopicMsgFilter extends BaseModel {
      * 消息的偏移量
      */
     private long offset;
+
+    /**
+     * 从某个{@param timestamp}开始消费
+     */
+    private long timestamp;
+
+    /**
+     * 请求发送时间
+     */
+    private long queryTime;
+
+    private String brokerAddr;
+
+    private String token;
 
     public String getApp() {
         return app;
@@ -80,5 +96,45 @@ public class TopicMsgFilter extends BaseModel {
 
     public void setUserCode(String userCode) {
         this.userCode = userCode;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public long getQueryTime() {
+        return queryTime;
+    }
+
+    public void setQueryTime(long queryTime) {
+        this.queryTime = queryTime;
+    }
+
+    public String getBrokerAddr() {
+        return brokerAddr;
+    }
+
+    public void setBrokerAddr(String brokerAddr) {
+        this.brokerAddr = brokerAddr;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

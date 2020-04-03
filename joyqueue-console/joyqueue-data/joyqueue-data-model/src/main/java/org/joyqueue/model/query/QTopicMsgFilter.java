@@ -35,10 +35,6 @@ public class QTopicMsgFilter extends QKeyword {
      */
     private String topic;
 
-    private String brokerAddr;
-
-    private String token;
-
     /**
      * 从某个{@param timestamp}开始消费
      */
@@ -73,14 +69,6 @@ public class QTopicMsgFilter extends QKeyword {
         this.topic = topic;
     }
 
-    public String getBrokerAddr() {
-        return brokerAddr;
-    }
-
-    public void setBrokerAddr(String brokerAddr) {
-        this.brokerAddr = brokerAddr;
-    }
-
     public long getQueryTime() {
         return queryTime;
     }
@@ -91,13 +79,5 @@ public class QTopicMsgFilter extends QKeyword {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
     }
 }

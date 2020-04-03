@@ -31,8 +31,7 @@ import org.joyqueue.model.domain.ApplicationToken;
 import org.joyqueue.model.domain.Broker;
 import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.query.QTopicMsgFilter;
-import org.joyqueue.other.filter.TopicMsgFilterMatcher;
-import org.joyqueue.other.filter.TopicMsgFilterOutput;
+import org.joyqueue.msg.filter.support.TopicMessageFilterSupport;
 import org.joyqueue.repository.TopicMsgFilterRepository;
 import org.joyqueue.service.ApplicationTokenService;
 import org.joyqueue.service.BrokerService;
@@ -88,14 +87,10 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     @Autowired
     private BrokerService brokerService;
 
-    @Autowired
-    private TopicMsgFilterMatcher filterMatcher;
-
-    @Autowired
-    private TopicMsgFilterOutput filterOutput;
+    private TopicMessageFilterSupport topicMessageFilterSupport = new TopicMessageFilterSupport();
 
     @Override
-    public void execute(QTopicMsgFilter filter) throws Exception {
+    public void execute(TopicMsgFilter filter) throws Exception {
         List<ApplicationToken> appTokens = applicationTokenService.findByApp(filter.getApp());
         if (CollectionUtils.isNotEmpty(appTokens)) {
             filter.setToken(appTokens.get(0).getToken());
@@ -108,14 +103,22 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         if (THREAD_POOL_EXECUTOR.getActiveCount() < MAX_POOL_SIZE) {
             CompletableFuture.supplyAsync(() -> {
                 try {
-                    return consume(filter,filterMatcher);
+                    return consume(filter);
                 } catch (IOException e) {
                     logger.error("Message filter cause error: {}", e.getMessage());
                     return null;
                 }
             }, THREAD_POOL_EXECUTOR).whenCompleteAsync((result, throwable) -> {
                 if (StringUtils.isNotBlank(result)) {
-                    filterOutput.output(result);
+                    topicMessageFilterSupport.output(result);
+                }
+                TopicMsgFilter msgFilter = repository.nextOne(filter.getUserCode());
+                if(msgFilter!=null) {
+                    try {
+                        execute(msgFilter);
+                    } catch (Exception e) {
+                        logger.error("topic message filter execute error: {}",e.getMessage());
+                    }
                 }
             });
         } else {
@@ -151,7 +154,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
     }
 
-    private String consume(QTopicMsgFilter msgFilter,TopicMsgFilterMatcher matcher) throws IOException {
+    private String consume(TopicMsgFilter msgFilter) throws IOException {
         final String url = String.format(URL_FORMAT, msgFilter.getApp(), msgFilter.getBrokerAddr());
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, msgFilter.getToken());
@@ -161,7 +164,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         consumer.start();
         QueueMetaData metaData = consumer.getQueueMetaData(msgFilter.getTopic());
         Map<Integer, Long> indexMapper = Maps.newHashMap();
-        String filePath = String.format(FILE_PATH_FORMAT, msgFilter.getUserName(), msgFilter.getUserId(), SystemClock.now());
+        String filePath = String.format(FILE_PATH_FORMAT, msgFilter.getUserCode(), SystemClock.now());
         File file = createFile(filePath);
         long clock = SystemClock.now();
         long filterClock = clock;
@@ -175,7 +178,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 for (Message message : messages) {
                     clock = SystemClock.now();
                     String content = new String(message.getData());
-                    if (matcher.match(content,msgFilter.getFilter())) {
+                    if (topicMessageFilterSupport.match(content,msgFilter.getFilter())) {
                         filterClock = SystemClock.now();
                         strBuilder.append(content).append('\n');
                         appendCount++;

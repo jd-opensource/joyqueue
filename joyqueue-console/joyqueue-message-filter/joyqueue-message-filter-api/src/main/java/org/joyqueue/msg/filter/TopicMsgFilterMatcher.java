@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.other.filter;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+package org.joyqueue.msg.filter;
 
 /**
  * @author jiangnan53
  * @date 2020/4/1
  **/
-@Service("topicMsgFilterOutput")
-public class TopicMsgFilterOutputImpl implements TopicMsgFilterOutput {
+public interface TopicMsgFilterMatcher {
 
-    private static final Logger logger = LoggerFactory.getLogger(TopicMsgFilterOutputImpl.class);
-
-    @Override
-    public void output(String path) {
-        logger.info("message filter file path: {}",path);
-    }
+    /**
+     * 符合某种匹配的条件
+     * @param content
+     * @param filter
+     * @return
+     */
+    boolean match(String content, String filter);
 }

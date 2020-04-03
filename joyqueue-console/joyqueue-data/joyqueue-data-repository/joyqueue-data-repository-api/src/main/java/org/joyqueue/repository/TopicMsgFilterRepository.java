@@ -15,6 +15,8 @@
  */
 package org.joyqueue.repository;
 
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.query.QTopicMsgFilter;
 import org.springframework.stereotype.Repository;
@@ -25,4 +27,16 @@ import org.springframework.stereotype.Repository;
  **/
 @Repository
 public interface TopicMsgFilterRepository extends PageRepository<TopicMsgFilter, QTopicMsgFilter> {
+
+    /**
+     * 从数据库中获取该用户的下一个任务
+     * @param userCode
+     * @return
+     */
+    TopicMsgFilter nextOne(String userCode);
+
+
+    PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query);
+
+
 }
