@@ -60,10 +60,10 @@ public class DelayedHeartbeat extends DelayedOperation {
     @Override
     protected void onExpiration() {
         group.inLock(() -> {
-            logger.info("group {} Member {} heartbeat expired, join callback = {}, sync callback = {}",
-                    group.getId(), member.getId(), member.getAwaitingJoinCallback(), member.getAwaitingSyncCallback());
-
             if (!groupBalanceManager.shouldKeepMemberAlive(member, heartbeatDeadline)) {
+                logger.info("group {} Member {} heartbeat expired, join callback = {}, sync callback = {}",
+                        group.getId(), member.getId(), member.getAwaitingJoinCallback(), member.getAwaitingSyncCallback());
+
                 groupBalanceManager.removeMemberAndUpdateGroup(group, member);
                 group.addExpiredMember(member);
             }
