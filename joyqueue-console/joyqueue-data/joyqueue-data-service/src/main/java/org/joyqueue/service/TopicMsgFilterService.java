@@ -15,6 +15,8 @@
  */
 package org.joyqueue.service;
 
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.query.QTopicMsgFilter;
 import org.slf4j.Logger;
@@ -36,4 +38,6 @@ public interface TopicMsgFilterService extends PageService<TopicMsgFilter, QTopi
      * @throws IOException
      */
     void execute(TopicMsgFilter filter) throws Exception;
+
+    PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query);
 }

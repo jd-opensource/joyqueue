@@ -25,11 +25,15 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
+import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QTopicMsgFilter;
 import org.joyqueue.service.TopicMsgFilterService;
+
+import java.util.Date;
 
 /**
  * @author jiangnan53
@@ -43,8 +47,8 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
     @Value
     private TopicMsgFilterService topicMsgFilterService;
 
-    @Path("msgFilterStatus")
-    public Response status(@Body @PageQuery QPageQuery<QTopicMsgFilter> qPageQuery) throws Exception {
+    @Path("findTopicMsgFilters")
+    public Response findTopicMsgFilters(@Body @PageQuery QPageQuery<QTopicMsgFilter> qPageQuery) throws Exception {
         Preconditions.checkArgument(qPageQuery != null, "Illegal args.");
         if (qPageQuery.getQuery() != null) {
             qPageQuery.getQuery().setUserId(session.getId());
@@ -53,8 +57,8 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
             qPageQuery.getQuery().setRole(session.getRole());
             qPageQuery.getQuery().setAdmin(session.getRole() == User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
         }
-//        topicMsgFilterService.execute(qPageQuery.getQuery());
-        return Responses.success();
+        PageResult<TopicMsgFilter> result = topicMsgFilterService.findTopicMsgFilters(qPageQuery);
+        return Responses.success(result.getPagination(),result.getResult());
     }
 
     @Path("msgFilter")
@@ -68,6 +72,17 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         return Responses.success();
     }
 
+    @Path("addTopicMsgFilter")
+    public Response addTopicMsgFilter(@Body QTopicMsgFilter msgFilter) throws Exception {
+        Preconditions.checkArgument(msgFilter != null, "Illegal args.");
+        msgFilter.setUserId(session.getId());
+        msgFilter.setUserName(session.getName());
+        msgFilter.setUserCode(session.getCode());
+        msgFilter.setRole(session.getRole());
+        topicMsgFilterService.add(filterConvert(msgFilter));
+        return Responses.success();
+    }
+
     @Override
     public void clean() {
         topicMsgFilterService = null;
@@ -78,10 +93,12 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         msgFilter.setApp(filter.getApp());
         msgFilter.setTopic(filter.getTopic());
         msgFilter.setFilter(filter.getFilter());
-        msgFilter.setQueryTime(filter.getQueryTime());
-        msgFilter.setTimestamp(filter.getTimestamp());
+        msgFilter.setCreateTime(new Date(filter.getQueryTime()));
+        msgFilter.setCreateBy(new Identity(filter.getUserId(),filter.getUserCode()));
+        msgFilter.setOffsetTime(new Date(filter.getTimestamp()));
         msgFilter.setUserCode(filter.getUserCode());
         msgFilter.setUserId(filter.getUserId());
+//        msgFilter.setDescription(filter.getDescription());
         return msgFilter;
     }
 }

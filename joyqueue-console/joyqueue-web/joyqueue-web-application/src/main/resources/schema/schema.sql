@@ -136,3 +136,18 @@ CREATE TABLE IF NOT EXISTS `message_retry` (
 MERGE INTO `user`
 (`id`, `code`, `name`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
 VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
+
+CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+ `topic_code` varchar(128) NOT NULL COMMENT '主题代码',
+ `filter` varchar(128) NOT NULL COMMENT '消息过滤条件',
+ `user_id` bigint(20) NOT NULL COMMENT '用户id',
+ `user_code` varchar(64) NOT NULL COMMENT '用户erp',
+ `create_time` datetime NOT NULL COMMENT '创建时间',
+ `offset_time` datetime COMMENT '请求的offset所在的时间点',
+ `app_code` varchar(100) NOT NULL COMMENT '应用',
+ `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态：-1 结束，0 未执行，1 正在执行',
+ `url` varchar(128) COMMENT '任务结束后生成的cfs链接',
+ `description` varchar(1024) NOT NULL DEFAULT '备注信息' COMMENT '备注信息',
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8;

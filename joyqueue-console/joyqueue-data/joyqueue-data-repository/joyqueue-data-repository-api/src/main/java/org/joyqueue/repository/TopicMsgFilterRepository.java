@@ -36,7 +36,6 @@ public interface TopicMsgFilterRepository extends PageRepository<TopicMsgFilter,
     TopicMsgFilter nextOne(String userCode);
 
 
-    PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query);
-
+    PageResult<TopicMsgFilter> findTopicMsgFiltersByQuery(QPageQuery<QTopicMsgFilter> query);
 
 }

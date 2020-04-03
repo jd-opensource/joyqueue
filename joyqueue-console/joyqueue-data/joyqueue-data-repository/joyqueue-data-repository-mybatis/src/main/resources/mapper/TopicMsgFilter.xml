@@ -5,49 +5,112 @@
 
 <mapper namespace="org.joyqueue.repository.TopicMsgFilterRepository">
 
+    <resultMap id="baseResultMap" type="TopicMsgFilter">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="app" column="app_code" jdbcType="VARCHAR"/>
+        <result property="topic" column="topic_code" jdbcType="VARCHAR"/>
+        <result property="userCode" column="user_code" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="filter" column="filter" jdbcType="VARCHAR"/>
+        <result property="offsetTime" column="offsetTime" jdbcType="TIMESTAMP"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+        a.`id`,
+        a.`topic_code` AS topic,
+        a.`filter`,
+        a.`user_id` AS userId,
+        a.`user_code` AS userCode,
+        a.`create_time` AS createTime,
+        a.`offset_time` AS offsetTime,
+        a.`app_code` AS app,
+        a.`status`,
+        a.`url`,
+        a.`description`
+    </sql>
+
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="TopicMsgFilter">
         INSERT INTO topic_msg_filter(
-            `id`,
             `topic_code`,
             `filter`,
+            `user_id`,
             `user_code`,
             `create_time`,
             `offset_time`,
-            `app`,
+            `app_code`,
             `status`,
-            `url`,
-            `description`)
+            `url`)
         VALUES(
-            #{id},
             #{topic},
             #{filter},
+            #{userId},
             #{userCode},
             #{createTime},
             #{offsetTime},
             #{app},
             #{status},
-            #{url},
-            #{description})
+            #{url})
     </insert>
 
-    <sql id="select">
+    <select id="nextOne" parameterType="String" resultType="TopicMsgFilter">
         SELECT
-            id,
-            `topic_id` AS `topic.id`,
-            `topic_code` AS `topic.code`,
-            msg_importance AS msgImportance,
-            msg_size AS msgSize,
-            msg_amount AS msgAmount,
-            consumer_tps AS consumerTps,
-            description,
-            source,
-            create_time AS createTime,
-            create_by AS `createBy.id`,
-            update_time AS  updateTime,
-            update_by AS  `updateBy.id`,
-            status
-        FROM topic_wiki
-    </sql>
+        <include refid="baseColumn"/>
+        FROM
+        topic_msg_filter a
+        WHERE a.user_code = #{userCode}
+        AND a.status == 0
+        limit 0,1
+    </select>
 
+    <select id="findTopicMsgFiltersByQuery" parameterType="QPageQuery" resultType="TopicMsgFilter">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        topic_msg_filter AS a
+        WHERE a.user_code = #{query.userCode}
+        <if test="query.status &gt;= -1 || query.status &lt;= 1 ">
+        AND a.status = #{query.status}
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="findTopicMsgFiltersCountByQuery" parameterType="QPageQuery" resultType="int">
+        SELECT COUNT(a.id) FROM topic_msg_filter a
+    </select>
+
+    <update id="state" parameterType="topicMsgFilter">
+        UPDATE
+            `topic_msg_filter`
+        SET
+           `status`=#{status},
+           <if test="topic != null">
+           `topic_code` =#{topic},
+           </if>
+           <if test="filter !=null">
+            `filter` =#{filter},
+            </if>
+            <if test="userId!=null">
+            `user_id` =#{userId},
+            </if>
+            <if test="userCode !=null">
+            `user_code` =#{userCode},
+            </if>
+            <if test="createTime!=null">
+            `create_time`=#{createTime},
+            </if>
+            <if test="offsetTime!=null">
+            `offset_time`=#{offsetTime},
+            </if>
+            <if test="app !=null">
+            `app_code`=#{app},
+            </if>
+            <if test="url ！=null">
+            `url` =#{url}
+            </if>
+        WHERE
+            id=#{id}
+    </update>
 
 </mapper>

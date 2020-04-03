@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.msg.filter;
+package org.joyqueue.msg.filter.cfs;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.msg.filter.TopicMsgFilterMatcher;
 
 /**
  * @author jiangnan53
  * @date 2020/4/3
  **/
-public class DefaultTopicMsgFilterMatcher implements TopicMsgFilterMatcher {
+public class TopicMsgFilterCfsMatcher implements TopicMsgFilterMatcher {
     @Override
     public boolean match(String content, String filter) {
         return StringUtils.containsIgnoreCase(content,filter);

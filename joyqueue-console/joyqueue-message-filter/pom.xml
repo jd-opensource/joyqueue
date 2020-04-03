@@ -16,6 +16,7 @@
     <modules>
         <module>joyqueue-message-filter-api</module>
         <module>joyqueue-message-filter-default</module>
+        <module>joyqueue-message-filter-cfs</module>
     </modules>
 
     <dependencies>

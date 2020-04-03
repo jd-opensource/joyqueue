@@ -40,6 +40,10 @@ public class QTopicMsgFilter extends QKeyword {
      */
     private long timestamp;
 
+    private String description;
+
+    private int status = 0;
+
     /**
      * 请求发送时间
      */
@@ -79,5 +83,21 @@ public class QTopicMsgFilter extends QKeyword {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

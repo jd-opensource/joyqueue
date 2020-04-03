@@ -8,8 +8,8 @@
         <d-input v-model="search.filter" placeholder="请输入过滤内容" class="left" style="width: 300px">
           <span slot="prepend">过滤内容</span>
         </d-input>
-        <d-button type="primary" class="left" style="margin-right: 30px" @click="getList">查询状态</d-button>
-        <d-button type="primary" class="right" style="margin-right: 30px" @click="doFilter">搜索</d-button>
+        <d-button type="primary" class="left" @click="getList">查询状态</d-button>
+        <d-button type="primary" class="left" @click="add">添加任务</d-button>
       </div>
     </d-form>
 
@@ -17,8 +17,7 @@
               @on-selection-change="handleSelectionChange" @on-detail="detail"></my-table>
 
     <my-dialog :dialog="detailDialog" @on-dialog-confirm="closeDetailDialog" @on-dialog-cancel="closeDetailDialog" >
-      <my-table :data="filterQueryTableData" :showPin="showTablePin" :showPagination="true" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
-                @on-selection-change="handleSelectionChange" @on-detail="detail"></my-table>
+
     </my-dialog>
   </div>
 </template>
@@ -28,6 +27,7 @@ import apiRequest from '../../utils/apiRequest.js'
 import myDialog from '../../components/common/myDialog.vue'
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud'
+import {timeStampToString} from "../../utils/dateTimeUtils";
 
 export default {
   name: 'messageFilter',
@@ -37,6 +37,9 @@ export default {
   },
   mixins: [ crud ],
   props: {
+    detailItem: {
+      type: Object
+    },
     app: {
       type: String
     },
@@ -51,8 +54,8 @@ export default {
       default: function () {
         return [
           {
-            txt: '报警详情',
-            method: 'on-detail'
+            txt: '执行',
+            method: 'on-do-filter'
           }
         ]
       }
@@ -60,13 +63,7 @@ export default {
     operates: {
       type: Array,
       default: function () {
-        return [
-          {
-            txt: '报警详情',
-            method: 'on-detail',
-            isAdmin: true
-          }
-        ]
+        return []
       }
     },
     search: {
@@ -83,10 +80,25 @@ export default {
   },
   data () {
     return {
+      filterStatus: [
+        {
+          label: '结束',
+          value: -1
+        },
+        {
+          label: '等待',
+          value: 0
+        },
+        {
+          label: '正在执行',
+          value: 1
+        }
+      ],
       apps: [],
       urls: {
         filter: '/topic/msgFilter',
-        status: '/topic/msgFilterStatus'
+        search: '/topic/findTopicMsgFilters',
+        add: '/topic/addTopicMsgFilter'
       },
       showTablePin: false,
       filterQueryTableData: {
@@ -120,14 +132,45 @@ export default {
         rowData: [],
         colData: [
           {
-            title: 'id',
-            key: 'id',
+            title: '应用',
+            key: 'app',
             width: '10%'
           },
           {
-            title: '所在分区',
-            key: 'partition',
+            title: '主题',
+            key: 'topic',
             width: '10%'
+          },
+          {
+            title: '请求时间',
+            key: 'createTime',
+            width: '15%',
+            formatter (item) {
+              return timeStampToString(item.createTime)
+            }
+          },
+          {
+            title: '状态',
+            key: 'status',
+            width: '10%',
+            formatter (item) {
+              switch(item.status) {
+                case 1 :{
+                  return '正在执行'
+                }
+                case 0 : {
+                  return '等待'
+                }
+                case -1: {
+                  return '结束'
+                }
+              }
+            }
+          },
+          {
+            title: '过滤条件',
+            key: 'filter',
+            width: '15%'
           },
           {
             title: '位点',
@@ -135,14 +178,9 @@ export default {
             width: '10%'
           },
           {
-            title: '生产时间',
-            key: 'produceTime',
-            width: '15%'
-          },
-          {
-            title: '消息内容',
-            key: 'content',
-            width: '45%'
+            title: '描述',
+            key: 'description',
+            width: '25%'
           }
         ],
         btns: this.btns,
@@ -162,20 +200,20 @@ export default {
     }
   },
   methods: {
-    doFilter () {
+    add () {
       if (!this.validate()) {
         return
       }
       let data = this.search
-      apiRequest.post(this.urls.filter, {}, data).then((data) => {
-        data.data = data.data || []
-        data.pagination = data.pagination || {
-          totalRecord: data.data.length
+      apiRequest.post(this.urls.add, {}, data).then((data) => {
+        if (data.code === 200) {
+          this.$Message.info('添加成功')
         }
-        this.page.total = data.pagination.totalRecord
-        this.page.page = data.pagination.page
-        this.page.size = data.pagination.size
-        this.tableData.rowData = data.data
+      })
+    },
+    doFilter () {
+      let data = this.search
+      apiRequest.post(this.urls.filter, {}, data).then((data) => {
         if (this.tableData.rowData.length === 0) {
           this.$Message.info('没有搜到数据')
         }
@@ -183,9 +221,6 @@ export default {
     },
     // 从mysql中获取过滤记录
     getList () {
-      if (!this.validate()) {
-        return
-      }
       this.showTablePin = true
       let data = {
         pagination: {
@@ -194,12 +229,7 @@ export default {
         },
         query: {}
       }
-      for (let i in this.search) {
-        if (this.search.hasOwnProperty(i)) {
-          data.query[i] = this.search[i]
-        }
-      }
-      apiRequest.post(this.urls.query, {}, data).then((data) => {
+      apiRequest.post(this.urls.search, {}, data).then((data) => {
         data.data = data.data || []
         data.pagination = data.pagination || {
           totalRecord: data.data.length

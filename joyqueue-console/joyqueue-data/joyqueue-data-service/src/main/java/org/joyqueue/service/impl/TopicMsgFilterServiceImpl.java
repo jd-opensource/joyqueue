@@ -27,6 +27,8 @@ import io.openmessaging.message.Message;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.model.PageResult;
+import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.ApplicationToken;
 import org.joyqueue.model.domain.Broker;
 import org.joyqueue.model.domain.TopicMsgFilter;
@@ -223,8 +225,15 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             }
         }
         consumer.stop();
+        msgFilter.setStatus(-1);
+        repository.update(msgFilter);
         logger.info("message filter consume finished");
         return filePath;
     }
 
+
+    @Override
+    public PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query) {
+        return repository.findTopicMsgFiltersByQuery(query);
+    }
 }

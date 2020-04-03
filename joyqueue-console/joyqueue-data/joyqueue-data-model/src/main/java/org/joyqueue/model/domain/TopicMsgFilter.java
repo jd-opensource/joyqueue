@@ -15,6 +15,8 @@
  */
 package org.joyqueue.model.domain;
 
+import java.util.Date;
+
 /**
  * @author jiangnan53
  * @date 2020/3/30
@@ -45,14 +47,21 @@ public class TopicMsgFilter extends BaseModel {
     private long offset;
 
     /**
-     * 从某个{@param timestamp}开始消费
+     * 从某个{@param offsetTime}开始消费
      */
-    private long timestamp;
+    private Date offsetTime;
 
     /**
-     * 请求发送时间
+     * 任务状态：
+     * -1 结束
+     * 0 未执行 默认
+     * 1 正在执行
      */
-    private long queryTime;
+    private int status = 0;
+
+    private String description;
+
+    private String url;
 
     private String brokerAddr;
 
@@ -98,20 +107,12 @@ public class TopicMsgFilter extends BaseModel {
         this.userCode = userCode;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public Date getOffsetTime() {
+        return offsetTime;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public long getQueryTime() {
-        return queryTime;
-    }
-
-    public void setQueryTime(long queryTime) {
-        this.queryTime = queryTime;
+    public void setOffsetTime(Date offsetTime) {
+        this.offsetTime = offsetTime;
     }
 
     public String getBrokerAddr() {
@@ -136,5 +137,31 @@ public class TopicMsgFilter extends BaseModel {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public int getStatus() {
+        return status;
+    }
+
+    @Override
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }
