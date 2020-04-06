@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="headLine2">
-      <d-input v-model="search.topic" placeholder="请输入队列名" class="input2" @on-enter="getList">
-        <span slot="prepend">队列名</span>
+      <d-input v-model="search.topic" placeholder="请输入主题名" class="input2" @on-enter="getList">
+        <span slot="prepend">主题名</span>
       </d-input>
       <d-input v-model="search.app" placeholder="请输入消费者" class="input2" @on-enter="getList">
         <span slot="prepend">消费者</span>
@@ -94,7 +94,7 @@ export default {
             key: 'id'
           },
           {
-            title: '队列',
+            title: '主题',
             key: 'topic'
           },
           {
