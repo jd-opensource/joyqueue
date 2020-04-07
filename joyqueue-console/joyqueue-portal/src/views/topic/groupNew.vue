@@ -16,6 +16,9 @@
             <d-option v-for="item in addData.replicaGroups" :value="item.brokerId" :key="item.id">{{item.brokerId}}</d-option>
           </d-select>
         </d-form-item>
+        <d-form-item label="Broker分组：" required style="margin-right: 20px;">
+          <d-input v-model="searchData.group" @on-enter="getList" placeholder="请输入Broker分组"  style="width: 150px"></d-input>
+        </d-form-item>
         <d-form-item>
           <d-button type="primary" @click="addNewPartitionGroup">
             添加
@@ -50,6 +53,7 @@ export default {
   mixins: [ crud ],
   data () {
     return {
+      firstOpen: true,
       topic: {},
       namespace: {},
       addData: {
@@ -70,7 +74,8 @@ export default {
         add: `/partitionGroup/add`
       },
       searchData: {
-        keyword: ''
+        keyword: '',
+        group: ''
       },
       tableData: {
         rowData: [{}],
@@ -129,6 +134,19 @@ export default {
           keyword: this.searchData.keyword
         }
       }
+      if (this.data.ip) {
+        data.query.keyword = this.data.ip
+        delete this.data.ip
+        this.urlOrigin.search = '/partitionGroupReplica/searchBrokerToAddNewDefault'
+      } else {
+        data.query.keyword = this.searchData.keyword
+        this.urlOrigin.search = '/partitionGroupReplica/searchBrokerToAddNew'
+      }
+      if (this.searchData.group) {
+        data.query.topic.brokerGroup = this.searchData.group
+      } else {
+        delete data.query.topic.brokerGroup
+      }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         data.data = data.data || []
         data.pagination = data.pagination || {
@@ -138,6 +156,24 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
+        if (this.firstOpen && this.tableData.rowData.length > 0) {
+          let groupCode = this.tableData.rowData[0].group.code
+          let unique = true
+          for (let i in this.tableData.rowData) {
+            if (this.tableData.rowData.hasOwnProperty(i)) {
+              if (this.tableData.rowData[i].group.code !== groupCode) {
+                unique = false
+                break
+              }
+            }
+          }
+          if (unique) {
+            this.searchData.group = groupCode
+          } else {
+            this.searchData.group = ''
+          }
+        }
+        this.firstOpen = false
         this.showTablePin = false
       })
     },
