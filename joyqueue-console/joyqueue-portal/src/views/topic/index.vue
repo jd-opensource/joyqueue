@@ -168,7 +168,7 @@ export default {
             }
           },
           {
-            title: '队列数',
+            title: '分区数',
             key: 'partitions'
           }
         ],
