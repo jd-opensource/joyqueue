@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -220,18 +221,20 @@ public class BrokerServiceImpl implements BrokerService {
     public PageResult<Broker> groupSearch(QPageQuery<QBroker> qPageQuery) throws Exception {
         QBrokerGroupRelated qBrokerGroupRelated =  new QBrokerGroupRelated();
         String groupCode = qPageQuery.getQuery().getGroup().getCode();
-        qBrokerGroupRelated.setGroup(new Identity(groupCode));
+        qBrokerGroupRelated.setKeyword(groupCode);
         QPageQuery<QBrokerGroupRelated> brokerGroupRelatedPageQuery = new QPageQuery<>();
         brokerGroupRelatedPageQuery.setQuery(qBrokerGroupRelated);
         brokerGroupRelatedPageQuery.setPagination(qPageQuery.getPagination());
+
         PageResult<BrokerGroupRelated> brokerGroupRelatedPageResult = brokerGroupRelatedService.findByQuery(brokerGroupRelatedPageQuery);
 
         PageResult<Broker> pageResult = new PageResult<>();
         if (brokerGroupRelatedPageResult !=null && brokerGroupRelatedPageResult.getResult() != null && brokerGroupRelatedPageResult.getResult().size() >0) {
             List<Integer> brokerIds = brokerGroupRelatedPageResult.getResult().stream().map(brokerGroup -> (int)brokerGroup.getId()).collect(Collectors.toList());
+            Map<Long,String> brokerIdGroupMap = brokerGroupRelatedPageResult.getResult().stream().collect(Collectors.toMap(BrokerGroupRelated::getId,item -> item.getGroup().getCode()));
             List<Broker> brokers = brokerNameServerService.getByIdsBroker(brokerIds);
             for(Broker broker:brokers){
-                broker.setGroup(new Identity(groupCode));
+                broker.setGroup(new Identity(brokerIdGroupMap.get(broker.getId())));
             }
             pageResult.setPagination(qPageQuery.getPagination());
             pageResult.setResult(brokers);
