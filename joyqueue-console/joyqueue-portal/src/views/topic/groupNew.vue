@@ -20,7 +20,7 @@
           <d-input v-model="searchData.group" @on-enter="getList" placeholder="请输入Broker分组"  style="width: 150px"></d-input>
         </d-form-item>
         <d-form-item>
-          <d-button type="primary" @click="addNewPartitionGroup">
+          <d-button type="primary" :disabled="btnDisabled" @click="addNewPartitionGroup">
             添加
             <icon name="plus-circle" style="margin-left: 5px;"></icon>
           </d-button>
@@ -53,6 +53,7 @@ export default {
   mixins: [ crud ],
   data () {
     return {
+      btnDisabled: false,
       firstOpen: true,
       topic: {},
       namespace: {},
@@ -178,13 +179,16 @@ export default {
       })
     },
     addNewPartitionGroup () {
+      this.btnDisabled = true
       let addData = this.addData
       if (!addData.partitions) {
         this.$Message.error('请输入队列数量')
+        this.btnDisabled = false
         return
       }
       if (!addData.recLeader) {
         this.$Message.error('请选择推荐leader')
+        this.btnDisabled = false
         return
       }
       let _this = this
@@ -193,6 +197,7 @@ export default {
           _this.$emit('on-partition-group-change')
           _this.$emit('on-dialog-cancel')
         }
+        this.btnDisabled = false
       })
     }
   },
