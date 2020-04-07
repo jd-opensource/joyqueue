@@ -6,8 +6,8 @@
                      :default-time="['00:00:00', '23:59:59']" @on-enter="getList">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="队列名" class="input2" @on-enter="getList">
-        <span slot="prepend">队列名</span>
+      <d-input v-model="search.topic" placeholder="主题名" class="input2" @on-enter="getList">
+        <span slot="prepend">主题名</span>
       </d-input>
       <d-input v-model="search.businessId" placeholder="业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
@@ -151,7 +151,7 @@ export default {
             width: '20%'
           },
           // {
-          //   title:"队列",
+          //   title:"主题",
           //   key: 'topic'
           // },
           {
@@ -218,7 +218,7 @@ export default {
             width: '15%'
           },
           {
-            title: '队列',
+            title: '主题',
             key: 'topic',
             width: '15%'
           }
@@ -249,7 +249,7 @@ export default {
         return
       }
       if (!this.search.topic) {
-        this.$Message.error('队列名不能为空')
+        this.$Message.error('主题名不能为空')
         return
       }
       let oldData = this.tableData.rowData

@@ -2,7 +2,7 @@
   <div>
     <div style="margin-left: 20px;">
       <d-form :model="addData" inline label-width="850">
-        <d-form-item label="队列数量：" required style="margin-right: 20px;">
+        <d-form-item label="分区数量：" required style="margin-right: 20px;">
           <d-input v-model="addData.partitions" placeholder="请输入数字"  style="width: 150px"></d-input>
         </d-form-item>
         <d-form-item label="选举类型：" required style="margin-right: 20px;">
@@ -182,7 +182,7 @@ export default {
       this.btnDisabled = true
       let addData = this.addData
       if (!addData.partitions) {
-        this.$Message.error('请输入队列数量')
+        this.$Message.error('请输入分区数量')
         this.btnDisabled = false
         return
       }
