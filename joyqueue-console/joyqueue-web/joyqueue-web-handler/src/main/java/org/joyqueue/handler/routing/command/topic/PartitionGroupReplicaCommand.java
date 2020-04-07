@@ -20,23 +20,18 @@ import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
-import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.model.ListQuery;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.BrokerGroup;
 import org.joyqueue.model.domain.TopicPartitionGroup;
 import org.joyqueue.model.domain.Broker;
-import org.joyqueue.model.domain.BrokerGroupRelated;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.PartitionGroupReplica;
 import org.joyqueue.model.query.QBroker;
-import org.joyqueue.model.query.QBrokerGroup;
-import org.joyqueue.model.query.QBrokerGroupRelated;
 import org.joyqueue.model.query.QPartitionGroupReplica;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.BrokerGroupService;
@@ -48,7 +43,6 @@ import org.apache.commons.collections.CollectionUtils;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 主题队列-Broker分组 处理器
@@ -109,69 +103,26 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
                 brokerGroup = brokerPage.getResult().get(0).getGroup().getCode();
             }
         }
-        QBroker qBroker2 = new QBroker();
-        // 其实如果brokerGroups.size()>0 则brokerGroups.size()===1
         if (brokerGroup!=null) {
-            ListQuery<QBrokerGroupRelated> brokerGroupRelatedListQuery = new ListQuery<>();
-            QBrokerGroupRelated brokerGroupRelated = new QBrokerGroupRelated();
-            brokerGroupRelated.setGroup(new Identity(brokerGroup));
-            brokerGroupRelatedListQuery.setQuery(brokerGroupRelated);
-            List<BrokerGroupRelated> brokerGroupRelateds = brokerGroupRelatedService.findByQuery(brokerGroupRelatedListQuery);
-            qBroker2.setInBrokerIds(brokerGroupRelateds.stream().map(related -> (int)related.getId()).collect(Collectors.toList()));
+            qPageQuery.getQuery().getTopic().setBrokerGroup(new BrokerGroup(brokerGroup));
         }
         qPageQuery.getQuery().setKeyword("");
-        QPartitionGroupReplica query = qPageQuery.getQuery();
-        List<PartitionGroupReplica> partitionGroupReplicas = service.getByTopicAndGroup(query.getTopic().getCode(), query.getNamespace().getCode(), query.getGroupNo());
-        // 若没有输入broker分组，则继续执行
-        QPageQuery<QBroker> brokerQuery2 = new QPageQuery(qPageQuery.getPagination(), qBroker2);
-        brokerQuery2.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
-        PageResult<Broker> brokerPage2 = brokerService.search(brokerQuery2);
-        List<Broker> brokers = new ArrayList<>();
-
-        if (CollectionUtils.isNotEmpty(partitionGroupReplicas)) {
-            for (Broker broker : brokerPage2.getResult()) {
-                boolean isMatch = false;
-                for (PartitionGroupReplica partitionGroupReplica : partitionGroupReplicas) {
-                    if (partitionGroupReplica.getBrokerId() == broker.getId()) {
-                        isMatch = true;
-                        break;
-                    }
-                }
-                if (!isMatch) {
-                    brokers.add(broker);
-                }
-            }
-        } else {
-            brokers.addAll(brokerPage2.getResult());
+        Response response = toScaleSearch(qPageQuery);
+        List<Broker> brokers = (List<Broker>) response.getData();
+        if (brokers.size()==0) {
+            qPageQuery.getQuery().getTopic().setBrokerGroup(null);
+            return toScaleSearch(qPageQuery);
         }
-        return Responses.success(brokerPage2.getPagination(), brokers);
+        return response;
     }
 
     @Path("searchBrokerToScale")
     public Response toScaleSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
         QPartitionGroupReplica query = qPageQuery.getQuery();
         List<PartitionGroupReplica> partitionGroupReplicas = service.getByTopicAndGroup(query.getTopic().getCode(), query.getNamespace().getCode(), query.getGroupNo());
-        List<BrokerGroup> brokerGroups = null;
-        if (query.getTopic().getBrokerGroup() != null) {
-            QBrokerGroup brokerGroup = new QBrokerGroup();
-            brokerGroup.setCode(query.getTopic().getBrokerGroup().getCode());
-            brokerGroups = brokerGroupService.findAll(brokerGroup).stream().filter(group -> StringUtils.containsIgnoreCase(group.getCode(),brokerGroup.getCode())).collect(Collectors.toList());
-        }
         QBroker qBroker = new QBroker();
-        if (brokerGroups!=null && brokerGroups.size()>0) {
-            ListQuery<QBrokerGroupRelated> brokerGroupRelatedListQuery = new ListQuery<>();
-            List<BrokerGroupRelated> brokerGroupRelateds = new ArrayList<>();
-            for (BrokerGroup brokerGroup: brokerGroups){
-                QBrokerGroupRelated brokerGroupRelated = new QBrokerGroupRelated();
-                brokerGroupRelated.setGroup(new Identity(brokerGroup.getId(),brokerGroup.getCode()));
-                brokerGroupRelatedListQuery.setQuery(brokerGroupRelated);
-                brokerGroupRelateds.addAll(brokerGroupRelatedService.findByQuery(brokerGroupRelatedListQuery));
-            }
-            qBroker.setInBrokerIds(brokerGroupRelateds.stream().map(brokerGroupRelated -> (int)brokerGroupRelated.getId()).collect(Collectors.toList()));
-        }
-        // 如果输入broker分组,brokerGroups.size()还是为0，说明库里没有，则直接返回空数据
-        else if (brokerGroups != null && query.getTopic().getBrokerGroup() != null) {
-            return Responses.success();
+        if (query.getTopic().getBrokerGroup() != null) {
+            qBroker.setGroup(new Identity(query.getTopic().getBrokerGroup().getCode()));
         }
         // 若没有输入broker分组，则继续执行
         QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(), qBroker);
@@ -198,12 +149,14 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         return Responses.success(brokerPage.getPagination(), brokers);
     }
 
+    @Path("searchBrokerToAddNewDefault")
+    public Response toAddNewPartitionGroupDefaultSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
+        return toScaleDefaultSearch(qPageQuery);
+    }
 
     @Path("searchBrokerToAddNew")
     public Response toAddNewPartitionGroupSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
-        QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(), new QBroker());
-        PageResult<Broker> brokerPage = brokerService.search(brokerQuery);
-        return Responses.success(brokerPage.getPagination(), brokerPage.getResult());
+        return toScaleSearch(qPageQuery);
     }
 
     @Override
