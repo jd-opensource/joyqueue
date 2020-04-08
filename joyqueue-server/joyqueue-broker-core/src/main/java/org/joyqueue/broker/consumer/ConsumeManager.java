@@ -166,7 +166,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             logger.warn("archive manager is null.");
         }
         this.filterMessageSupport = new FilterMessageSupport(clusterManager);
-        this.partitionManager = new PartitionManager(clusterManager, sessionManager);
+        this.partitionManager = consumeConfig.useLegacyPartitionManager() ? new LegacyPartitionManager(clusterManager, sessionManager): new CasPartitionManager(clusterManager, sessionManager);
         this.positionManager = new PositionManager(clusterManager, storeService, consumeConfig);
         this.brokerContext.positionManager(positionManager);
         this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager, consumeConfig);
@@ -199,6 +199,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Close.close(partitionConsumption);
         Close.close(concurrentConsumption);
         resetBroadcastIndexTimer.cancel();
+        partitionManager.close();
         logger.info("ConsumeManager is stopped.");
     }
 
