@@ -25,6 +25,7 @@ import org.joyqueue.broker.consumer.model.PullResult;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.network.traffic.Traffic;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
+import org.joyqueue.broker.protocol.command.FetchPartitionMessageRequest;
 import org.joyqueue.broker.protocol.command.FetchPartitionMessageResponse;
 import org.joyqueue.broker.protocol.converter.CheckResultConverter;
 import org.joyqueue.domain.TopicName;
@@ -33,7 +34,6 @@ import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.network.command.BooleanAck;
 import org.joyqueue.network.command.FetchPartitionMessageAckData;
 import org.joyqueue.network.command.FetchPartitionMessageData;
-import org.joyqueue.network.command.FetchPartitionMessageRequest;
 import org.joyqueue.network.command.JoyQueueCommandType;
 import org.joyqueue.network.protocol.annotation.FetchHandler;
 import org.joyqueue.network.session.Connection;
@@ -92,8 +92,13 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
                 if (!checkResult.isSuccess()) {
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport,
                             consumer.getTopic(), partition, consumer.getApp(), checkResult.getJoyQueueCode());
-                    buildFetchPartitionMessageAckData(topic, entry.getValue(), CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode()), result);
-                    traffic.record(topic, 0, 0);
+                    result.put(topic, partitionEntry.getKey(),
+                            new FetchPartitionMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
+                    continue;
+                }
+
+                if (fetchPartitionMessageRequest.getTraffic().isLimited(entry.getKey())) {
+                    result.put(topic, partitionEntry.getKey(), new FetchPartitionMessageAckData(JoyQueueCode.SUCCESS));
                     continue;
                 }
 
@@ -109,13 +114,6 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
         fetchPartitionMessageResponse.setTraffic(traffic);
         fetchPartitionMessageResponse.setData(result);
         return new Command(fetchPartitionMessageResponse);
-    }
-
-    protected void buildFetchPartitionMessageAckData(String topic, Map<Short, FetchPartitionMessageData> partitionMap, JoyQueueCode code, Table<String, Short, FetchPartitionMessageAckData> result) {
-        FetchPartitionMessageAckData fetchPartitionMessageAckData = new FetchPartitionMessageAckData(code);
-        for (Map.Entry<Short, FetchPartitionMessageData> entry : partitionMap.entrySet()) {
-            result.put(topic, entry.getKey(), fetchPartitionMessageAckData);
-        }
     }
 
     protected FetchPartitionMessageAckData fetchMessage(Transport transport, Consumer consumer, short partition, long index, int count) {

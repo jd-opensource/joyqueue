@@ -29,9 +29,4 @@ public interface FetchResponseTrafficPayload extends ResponseTrafficPayload, Tra
     default String getTrafficType() {
         return TYPE;
     }
-
-    @Override
-    default void onLimited() {
-
-    }
 }

@@ -57,15 +57,6 @@ public class FetchResponse extends KafkaRequestOrResponse implements FetchRespon
     }
 
     @Override
-    public void onLimited() {
-        for (Map.Entry<String, List<PartitionResponse>> entry : partitionResponses.entrySet()) {
-            for (PartitionResponse partitionResponse : entry.getValue()) {
-                partitionResponse.getMessages().clear();
-            }
-        }
-    }
-
-    @Override
     public String toString() {
         StringBuilder responseStringBuilder = new StringBuilder();
         responseStringBuilder.append("Name: " + this.getClass().getSimpleName());

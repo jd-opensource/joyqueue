@@ -29,6 +29,7 @@ import org.joyqueue.broker.polling.LongPollingManager;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.JoyQueueContextAware;
+import org.joyqueue.broker.protocol.command.FetchTopicMessageRequest;
 import org.joyqueue.broker.protocol.command.FetchTopicMessageResponse;
 import org.joyqueue.broker.protocol.converter.CheckResultConverter;
 import org.joyqueue.domain.TopicName;
@@ -37,7 +38,6 @@ import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.network.command.BooleanAck;
 import org.joyqueue.network.command.FetchTopicMessageAckData;
 import org.joyqueue.network.command.FetchTopicMessageData;
-import org.joyqueue.network.command.FetchTopicMessageRequest;
 import org.joyqueue.network.command.JoyQueueCommandType;
 import org.joyqueue.network.protocol.annotation.FetchHandler;
 import org.joyqueue.network.session.Connection;
@@ -96,7 +96,11 @@ public class FetchTopicMessageRequestHandler implements JoyQueueCommandHandler, 
             if (!checkResult.isSuccess()) {
                 logger.warn("checkReadable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, fetchTopicMessageRequest.getApp(), checkResult.getJoyQueueCode());
                 result.put(topic, new FetchTopicMessageAckData(CheckResultConverter.convertFetchCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
-                traffic.record(topic, 0, 0);
+                continue;
+            }
+
+            if (fetchTopicMessageRequest.getTraffic().isLimited(topic)) {
+                result.put(topic, new FetchTopicMessageAckData(JoyQueueCode.SUCCESS));
                 continue;
             }
 

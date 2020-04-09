@@ -17,6 +17,8 @@ package org.joyqueue.broker.limit.support;
 
 import org.joyqueue.broker.limit.RateLimiter;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * RateLimiter
  *
@@ -30,6 +32,7 @@ public class DefaultRateLimiter implements RateLimiter {
 
     private com.google.common.util.concurrent.RateLimiter tpsRateLimiter;
     private com.google.common.util.concurrent.RateLimiter trafficRateLimiter;
+    private Semaphore semaphore = new Semaphore(1);
 
     public DefaultRateLimiter(int tps) {
         this.tps = tps;
@@ -62,5 +65,16 @@ public class DefaultRateLimiter implements RateLimiter {
             return true;
         }
         return trafficRateLimiter.tryAcquire(Math.min(traffic, this.traffic));
+    }
+
+    @Override
+    public boolean tryAcquireRequire() {
+        return semaphore.tryAcquire();
+    }
+
+    @Override
+    public boolean releaseRequire() {
+        semaphore.release();
+        return true;
     }
 }

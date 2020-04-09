@@ -153,7 +153,15 @@ public class ProduceRequest extends KafkaRequestOrResponse {
             if (CollectionUtils.isEmpty(messages)) {
                 return 0;
             }
-            return messages.size();
+            int result = 0;
+            for (KafkaBrokerMessage message : messages) {
+                if (message.isBatch()) {
+                    result += message.getFlag();
+                } else {
+                    result += 1;
+                }
+            }
+            return result;
         }
 
         public int getTraffic() {

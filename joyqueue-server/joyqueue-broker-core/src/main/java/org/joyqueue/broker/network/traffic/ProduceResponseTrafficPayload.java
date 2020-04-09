@@ -29,9 +29,4 @@ public interface ProduceResponseTrafficPayload extends ResponseTrafficPayload, T
     default String getTrafficType() {
         return TYPE;
     }
-
-    @Override
-    default void onLimited() {
-
-    }
 }

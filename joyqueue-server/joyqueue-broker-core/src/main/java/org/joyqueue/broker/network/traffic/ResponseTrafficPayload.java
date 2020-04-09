@@ -23,5 +23,4 @@ package org.joyqueue.broker.network.traffic;
  */
 public interface ResponseTrafficPayload extends TrafficPayload {
 
-    void onLimited();
 }

@@ -77,6 +77,10 @@ public class Traffic {
         this.limited = limited;
     }
 
+    public boolean isLimited() {
+        return limited;
+    }
+
     public void limited(String topic, boolean limited) {
         if (isLimited == null) {
             isLimited = Maps.newHashMap();

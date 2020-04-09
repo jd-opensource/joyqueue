@@ -39,8 +39,6 @@ import org.joyqueue.broker.kafka.message.converter.KafkaMessageConverter;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.broker.network.traffic.Traffic;
-import org.joyqueue.domain.PartitionGroup;
-import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.message.BrokerMessage;
@@ -102,7 +100,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
 //        IsolationLevel isolationLevel = IsolationLevel.valueOf(fetchRequest.getIsolationLevel());
         int maxBytes = fetchRequest.getMaxBytes();
-        Traffic traffic = fetchRequest.getTraffic();
+        Traffic traffic = new Traffic(clientId);
 
         Map<String, List<FetchResponse.PartitionResponse>> fetchPartitionResponseMap = Maps.newHashMapWithExpectedSize(partitionRequestMap.size());
         int currentBytes = 0;
@@ -123,7 +121,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                     continue;
                 }
 
-                if (traffic.isLimited(topic.getFullName()) || currentBytes > maxBytes) {
+                if (fetchRequest.getTraffic().isLimited(topic.getFullName()) || currentBytes > maxBytes) {
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode()));
                     continue;
                 }
@@ -133,7 +131,6 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJoyQueueCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode());
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
-                    traffic.record(topic.getFullName(), 0, 0);
                     continue;
                 }
 
@@ -149,29 +146,13 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
             fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);
         }
 
-        FetchResponse fetchResponse = new FetchResponse() {
-            @Override
-            public void onLimited() {
-                for (Map.Entry<String, List<PartitionResponse>> entry : fetchPartitionResponseMap.entrySet()) {
-                    TopicConfig topicConfig = clusterManager.getTopicConfig(TopicName.parse(entry.getKey()));
-                    for (PartitionResponse partitionResponse : entry.getValue()) {
-                        PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition((short) partitionResponse.getPartition());
-                        if (partitionGroup != null) {
-                            brokerMonitor.onGetMessage(entry.getKey(), clientId, partitionGroup.getGroup()
-                                    , (short) partitionResponse.getPartition(), -partitionResponse.getMessages().size(), -partitionResponse.getBytes(), 0);
-                        }
-                        partitionResponse.getMessages().clear();
-                    }
-                }
-            }
-        };
-
+        FetchResponse fetchResponse = new FetchResponse();
         fetchResponse.setPartitionResponses(fetchPartitionResponseMap);
         fetchResponse.setTraffic(traffic);
         Command response = new Command(fetchResponse);
 
-        // 如果当前拉取消息量小于最小限制，那么延迟响应
-        if (fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0 && config.getFetchDelay()) {
+        // 如果没有被限流，并且当前拉取消息量小于最小限制，那么延迟响应
+        if (!fetchRequest.getTraffic().isLimited() && fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0 && config.getFetchDelay()) {
             delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(fetchRequest.getMaxWait()) {
                 @Override
                 protected void onComplete() {
