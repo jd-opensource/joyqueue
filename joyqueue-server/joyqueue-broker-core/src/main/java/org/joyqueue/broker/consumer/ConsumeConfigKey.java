@@ -32,6 +32,8 @@ public enum ConsumeConfigKey implements PropertyDef {
     BROADCAST_INDEX_RESET_INTERVAL("consume.broadcast.index.reset.interval", 1000 * 60 * 5, Type.INT),
     BROADCAST_INDEX_RESET_TIME("consume.broadcast.index.reset.time", 1000 * 60 * 60 * 24 * 2, Type.INT),
     INDEX_FLUSH_INTERVAL("consume.index.flush.interval", 1000 * 5, Type.INT),
+    // 是否使用旧版的PartitionManager
+    USE_LEGACY_PARTITION_MANAGER("consume.legacy.partition.manager", false, Type.BOOLEAN),
 
     ;
     private String name;
