@@ -23,19 +23,19 @@ import org.joyqueue.network.handler.ConnectionHandler;
 import org.joyqueue.network.protocol.Protocol;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.mqtt.MqttDecoder;
 import io.netty.handler.codec.mqtt.MqttEncoder;
 
 /**
  * @author majun8
  */
-public class MqttProtocolHandlerPipeline extends ChannelInitializer {
+public class MqttProtocolHandlerPipeline extends AbstractMqttProtocolPipeline {
 
     private Protocol protocol;
     private BrokerContext brokerContext;
 
     public MqttProtocolHandlerPipeline(Protocol protocol, ChannelHandler channelHandler, BrokerContext brokerContext) {
+        super(brokerContext);
         this.protocol = protocol;
         this.brokerContext = brokerContext;
         if (channelHandler instanceof DefaultProtocolHandlerPipeline) {
@@ -47,18 +47,20 @@ public class MqttProtocolHandlerPipeline extends ChannelInitializer {
     @Override
     protected void initChannel(Channel channel) throws Exception {
         channel.pipeline()
-                .addLast(new MqttDecoder())
+                .addLast(new MqttDecoder(mqttContext.getMqttConfig().getMaxPayloadSize()))
                 .addLast(MqttEncoder.INSTANCE)
                 .addLast(new ConnectionHandler())
                 .addLast(newMqttCommandInvocation());
     }
 
+    @Override
     protected MqttCommandInvocation newMqttCommandInvocation() {
         return new MqttCommandInvocation(newMqttHandlerDispatcher());
     }
 
+    @Override
     protected MqttHandlerDispatcher newMqttHandlerDispatcher() {
-        MqttHandlerDispatcher mqttHandlerDispatcher = new MqttHandlerDispatcher(protocol.createCommandHandlerFactory(), brokerContext);
+        MqttHandlerDispatcher mqttHandlerDispatcher = new MqttHandlerDispatcher(protocol.createCommandHandlerFactory(), brokerContext, mqttContext);
         try {
             mqttHandlerDispatcher.start();
         } catch (Exception e) {
