@@ -47,10 +47,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class CasPartitionManager implements PartitionManager {
 
-    private final static Logger logger = LoggerFactory.getLogger(CasPartitionManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(CasPartitionManager.class);
 
     // 清理线程，每30分钟清理一次
-    private final static long CLEAN_INTERVAL_MS = 30L * 60 * 1000;
+    private static final long CLEAN_INTERVAL_MS = 30L * 60 * 1000;
 
     // 集群管理器
     private ClusterManager clusterManager;

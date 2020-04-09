@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Date: 2020/4/2
  */
 public class CasLock {
-    private final static long FREE = -1L;
+    private static final long FREE = -1L;
     private final AtomicLong lockThread = new AtomicLong(FREE);
     private final AtomicLong references = new AtomicLong(0L);
 

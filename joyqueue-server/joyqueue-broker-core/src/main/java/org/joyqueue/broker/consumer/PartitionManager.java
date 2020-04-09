@@ -48,7 +48,7 @@ public interface PartitionManager {
 
     void increaseRetryProbability(Consumer consumer);
 
-    abstract void decreaseRetryProbability(Consumer consumer);
+    void decreaseRetryProbability(Consumer consumer);
 
     List<Short> getPriorityPartition(TopicName topic);
 
