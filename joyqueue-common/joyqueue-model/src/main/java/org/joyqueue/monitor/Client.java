@@ -41,6 +41,8 @@ public class Client extends BaseMonitorInfo {
     private boolean producerRole = false;
     // 是否是消费者
     private boolean consumerRole = false;
+    // 是否认证
+    private boolean isAuth;
 
     public String getConnectionId() {
         return connectionId;
@@ -136,5 +138,13 @@ public class Client extends BaseMonitorInfo {
 
     public long getCreateTime() {
         return createTime;
+    }
+
+    public void setAuth(boolean auth) {
+        isAuth = auth;
+    }
+
+    public boolean isAuth() {
+        return isAuth;
     }
 }
