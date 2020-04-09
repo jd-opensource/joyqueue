@@ -71,7 +71,7 @@ public class PartitionManagerTest {
         boolean result = partitionManager.tryOccupyPartition(consumer, partition, occupyTimeout);
         Assert.assertEquals(false, result);
 
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         boolean result2 = partitionManager.tryOccupyPartition(consumer, partition, occupyTimeout);
         Assert.assertEquals(true, result2);
     }
