@@ -158,11 +158,14 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         if (this.firstOpen && this.tableData.rowData.length > 0) {
-          let groupCode = this.tableData.rowData[0].group.code
+          let groupCode = ''
+          if (this.tableData.rowData[0].group) {
+            groupCode = this.tableData.rowData[0].group.code
+          }
           let unique = true
           for (let i in this.tableData.rowData) {
             if (this.tableData.rowData.hasOwnProperty(i)) {
-              if (this.tableData.rowData[i].group.code !== groupCode) {
+              if (this.tableData.rowData[i].group && this.tableData.rowData[i].group.code !== groupCode) {
                 unique = false
                 break
               }

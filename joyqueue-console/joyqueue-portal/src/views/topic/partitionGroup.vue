@@ -344,7 +344,7 @@ export default {
       this.getList()
     },
     groupNew () {
-      this.groupNewDialogData = {topic: this.searchData.topic, namespace: this.searchData.namespace,ip: this.searchData[0].ip}
+      this.groupNewDialogData = {topic: this.searchData.topic, namespace: this.searchData.namespace,ip: this.tableData.rowData[0].ip}
       this.groupNewDialog.visible = true
     },
     groupMerge (item) {
