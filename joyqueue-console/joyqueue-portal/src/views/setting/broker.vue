@@ -1,9 +1,14 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/Broker分组编码/IP" class="left mr10"
+      <d-input v-model="searchData.keyword" placeholder="请输入ID/IP" class="left mr10"
                style="width:300px" @on-enter="getList">
-        <span slot="prepend">关键词</span>
+        <span slot="prepend">&nbsp;ID/IP&nbsp;</span>
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+      </d-input>
+      <d-input v-model="searchData.group" placeholder="请输入Broker分组编码" class="left mr10"
+               style="width:300px" @on-enter="getList">
+        <span slot="prepend">分组编码</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
       <slot name="extendBtn"></slot>
@@ -219,6 +224,10 @@ export default {
   },
   methods: {
     getList () {
+      if(this.searchData.keyword&&this.searchData.group){
+        this.$Message.error("验证不通过，ID/IP搜索和Broker分组编号不能同时搜索")
+        return
+      }
       this.showTablePin = true
       let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {

@@ -44,7 +44,7 @@ import org.joyqueue.service.TopicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,12 +63,17 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QConsumer> qPageQuery) throws Exception {
         QConsumer query = qPageQuery.getQuery();
-        List<Consumer> consumers = Collections.emptyList();
+        List<Consumer> consumers = new ArrayList<>(0);
 
-        if (query.getApp() != null) {
+        boolean appFlag = true;
+
+        if (query.getApp() != null && query.getTopic() ==null) {
             consumers = service.findByApp(query.getApp().getCode());
-        } else if (query.getTopic() != null) {
+        } else if (query.getTopic() != null && query.getApp() == null) {
+            appFlag = false;
             consumers = service.findByTopic(query.getTopic().getCode(), query.getTopic().getNamespace().getCode());
+        } else if (query.getApp() !=null && query.getTopic()!=null) {
+            consumers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(),query.getTopic().getCode(),query.getApp().getCode(),null));
         }
 
         if (CollectionUtils.isNotEmpty(consumers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
@@ -76,8 +81,14 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
             Iterator<Consumer> iterator = consumers.iterator();
             while (iterator.hasNext()) {
                 Consumer consumer = iterator.next();
-                if (!consumer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
-                    iterator.remove();
+                if (appFlag) {
+                    if (!consumer.getTopic().getCode().contains(qPageQuery.getQuery().getKeyword())) {
+                        iterator.remove();
+                    }
+                } else {
+                    if (!consumer.getApp().getCode().contains(qPageQuery.getQuery().getKeyword())) {
+                        iterator.remove();
+                    }
                 }
             }
         }

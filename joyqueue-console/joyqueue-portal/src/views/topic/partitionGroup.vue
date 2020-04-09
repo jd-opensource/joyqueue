@@ -327,7 +327,7 @@ export default {
       this.positionDialog.visible = false
     },
     groupScale (item) {
-      this.groupScaleDialogData = {groupNo: item.groupNo, topic: {id: item.topic.id, code: item.topic.code}, namespace: {id: item.namespace.id, code: item.namespace.code}}
+      this.groupScaleDialogData = {groupNo: item.groupNo, topic: {id: item.topic.id, code: item.topic.code}, namespace: {id: item.namespace.id, code: item.namespace.code}, ip: item.ip}
       this.groupScaleDialog.visible = true
     },
     groupScaleConfirm () {
@@ -344,7 +344,7 @@ export default {
       this.getList()
     },
     groupNew () {
-      this.groupNewDialogData = {topic: this.searchData.topic, namespace: this.searchData.namespace}
+      this.groupNewDialogData = {topic: this.searchData.topic, namespace: this.searchData.namespace,ip: this.searchData[0].ip}
       this.groupNewDialog.visible = true
     },
     groupMerge (item) {

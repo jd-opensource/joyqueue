@@ -68,7 +68,7 @@ export default {
           {
             txt: '删除',
             method: 'on-del',
-            isAdmin: true
+            isAdmin: 1
           }
         ]
       }
@@ -168,7 +168,7 @@ export default {
             }
           },
           {
-            title: '队列数',
+            title: '分区数',
             key: 'partitions'
           }
         ],

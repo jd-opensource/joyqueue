@@ -29,6 +29,8 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
     private long lastAckTime;
     private long leftIndex;
     private long rightIndex;
+    private long tps;
+    private long traffic;
 
     public PartitionAckMonitorInfo() {
 
@@ -89,5 +91,21 @@ public class PartitionAckMonitorInfo extends BaseMonitorInfo {
 
     public long getRightIndex() {
         return rightIndex;
+    }
+
+    public long getTps() {
+        return tps;
+    }
+
+    public void setTps(long tps) {
+        this.tps = tps;
+    }
+
+    public long getTraffic() {
+        return traffic;
+    }
+
+    public void setTraffic(long traffic) {
+        this.traffic = traffic;
     }
 }

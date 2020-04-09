@@ -1,5 +1,5 @@
 <template>
-  <d-form  ref="form" :model="formData" :rules="rules"  label-width="100px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
+  <d-form  ref="form" :model="formData" :rules="rules"  label-width="120px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
     <d-form-item label="代码:" prop="code" :error="error.code" >
       <d-input  v-model="formData.code" :disabled="type" placeholder="如app_slice_pending" style="width: 60%" ></d-input>
     </d-form-item>
@@ -18,8 +18,11 @@
     <d-form-item label="来源:" prop="source"  >
       <d-input style="width: 60%" v-model="formData.source" placeholder="指标来源"></d-input>
     </d-form-item>
-    <d-form-item label="提供方:" prop="source"  >
+    <d-form-item label="提供方:" prop="provider"  >
       <d-input style="width: 60%" v-model="formData.provider" placeholder="指标提供方"></d-input>
+    </d-form-item>
+    <d-form-item label="用户是否开放权限:"  >
+      <d-switch v-model="formData.userPermission"></d-switch>
     </d-form-item>
     <d-form-item label="描述:"  >
       <d-input style="width: 60%" v-model="formData.description" placeholder="描述"></d-input>
@@ -47,7 +50,8 @@ export default {
           aggregator: '',
           groupField: '',
           groupFieldArray: [],
-          summaryLevel: ''
+          summaryLevel: '',
+          userPermission: false
         }
       }
     }

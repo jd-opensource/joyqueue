@@ -428,7 +428,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
      * 根据上一条索引来验证这条索引的合法性
      * @param current 当前索引
      * @param previous 上一条索引
-     * @return
+     * @return true 合法
      */
     private boolean verifyCurrentIndex(IndexItem current, IndexItem previous) {
         return current.getLength() > 0 && current.getOffset() > previous.getOffset();
@@ -659,7 +659,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         indexStore.appendByteBuffer(indexBuffer);
     }
 
-    private void write() throws IOException, InterruptedException {
+    private void write() {
         WriteCommand writeCommand = null;
         if(!writeLock.tryLock()) {
             throw new IllegalStateException("Acquire write lock failed!");
@@ -906,7 +906,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     /**
      *
      * @param indexStore  partition index store
-     * @param time
+     * @param time 查询时间
      * @return true if partition 的最早消息时间小于指定时间
      *
      **/
@@ -917,11 +917,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         // message send time
         long clientTimestamp=MessageParser.getLong(message,MessageParser.CLIENT_TIMESTAMP);
         long offset=MessageParser.getInt(message,MessageParser.STORAGE_TIMESTAMP);
-        if(clientTimestamp+offset<time){
-            return true;
-        }else{
-            return false;
-        }
+        return clientTimestamp + offset < time;
     }
 
 
@@ -952,24 +948,24 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     @Override
     public synchronized void start() {
-        if (config.printMetricIntervalMs > 0) {
-            metricThread.start();
+        if(started.compareAndSet(false, true)) {
+            if (config.printMetricIntervalMs > 0) {
+                metricThread.start();
+            }
+            startFlushThread();
         }
-//        startCallbackThread();
-        startFlushThread();
-        started.set(true);
     }
 
-//    private void startCallbackThread() {
-//        this.callbackThread.start();
-//    }
 
     private void startFlushThread() {
-        flushLoopThread.start();
+        if(started.get()) {
+            flushLoopThread.start();
+        }
     }
 
 
     private void startWriteThread() {
+
         this.writeLoopThread.start();
     }
 
@@ -980,7 +976,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         // 此时logger已经被关闭，无法使用。
         try {
             if (started.compareAndSet(true, false)) {
-                System.out.println("Waiting for flush finished...");
+                logSafe("Stopping store {}-{}...", topic, partitionGroup);
+                logSafe("Waiting for flush finished {}-{}...", topic, partitionGroup);
                 try {
                     while (!isAllStoreClean()) {
                         Thread.sleep(50);
@@ -988,29 +985,38 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                 } catch (InterruptedException e) {
                     logger.error(e.getMessage(), e);
                 }
-                System.out.println("Stopping flush thread...");
+                logSafe("Stopping flush thread {}-{}...", topic, partitionGroup);
+
                 stopFlushThread();
                 flushCheckpoint();
-                System.out.println("Stopping callback thread...");
 
-//                stopCallbackThread();
                 if (config.printMetricIntervalMs > 0) {
+                    logSafe("Stopping metric threads {}-{}...", topic, partitionGroup);
                     metricThread.stop();
                 }
                 System.out.println("Store stopped. " + base.getAbsolutePath());
+                logSafe("Store stopped {}-{}.", topic, partitionGroup);
             }
         } catch (Throwable t) {
             logger.error(t.getMessage(),t);
         }
     }
 
+    private void logSafe(String format, Object... arguments) {
+        try {
+            logger.info(format, arguments);
+        } catch (Throwable t) {
+            System.out.println(
+                    String.format(
+                        format.replaceAll("\\{}", "%s"), arguments
+                    )
+            );
+        }
+    }
     private boolean isAllStoreClean() {
         return Stream.concat(Stream.of(store), partitionMap.values().stream().map(partition -> partition.store)).allMatch(PositioningStore::isClean);
     }
 
-//    private void stopCallbackThread() {
-//        this.callbackThread.stop();
-//    }
 
     private void stopFlushThread() {
         flushLoopThread.stop();
@@ -1055,8 +1061,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     @Override
     public void enable() {
-        if (!enabled.get()) {
-            enabled.set(true);
+        if (started.get() && enabled.compareAndSet(false, true)) {
             startWriteThread();
         }
     }

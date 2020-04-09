@@ -63,4 +63,9 @@ public class MetricCommand extends CommandSupport<Metric,MetricService,QMetric> 
     public Response findAll() throws Exception {
         return Responses.success(service.findByQuery(new ListQuery<>(new QMetric())));
     }
+
+    @Path("findByPermission")
+    public Response findByPermission(@QueryParam("userPermission") Boolean userPermission) throws Exception {
+        return Responses.success(service.findByQuery(new ListQuery<>(new QMetric(userPermission))));
+    }
 }

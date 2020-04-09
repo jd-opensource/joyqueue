@@ -1,6 +1,6 @@
 <template>
   <div>
-    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
+    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
                    :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
@@ -10,7 +10,7 @@
 import Vue from 'vue'
 import consumerBase from '../monitor/consumerBase.vue'
 import { getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
-    clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender, getTopicCodeByCode } from '../../utils/common.js'
+  clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender, getTopicCodeByCode } from '../../utils/common.js'
 
 export default {
   name: 'consumer',
@@ -39,26 +39,25 @@ export default {
           title: '主题',
           key: 'topic.code',
           width: 100,
-            render: (h, params) => {
-                const topic = params.item.topic
-                const namespace = params.item.namespace
-                const topicId = getTopicCodeByCode(topic.code, namespace.code)
-                return h('d-button', {
-                    props: {
-                        type: 'borderless',
-                        color: 'primary'
-                    },
-                    style: {
-                        color: '#3366FF'
-                    },
-                    on: {
-                        click: () => {
-                            this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-                                query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'consumer' }})
-                        }
-                    }
-                }, topic.code)
-            }
+          render: (h, params) => {
+            const topic = params.item.topic
+            const namespace = params.item.namespace
+            const topicId = getTopicCodeByCode(topic.code, namespace.code)
+            return h('label', {
+              style: {
+                color: '#3366FF'
+              },
+              on: {
+                click: () => {
+                  this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
+                    query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'consumer' }})
+                },
+                mousemove: (event) => {
+                  event.target.style.cursor = 'pointer'
+                }
+              }
+            }, topic.code)
+          }
         },
         {
           title: '命名空间',
@@ -113,11 +112,7 @@ export default {
           render: (h, params) => {
             const retry = params.item.retry
             const formatNumFilter = Vue.filter('formatNum')
-            return h('d-button', {
-              props: {
-                type: 'borderless',
-                color: 'primary'
-              },
+            return h('label', {
               style: {
                 color: '#3366FF'
               },
@@ -133,6 +128,9 @@ export default {
                       tab: 'retry'
                     }
                   })
+                },
+                mousemove: (event) => {
+                  event.target.style.cursor = 'pointer'
                 }
               }
             }, retry === undefined ? 0 : formatNumFilter(retry.count))

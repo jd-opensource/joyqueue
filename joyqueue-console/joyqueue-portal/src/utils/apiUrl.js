@@ -84,6 +84,9 @@ export default {
   },
   common: {
     findSubscribeGroup: `/consumer/findAllSubscribeGroups`
+  },
+  monitor: {
+    redirectUrl: `/grafana/getRedirectUrl`
   }
 
 }

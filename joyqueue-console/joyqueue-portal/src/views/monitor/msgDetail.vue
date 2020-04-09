@@ -149,7 +149,11 @@ export default {
         return
       }
       if (!this.searchData.timestamp && !this.searchData.index) {
-        this.$Message.error('验证不通过: 开始时间或位点至少填写一项')
+        this.$Message.error('验证不通过: 开始时间或位点需要填写其中一项')
+        return
+      }
+      if (this.searchData.timestamp && this.searchData.index) {
+        this.$Message.error('验证不通过: 开始时间或位点只能填写其中一项')
         return
       }
       this.showTablePin = true

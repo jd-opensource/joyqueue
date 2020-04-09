@@ -15,21 +15,16 @@
  */
 package org.joyqueue.broker.store;
 
-import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.time.SystemClock;
-
 import java.io.IOException;
 import java.util.Map;
 
 /**
  * @author majun8
  */
-public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy {
-    private long maxIntervalTime;
-    private boolean keepUnconsumed = true;
-
+public class IntervalTimeStoreCleaningStrategy extends AbstractStoreCleaningStrategy{
     public IntervalTimeStoreCleaningStrategy() {
 
     }
@@ -37,14 +32,14 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
     @Override
     public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap) throws IOException {
         long currentTimestamp = SystemClock.now();
-        long targetDeleteTimeline = currentTimestamp - maxIntervalTime;
+        long targetDeleteTimeline = currentTimestamp -storeLogMaxTime(partitionGroupStore.getTopic()) ;
 
         long totalDeletedSize = 0L;  // 总共删除长度
         long deletedSize = 0L;
 
         if (partitionGroupStore != null) {
             do {
-                deletedSize = partitionGroupStore.clean(targetDeleteTimeline, partitionAckMap, keepUnconsumed);
+                deletedSize = partitionGroupStore.clean(targetDeleteTimeline, partitionAckMap, keepUnconsumed(partitionGroupStore.getTopic()));
                 totalDeletedSize += deletedSize;
             } while (deletedSize > 0L);
         }
@@ -54,8 +49,6 @@ public class IntervalTimeStoreCleaningStrategy implements StoreCleaningStrategy 
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
-        BrokerStoreConfig brokerStoreConfig = new BrokerStoreConfig(supplier);
-        this.maxIntervalTime = brokerStoreConfig.getMaxStoreTime();
-        this.keepUnconsumed = brokerStoreConfig.keepUnconsumed();
+        super.setSupplier(supplier);
     }
 }

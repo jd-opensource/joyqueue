@@ -17,15 +17,14 @@ import java.util.Map;
  * Ensure not out of global storage limit. first, clean out of date message log and try to clean
  * oldest message log of partition group if storage size is still greater than storage limit
  *
+ * Not thread safe
  **/
-public class GlobalStorageLimitCleaningStrategy implements StoreCleaningStrategy {
+public class GlobalStorageLimitCleaningStrategy extends  AbstractStoreCleaningStrategy {
     private static final Logger LOG= LoggerFactory.getLogger(GlobalStorageLimitCleaningStrategy.class);
     private long forceCleanWALStorageSizeThreshold;
     private long stopCleanWALStorageSizeThreshold;
     private String applicationDataPath;
     private File applicationDataDirectory;
-    private boolean keepUnconsumed;
-    private long maxStoreTime;
     private long totalStorageSize;
     private Map<String,Boolean> partitionGroupForcibleCleanWal=new HashMap();
     private StorageState storageState=StorageState.SAFETY;
@@ -36,6 +35,11 @@ public class GlobalStorageLimitCleaningStrategy implements StoreCleaningStrategy
         }
         long now = SystemClock.now();
         long used=0L;
+        long maxStoreTime= storeLogMaxTime(partitionGroupStore.getTopic());
+        boolean keepUnconsumed=keepUnconsumed(partitionGroupStore.getTopic());
+        if(LOG.isDebugEnabled()){
+            LOG.info("topic {},Dynamic max store time {} ms,keep unconsumed {}",partitionGroupStore.getTopic(),maxStoreTime,keepUnconsumed);
+        }
         long cleanWALBeforeTime = now - maxStoreTime;
         long totalDeletedSize = 0L;  // 总共删除长度
         long deletedSize = 0L;
@@ -73,14 +77,13 @@ public class GlobalStorageLimitCleaningStrategy implements StoreCleaningStrategy
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
+        super.setSupplier(supplier);
         BrokerStoreConfig brokerStoreConfig = new BrokerStoreConfig(supplier);
         int forceCleanWALFractionThreshold= brokerStoreConfig.getStoreDiskUsageMax();
         int cleanWALUsageSafeThreshold= brokerStoreConfig.getStoreDiskUsageSafe();
         this.applicationDataPath= brokerStoreConfig.getApplicationDataPath();
         this.applicationDataDirectory=new File(this.applicationDataPath);
         this.totalStorageSize=totalStorageSize();
-        this.keepUnconsumed = brokerStoreConfig.keepUnconsumed();
-        this.maxStoreTime = brokerStoreConfig.getMaxStoreTime();
         this.forceCleanWALStorageSizeThreshold= totalStorageSize*forceCleanWALFractionThreshold/100;
         this.stopCleanWALStorageSizeThreshold= totalStorageSize*cleanWALUsageSafeThreshold/100;
     }

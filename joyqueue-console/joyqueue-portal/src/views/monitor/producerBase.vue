@@ -14,10 +14,14 @@
         </d-button>
       </d-button-group>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
+    <my-table :data="tableData" style="z-index: 1" :showPin="showTablePin" :showPagination="this.showPagination" :page="page" @on-size-change="handleSizeChange"
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
-              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog" @on-cancel-subscribe="cancelSubscribe"
-              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-rateLimit="openRateLimitDialog"/>
+              @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog"
+              @on-cancel-subscribe="cancelSubscribe" @on-rateLimit="openRateLimitDialog" @on-compare-chart="goCompareChart"
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" />
+    <d-button class="right load-btn" style="z-index: 2" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
+      <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+    </d-button>
 
     <!--生产订阅弹出框-->
     <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
@@ -30,8 +34,8 @@
     <my-dialog :dialog="configDialog" @on-dialog-confirm="configConfirm" @on-dialog-cancel="dialogCancel('configDialog')">
       <grid-row :v-if="configDialogTip">{{configDialogTip}}</grid-row>
       <producer-config-form ref="configForm" :data="configData"
-      :archive-config-enabled="configData.archive || !forbidEnableArchive"
-      :nearby-config-enabled="configData.nearBy || !forbidEnableNearby"/>
+                            :archive-config-enabled="configData.archive || !forbidEnableArchive"
+                            :nearby-config-enabled="configData.nearBy || !forbidEnableNearby"/>
     </my-dialog>
     <my-dialog :dialog="weightDialog" @on-dialog-confirm="weightConfigConfirm" @on-dialog-cancel="dialogCancel('weightDialog')">
       <producer-weight-form ref="weightForm" :producerId="producerId"/>
@@ -58,6 +62,7 @@ import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
 import RateLimit from './rateLimit'
 import ProducerSendMessageForm from './producerSendMessageForm'
 import ButtonGroup from '../../components/button/button-group'
+import apiUrl from '../../utils/apiUrl.js'
 
 export default {
   name: 'producer-base',
@@ -118,8 +123,14 @@ export default {
         ]
       }
     },
+    btnGroups: {
+      type: Object
+    },
     colData: { // 生产者 列表表头
       type: Array
+    },
+    showPagination: {
+      type: Boolean
     },
     search: {// 查询条件，我的应用：app:{id:0,code:'',namespace:{id:0,code:''}}  ， 主题中心：topic:{id:0,code:'',namespace:{id:0,code:''}}
       type: Object
@@ -148,10 +159,11 @@ export default {
   },
   data () {
     return {
+      curIndex: 0,
+      cacheList: [],
       urls: {
         search: `/producer/search`,
         getMonitor: `/monitor/find`,
-        getUrl: `/grafana/getRedirectUrl`,
         del: `/producer/delete`,
         sendMessage: '/monitor/producer/sendMessage'
       },
@@ -160,7 +172,8 @@ export default {
         rowData: [],
         colData: this.colData,
         btns: this.btns,
-        operates: this.operates
+        operates: this.operates,
+        btnGroups: this.btnGroups
       },
       keyword: '',
       page: {
@@ -176,7 +189,7 @@ export default {
       rateLimitDialog: {
         visible: false,
         title: '限流',
-        width: '400',
+        width: '500',
         showFooter: true,
         limitTps: 0,
         limitTraffic: 0
@@ -212,7 +225,9 @@ export default {
       configData: {},
       monitorUIds: {
         detail: this.$store.getters.uIds.producer.detail,
-        summary: this.$store.getters.uIds.producer.summary
+        summary: this.$store.getters.uIds.producer.summary,
+        performance: this.$store.getters.uIds.producer.performance,
+        compare: this.$store.getters.uIds.producer.compare
       }
     }
   },
@@ -254,7 +269,7 @@ export default {
         namespace: item.namespace.code,
         app: item.app.code,
         message: ''
-      };
+      }
       this.sendMessageDialog.visible = true
     },
     cancelSubscribe (item) {
@@ -292,8 +307,12 @@ export default {
       this.getList()
     },
     configConfirm () {
-      this.configData = this.$refs.configForm.getFormData()
-      this.config(this.configData, 'configDialog')
+      this.$refs.configForm.$refs.form.validate((valid) => {
+        if (valid) {
+          this.configData = this.$refs.configForm.getFormData()
+          this.config(this.configData, 'configDialog')
+        }
+      })
     },
     weightConfigConfirm () {
       let configData = {
@@ -310,7 +329,7 @@ export default {
     },
     sendMessageConfirm () {
       let formData = this.$refs.sendMessageForm.formData
-      if (!formData.message || formData.message == '' || formData.message.trim() == '') {
+      if (!formData.message) {
         this.$Message.error('消息体不能为空')
         return
       }
@@ -319,7 +338,7 @@ export default {
         namespace: formData.namespace,
         app: formData.app,
         message: formData.message
-      };
+      }
       apiRequest.post(this.urls.sendMessage, null, data, true).then((data) => {
         data.data = data.data || []
         if (data.code !== this.$store.getters.successCode) {
@@ -337,7 +356,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.summary, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.summary, {}, {}).then((data) => {
           let url = data.data || ''
           if (url.indexOf('?') < 0) {
             url += '?'
@@ -354,7 +373,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.detail, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.detail, {}, {}).then((data) => {
           let url = data.data || ''
           if (url.indexOf('?') < 0) {
             url += '?'
@@ -371,7 +390,7 @@ export default {
         window.open(replaceChartUrl(this.monitorUrls.performance, item.topic.namespace.code,
           item.topic.code, item.app.code))
       } else {
-        apiRequest.get(this.urls.getUrl + '/pp', {}, {}).then((data) => {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + this.monitorUIds.performance, {}, {}).then((data) => {
           if (data.data) {
             let url = data.data
             if (url.indexOf('?') < 0) {
@@ -382,6 +401,23 @@ export default {
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
             window.open(url)
           }
+        })
+      }
+    },
+    goCompareChart (item) {
+      if (this.monitorUrls && this.monitorUrls.compare) {
+        window.open(replaceChartUrl(this.monitorUrls.compare, item.topic.namespace.code,
+          item.topic.code, item.app.code))
+      } else {
+        apiRequest.get(apiUrl['monitor']['redirectUrl'] + '/' + this.monitorUIds.compare, {}, {}).then((data) => {
+          let url = data.data || ''
+          if (url.indexOf('?') < 0) {
+            url += '?'
+          } else if (!url.endsWith('?')) {
+            url += '&'
+          }
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          window.open(url)
         })
       }
     },
@@ -410,17 +446,26 @@ export default {
       })
     },
     // 查询
-    getList () {
+    // 原來的getList方法
+    getList2 () {
       // 查询数据库里的数据
       this.showTablePin = true
+      let query = {}
+      if (this.keyword == null || this.keyword === '' || this.keyword === undefined) {
+        query = {
+          keyword: this.keyword
+        }
+      } else {
+        query = {
+          app: this.keyword
+        }
+      }
       let data = {
         pagination: {
           page: this.page.page,
           size: this.page.size
         },
-        query: {
-          keyword: this.keyword
-        }
+        query: query
       }
       for (let i in this.search) {
         if (this.search.hasOwnProperty(i)) {
@@ -443,6 +488,50 @@ export default {
         }
       })
     },
+    // 实现懒加载的getList方法
+    getList () {
+      this.tableData.rowData = []
+      // 查询数据库里的数据
+      this.showTablePin = true
+      let query = {}
+      query.keyword = this.keyword
+      let data = {
+        pagination: {
+          page: this.page.page,
+          size: this.page.size
+        },
+        query: query
+      }
+      for (let i in this.search) {
+        if (this.search.hasOwnProperty(i)) {
+          data.query[i] = this.search[i]
+        }
+      }
+      apiRequest.post(this.urls.search, {}, data).then((data) => {
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        data.data.sort(function (a,b) {
+          return a.topic.code - b.topic.code
+        })
+        if (data.data.length > this.page.size) {
+          this.tableData.rowData = data.data.slice(0, this.page.size)
+          this.curIndex = this.page.size - 1
+        } else {
+          this.tableData.rowData = data.data
+          this.curIndex = data.data.length - 1
+        }
+        this.cacheList = data.data
+        this.showTablePin = false
+        for (let i = 0; i < this.tableData.rowData.length; i++) {
+          this.getMonitor(this.tableData.rowData[i], i)
+        }
+      })
+    },
     config (configData, dialog) {
       apiRequest.post(this.configDialog.urls.addOrUpdae, {}, configData).then((data) => {
         if (data.code !== 200) {
@@ -455,6 +544,22 @@ export default {
         }
       }).catch(() => {
       })
+    },
+    // 滚动事件触发下拉加载
+    getRestList () {
+      if (this.curIndex < this.cacheList.length - 1) {
+        for (let i = 0; i < this.page.size; i++) {
+          if (this.curIndex < this.cacheList.length - 1) {
+            this.curIndex += 1
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+              this.tableData.rowData.push(this.cacheList[this.curIndex])
+              this.getMonitor(this.tableData.rowData[this.curIndex], this.curIndex)
+            }
+          } else {
+            break
+          }
+        }
+      }
     }
   },
   mounted () {
@@ -465,6 +570,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.label{text-align: right; line-height: 32px;}
-.val{}
+  .label{text-align: right; line-height: 32px;}
+  .val{}
+  .load-btn { margin-right: 50px;margin-top: -100px;position: relative}
 </style>

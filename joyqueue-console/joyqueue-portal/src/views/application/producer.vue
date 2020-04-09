@@ -1,6 +1,6 @@
 <template>
   <div>
-    <producer-base ref="producerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
+    <producer-base ref="producerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName" :colData="colData"
                    :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"  @on-enter="getList"
                    :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
@@ -43,24 +43,23 @@ export default {
           key: 'topic.code',
           width: 100,
           render: (h, params) => {
-              const topic = params.item.topic
-              const namespace = params.item.namespace
-              const topicId = getTopicCodeByCode(topic.code, namespace.code)
-              return h('d-button', {
-                  props: {
-                      type: 'borderless',
-                      color: 'primary'
-                  },
-                  style: {
-                      color: '#3366FF'
-                  },
-                  on: {
-                      click: () => {
-                          this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-                              query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'producer' }})
-                      }
-                  }
-              }, topic.code)
+            const topic = params.item.topic
+            const namespace = params.item.namespace
+            const topicId = getTopicCodeByCode(topic.code, namespace.code)
+            return h('label', {
+              style: {
+                color: '#3366FF'
+              },
+              on: {
+                click: () => {
+                  this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
+                    query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'producer' }})
+                },
+                mousemove: (event) => {
+                  event.target.style.cursor = 'pointer'
+                }
+              }
+            }, topic.code)
           }
         },
         {

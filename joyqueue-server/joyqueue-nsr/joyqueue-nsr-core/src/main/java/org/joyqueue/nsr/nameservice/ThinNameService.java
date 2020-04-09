@@ -110,6 +110,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -135,7 +136,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
      */
     protected EventBus<NameServerEvent> eventBus = new EventBus<>("joyqueue-thin-nameservice-eventBus");
 
-    private Cache<TopicName, TopicConfig> topicCache;
+    private Cache<TopicName, Optional<TopicConfig>> topicCache;
 
     public ThinNameService() {
         //do nothing
@@ -268,12 +269,12 @@ public class ThinNameService extends Service implements NameService, PropertySup
     public TopicConfig getTopicConfig(TopicName topic) {
         if (nameServiceConfig.getThinCacheEnable()) {
             try {
-                return topicCache.get(topic, new Callable<TopicConfig>() {
+                return topicCache.get(topic, new Callable<Optional<TopicConfig>>() {
                     @Override
-                    public TopicConfig call() throws Exception {
-                        return doGetTopicConfig(topic);
+                    public Optional<TopicConfig> call() throws Exception {
+                        return Optional.ofNullable(doGetTopicConfig(topic));
                     }
-                });
+                }).get();
             } catch (ExecutionException e) {
                 logger.error("getTopicConfig exception, topic: {}", topic, e);
                 return null;
@@ -473,7 +474,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
     @Override
     public AllMetadata getAllMetadata() {
         Command request = new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.NSR_GET_ALL_METADATA_REQUEST), new GetAllMetadataRequest());
-        Command response = send(request);
+        Command response = send(request, nameServiceConfig.getAllMetadataTransportTimeout());
         if (!response.isSuccess()) {
             logger.error("getAllMetadata error request {},response {}", request, response);
             throw new RuntimeException(String.format("getAppToken error request {},response {}", request, response));

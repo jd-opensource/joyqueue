@@ -8,10 +8,14 @@
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">新建数据中心<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
+    <my-table :data="tableData" :showPin="showTablePin" :showPagination="false" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-edit="edit" @on-del="del">
     </my-table>
+
+    <d-button class="right load-btn" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+      <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+    </d-button>
 
     <!--新建数据中心-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submitForm('addData')" @on-dialog-cancel="addCancel()">
@@ -76,11 +80,14 @@ import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
+import ButtonGroup from '../../components/button/button-group'
+
 export default {
   name: 'application',
   components: {
     myTable,
-    myDialog
+    myDialog,
+    ButtonGroup
   },
   mixins: [ crud ],
   data () {
@@ -88,6 +95,8 @@ export default {
       // urls: {
       //   del: '/datacenter'
       // },
+      curIndex: 0,
+      cacheList: [],
       searchData: {
         code: ''
       },
@@ -245,6 +254,47 @@ export default {
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()
+    },
+    getList () {
+      this.tableData.rowData = []
+      this.showTablePin = true
+      let data = this.getSearchVal()
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        if (data.data.length > this.page.size) {
+          this.tableData.rowData = data.data.slice(0, this.page.size)
+          this.curIndex = this.page.size - 1
+        } else {
+          this.tableData.rowData = data.data
+          this.curIndex = data.data.length - 1
+        }
+        this.cacheList = data.data
+        this.showTablePin = false
+      })
+    },
+    // 滚动事件触发下拉加载
+    getRestList () {
+      if (this.curIndex < this.cacheList.length - 1) {
+        for (let i = 0; i < this.page.size; i++) {
+          if (this.curIndex < this.cacheList.length - 1) {
+            this.curIndex += 1
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+              this.tableData.rowData.push(this.cacheList[this.curIndex])
+            }
+          } else {
+            break
+          }
+        }
+      }
     }
   },
   mounted () {
@@ -257,4 +307,5 @@ export default {
 <style scoped>
   .label{text-align: right; line-height: 32px;}
   .val{}
+  .load-btn { margin-right: 50px;margin-top: -30px;position: relative}
 </style>

@@ -255,7 +255,13 @@
                path="/v1/partitionGroupReplica/searchBrokerToScale" handlers="partitionGroupReplica#searchBrokerToScale render"
                errors="error"/>
         <route inherit="post"
+               path="/v1/partitionGroupReplica/searchBrokerToScaleDefault" handlers="partitionGroupReplica#searchBrokerToScaleDefault render"
+               errors="error"/>
+        <route inherit="post"
                path="/v1/partitionGroupReplica/searchBrokerToAddNew" handlers="partitionGroupReplica#searchBrokerToAddNew render"
+               errors="error"/>
+        <route inherit="post"
+               path="/v1/partitionGroupReplica/searchBrokerToAddNewDefault" handlers="partitionGroupReplica#searchBrokerToAddNewDefault render"
                errors="error"/>
         <route inherit="post"
                path="/v1/partitionGroupReplica/leader" handlers="partitionGroupReplica#leader render"

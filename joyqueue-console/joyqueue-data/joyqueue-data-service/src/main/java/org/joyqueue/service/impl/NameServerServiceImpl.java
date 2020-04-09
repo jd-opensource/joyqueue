@@ -123,9 +123,10 @@ public class NameServerServiceImpl implements NameServerService {
             entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
             post.setEntity(entity);
         }
-        return onResponse(HttpUtil.executeRequest(post), post);
+        return HttpUtil.request(post);
     }
 
+    @Deprecated
     private String onResponse(CloseableHttpResponse response, HttpUriRequest request) throws Exception {
         try {
             int statusCode = response.getStatusLine().getStatusCode();
@@ -147,5 +148,4 @@ public class NameServerServiceImpl implements NameServerService {
         return EscapeUtils.escape(topic, "/", "^");
     }
 
-    ;
 }

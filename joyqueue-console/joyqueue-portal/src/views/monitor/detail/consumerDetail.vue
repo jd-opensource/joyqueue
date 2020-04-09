@@ -49,6 +49,7 @@ import offset from './offset'
 import broker from './broker.vue'
 import detailTable from './detailTable'
 import coordinatorGroupMember from './coordinatorGroupMember.vue'
+import bytesToSize from '../../../utils/byteUtils'
 
 export default {
   name: 'consumerDetail',
@@ -80,10 +81,6 @@ export default {
                   row: params.row,
                   colData: [
                     {
-                      title: 'ID',
-                      key: 'partitionGroup'
-                    },
-                    {
                       title: '分区',
                       key: 'partition'
                     },
@@ -94,6 +91,17 @@ export default {
                     {
                       title: '出队数',
                       key: 'deQuence.count'
+                    },
+                    {
+                      title: 'TPS',
+                      key: 'deQuence.tps'
+                    },
+                    {
+                      title: '流量',
+                      key: 'deQuence.traffic',
+                      formatter (item) {
+                        return bytesToSize(item.deQuence.traffic)
+                      }
                     }
                   ],
                   subscribe: params.row.subscribe,
@@ -155,22 +163,26 @@ export default {
           colData: [
             {
               title: 'id',
-              key: 'connectionHost'
+              key: 'connectionHost',
+              width: '15%'
             },
             {
               title: '最新心跳时间',
               key: 'latestHeartbeat',
+              width: '15%',
               formatter (item) {
                 return timeStampToString(item.latestHeartbeat)
               }
             },
             {
               title: '会话超时',
-              key: 'sessionTimeout'
+              key: 'sessionTimeout',
+              width: '10%'
             },
             {
               title: '分区分配',
-              key: 'assignmentList'
+              key: 'assignmentList',
+              width: '60%'
             }
           ],
           urls: {
