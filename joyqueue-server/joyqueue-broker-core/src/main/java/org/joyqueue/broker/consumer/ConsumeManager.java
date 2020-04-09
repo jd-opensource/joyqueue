@@ -80,7 +80,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     private final Logger logger = LoggerFactory.getLogger(ConsumeManager.class);
 
     // 并行消费处理
-    private ConcurrentConsumption concurrentConsumption;
+    private ConcurrentConsumer concurrentConsumption;
     // 分区消费处理
     private PartitionConsumption partitionConsumption;
     // 消息重试管理
