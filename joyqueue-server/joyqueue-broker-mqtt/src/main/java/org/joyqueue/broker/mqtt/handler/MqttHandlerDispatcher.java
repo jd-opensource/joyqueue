@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.mqtt.handler;
 
-import org.joyqueue.broker.mqtt.config.MqttConfig;
 import org.joyqueue.broker.mqtt.config.MqttContext;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.mqtt.command.MqttHandlerFactory;

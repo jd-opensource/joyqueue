@@ -26,7 +26,6 @@ import org.joyqueue.broker.mqtt.message.WillMessage;
 import org.joyqueue.broker.mqtt.publish.MessagePublisher;
 import org.joyqueue.broker.mqtt.session.MqttSession;
 import org.joyqueue.broker.mqtt.subscriptions.MqttSubscription;
-import org.joyqueue.broker.mqtt.subscriptions.Token;
 import org.joyqueue.broker.mqtt.subscriptions.TopicFilter;
 import org.joyqueue.broker.mqtt.util.NettyAttrManager;
 import org.joyqueue.domain.AppToken;
