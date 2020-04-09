@@ -36,6 +36,7 @@ import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.nsr.util.DCWrapper;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -61,7 +61,7 @@ public class MetadataCacheManager extends Service {
     private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile AllMetadataCache cache;
     private ReentrantLock lock = new ReentrantLock();
-    private AtomicInteger version = new AtomicInteger();
+    private volatile long timestamp = 0;
 
     public MetadataCacheManager(NameServiceConfig config) {
         this.config = config;
@@ -453,11 +453,11 @@ public class MetadataCacheManager extends Service {
         return lock.isLocked();
     }
 
-    public int getVersion() {
-        return version.intValue();
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    public void updateVersion() {
-        version.incrementAndGet();
+    public void updateTimestamp() {
+        timestamp = SystemClock.now();
     }
 }

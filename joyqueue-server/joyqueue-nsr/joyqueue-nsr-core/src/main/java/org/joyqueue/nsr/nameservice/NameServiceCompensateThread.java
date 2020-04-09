@@ -20,6 +20,7 @@ import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +109,15 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                 AllMetadata allMetadata = null;
                 AllMetadataCache newCache = null;
                 AllMetadataCache oldCache = metadataCacheManager.getCache();
-                int version = metadataCacheManager.getVersion();
+                long version = metadataCacheManager.getTimestamp();
+
+                if (SystemClock.now() - version < config.getAllMetadataInterval()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("doCompensate, interval less than threshold, last: {}, threshold: {}",
+                                version, config.getAllMetadataInterval());
+                    }
+                    return;
+                }
 
                 for (int i = 0; i <= config.getCompensationRetryTimes(); i++) {
                     if (logger.isDebugEnabled()) {
@@ -142,7 +151,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                         metadataCompensator.compensate(oldCache, newCache);
                     }
 
-                    int currentVersion = metadataCacheManager.getVersion();
+                    long currentVersion = metadataCacheManager.getTimestamp();
                     if (version == currentVersion) {
                         break;
                     } else {

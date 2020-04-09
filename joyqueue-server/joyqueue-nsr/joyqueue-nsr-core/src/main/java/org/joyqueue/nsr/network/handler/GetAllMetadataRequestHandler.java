@@ -100,32 +100,37 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
     }
 
     protected byte[] doGetAllMetadata() {
+        boolean isException = false;
         try {
             allMetadataCache = nameService.getAllMetadata();
         } catch (Exception e) {
             if (allMetadataCache == null) {
                 throw e;
             }
-
+            isException = true;
             logger.error("get all metadata exception", e);
+        }
+
+        if (isException || config.getAllMetadataRewriteEnable()) {
             try {
                 allMetadataCache.setConfigs(mergeMemoryConfigs(allMetadataCache.getConfigs()));
             } catch (Exception e1) {
                 throw e1;
             }
         }
+
         return GetAllMetadataResponseCodec.toJson(allMetadataCache);
     }
 
     protected List<Config> mergeMemoryConfigs(List<Config> configs) {
         Set<Config> result = Sets.newHashSet();
+        result.addAll(configs);
         List<Property> properties = supplier.getProperties();
         for (Property property : properties) {
             if (property.getValue() != null) {
                 result.add(new Config(property.getGroup(), property.getKey(), String.valueOf(property.getValue())));
             }
         }
-        result.addAll(configs);
         return Lists.newArrayList(result);
     }
 

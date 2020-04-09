@@ -71,6 +71,14 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_CACHE_EXPIRE_TIME);
     }
 
+    public int getAllMetadataInterval() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_INTERVAL);
+    }
+
+    public boolean getAllMetadataRewriteEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_REWRITE_ENABLE);
+    }
+
     public boolean getCompensationEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ENABLE);
     }

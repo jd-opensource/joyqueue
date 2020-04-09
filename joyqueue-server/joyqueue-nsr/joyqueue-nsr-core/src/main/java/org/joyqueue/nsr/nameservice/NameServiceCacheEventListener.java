@@ -72,7 +72,7 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
     @Override
     public void onEvent(MetaEvent event) {
         if (!metadataCacheManager.tryLock()) {
-            metadataCacheManager.updateVersion();
+            metadataCacheManager.updateTimestamp();
             return;
         }
         try {
@@ -83,7 +83,7 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
             }
             doOnEvent(event);
             metadataCacheManager.fillCache(newCache);
-            metadataCacheManager.updateVersion();
+            metadataCacheManager.updateTimestamp();
         } finally {
             metadataCacheManager.unlock();
         }
