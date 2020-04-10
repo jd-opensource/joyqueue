@@ -17,3 +17,6 @@ org.joyqueue.broker.kafka.network.codec.AddPartitionsToTxnCodec
 org.joyqueue.broker.kafka.network.codec.EndTxnCodec
 org.joyqueue.broker.kafka.network.codec.InitProducerIdCodec
 org.joyqueue.broker.kafka.network.codec.TxnOffsetCommitCodec
+
+org.joyqueue.broker.kafka.network.codec.SaslAuthenticateCodec
+org.joyqueue.broker.kafka.network.codec.SaslHandshakeCodec

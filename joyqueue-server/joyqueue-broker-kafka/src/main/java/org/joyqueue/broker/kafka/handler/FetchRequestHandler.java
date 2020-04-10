@@ -92,6 +92,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     @Override
     public Command handle(Transport transport, Command request) {
         FetchRequest fetchRequest = (FetchRequest) request.getPayload();
+        Connection connection = SessionHelper.getConnection(transport);
         Map<String, List<FetchRequest.PartitionRequest>> partitionRequestMap = fetchRequest.getPartitionRequests();
         String clientId = KafkaClientHelper.parseClient(fetchRequest.getClientId());
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
@@ -105,7 +106,6 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
             TopicName topic = TopicName.parse(entry.getKey());
             List<FetchResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
 
-            Connection connection = SessionHelper.getConnection(transport);
             String consumerId = connection.getConsumer(topic.getFullName(), clientId);
             Consumer consumer = sessionManager.getConsumerById(consumerId);
             org.joyqueue.domain.Consumer.ConsumerPolicy consumerPolicy = clusterManager.tryGetConsumerPolicy(topic, clientId);
