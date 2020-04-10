@@ -169,6 +169,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
      * @param brokerId
      * @return
      */
+    @Override
     public BrokerMonitorInfo findBrokerMonitor(Long brokerId){
         try {
             Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(brokerId)));
@@ -183,6 +184,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
      * @param brokerId
      * @return
      */
+    @Override
     public BrokerStartupInfo getStartupInfo(Long brokerId) throws Exception {
         Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(brokerId)));
         return getStartInfo(broker);
@@ -194,14 +196,25 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             BrokerTopicMonitorRecord brokerTopicMonitorRecord = new BrokerTopicMonitorRecord();
             if (type == SubscribeType.CONSUMER) {
                 ConsumerMonitorInfo consumerMonitorInfo = queryMonitorConsumer(topic,app,broker);
-                brokerTopicMonitorRecord.setConnections(consumerMonitorInfo.getConnections());
-                brokerTopicMonitorRecord.setCount(consumerMonitorInfo.getDeQueue().getCount());
-                brokerTopicMonitorRecord.setTotalSize(consumerMonitorInfo.getDeQueue().getTotalSize());
+                if(consumerMonitorInfo != null) {
+                    if (consumerMonitorInfo.getRetry() != null) {
+                        brokerTopicMonitorRecord.setRetryCount(consumerMonitorInfo.getRetry().getCount());
+                        brokerTopicMonitorRecord.setRetryTps(consumerMonitorInfo.getRetry().getCurrent());
+                    }
+                    if(consumerMonitorInfo.getPending() != null) {
+                        brokerTopicMonitorRecord.setBacklog(consumerMonitorInfo.getPending().getCount());
+                    }
+                    brokerTopicMonitorRecord.setConnections(consumerMonitorInfo.getConnections());
+                    brokerTopicMonitorRecord.setCount(consumerMonitorInfo.getDeQueue().getCount());
+                    brokerTopicMonitorRecord.setTotalSize(consumerMonitorInfo.getDeQueue().getTotalSize());
+                }
             } else if (type == SubscribeType.PRODUCER) {
                 ProducerMonitorInfo producerMonitorInfo = queryMonitorProducer(topic,app,broker);
-                brokerTopicMonitorRecord.setConnections(producerMonitorInfo.getConnections());
-                brokerTopicMonitorRecord.setCount(producerMonitorInfo.getEnQueue().getCount());
-                brokerTopicMonitorRecord.setTotalSize(producerMonitorInfo.getEnQueue().getTotalSize());
+                if (producerMonitorInfo != null) {
+                    brokerTopicMonitorRecord.setConnections(producerMonitorInfo.getConnections());
+                    brokerTopicMonitorRecord.setCount(producerMonitorInfo.getEnQueue().getCount());
+                    brokerTopicMonitorRecord.setTotalSize(producerMonitorInfo.getEnQueue().getTotalSize());
+                }
             }
             brokerTopicMonitorRecord.setApp(app);
             brokerMonitorRecordList.add(brokerTopicMonitorRecord);
