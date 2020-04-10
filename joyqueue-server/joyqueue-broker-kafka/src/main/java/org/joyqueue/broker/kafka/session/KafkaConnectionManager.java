@@ -73,19 +73,22 @@ public class KafkaConnectionManager {
 
         if (KafkaSessionHelper.isAuth(transport)) {
             isAuth = true;
-        } else if (config.getAuthEnable()) {
+        } else {
             String token = KafkaClientHelper.parseToken(clientId);
-            if (StringUtils.isBlank(token)) {
+            if (config.getAuthEnable() && StringUtils.isBlank(token)) {
                 logger.warn("user auth failed, token is null, transport: {}, app: {}", transport, app);
                 return false;
             }
-            BooleanResponse authResponse = authentication.auth(app.split("\\.")[0], token);
-            if (!authResponse.isSuccess()) {
-                logger.warn("user auth failed, transport: {}, app: {}, code: {}", transport, app, authResponse.getJoyQueueCode());
-                return false;
+
+            if (StringUtils.isNotBlank(token)) {
+                BooleanResponse authResponse = authentication.auth(app.split("\\.")[0], token);
+                if (!authResponse.isSuccess()) {
+                    logger.warn("user auth failed, transport: {}, app: {}, code: {}", transport, app, authResponse.getJoyQueueCode());
+                    return false;
+                }
+                KafkaSessionHelper.setIsAuth(transport, true);
+                isAuth = true;
             }
-            KafkaSessionHelper.setIsAuth(transport, true);
-            isAuth = true;
         }
 
         InetSocketAddress remoteAddress = (InetSocketAddress) transport.remoteAddress();
