@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -233,6 +234,9 @@ public class BrokerServiceImpl implements BrokerService {
             List<Integer> brokerIds = brokerGroupRelatedPageResult.getResult().stream().map(brokerGroup -> (int)brokerGroup.getId()).collect(Collectors.toList());
             Map<Long,String> brokerIdGroupMap = brokerGroupRelatedPageResult.getResult().stream().collect(Collectors.toMap(BrokerGroupRelated::getId,item -> item.getGroup().getCode()));
             List<Broker> brokers = brokerNameServerService.getByIdsBroker(brokerIds);
+            if (brokers == null) {
+                brokers = Collections.emptyList();
+            }
             for(Broker broker:brokers){
                 broker.setGroup(new Identity(brokerIdGroupMap.get(broker.getId())));
             }

@@ -165,9 +165,11 @@ export default {
           let unique = true
           for (let i in this.tableData.rowData) {
             if (this.tableData.rowData.hasOwnProperty(i)) {
-              if (this.tableData.rowData[i].group && this.tableData.rowData[i].group.code !== groupCode) {
-                unique = false
-                break
+              if (this.tableData.rowData[i].group) {
+                if (this.tableData.rowData[i].group.code.indexOf(groupCode) < 0) {
+                  unique = false
+                  break
+                }
               }
             }
           }
