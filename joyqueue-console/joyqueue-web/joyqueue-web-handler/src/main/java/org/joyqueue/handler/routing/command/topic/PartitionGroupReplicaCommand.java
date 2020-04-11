@@ -144,7 +144,9 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
                 }
             }
         } else {
-            brokers.addAll(brokerPage.getResult());
+            if (brokerPage.getResult()!=null) {
+                brokers.addAll(brokerPage.getResult());
+            }
         }
         return Responses.success(brokerPage.getPagination(), brokers);
     }
