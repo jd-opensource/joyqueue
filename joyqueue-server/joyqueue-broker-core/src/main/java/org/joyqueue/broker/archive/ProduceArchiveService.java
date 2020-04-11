@@ -191,7 +191,7 @@ public class ProduceArchiveService extends Service {
      */
     private void updateArchiveItem() throws JoyQueueException {
         List<SendArchiveItem> list = new ArrayList<>();
-
+        logger.info("update archive item from metadata");
         List<TopicConfig> topics = clusterManager.getTopics();
         int brokerId = clusterManager.getBroker().getId();
         topics.stream().forEach(topicConfig -> {
@@ -641,9 +641,11 @@ public class ProduceArchiveService extends Service {
          *
          * @param item 发送归档项
          */
-        public void remove(SendArchiveItem item) {
+        public void remove(SendArchiveItem item) throws JoyQueueException {
             // 移除列表
             cpList.remove(item);
+            // clean archive position from store
+            archiveStore.cleanPosition(item.getTopic(),item.getPartition());
         }
 
         /**
@@ -658,7 +660,11 @@ public class ProduceArchiveService extends Service {
             cpList.stream().forEach(item -> {
                 // 最新的归档项列表不包含这个项，则删除该项
                 if (!newItemList.contains(item)) {
-                    remove(item);
+                    try {
+                        remove(item);
+                    }catch (JoyQueueException e){
+                        logger.info("remove archive item exception",e);
+                    }
                 }
             });
             // 添加新增归档项
@@ -668,7 +674,10 @@ public class ProduceArchiveService extends Service {
                     Long index = archiveStore.getPosition(item.topic, item.partition);
                     if (index == null) {
                         // 从头拉起
-                        index = 0L;
+                        Consumer consumer=new Consumer();
+                        // fullName
+                        consumer.setTopic(item.getTopic());
+                        index = consume.getMaxIndex(consumer,item.getPartition());
                     }
                     item.setReadIndex(index);
                     cpList.add(item);

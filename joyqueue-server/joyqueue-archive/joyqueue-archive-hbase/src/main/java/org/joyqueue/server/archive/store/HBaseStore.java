@@ -191,6 +191,23 @@ public class HBaseStore implements ArchiveStore {
         }
     }
 
+    @Override
+    public void cleanPosition(String topic, short partition) throws JoyQueueException {
+        try {
+          Long currentPosition=  getPosition(topic,partition);
+          byte[] rowKey = Bytes.toBytes(topic + ":" + partition);
+          hBaseClient.delete(namespace, positionTable, cf, col, rowKey);
+          if(currentPosition!=null){
+              logger.info("clean topic {}/partition {},archive position {}",topic,partition,currentPosition);
+            }else{
+              logger.info("clean topic {}/partition {},archive position not init",topic,partition);
+          }
+        } catch (IOException e) {
+            logger.info("clean archive position exception",e);
+            throw new JoyQueueException(JoyQueueCode.SE_IO_ERROR, e);
+        }
+    }
+
     /**
      * 范围查询 左开右闭
      *
