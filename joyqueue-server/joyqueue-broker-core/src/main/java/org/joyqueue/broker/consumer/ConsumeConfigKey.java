@@ -35,6 +35,9 @@ public enum ConsumeConfigKey implements PropertyDef {
     // 是否使用旧版的PartitionManager
     USE_LEGACY_PARTITION_MANAGER("consume.legacy.partition.manager", false, Type.BOOLEAN),
 
+    // 是否使用旧版的并行消费
+    USE_LEGACY_CONCURRENT_CONSUMER("consume.legacy.concurrent.consumer", false, Type.BOOLEAN),
+
     ;
     private String name;
     private Object value;
