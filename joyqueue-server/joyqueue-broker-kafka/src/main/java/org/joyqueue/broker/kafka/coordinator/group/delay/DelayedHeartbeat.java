@@ -38,7 +38,7 @@ public class DelayedHeartbeat extends DelayedOperation {
 
     public DelayedHeartbeat(GroupBalanceManager groupBalanceManager, GroupMetadata group, GroupMemberMetadata member, long heartbeatDeadline,
                             long sessionTimeout) {
-        super(sessionTimeout);
+        super(sessionTimeout, group.getLock());
         this.groupBalanceManager = groupBalanceManager;
         this.group = group;
         this.member = member;
@@ -47,26 +47,26 @@ public class DelayedHeartbeat extends DelayedOperation {
 
     @Override
     protected boolean tryComplete() {
-        synchronized (group) {
+        return group.inLock(() -> {
             if (groupBalanceManager.shouldKeepMemberAlive(member, heartbeatDeadline) || member.isLeaving()) {
                 return forceComplete();
             } else {
                 return false;
             }
-        }
+        });
     }
 
     @Override
     protected void onExpiration() {
-        synchronized (group) {
-            logger.info("group {} Member {} heartbeat expired, join callback = {}, sync callback = {}",
-                    group.getId(), member.getId(), member.getAwaitingJoinCallback(), member.getAwaitingSyncCallback());
-
+        group.inLock(() -> {
             if (!groupBalanceManager.shouldKeepMemberAlive(member, heartbeatDeadline)) {
+                logger.info("group {} Member {} heartbeat expired, join callback = {}, sync callback = {}",
+                        group.getId(), member.getId(), member.getAwaitingJoinCallback(), member.getAwaitingSyncCallback());
+
                 groupBalanceManager.removeMemberAndUpdateGroup(group, member);
                 group.addExpiredMember(member);
             }
-        }
+        });
     }
 
     @Override

@@ -76,7 +76,7 @@ public class DelayedInitialJoin extends DelayedJoin {
         logger.info("delayed initial join onComplete, isNewMemberAdded = {}, remainingMs = {}, delayMs = {}, configurationRebalanceDelay = {}",
                 group.isNewMemberAdded(), remainingMs, delayMs, configurationRebalanceDelay);
 
-        synchronized (group) {
+        group.inLock(() -> {
             if (group.isNewMemberAdded() && remainingMs != 0) {
                 group.setNewMemberAdded(false);
                 long delay = Math.min(configurationRebalanceDelay, remainingMs);
@@ -88,6 +88,6 @@ public class DelayedInitialJoin extends DelayedJoin {
             } else {
                 super.onComplete();
             }
-        }
+        });
     }
 }
