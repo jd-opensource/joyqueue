@@ -15,7 +15,6 @@
  */
 package org.joyqueue.broker.mqtt.handler;
 
-import org.joyqueue.broker.mqtt.config.MqttConfig;
 import org.joyqueue.broker.mqtt.config.MqttContext;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.mqtt.command.MqttHandlerFactory;
@@ -40,10 +39,10 @@ public class MqttHandlerDispatcher extends Service {
     private MqttProtocolHandler mqttProtocolHandler;
     private MqttContext mqttContext;
 
-    public MqttHandlerDispatcher(CommandHandlerFactory handlerFactory, BrokerContext brokerContext) {
+    public MqttHandlerDispatcher(CommandHandlerFactory handlerFactory, BrokerContext brokerContext, MqttContext mqttContext) {
         this.handlerFactory = (MqttHandlerFactory) handlerFactory;
         this.mqttProtocolHandler = new MqttProtocolHandler(brokerContext);
-        this.mqttContext = new MqttContext(new MqttConfig(brokerContext.getPropertySupplier()));
+        this.mqttContext = mqttContext;
     }
 
     public Handler getHandler(MqttMessageType type) {

@@ -182,9 +182,8 @@ export default {
             validator: numberValidator,
             type: 'number',
             trigger: 'change',
-            max: 1000,
             min: 1,
-            hint: '批量大小1~1000',
+            hint: '普通用户批量大小范围为1~1000',
             required: false
           }
         ],
@@ -247,6 +246,14 @@ export default {
       return data
     },
     validate (callback) {
+      if (!this.$store.getters.isAdmin && this.formData.batchSize > 1000) {
+        this.$Message.error('普通用户的批量大小范围为1-1000')
+        return false
+      }
+      if (this.formData.batchSize > 30000) {
+        this.$Message.error('批量大小不能超过30000')
+        return false
+      }
       this.$refs['form'].validate(valid => {
         if (valid) {
           callback && callback()

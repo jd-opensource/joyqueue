@@ -25,7 +25,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
@@ -40,13 +39,14 @@ import java.util.List;
 /**
  * @author majun8
  */
-public class MqttOverWebsocketProtocolHandlerPipeline extends ChannelInitializer {
+public class MqttOverWebsocketProtocolHandlerPipeline extends AbstractMqttProtocolPipeline {
     private static final String MQTT_SUBPROTOCOL_CSV_LIST = "mqtt, mqttv3.1, mqttv3.1.1";
 
     private Protocol protocol;
     private BrokerContext brokerContext;
 
     public MqttOverWebsocketProtocolHandlerPipeline(Protocol protocol, ChannelHandler channelHandler, BrokerContext brokerContext) {
+        super(brokerContext);
         this.protocol = protocol;
         this.brokerContext = brokerContext;
         if (channelHandler instanceof DefaultProtocolHandlerPipeline) {
@@ -63,18 +63,20 @@ public class MqttOverWebsocketProtocolHandlerPipeline extends ChannelInitializer
                 .addLast(new WebSocketServerProtocolHandler("/mqtt", MQTT_SUBPROTOCOL_CSV_LIST))
                 .addLast(new WebSocketFrameToByteBufDecoder())
                 .addLast(new ByteBufToWebSocketFrameEncoder())
-                .addLast(new MqttDecoder())
+                .addLast(new MqttDecoder(mqttContext.getMqttConfig().getMaxPayloadSize()))
                 .addLast(MqttEncoder.INSTANCE)
                 .addLast(new ConnectionHandler())
                 .addLast(newMqttCommandInvocation());
     }
 
+    @Override
     protected MqttCommandInvocation newMqttCommandInvocation() {
         return new MqttCommandInvocation(newMqttHandlerDispatcher());
     }
 
+    @Override
     protected MqttHandlerDispatcher newMqttHandlerDispatcher() {
-        MqttHandlerDispatcher mqttHandlerDispatcher = new MqttHandlerDispatcher(protocol.createCommandHandlerFactory(), brokerContext);
+        MqttHandlerDispatcher mqttHandlerDispatcher = new MqttHandlerDispatcher(protocol.createCommandHandlerFactory(), brokerContext, mqttContext);
         try {
             mqttHandlerDispatcher.start();
         } catch (Exception e) {

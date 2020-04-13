@@ -5,7 +5,7 @@
         <div class="title">{{prop.detail.id}}</div>
         <grid-row :gutter="16">
           <grid-col span="8">
-            <span>队列数:</span>
+            <span>分区数:</span>
             <span>{{prop.detail.partitions}}</span>
           </grid-col>
           <grid-col span="8">

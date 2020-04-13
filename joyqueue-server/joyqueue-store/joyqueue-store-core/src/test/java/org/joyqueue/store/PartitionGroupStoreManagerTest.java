@@ -301,6 +301,77 @@ public class PartitionGroupStoreManagerTest {
         this.store.start();
         this.store.enable();
     }
+    @Test
+    public void changeFileSizeTest() throws Exception {
+        int count = 1024;
+        int repeat = 300;
+        long timeout = 500000L;
+        List<ByteBuffer> messages = MessageUtils.build(count, 1024);
+
+
+        long length = messages.stream().mapToInt(Buffer::remaining).sum() * repeat;
+        WriteRequest [] writeRequests = IntStream.range(0, messages.size())
+                .mapToObj(i -> new WriteRequest(partitions[i % partitions.length], messages.get(i)))
+                .toArray(WriteRequest[]::new);
+
+
+        for (int i = 0; i < repeat; i++) {
+            store.asyncWrite(QosLevel.RECEIVE, null,writeRequests);
+        }
+
+
+        // 等待建索引和刷盘都完成
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() < length && store.flushPosition() < length) {
+            Thread.sleep(10L);
+        }
+        store.commit(store.rightPosition());
+
+        destroyStore();
+        if (null == bufferPool) {
+            bufferPool = PreloadBufferPool.getInstance();
+            bufferPool.addPreLoad(32 * 1024 * 1024, 2, 4);
+            bufferPool.addPreLoad(128 * 1024, 2, 4);
+        }
+        PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                new PositioningStore.Config(32 * 1024 * 1024),
+                new PositioningStore.Config(128 * 1024));
+
+        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
+                bufferPool);
+        this.store.recover();
+        this.store.start();
+        this.store.enable();
+
+        for (int i = 0; i < repeat; i++) {
+            store.asyncWrite(QosLevel.RECEIVE, null,writeRequests);
+        }
+
+
+        // 等待建索引和刷盘都完成
+        t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() <  2 * length && store.flushPosition() < 2 * length) {
+            Thread.sleep(10L);
+        }
+        store.commit(store.rightPosition());
+
+        int readCount = 0;
+        for (int i = 0; i < partitions.length; i++) {
+            short p = partitions[i];
+            long index = 0L;
+            while (true) {
+                try {
+                    ReadResult readResult = store.read(p, index, count, 0L);
+                    index += readResult.getMessages().length;
+                    readCount += readResult.getMessages().length;
+                } catch (PositionOverflowException e) {
+                    break;
+                }
+            }
+        }
+        Assert.assertEquals(count * repeat * 2, readCount);
+    }
 
     @Test
     public void writeReadBatchMessageTest() throws IOException, InterruptedException {
