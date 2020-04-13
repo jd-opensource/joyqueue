@@ -15,20 +15,13 @@
  */
 package org.joyqueue.hbase;
 
+import org.apache.hadoop.hbase.client.*;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.lang.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +93,8 @@ public class HBaseClient implements LifeCycle {
         table.put(list);
     }
 
+
+
     public void put(String nameSpace, String tableName, byte[] cf, byte[] col, byte[] rowKey, byte[] val) throws IOException {
         Table table = conn.getTable(TableName.valueOf(nameSpace, tableName));
         Put put = new Put(rowKey);
@@ -124,6 +119,13 @@ public class HBaseClient implements LifeCycle {
         scanner.forEach(result -> list.add(new Pair<>(result.getRow(), result.getValue(args.getCf(), args.getCol()))));
 
         return list;
+    }
+
+    public void delete(String nameSpace, String tableName, byte[] cf, byte[] col, byte[] rowKey) throws IOException {
+        Table table = conn.getTable(TableName.valueOf(nameSpace, tableName));
+        Delete del = new Delete(rowKey);
+        del.addColumn(cf,col);
+        table.delete(del);
     }
 
     public byte[] get(String nameSpace, String tableName, byte[] cf, byte[] col, byte[] rowKey) throws IOException {

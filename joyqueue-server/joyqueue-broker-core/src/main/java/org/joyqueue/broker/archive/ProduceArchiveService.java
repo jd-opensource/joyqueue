@@ -96,8 +96,8 @@ public class ProduceArchiveService extends Service {
     private final Map<String, Long> pauseMap = new HashMap<>();
 
     private PointTracer tracer;
-
-
+    private AtomicLong updateArchiveMetadataCounter=new AtomicLong(0);
+    private long ARCHIVE_METADATA_MOD =60;
     // 负责监听元数据变化,并且同步归档位置
     private LoopThread updateItemThread;
     // 负责读取消息写入队列
@@ -191,7 +191,6 @@ public class ProduceArchiveService extends Service {
      */
     private void updateArchiveItem() throws JoyQueueException {
         List<SendArchiveItem> list = new ArrayList<>();
-
         List<TopicConfig> topics = clusterManager.getTopics();
         int brokerId = clusterManager.getBroker().getId();
         topics.stream().forEach(topicConfig -> {
@@ -199,7 +198,6 @@ public class ProduceArchiveService extends Service {
             // 检查是否开启发送归档
             if (clusterManager.checkArchiveable(name)) {
                 logger.info("Topic:{} send archive is enable.", name.getFullName());
-
                 List<Short> partitionSet = topicConfig.fetchPartitionByBroker(brokerId);
                 partitionSet.stream().forEach(partition -> {
                     list.add(new SendArchiveItem(name.getFullName(), partition));
@@ -208,6 +206,10 @@ public class ProduceArchiveService extends Service {
         });
         // 新增或更新归档项
         itemList.addAndUpdate(list);
+        long count=updateArchiveMetadataCounter.getAndIncrement();
+        if(count% ARCHIVE_METADATA_MOD ==0){
+            logger.info("Add or Update archive item ping,size {}",list.size());
+        }
     }
 
     /**
@@ -641,9 +643,11 @@ public class ProduceArchiveService extends Service {
          *
          * @param item 发送归档项
          */
-        public void remove(SendArchiveItem item) {
+        public void remove(SendArchiveItem item) throws JoyQueueException {
             // 移除列表
             cpList.remove(item);
+            // clean archive position from store
+            archiveStore.cleanPosition(item.getTopic(),item.getPartition());
         }
 
         /**
@@ -658,7 +662,12 @@ public class ProduceArchiveService extends Service {
             cpList.stream().forEach(item -> {
                 // 最新的归档项列表不包含这个项，则删除该项
                 if (!newItemList.contains(item)) {
-                    remove(item);
+                    try {
+                        remove(item);
+                        logger.info("Clean up archive item,topic {},partition {}",item.getTopic(),item.getPartition());
+                    }catch (JoyQueueException e){
+                        logger.info("remove archive item exception",e);
+                    }
                 }
             });
             // 添加新增归档项
@@ -667,8 +676,14 @@ public class ProduceArchiveService extends Service {
                 if (!cpList.contains(item)) {
                     Long index = archiveStore.getPosition(item.topic, item.partition);
                     if (index == null) {
-                        // 从头拉起
-                        index = 0L;
+                        // 从当前的 max index 开始归档
+                        Consumer consumer=new Consumer();
+                        // fullName
+                        consumer.setTopic(item.getTopic());
+                        index = consume.getMaxIndex(consumer,item.getPartition());
+                        logger.info("New archive item,topic {},partition {},init from local store max index {}",item.getTopic(),item.getPartition(),item.getReadIndex());
+                    }else{
+                        logger.info("New archive item,topic {},partition {},recover from archive store,index {}",item.getTopic(),item.getPartition(),index);
                     }
                     item.setReadIndex(index);
                     cpList.add(item);
