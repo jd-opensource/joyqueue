@@ -16,8 +16,6 @@
 package org.joyqueue.broker.kafka.coordinator.transaction.synchronizer;
 
 import com.google.common.collect.Lists;
-import org.joyqueue.broker.coordinator.session.CoordinatorSession;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
 import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionIdManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
@@ -29,6 +27,8 @@ import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.JoyQueueCommand;
+import org.joyqueue.network.transport.session.session.TransportSession;
+import org.joyqueue.network.transport.session.session.TransportSessionManager;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +50,10 @@ public class TransactionAbortSynchronizer extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionAbortSynchronizer.class);
 
     private KafkaConfig config;
-    private CoordinatorSessionManager sessionManager;
+    private TransportSessionManager sessionManager;
     private TransactionIdManager transactionIdManager;
 
-    public TransactionAbortSynchronizer(KafkaConfig config, CoordinatorSessionManager sessionManager, TransactionIdManager transactionIdManager) {
+    public TransactionAbortSynchronizer(KafkaConfig config, TransportSessionManager sessionManager, TransactionIdManager transactionIdManager) {
         this.config = config;
         this.sessionManager = sessionManager;
         this.transactionIdManager = transactionIdManager;
@@ -76,9 +76,9 @@ public class TransactionAbortSynchronizer extends Service {
                 txIds.add(txId);
             }
 
-            CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+            TransportSession session = sessionManager.getOrCreateSession(broker);
             TransactionRollbackRequest transactionRollbackRequest = new TransactionRollbackRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
-            session.async(new JoyQueueCommand(transactionRollbackRequest), new CommandCallback() {
+            session.async(new JoyQueueCommand(transactionRollbackRequest), config.getTransactionSyncTimeout(), new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
                     if (response.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode() &&

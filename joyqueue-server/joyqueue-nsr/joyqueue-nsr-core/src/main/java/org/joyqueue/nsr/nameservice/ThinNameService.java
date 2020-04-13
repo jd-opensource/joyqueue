@@ -269,12 +269,17 @@ public class ThinNameService extends Service implements NameService, PropertySup
     public TopicConfig getTopicConfig(TopicName topic) {
         if (nameServiceConfig.getThinCacheEnable()) {
             try {
-                return topicCache.get(topic, new Callable<Optional<TopicConfig>>() {
+                Optional<TopicConfig> optional = topicCache.get(topic, new Callable<Optional<TopicConfig>>() {
                     @Override
                     public Optional<TopicConfig> call() throws Exception {
                         return Optional.ofNullable(doGetTopicConfig(topic));
                     }
-                }).get();
+                });
+                if (optional.isPresent()) {
+                    return optional.get();
+                } else {
+                    return null;
+                }
             } catch (ExecutionException e) {
                 logger.error("getTopicConfig exception, topic: {}", topic, e);
                 return null;

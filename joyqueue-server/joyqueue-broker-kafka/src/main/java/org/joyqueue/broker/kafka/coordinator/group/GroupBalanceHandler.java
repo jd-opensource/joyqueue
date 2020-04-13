@@ -17,6 +17,8 @@ package org.joyqueue.broker.kafka.coordinator.group;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.command.JoinGroupRequest;
 import org.joyqueue.broker.kafka.command.SyncGroupAssignment;
@@ -28,8 +30,11 @@ import org.joyqueue.broker.kafka.coordinator.group.domain.GroupJoinGroupResult;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupState;
+import org.joyqueue.config.BrokerConfigKey;
+import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.monitor.TraceStat;
+import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,14 +53,18 @@ public class GroupBalanceHandler extends Service {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
+    private PropertySupplier propertySupplier;
     private KafkaConfig config;
     private GroupMetadataManager groupMetadataManager;
     private GroupBalanceManager groupBalanceManager;
+    private PointTracer tracer;
 
-    public GroupBalanceHandler(KafkaConfig config, GroupMetadataManager groupMetadataManager, GroupBalanceManager groupBalanceManager) {
+    public GroupBalanceHandler(PropertySupplier propertySupplier, KafkaConfig config, GroupMetadataManager groupMetadataManager, GroupBalanceManager groupBalanceManager) {
+        this.propertySupplier = propertySupplier;
         this.config = config;
         this.groupMetadataManager = groupMetadataManager;
         this.groupBalanceManager = groupBalanceManager;
+        this.tracer = Plugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
     }
 
     public void joinGroup(String groupId, String memberId, String clientId, String clientHost, int rebalanceTimeoutMs, int sessionTimeoutMs, String protocolType,
@@ -69,7 +78,7 @@ public class GroupBalanceHandler extends Service {
             callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_GROUP_ID.getCode()));
             return;
         }
-        if (sessionTimeoutMs < config.getSessionMaxTimeout() || sessionTimeoutMs > config.getSessionMinTimeout()) {
+        if (sessionTimeoutMs > config.getSessionMaxTimeout() || sessionTimeoutMs < config.getSessionMinTimeout()) {
             callback.sendResponseCallback(GroupJoinGroupResult.buildError(memberId, KafkaErrorCode.INVALID_SESSION_TIMEOUT.getCode()));
             return;
         }
@@ -296,6 +305,8 @@ public class GroupBalanceHandler extends Service {
             return KafkaErrorCode.UNKNOWN_MEMBER_ID.getCode();
         }
 
+        TraceStat begin = tracer.begin("kafka.coordinator.heartbeat");
+        tracer.end(begin);
         return doHeartbeat(group, memberId, generationId);
     }
 

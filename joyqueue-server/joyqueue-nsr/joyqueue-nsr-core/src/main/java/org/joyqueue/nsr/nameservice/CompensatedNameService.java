@@ -17,6 +17,7 @@ package org.joyqueue.nsr.nameservice;
 
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * CompensatedNameService
@@ -68,11 +70,11 @@ public class CompensatedNameService extends Service implements NameService, Prop
 
     private PropertySupplier supplier;
     private Messenger messenger;
-    private NameServiceCacheManager nameServiceCacheManager;
-    private NameServiceCompensator nameServiceCompensator;
+    private MetadataCacheManager metadataCacheManager;
+    private MetadataCompensator metadataCompensator;
     private NameServiceCompensateThread nameServiceCompensateThread;
     private int brokerId;
-    private volatile long nameserverLastAvailableTime = 0;
+    private AtomicLong nameserverLastAvailableTime = new AtomicLong();
     private AtomicInteger nameserverNotAvailableCounter = new AtomicInteger(0);
 
     public CompensatedNameService(NameService delegate) {
@@ -84,18 +86,18 @@ public class CompensatedNameService extends Service implements NameService, Prop
         this.supplier = supplier;
         this.config = new NameServiceConfig(supplier);
         this.messenger = serviceProviderPoint.get(config.getMessengerType());
-        this.nameServiceCacheManager = new NameServiceCacheManager(config);
-        this.nameServiceCompensator = new NameServiceCompensator(config, eventBus);
-        this.nameServiceCompensateThread = new NameServiceCompensateThread(config, delegate, nameServiceCacheManager, nameServiceCompensator);
+        this.metadataCacheManager = new MetadataCacheManager(config);
+        this.metadataCompensator = new MetadataCompensator(config, eventBus);
+        this.nameServiceCompensateThread = new NameServiceCompensateThread(config, delegate, metadataCacheManager, metadataCompensator);
 
         try {
             enrichIfNecessary(messenger);
             delegate.start();
             eventBus.start();
 
-            nameServiceCacheManager.start();
-            nameServiceCompensator.start();
-            nameServiceCompensateThread.doCompensate();
+            metadataCacheManager.start();
+            metadataCompensator.start();
+            nameServiceCompensateThread.doCompensate(false);
         } catch (Exception e) {
             throw new NsrException(e);
         }
@@ -108,14 +110,14 @@ public class CompensatedNameService extends Service implements NameService, Prop
         } catch (Exception e) {
             throw new NsrException(e);
         }
-        messenger.addListener(new NameServiceCacheEventListener(config, eventBus, nameServiceCacheManager));
+        messenger.addListener(new NameServiceCacheEventListener(config, eventBus, metadataCacheManager));
     }
 
     @Override
     protected void doStop() {
         nameServiceCompensateThread.stop();
-        nameServiceCompensator.stop();
-        nameServiceCacheManager.stop();
+        metadataCompensator.stop();
+        metadataCacheManager.stop();
         delegate.stop();
         messenger.stop();
     }
@@ -157,7 +159,36 @@ public class CompensatedNameService extends Service implements NameService, Prop
 
     @Override
     public boolean hasSubscribe(String app, Subscription.Type subscribe) {
-        return delegate.hasSubscribe(app, subscribe);
+        if (config.getCompensationEnable()) {
+            return hasSubscribeByCache(app, subscribe);
+        }
+        if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
+            return hasSubscribeByCache(app, subscribe);
+        }
+        try {
+            boolean result = delegate.hasSubscribe(app, subscribe);
+            setNameserverAvailable();
+            return result;
+        } catch (Exception e) {
+            logger.error("hasSubscribe exception, app: {}, subscribe: {}", app, subscribe, e);
+            setNameserverNotAvailable();
+            if (config.getCompensationErrorCacheEnable()) {
+                return hasSubscribeByCache(app, subscribe);
+            }
+            throw new NsrException(e);
+        }
+    }
+
+    protected boolean hasSubscribeByCache(String app, Subscription.Type subscribe) {
+        switch (subscribe) {
+            case CONSUMPTION: {
+                return MapUtils.isNotEmpty(metadataCacheManager.getConsumerByApp(app));
+            }
+            case PRODUCTION: {
+                return MapUtils.isNotEmpty(metadataCacheManager.getProducerByApp(app));
+            }
+        }
+        return false;
     }
 
     @Override
@@ -168,10 +199,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public Broker getBroker(int brokerId) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getBroker(brokerId);
+            return metadataCacheManager.getBroker(brokerId);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getBroker(brokerId);
+            return metadataCacheManager.getBroker(brokerId);
         }
         try {
             Broker broker = delegate.getBroker(brokerId);
@@ -181,7 +212,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("gerBroker exception, brokerId: {}", brokerId, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getBroker(brokerId);
+                return metadataCacheManager.getBroker(brokerId);
             }
             throw new NsrException(e);
         }
@@ -190,7 +221,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public List<Broker> getAllBrokers() {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getAllBrokers();
+            return metadataCacheManager.getAllBrokers();
         }
         try {
             List<Broker> allBrokers = delegate.getAllBrokers();
@@ -200,7 +231,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getAllBrokers exception", e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getAllBrokers();
+                return metadataCacheManager.getAllBrokers();
             }
             throw new NsrException(e);
         }
@@ -214,10 +245,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public TopicConfig getTopicConfig(TopicName topic) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getTopicConfig(topic);
+            return metadataCacheManager.getTopicConfig(topic);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getTopicConfig(topic);
+            return metadataCacheManager.getTopicConfig(topic);
         }
         try {
             TopicConfig topicConfig = delegate.getTopicConfig(topic);
@@ -227,7 +258,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getTopicConfig exception, topic: {}", topic, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getTopicConfig(topic);
+                return metadataCacheManager.getTopicConfig(topic);
             }
             throw new NsrException(e);
         }
@@ -236,10 +267,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public Set<String> getAllTopicCodes() {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getAllTopicCodes();
+            return metadataCacheManager.getAllTopicCodes();
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getAllTopicCodes();
+            return metadataCacheManager.getAllTopicCodes();
         }
         try {
             Set<String> allTopicCodes = delegate.getAllTopicCodes();
@@ -249,7 +280,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getAllTopicCodes exception", e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getAllTopicCodes();
+                return metadataCacheManager.getAllTopicCodes();
             }
             throw new NsrException(e);
         }
@@ -258,10 +289,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public Set<String> getTopics(String app, Subscription.Type subscription) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getTopics(app, subscription);
+            return metadataCacheManager.getTopics(app, subscription);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getTopics(app, subscription);
+            return metadataCacheManager.getTopics(app, subscription);
         }
         try {
             Set<String> topics = delegate.getTopics(app, subscription);
@@ -271,7 +302,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getTopics exception, app: {}, subscription: {}", app, subscription, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getTopics(app, subscription);
+                return metadataCacheManager.getTopics(app, subscription);
             }
             throw new NsrException(e);
         }
@@ -280,10 +311,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public Map<TopicName, TopicConfig> getTopicConfigByBroker(Integer brokerId) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getTopicConfigByBroker(brokerId);
+            return metadataCacheManager.getTopicConfigByBroker(brokerId);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getTopicConfigByBroker(brokerId);
+            return metadataCacheManager.getTopicConfigByBroker(brokerId);
         }
         try {
             Map<TopicName, TopicConfig> topicConfigByBroker = delegate.getTopicConfigByBroker(brokerId);
@@ -293,7 +324,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getTopicConfigByBroker exception, brokerId: {}", brokerId, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getTopicConfigByBroker(brokerId);
+                return metadataCacheManager.getTopicConfigByBroker(brokerId);
             }
             throw new NsrException(e);
         }
@@ -304,7 +335,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
         Broker broker = delegate.register(brokerId, brokerIp, port);
         if (broker != null) {
             this.brokerId = broker.getId();
-            this.nameServiceCompensator.setBrokerId(this.brokerId);
+            this.metadataCompensator.setBrokerId(this.brokerId);
         }
         return broker;
     }
@@ -312,10 +343,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public Producer getProducerByTopicAndApp(TopicName topic, String app) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getProducerByTopicAndApp(topic, app);
+            return metadataCacheManager.getProducerByTopicAndApp(topic, app);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getProducerByTopicAndApp(topic, app);
+            return metadataCacheManager.getProducerByTopicAndApp(topic, app);
         }
         try {
             Producer producerByTopicAndApp = delegate.getProducerByTopicAndApp(topic, app);
@@ -325,7 +356,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getProducerByTopicAndApp exception, topic: {}, app: {}", topic, app, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getProducerByTopicAndApp(topic, app);
+                return metadataCacheManager.getProducerByTopicAndApp(topic, app);
             }
             throw new NsrException(e);
         }
@@ -334,10 +365,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getConsumerByTopicAndApp(topic, app);
+            return metadataCacheManager.getConsumerByTopicAndApp(topic, app);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getConsumerByTopicAndApp(topic, app);
+            return metadataCacheManager.getConsumerByTopicAndApp(topic, app);
         }
         try {
             Consumer consumerByTopicAndApp = delegate.getConsumerByTopicAndApp(topic, app);
@@ -347,7 +378,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getConsumerByTopicAndApp exception, topic: {}, app: {}", topic, app, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getConsumerByTopicAndApp(topic, app);
+                return metadataCacheManager.getConsumerByTopicAndApp(topic, app);
             }
             throw new NsrException(e);
         }
@@ -356,10 +387,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public Map<TopicName, TopicConfig> getTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getTopicConfigByApp(subscribeApp, subscribe);
+            return metadataCacheManager.getTopicConfigByApp(subscribeApp, subscribe);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getTopicConfigByApp(subscribeApp, subscribe);
+            return metadataCacheManager.getTopicConfigByApp(subscribeApp, subscribe);
         }
         try {
             Map<TopicName, TopicConfig> topicConfigByApp = delegate.getTopicConfigByApp(subscribeApp, subscribe);
@@ -369,7 +400,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}", subscribeApp, subscribe, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getTopicConfigByApp(subscribeApp, subscribe);
+                return metadataCacheManager.getTopicConfigByApp(subscribeApp, subscribe);
             }
             throw new NsrException(e);
         }
@@ -378,10 +409,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public DataCenter getDataCenter(String ip) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getDataCenter(ip);
+            return metadataCacheManager.getDataCenter(ip);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getDataCenter(ip);
+            return metadataCacheManager.getDataCenter(ip);
         }
         try {
             DataCenter dataCenter = delegate.getDataCenter(ip);
@@ -391,7 +422,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getDataCenter exception, ip: {}", ip, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getDataCenter(ip);
+                return metadataCacheManager.getDataCenter(ip);
             }
             throw new NsrException(e);
         }
@@ -400,10 +431,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public String getConfig(String group, String key) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getConfig(group, key);
+            return metadataCacheManager.getConfig(group, key);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getConfig(group, key);
+            return metadataCacheManager.getConfig(group, key);
         }
         try {
             String config = delegate.getConfig(group, key);
@@ -413,7 +444,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getConfig exception, group: {}, key: {}", group, key, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getConfig(group, key);
+                return metadataCacheManager.getConfig(group, key);
             }
             throw new NsrException(e);
         }
@@ -422,10 +453,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public List<Config> getAllConfigs() {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getAllConfigs();
+            return metadataCacheManager.getAllConfigs();
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getAllConfigs();
+            return metadataCacheManager.getAllConfigs();
         }
         try {
             List<Config> allConfigs = delegate.getAllConfigs();
@@ -435,7 +466,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getAllConfigs exception", e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getAllConfigs();
+                return metadataCacheManager.getAllConfigs();
             }
             throw new NsrException(e);
         }
@@ -444,10 +475,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public List<Broker> getBrokerByRetryType(String retryType) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getBrokerByRetryType(retryType);
+            return metadataCacheManager.getBrokerByRetryType(retryType);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getBrokerByRetryType(retryType);
+            return metadataCacheManager.getBrokerByRetryType(retryType);
         }
         try {
             List<Broker> brokerByRetryType = delegate.getBrokerByRetryType(retryType);
@@ -457,7 +488,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getBrokerByRetryType exception, retryType: {}", retryType, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getBrokerByRetryType(retryType);
+                return metadataCacheManager.getBrokerByRetryType(retryType);
             }
             throw new NsrException(e);
         }
@@ -466,10 +497,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public List<Consumer> getConsumerByTopic(TopicName topic) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getConsumerByTopic(topic);
+            return metadataCacheManager.getConsumerByTopic(topic);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getConsumerByTopic(topic);
+            return metadataCacheManager.getConsumerByTopic(topic);
         }
         try {
             List<Consumer> consumerByTopic = delegate.getConsumerByTopic(topic);
@@ -479,7 +510,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getConsumerByTopic exception, topic: {}", topic, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getConsumerByTopic(topic);
+                return metadataCacheManager.getConsumerByTopic(topic);
             }
             throw new NsrException(e);
         }
@@ -488,10 +519,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public List<Producer> getProducerByTopic(TopicName topic) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getProducerByTopic(topic);
+            return metadataCacheManager.getProducerByTopic(topic);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getProducerByTopic(topic);
+            return metadataCacheManager.getProducerByTopic(topic);
         }
         try {
             List<Producer> producerByTopic = delegate.getProducerByTopic(topic);
@@ -501,7 +532,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getProducerByTopic exception, topic: {}", topic, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getProducerByTopic(topic);
+                return metadataCacheManager.getProducerByTopic(topic);
             }
             throw new NsrException(e);
         }
@@ -510,10 +541,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public List<Replica> getReplicaByBroker(Integer brokerId) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getReplicaByBroker(brokerId);
+            return metadataCacheManager.getReplicaByBroker(brokerId);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getReplicaByBroker(brokerId);
+            return metadataCacheManager.getReplicaByBroker(brokerId);
         }
         try {
             List<Replica> replicaByBroker = delegate.getReplicaByBroker(brokerId);
@@ -523,7 +554,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getReplicaByBroker exception, brokerId: {}", brokerId, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getReplicaByBroker(brokerId);
+                return metadataCacheManager.getReplicaByBroker(brokerId);
             }
             throw new NsrException(e);
         }
@@ -532,10 +563,10 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     public AppToken getAppToken(String app, String token) {
         if (config.getCompensationCacheEnable()) {
-            return nameServiceCacheManager.getAppToken(app, token);
+            return metadataCacheManager.getAppToken(app, token);
         }
         if (config.getCompensationErrorCacheEnable() && !nameserverIsAvailable()) {
-            return nameServiceCacheManager.getAppToken(app, token);
+            return metadataCacheManager.getAppToken(app, token);
         }
         try {
             AppToken appToken = delegate.getAppToken(app, token);
@@ -545,7 +576,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
             logger.error("getAppToken exception, app: {}, token: {}", app, token, e);
             setNameserverNotAvailable();
             if (config.getCompensationErrorCacheEnable()) {
-                return nameServiceCacheManager.getAppToken(app, token);
+                return metadataCacheManager.getAppToken(app, token);
             }
             throw new NsrException(e);
         }
@@ -572,20 +603,28 @@ public class CompensatedNameService extends Service implements NameService, Prop
     }
 
     protected boolean nameserverIsAvailable() {
-        return nameserverLastAvailableTime == 0
-                || config.getCompensationErrorThreshold() > nameserverNotAvailableCounter.get()
-                || SystemClock.now() - nameserverLastAvailableTime > config.getCompensationErrorRetryInterval();
+        long now = SystemClock.now();
+        long nameserverLastAvailableTime = this.nameserverLastAvailableTime.get();
+        boolean result = (nameserverLastAvailableTime == 0 || config.getCompensationErrorThreshold() > nameserverNotAvailableCounter.get());
+
+        if (!result) {
+            if (now - nameserverLastAvailableTime < config.getCompensationErrorRetryInterval()) {
+                return false;
+            }
+            if (this.nameserverLastAvailableTime.compareAndSet(nameserverLastAvailableTime, now)) {
+                nameserverNotAvailableCounter.set(0);
+                return true;
+            }
+        }
+        return result;
     }
 
     protected void setNameserverNotAvailable() {
-        if (nameserverLastAvailableTime == 0) {
-            nameserverLastAvailableTime = SystemClock.now();
-        }
         nameserverNotAvailableCounter.incrementAndGet();
     }
 
     protected void setNameserverAvailable() {
-        nameserverLastAvailableTime = 0;
+        nameserverLastAvailableTime.set(SystemClock.now());
         nameserverNotAvailableCounter.set(0);
     }
 

@@ -18,6 +18,9 @@ package org.joyqueue.broker.kafka.coordinator.transaction;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.coordinator.Coordinator;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionMetadata;
@@ -32,11 +35,8 @@ import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
-import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,15 +60,15 @@ public class TransactionHandler extends Service {
     private TransactionMetadataManager transactionMetadataManager;
     private ProducerIdManager producerIdManager;
     private TransactionSynchronizer transactionSynchronizer;
-    private NameService nameService;
+    private ClusterNameService clusterNameService;
 
     public TransactionHandler(Coordinator coordinator, TransactionMetadataManager transactionMetadataManager, ProducerIdManager producerIdManager,
-                              TransactionSynchronizer transactionSynchronizer, NameService nameService) {
+                              TransactionSynchronizer transactionSynchronizer, ClusterNameService clusterNameService) {
         this.coordinator = coordinator;
         this.transactionMetadataManager = transactionMetadataManager;
         this.producerIdManager = producerIdManager;
         this.transactionSynchronizer = transactionSynchronizer;
-        this.nameService = nameService;
+        this.clusterNameService = clusterNameService;
     }
 
     public TransactionMetadata initProducer(String clientId, String transactionId, int transactionTimeout) {
@@ -137,7 +137,7 @@ public class TransactionHandler extends Service {
             result.put(entry.getKey(), partitionMetadataAndErrors);
 
             TopicName topic = TopicName.parse(entry.getKey());
-            TopicConfig topicConfig = nameService.getTopicConfig(topic);
+            TopicConfig topicConfig = clusterNameService.getTopicConfig(topic);
 
             for (Integer partition : entry.getValue()) {
                 PartitionGroup partitionGroup = null;
@@ -149,7 +149,7 @@ public class TransactionHandler extends Service {
                 } else if (partitionGroup.getLeader() == null || partitionGroup.getLeader() <= 0) {
                     partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
                 } else {
-                    Broker broker = nameService.getBroker(partitionGroup.getLeader());
+                    Broker broker = clusterNameService.getNameService().getBroker(partitionGroup.getLeader());
                     if (broker == null) {
                         partitionMetadataAndErrors.add(new PartitionMetadataAndError(partition, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode()));
                     } else {

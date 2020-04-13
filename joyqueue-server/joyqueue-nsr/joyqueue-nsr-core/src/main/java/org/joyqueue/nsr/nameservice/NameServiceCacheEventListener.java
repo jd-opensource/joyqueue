@@ -61,31 +61,31 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
 
     private NameServiceConfig config;
     private EventBus<NameServerEvent> eventBus;
-    private NameServiceCacheManager nameServiceCacheManager;
+    private MetadataCacheManager metadataCacheManager;
 
-    public NameServiceCacheEventListener(NameServiceConfig config, EventBus<NameServerEvent> eventBus, NameServiceCacheManager nameServiceCacheManager) {
+    public NameServiceCacheEventListener(NameServiceConfig config, EventBus<NameServerEvent> eventBus, MetadataCacheManager metadataCacheManager) {
         this.config = config;
         this.eventBus = eventBus;
-        this.nameServiceCacheManager = nameServiceCacheManager;
+        this.metadataCacheManager = metadataCacheManager;
     }
 
     @Override
     public void onEvent(MetaEvent event) {
-        if (!nameServiceCacheManager.tryLock()) {
-            nameServiceCacheManager.updateVersion();
+        if (!metadataCacheManager.tryLock()) {
+            metadataCacheManager.updateTimestamp();
             return;
         }
         try {
-            AllMetadataCache newCache = nameServiceCacheManager.getCache().clone();
+            AllMetadataCache newCache = metadataCacheManager.getCache().clone();
             boolean updateCache = doUpdateCache(event, newCache);
             if (!updateCache) {
                 return;
             }
             doOnEvent(event);
-            nameServiceCacheManager.fillCache(newCache);
-            nameServiceCacheManager.updateVersion();
+            metadataCacheManager.fillCache(newCache);
+            metadataCacheManager.updateTimestamp();
         } finally {
-            nameServiceCacheManager.unlock();
+            metadataCacheManager.unlock();
         }
     }
 

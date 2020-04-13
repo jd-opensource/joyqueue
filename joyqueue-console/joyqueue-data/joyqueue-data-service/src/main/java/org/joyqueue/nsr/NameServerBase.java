@@ -111,10 +111,10 @@ public class NameServerBase {
     }
 
     public int isSuccess(String s){
-     if (s.equals("success")) {
-         return 1;
-     }
-     return 0;
+        if (s.equals("success")) {
+            return 1;
+        }
+        return 0;
     }
 
     /**
