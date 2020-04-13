@@ -32,7 +32,6 @@ import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupState;
 import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.monitor.PointTracer;
-import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;

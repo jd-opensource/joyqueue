@@ -28,7 +28,6 @@ import org.joyqueue.broker.consumer.model.PullResult;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.domain.Partition;
-import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.BrokerMessage;
@@ -184,12 +183,6 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
     }
 
     protected void commitRetry(Connection connection, Consumer consumer, List<CommitAckData> data) throws Exception {
-        org.joyqueue.domain.Consumer subscribe = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-        if (subscribe.getConsumerPolicy() != null && subscribe.getConsumerPolicy().getRetry() != null && !subscribe.getConsumerPolicy().getRetry()) {
-            logger.warn("consumer retry is disabled, ignore retry, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-            return;
-        }
-
         List<RetryMessageModel> retryMessageModelList = Lists.newLinkedList();
         for (CommitAckData ackData : data) {
             PullResult pullResult = consume.getMessage(consumer, ackData.getPartition(), ackData.getIndex(), 1);

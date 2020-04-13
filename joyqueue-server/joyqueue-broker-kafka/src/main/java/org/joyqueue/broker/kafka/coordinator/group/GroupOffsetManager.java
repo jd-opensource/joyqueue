@@ -291,7 +291,7 @@ public class GroupOffsetManager extends Service {
         Map<Broker, Map<String, List<OffsetAndMetadata>>> result = Maps.newHashMapWithExpectedSize(offsets.size());
         for (Map.Entry<String, List<OffsetAndMetadata>> entry : offsets.entrySet()) {
             String topic = entry.getKey();
-            TopicConfig topicConfig = clusterNameService.getTopicConfig(TopicName.parse(topic));
+            TopicConfig topicConfig = clusterNameService.getNameService().getTopicConfig(TopicName.parse(topic));
             if (topicConfig == null) {
                 logger.error("get leader failed, topic not exist, topic: {}", topic);
                 continue;
@@ -327,7 +327,7 @@ public class GroupOffsetManager extends Service {
 
         for (Map.Entry<String, List<Integer>> entry : topicAndPartitions.entrySet()) {
             String topic = entry.getKey();
-            TopicConfig topicConfig = clusterNameService.getTopicConfig(TopicName.parse(topic));
+            TopicConfig topicConfig = clusterNameService.getNameService().getTopicConfig(TopicName.parse(topic));
             if (topicConfig == null) {
                 logger.error("get leader failed, topic not exist, topic: {}", topic);
                 continue;

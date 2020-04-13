@@ -21,15 +21,18 @@ public class MetadataValidator {
 
     public boolean validateChange(AllMetadataCache oldCache, AllMetadataCache newCache) {
         if (oldCache.getAllTopicConfigs().size() - newCache.getAllTopicConfigs().size() > config.getCompensationThreshold()) {
-            logger.error("validate change error, oldTopic: {}, newTopic: {}, threshold: {}", oldCache.getAllTopicConfigs().size(), newCache.getAllTopicConfigs().size(), config.getCompensationThreshold());
+            logger.error("validate change error, oldTopic: {}, newTopic: {}, threshold: {}",
+                    oldCache.getAllTopicConfigs().size(), newCache.getAllTopicConfigs().size(), config.getCompensationThreshold());
             return false;
         }
         if (oldCache.getAllConsumers().size() - newCache.getAllConsumers().size() > config.getCompensationThreshold()) {
-            logger.error("validate change error, oldConsumer: {}, newConsumer: {}, threshold: {}", oldCache.getAllConsumers().size(), newCache.getAllConsumers().size(), config.getCompensationThreshold());
+            logger.error("validate change error, oldConsumer: {}, newConsumer: {}, threshold: {}",
+                    oldCache.getAllConsumers().size(), newCache.getAllConsumers().size(), config.getCompensationThreshold());
             return false;
         }
         if (oldCache.getAllProducers().size() - newCache.getAllProducers().size() > config.getCompensationThreshold()) {
-            logger.error("validate change error, oldProducer: {}, oldConsumer: {}, threshold: {}", oldCache.getAllProducers().size(), newCache.getAllProducers().size(), config.getCompensationThreshold());
+            logger.error("validate change error, oldProducer: {}, oldConsumer: {}, threshold: {}",
+                    oldCache.getAllProducers().size(), newCache.getAllProducers().size(), config.getCompensationThreshold());
             return false;
         }
         return true;

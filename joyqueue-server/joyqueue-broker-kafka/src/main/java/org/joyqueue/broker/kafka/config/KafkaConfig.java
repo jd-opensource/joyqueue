@@ -39,8 +39,17 @@ public class KafkaConfig {
         this.brokerConfig = new BrokerConfig(propertySupplier);
     }
 
-    public boolean getAuthEnable() {
-        return getConfig(KafkaConfigKey.AUTH_ENABLE);
+    public boolean getAuthEnable(String app) {
+        Object appEnable = PropertySupplier.getValue(propertySupplier,
+                KafkaConfigKey.AUTH_ENABLE_PREFIX.getName() + app,
+                KafkaConfigKey.AUTH_ENABLE_PREFIX.getType(),
+                KafkaConfigKey.AUTH_ENABLE_PREFIX.getValue());
+
+        if (appEnable != null) {
+            return (boolean) appEnable;
+        }
+
+        return (boolean) propertySupplier.getValue(KafkaConfigKey.AUTH_ENABLE);
     }
 
     public boolean getProduceDelayEnable() {

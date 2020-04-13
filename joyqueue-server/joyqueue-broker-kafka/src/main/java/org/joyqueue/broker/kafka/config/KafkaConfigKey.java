@@ -72,6 +72,7 @@ public enum KafkaConfigKey implements PropertyDef {
 
     // 启用认证
     AUTH_ENABLE("kafka.auth.enable", true, Type.BOOLEAN),
+    AUTH_ENABLE_PREFIX("kafka.auth.enable.", null, Type.BOOLEAN),
 
     ;
 

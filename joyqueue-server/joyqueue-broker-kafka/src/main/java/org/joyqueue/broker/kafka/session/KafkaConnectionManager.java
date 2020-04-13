@@ -75,7 +75,7 @@ public class KafkaConnectionManager {
             isAuth = true;
         } else {
             String token = KafkaClientHelper.parseToken(clientId);
-            if (config.getAuthEnable() && StringUtils.isBlank(token)) {
+            if (config.getAuthEnable(app) && StringUtils.isBlank(token)) {
                 logger.warn("user auth failed, token is null, transport: {}, app: {}", transport, app);
                 return false;
             }
