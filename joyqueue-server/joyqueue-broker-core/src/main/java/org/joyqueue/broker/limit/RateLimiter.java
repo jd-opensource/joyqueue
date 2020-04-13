@@ -28,4 +28,8 @@ public interface RateLimiter {
     boolean tryAcquireTps(int tps);
 
     boolean tryAcquireTraffic(int traffic);
+
+    boolean tryAcquireRequire();
+
+    boolean releaseRequire();
 }

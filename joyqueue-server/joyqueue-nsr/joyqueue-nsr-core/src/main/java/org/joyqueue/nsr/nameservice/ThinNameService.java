@@ -277,9 +277,8 @@ public class ThinNameService extends Service implements NameService, PropertySup
                 });
                 if (optional.isPresent()) {
                     return optional.get();
-                } else {
-                    return null;
                 }
+                return null;
             } catch (ExecutionException e) {
                 logger.error("getTopicConfig exception, topic: {}", topic, e);
                 return null;

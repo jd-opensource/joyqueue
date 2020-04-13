@@ -15,8 +15,8 @@
  */
 package org.joyqueue.broker.limit;
 
-import org.joyqueue.broker.network.traffic.FetchTrafficPayload;
-import org.joyqueue.broker.network.traffic.ProduceTrafficPayload;
+import org.joyqueue.broker.network.traffic.FetchResponseTrafficPayload;
+import org.joyqueue.broker.network.traffic.ProduceResponseTrafficPayload;
 
 /**
  * LimitType
@@ -26,9 +26,9 @@ import org.joyqueue.broker.network.traffic.ProduceTrafficPayload;
  */
 public enum LimitType {
 
-    FETCH(FetchTrafficPayload.TYPE),
+    FETCH(FetchResponseTrafficPayload.TYPE),
 
-    PRODUCE(ProduceTrafficPayload.TYPE)
+    PRODUCE(ProduceResponseTrafficPayload.TYPE)
 
     ;
 
