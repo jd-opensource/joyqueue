@@ -169,6 +169,7 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         if (brokerGroup!=null) {
             qPageQuery.getQuery().getTopic().setBrokerGroup(new BrokerGroup(brokerGroup));
         }
+        qPageQuery.getQuery().setKeyword("");
         Response response = toScaleSearch(qPageQuery);
         List<Broker> brokers = (List<Broker>) response.getData();
         if (brokers.size()==0) {
