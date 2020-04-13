@@ -31,27 +31,14 @@ import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.model.BrokerMetadata;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.domain.BrokerClient;
-import org.joyqueue.model.domain.BrokerMonitorRecord;
-import org.joyqueue.model.domain.BrokerTopicMonitor;
-import org.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
-import org.joyqueue.model.domain.ProducerSendMessage;
-import org.joyqueue.model.domain.SimplifiedBrokeMessage;
-import org.joyqueue.model.domain.Subscribe;
-import org.joyqueue.model.domain.User;
+import org.joyqueue.model.domain.*;
 import org.joyqueue.model.query.QMonitor;
 import org.joyqueue.model.query.QPartitionGroupMonitor;
 import org.joyqueue.monitor.BrokerMessageInfo;
 import org.joyqueue.monitor.BrokerMonitorInfo;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.Client;
-import org.joyqueue.service.ApplicationUserService;
-import org.joyqueue.service.BrokerManageService;
-import org.joyqueue.service.BrokerMessageService;
-import org.joyqueue.service.BrokerMonitorService;
-import org.joyqueue.service.BrokerService;
-import org.joyqueue.service.BrokerTopicMonitorService;
-import org.joyqueue.service.CoordinatorMonitorService;
+import org.joyqueue.service.*;
 import org.joyqueue.toolkit.io.Directory;
 import org.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
@@ -82,8 +69,13 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Value
     private BrokerService brokerService;
 
+    @Value
+    private DataCenterService dataCenterService;
+
     @Value(Constants.USER_KEY)
     protected User session;
+
+    public static final String DATA_CENTER_IP_SEPARATOR = ":";
 
     @Override
     public Response execute() throws Exception {
@@ -158,8 +150,21 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("findConnectionOnBroker")
     public Response findConnectionOnBroker(@Body Subscribe subscribe) {
         try {
-            List<ConnectionMonitorInfoWithIp> record=brokerMonitorService.findConnectionOnBroker(subscribe);
-            return Responses.success(record);
+            List<ConnectionMonitorInfoWithIp> records = brokerMonitorService.findConnectionOnBroker(subscribe);
+            if (records != null) {
+                records.forEach(record -> {
+                    try {
+                        String ip = record.getIp();
+                        if (ip != null) {
+
+                        }
+                        record.setDataCenter(dataCenterService.findByIp(ip.split(DATA_CENTER_IP_SEPARATOR)[0]));
+                    } catch (Exception e) {
+                        logger.error(String.format("find data center by ip error. ip is %s", record.getIp()), e);
+                    }
+                });
+            }
+            return Responses.success(records);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
             return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
