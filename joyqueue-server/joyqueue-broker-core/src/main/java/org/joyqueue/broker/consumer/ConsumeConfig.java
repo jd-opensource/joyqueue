@@ -91,4 +91,7 @@ public class ConsumeConfig {
     public boolean useLegacyPartitionManager() {
         return propertySupplier.getValue(ConsumeConfigKey.USE_LEGACY_PARTITION_MANAGER);
     }
+    public boolean useLegacyConcurrentConsumer() {
+        return propertySupplier.getValue(ConsumeConfigKey.USE_LEGACY_CONCURRENT_CONSUMER);
+    }
 }
