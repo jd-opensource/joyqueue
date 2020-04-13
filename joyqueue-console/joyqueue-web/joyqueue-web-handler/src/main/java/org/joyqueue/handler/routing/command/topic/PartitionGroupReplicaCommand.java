@@ -41,6 +41,7 @@ import org.joyqueue.service.TopicPartitionGroupService;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -131,32 +132,68 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
         List<Broker> brokers = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(partitionGroupReplicas)) {
-            for (Broker broker : brokerPage.getResult()) {
-                boolean isMatch = false;
-                for (PartitionGroupReplica partitionGroupReplica : partitionGroupReplicas) {
-                    if (partitionGroupReplica.getBrokerId() == broker.getId()) {
-                        isMatch = true;
-                        break;
+            if (CollectionUtils.isNotEmpty(brokerPage.getResult())) {
+                for (Broker broker : brokerPage.getResult()) {
+                    boolean isMatch = false;
+                    for (PartitionGroupReplica partitionGroupReplica : partitionGroupReplicas) {
+                        if (partitionGroupReplica.getBrokerId() == broker.getId()) {
+                            isMatch = true;
+                            break;
+                        }
                     }
-                }
-                if (!isMatch) {
-                    brokers.add(broker);
+                    if (!isMatch) {
+                        brokers.add(broker);
+                    }
                 }
             }
         } else {
-            brokers.addAll(brokerPage.getResult());
+            if (brokerPage.getResult()!=null) {
+                brokers.addAll(brokerPage.getResult());
+            }
         }
         return Responses.success(brokerPage.getPagination(), brokers);
     }
 
     @Path("searchBrokerToAddNewDefault")
     public Response toAddNewPartitionGroupDefaultSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
-        return toScaleDefaultSearch(qPageQuery);
+        QBroker qBroker = new QBroker();
+        QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(), qBroker);
+        brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
+        PageResult<Broker> brokerPage = brokerService.search(brokerQuery);
+        String brokerGroup = null;
+        if (CollectionUtils.isNotEmpty(brokerPage.getResult())) {
+            if (brokerPage.getResult().get(0).getGroup()!=null) {
+                brokerGroup = brokerPage.getResult().get(0).getGroup().getCode();
+            }
+        }
+        if (brokerGroup!=null) {
+            qPageQuery.getQuery().getTopic().setBrokerGroup(new BrokerGroup(brokerGroup));
+        }
+        qPageQuery.getQuery().setKeyword("");
+        Response response = toScaleSearch(qPageQuery);
+        List<Broker> brokers = (List<Broker>) response.getData();
+        if (brokers.size()==0) {
+            qPageQuery.getQuery().getTopic().setBrokerGroup(null);
+            return toAddNewPartitionGroupSearch(qPageQuery);
+        }
+        return response;
     }
 
     @Path("searchBrokerToAddNew")
     public Response toAddNewPartitionGroupSearch(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
-        return toScaleSearch(qPageQuery);
+        QPartitionGroupReplica query = qPageQuery.getQuery();
+        QBroker qBroker = new QBroker();
+        if (query.getTopic().getBrokerGroup() != null) {
+            qBroker.setGroup(new Identity(query.getTopic().getBrokerGroup().getCode()));
+        }
+        // 若没有输入broker分组，则继续执行
+        QPageQuery<QBroker> brokerQuery = new QPageQuery(qPageQuery.getPagination(), qBroker);
+        brokerQuery.getQuery().setKeyword(qPageQuery.getQuery().getKeyword());
+        PageResult<Broker> brokerPage = brokerService.search(brokerQuery);
+        if (CollectionUtils.isEmpty(brokerPage.getResult())) {
+            brokerPage.setResult(Collections.emptyList());
+        }
+        return Responses.success(brokerPage.getPagination(), brokerPage.getResult());
     }
 
     @Override

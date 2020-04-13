@@ -25,6 +25,10 @@ public class BrokerTopicMonitorRecord {
     private long count;
     private long totalSize;
 
+    private long retryCount;
+    private long retryTps;
+    private long backlog;
+
     public String getApp() {
         return app;
     }
@@ -63,5 +67,29 @@ public class BrokerTopicMonitorRecord {
 
     public void setTotalSize(long totalSize) {
         this.totalSize = totalSize;
+    }
+
+    public long getRetryCount() {
+        return retryCount;
+    }
+
+    public void setRetryCount(long retryCount) {
+        this.retryCount = retryCount;
+    }
+
+    public long getRetryTps() {
+        return retryTps;
+    }
+
+    public void setRetryTps(long retryTps) {
+        this.retryTps = retryTps;
+    }
+
+    public long getBacklog() {
+        return backlog;
+    }
+
+    public void setBacklog(long backlog) {
+        this.backlog = backlog;
     }
 }
