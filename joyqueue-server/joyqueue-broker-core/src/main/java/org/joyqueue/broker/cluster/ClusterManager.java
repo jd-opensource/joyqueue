@@ -632,7 +632,7 @@ public class ClusterManager extends Service {
         if (!partitionGroup.getReplicas().contains(getBrokerId())) {
             return false;
         }
-        if (!config.getTopicLocalElectionEnable()) {
+        if (!config.getTopicLocalElectionEnable() || partitionGroup.getReplicas().size() == 1) {
             return getBrokerId().equals(partitionGroup.getLeader());
         }
         ClusterNode clusterNode = clusterNameService.getTopicGroupNode(partitionGroup.getTopic(), partitionGroup.getGroup());

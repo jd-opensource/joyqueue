@@ -97,7 +97,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
 
             metadataCacheManager.start();
             metadataCompensator.start();
-            nameServiceCompensateThread.doCompensate();
+            nameServiceCompensateThread.doCompensate(false);
         } catch (Exception e) {
             throw new NsrException(e);
         }

@@ -44,7 +44,7 @@ public enum NameServiceConfigKey implements PropertyDef {
     NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL("nameservice.compensation.error.retry.interval", 1000 * 10, Type.INT),
     NAMESERVER_COMPENSATION_ERROR_CACHE_ENABLE("nameservice.compensation.error.cache.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_ERROR_THRESHOLD("nameservice.compensation.error.threshold", 10, Type.INT),
-    NAMESERVER_COMPENSATION_THRESHOLD("nameservice.compensation.threshold", 100, Type.INT),
+    NAMESERVER_COMPENSATION_THRESHOLD("nameservice.compensation.threshold", 1000, Type.INT),
     NAMESERVER_MESSENGER_TYPE("nameservice.messenger.type", "default", Type.STRING),
     NAMESERVER_MESSENGER_IGNITE_ENABLE("nameservice.messenger.ignite.enable", false, Type.BOOLEAN), // TODO 临时配置，是否启用ignite推送,
     NAMESERVER_MESSENGER_PUBLISH_LEADER_CHANGE_ENABLE("nameservice.messenger.publish.leaderChange.enable", true, Type.BOOLEAN),
