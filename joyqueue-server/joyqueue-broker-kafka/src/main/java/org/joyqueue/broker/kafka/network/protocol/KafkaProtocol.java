@@ -122,7 +122,7 @@ public class KafkaProtocol extends Service implements ProtocolService, BrokerCon
         this.transactionOffsetHandler = new TransactionOffsetHandler(coordinator, this.transactionMetadataManager, transactionSynchronizer);
         this.transactionCoordinator = new TransactionCoordinator(coordinator, this.transactionMetadataManager, transactionHandler, transactionOffsetHandler);
 
-        this.connectionManager = new KafkaConnectionManager(brokerContext.getSessionManager());
+        this.connectionManager = new KafkaConnectionManager(config, brokerContext.getSessionManager(), brokerContext.getAuthentication());
 
         this.connectionHandler = new KafkaConnectionHandler(connectionManager);
         this.transportHandler = new KafkaTransportHandler(config);

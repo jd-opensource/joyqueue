@@ -39,6 +39,10 @@ public class KafkaConfig {
         this.brokerConfig = new BrokerConfig(propertySupplier);
     }
 
+    public boolean getAuthEnable() {
+        return getConfig(KafkaConfigKey.AUTH_ENABLE);
+    }
+
     public boolean getProduceDelayEnable() {
         return getConfig(KafkaConfigKey.PRODUCE_DELAY_ENABLE);
     }
