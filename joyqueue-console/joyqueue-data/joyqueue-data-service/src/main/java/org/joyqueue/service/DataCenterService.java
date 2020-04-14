@@ -26,4 +26,6 @@ import java.util.List;
 public interface DataCenterService extends NsrService<DataCenter, String> {
 
     List<DataCenter> findAllDataCenter() throws Exception;
+
+    DataCenter findByIp(String ip) throws Exception;
 }
