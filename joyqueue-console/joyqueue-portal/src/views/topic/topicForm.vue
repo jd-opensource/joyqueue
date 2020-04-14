@@ -24,7 +24,7 @@
                 <d-option :value="2" >顺序主题</d-option>
               </d-select>
             </d-form-item>
-            <d-form-item label="队列数量：" prop="partitions">
+            <d-form-item label="分区数量：" prop="partitions">
               <d-input v-model.number="formData.partitions" :disabled="partitionsDisabled" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="选举类型：" prop="electType">
@@ -117,7 +117,7 @@ export default {
     let validateBroker = (rule, value, callback) => {
       if (this.formData.topic.partitions !== undefined && this.formData.topic.brokers !== undefined &&
           this.formData.topic.brokers.length > this.formData.topic.partitions) {
-        callback(new Error('勾选的broker数量不能大于队列数量'))
+        callback(new Error('勾选的broker数量不能大于分区数量'))
       } else {
         callback()
       }
@@ -150,7 +150,7 @@ export default {
           ],
           name: getNameRule(),
           partitions: [
-            {type: 'number', required: true, message: '请输入队列数量', trigger: 'change'}
+            {type: 'number', required: true, message: '请输入分区数量', trigger: 'change'}
           ],
           brokerGroup: [
             {validator: validateBrokerGroup, trigger: 'change'}

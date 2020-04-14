@@ -272,6 +272,9 @@
                path="/v1/partitionGroupReplica/searchBrokerToAddNew" handlers="partitionGroupReplica#searchBrokerToAddNew render"
                errors="error"/>
         <route inherit="post"
+               path="/v1/partitionGroupReplica/searchBrokerToAddNewDefault" handlers="partitionGroupReplica#searchBrokerToAddNewDefault render"
+               errors="error"/>
+        <route inherit="post"
                path="/v1/partitionGroupReplica/leader" handlers="partitionGroupReplica#leader render"
                errors="error"/>
 

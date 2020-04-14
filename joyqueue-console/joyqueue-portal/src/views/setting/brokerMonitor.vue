@@ -71,7 +71,7 @@ export default {
         rowData: [],
         colData: [
           {
-            title: '队列',
+            title: '主题',
             key: 'topic'
           },
           {

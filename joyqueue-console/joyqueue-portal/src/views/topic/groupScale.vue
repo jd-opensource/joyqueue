@@ -129,9 +129,12 @@ export default {
         this.urlOrigin.search = '/partitionGroupReplica/searchBrokerToScaleDefault'
       } else {
         data.query.keyword = this.searchData.keyword
+        this.urlOrigin.search = '/partitionGroupReplica/searchBrokerToScale'
       }
       if (this.searchData.group) {
         data.query.topic.brokerGroup = this.searchData.group
+      } else {
+        delete data.query.topic.brokerGroup
       }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         data.data = data.data || []
@@ -143,7 +146,26 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         if (this.firstOpen && this.tableData.rowData.length > 0) {
-          this.searchData.group = this.tableData.rowData[0].group.code
+          let groupCode = ''
+          if (this.tableData.rowData[0].group) {
+            groupCode = this.tableData.rowData[0].group.code
+          }
+          let unique = true
+          for (let i in this.tableData.rowData) {
+            if (this.tableData.rowData.hasOwnProperty(i)) {
+              if (this.tableData.rowData[i].group) {
+                if (this.tableData.rowData[i].group.code.indexOf(groupCode) < 0) {
+                  unique = false
+                  break
+                }
+              }
+            }
+          }
+          if (unique) {
+            this.searchData.group = groupCode
+          } else {
+            this.searchData.group = ''
+          }
         }
         this.firstOpen = false
         this.showTablePin = false

@@ -80,6 +80,10 @@ public class MqttConfig {
         return getConfig(MqttConfigKey.EXECUTOR_SERVICE_PUBLISH_QUEUESIZE);
     }
 
+    public int getMaxPayloadSize() {
+        return getConfig(MqttConfigKey.MAX_PAYLOAD_SIZE);
+    }
+
     protected <T> T getConfig(PropertyDef key) {
         return PropertySupplier.getValue(this.propertySupplier, key);
     }

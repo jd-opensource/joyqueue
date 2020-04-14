@@ -87,19 +87,23 @@ export default {
         return [
           {
             title: 'Broker分组',
-            key: 'group.code'
+            key: 'group.code',
+            width: '20%'
           },
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '20%'
           },
           {
             title: 'IP',
-            key: 'ip'
+            key: 'ip',
+            width: '20%'
           },
           {
             title: '端口',
-            key: 'port'
+            key: 'port',
+            width: '20%'
           }
         ]
       }
@@ -168,7 +172,7 @@ export default {
             }
           },
           {
-            title: '队列数',
+            title: '分区数',
             key: 'partitions'
           }
         ],
