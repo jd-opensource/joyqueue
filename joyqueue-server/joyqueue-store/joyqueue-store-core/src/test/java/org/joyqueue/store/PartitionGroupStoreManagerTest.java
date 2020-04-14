@@ -43,10 +43,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -65,7 +67,6 @@ public class PartitionGroupStoreManagerTest {
     private static final String topic = "test_topic";
     private static final int partitionGroup = 3;
     private static final short[] partitions = new short[]{4, 5, 6};
-    private static final int[] nodes = new int[]{0};
     private File base = null;
     private File groupBase = null;
     private PartitionGroupStoreManager store;
@@ -122,13 +123,67 @@ public class PartitionGroupStoreManagerTest {
 
     }
 
+    @Test
+    @Ignore
+    public void readPerformanceTest() throws Exception {
+        short[] partitions = new short[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Short [] p = new Short[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        store.rePartition(p);
+        writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION, partitions);
+        destroyStore();
+        recoverStore();
+        readPerformanceTest(10, partitions);
+    }
+
+    private void readPerformanceTest(int batchCount, short [] partitions) throws IOException, InterruptedException {
+
+        AtomicLong readBytes = new AtomicLong(0L);
+        AtomicLong readCount = new AtomicLong(0L);
+        CountDownLatch latch = new CountDownLatch(partitions.length);
+        long t0 = SystemClock.now();
+
+        for (int i = 0; i < partitions.length; i++) {
+            int finalI = i;
+            Thread t = new Thread(() -> {
+                try {
+                    short partition = partitions[finalI];
+                    long index = store.getLeftIndex(partition);
+                    while (index < store.getRightIndex(partition)) {
+                        ReadResult readResult = store.read(partition, index, batchCount, -1);
+                        Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+                        readBytes.addAndGet(Arrays.stream(readResult.getMessages()).mapToLong(ByteBuffer::remaining).sum());
+                        readCount.addAndGet(readResult.getMessages().length);
+                        index += readResult.getMessages().length;
+                    }
+                } catch (IOException e) {
+                    logger.warn("Read exception: ", e);
+                }
+                latch.countDown();
+            });
+            t.start();
+        }
+        latch.await();
+        long t1 = SystemClock.now();
+
+        logger.info("Total read {}, takes {}ms, qps: {}, traffic: {}, batch count: {}.",
+                Format.formatTraffic(readBytes.get()),
+                t1 - t0,
+                Format.formatWithComma(1000L * readCount.get() / (t1 - t0)),
+                Format.formatTraffic(1000L * readBytes.get() / (t1 - t0)),
+                batchCount);
+
+    }
+
     @Ignore
     @Test
     public void writePerformanceTest() throws InterruptedException {
-        writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION);
+        writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION, null);
     }
 
-    private void writePerformanceTest(long totalBytes, int msgSize, int batchCount, boolean sync, QosLevel qosLevel) throws InterruptedException {
+    private void writePerformanceTest(long totalBytes, int msgSize, int batchCount, boolean sync, QosLevel qosLevel, short [] partitions) throws InterruptedException {
+        if(null == partitions) {
+            partitions = PartitionGroupStoreManagerTest.partitions;
+        }
         List<ByteBuffer> messages = MessageUtils.build(batchCount, msgSize);
         int size = messages.get(0).remaining();
         int [] intPartitions = new int [partitions.length];
@@ -183,7 +238,6 @@ public class PartitionGroupStoreManagerTest {
         } finally {
             commitThread.stop();
         }
-
     }
 
     @Ignore
@@ -196,6 +250,7 @@ public class PartitionGroupStoreManagerTest {
                 CompletableFuture.runAsync(() -> {
                     for(;;) {
                         store.asyncWrite(QosLevel.RECEIVE, null, writeRequests);
+                        store.commit(store.rightPosition());
                     }
                 }),
                 CompletableFuture.runAsync(() -> {
@@ -306,6 +361,10 @@ public class PartitionGroupStoreManagerTest {
         int count = 1024;
         int repeat = 300;
         long timeout = 500000L;
+        int storeFileSize = 128 * 1024 * 1024;
+        int indexFileSize = 512 * 1024;
+        boolean indexLoadOnRead = true;
+        boolean storeLoadOnRead = false;
         List<ByteBuffer> messages = MessageUtils.build(count, 1024);
 
 
@@ -330,13 +389,13 @@ public class PartitionGroupStoreManagerTest {
         destroyStore();
         if (null == bufferPool) {
             bufferPool = PreloadBufferPool.getInstance();
-            bufferPool.addPreLoad(32 * 1024 * 1024, 2, 4);
-            bufferPool.addPreLoad(128 * 1024, 2, 4);
+            bufferPool.addPreLoad(storeFileSize, 2, 4);
+            bufferPool.addPreLoad(indexFileSize, 2, 4);
         }
         PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
-                new PositioningStore.Config(32 * 1024 * 1024),
-                new PositioningStore.Config(128 * 1024));
+                new PositioningStore.Config(storeFileSize, storeLoadOnRead),
+                new PositioningStore.Config(indexFileSize, indexLoadOnRead));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);
@@ -771,8 +830,8 @@ public class PartitionGroupStoreManagerTest {
     private void recoverStore() {
         if (null == bufferPool) {
             bufferPool = PreloadBufferPool.getInstance();
-            bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
-            bufferPool.addPreLoad(512 * 1024, 2, 4);
+            bufferPool.addPreLoad(32 * 1024 * 1024, 2, 4);
+            bufferPool.addPreLoad(128 * 1024, 2, 4);
         }
 
         PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(
@@ -780,14 +839,15 @@ public class PartitionGroupStoreManagerTest {
                 DEFAULT_WRITE_REQUEST_CACHE_SIZE,
                 1L,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
-                new PositioningStore.Config(128 * 1024 * 1024),
-                new PositioningStore.Config(512 * 1024));
+                new PositioningStore.Config(32 * 1024 * 1024),
+                new PositioningStore.Config(128 * 1024,true));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);
         this.store.recover();
         this.store.start();
         this.store.enable();
+        this.store.commit(this.store.rightPosition());
     }
 
     private void destroyStore() {

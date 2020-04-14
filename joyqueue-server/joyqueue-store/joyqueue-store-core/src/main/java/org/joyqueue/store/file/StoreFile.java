@@ -112,4 +112,15 @@ public interface StoreFile<T> extends Timed {
      * 文件创建时间
      */
     long timestamp();
+
+    /**
+     * 调用fsync，确保数据写入到磁盘上。
+     * @throws IOException 发生IO异常时抛出
+     */
+    void force() throws IOException;
+
+    /**
+     * 结束写入，文件变为只读。
+     */
+    void closeWrite();
 }
