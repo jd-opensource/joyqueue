@@ -180,7 +180,7 @@ public class ClusterNameService extends Service {
             }
 
             tracer.end(begin);
-            return topicConfigMap;
+            return result;
         } catch (Exception e) {
             logger.error("getTopicConfigs exception, topics: {}", topics, e);
             tracer.error(begin);

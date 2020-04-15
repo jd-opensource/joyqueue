@@ -446,9 +446,8 @@ public class PositionManager extends Service {
      * @param partition 消费分区
      * @return 指定分区已经消费到的消息序号
      */
-    private long getMaxMsgIndex(TopicName topic, short partition) {
-        Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
-        PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
+    private long getMaxMsgIndex(TopicName topic, short partition, int groupId) {
+        PartitionGroupStore store = storeService.getStore(topic.getFullName(), groupId);
         long rightIndex = store.getRightIndex(partition);
         return rightIndex;
     }
@@ -484,7 +483,7 @@ public class PositionManager extends Service {
             consumePartition.setPartitionGroup(partitionGroupId);
 
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = getMaxMsgIndex(topic, partition);
+            long currentIndex = getMaxMsgIndex(topic, partition, partitionGroupId);
             currentIndex = Math.max(currentIndex, 0);
             // 为新订阅的应用初始化消费位置对象
             Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
@@ -550,7 +549,7 @@ public class PositionManager extends Service {
         AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = getMaxMsgIndex(topic, partition);
+            long currentIndex = getMaxMsgIndex(topic, partition, partitionGroup.getGroup());
             long currentIndexVal = Math.max(currentIndex, 0);
 
             appList.stream().forEach(app -> {

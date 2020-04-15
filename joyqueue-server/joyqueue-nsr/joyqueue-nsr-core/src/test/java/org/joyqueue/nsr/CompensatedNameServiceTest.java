@@ -40,7 +40,6 @@ import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +77,7 @@ public class CompensatedNameServiceTest {
         compensatedNameService.start();
     }
 
-    @Test
+//    @Test
     public void testErrorCache() throws Exception {
         for (int i = 0; i < 2; i++) {
             Assert.assertEquals(compensatedNameService.getProducerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");

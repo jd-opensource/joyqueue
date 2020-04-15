@@ -133,13 +133,13 @@ public class TopicMessageConsumer extends Service {
         }
 
         if (config.getThread() == ConsumerConfig.NONE_THREAD) {
+            int maxPartition = 1;
             if (CollectionUtils.isNotEmpty(topicMetadata.getPartitionGroups())) {
-                int maxPartition = 0;
                 for (PartitionGroupMetadata partitionGroup : topicMetadata.getPartitionGroups()) {
                     maxPartition = Math.max(partitionGroup.getPartitions().size(), maxPartition);
                 }
-                config.setThread(maxPartition);
             }
+            config.setThread(maxPartition);
         }
 
         if (topicMetadata.getType().equals(TopicType.BROADCAST)) {

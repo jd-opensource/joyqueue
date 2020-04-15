@@ -88,11 +88,11 @@ public class MetadataCompensator extends Service {
         if (brokerId <= 0) {
             return;
         }
-        if (config.getCompensationTopicEnable()) {
-            compensateTopic(oldCache, newCache);
-        }
         if (config.getCompensationBrokerEnable()) {
             compensateBroker(oldCache, newCache);
+        }
+        if (config.getCompensationTopicEnable()) {
+            compensateTopic(oldCache, newCache);
         }
         if (config.getCompensationProducerEnable()) {
             compensateProducer(oldCache, newCache);

@@ -62,7 +62,7 @@ public class CoordinatorConfig {
     public TopicName getTransactionTopic() {
         String topic = PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_CODE);
         String namespace = getGroupNamespace();
-        if (StringUtils.isBlank(namespace)) {
+        if (StringUtils.isBlank(namespace) || namespace.equals("null")) {
             return TopicName.parse(topic);
         } else {
             return TopicName.parse(topic, namespace);
