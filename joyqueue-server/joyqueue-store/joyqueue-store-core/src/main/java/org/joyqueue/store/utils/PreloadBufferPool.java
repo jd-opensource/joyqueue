@@ -162,8 +162,6 @@ public class PreloadBufferPool {
      * 清除文件缓存页。LRU。
      */
     private void evict() {
-        long before = usedSize.get();
-
         // 清理超过maxCount的缓存页
         for (PreLoadCache preLoadCache : bufferCache.values()) {
             if (!needEviction()) {
@@ -179,10 +177,19 @@ public class PreloadBufferPool {
         // 清理使用中最旧的页面，直到内存占用率达标
         if (needEviction()) {
             List<LruWrapper<BufferHolder>> sorted;
+
             sorted = Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
                     .filter(BufferHolder::isFree)
                     .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime()))
-                    .sorted(Comparator.comparing(LruWrapper::getLastAccessTime))
+                    .sorted((h1, h2) -> {
+                        if (h1.get().writable() != h2.get().writable()) { // 二者只读状态不同
+                            // 优先清理只读的页，避免频繁加载正在写入的页
+                            return h1.get().writable() ? 1 : -1;
+                        } else {
+                            // 只读状态相同，按照最后访问时间排序
+                            return Long.compare(h1.getLastAccessTime(), h2.getLastAccessTime());
+                        }
+                    })
                     .collect(Collectors.toList());
 
             while (needEviction() && !sorted.isEmpty()) {
