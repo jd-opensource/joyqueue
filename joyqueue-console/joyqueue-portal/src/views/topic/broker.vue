@@ -30,17 +30,17 @@ export default {
   mixins: [crud],
   props: {
     topicId: {
-     type: String,
-     default: ''
-   },
-   showBrokerChart: {
-     type: Boolean,
-     default: true
-   },
-   showHostChart: {
-     type: Boolean,
-     default: true
-   }
+      type: String,
+      default: ''
+    },
+    showBrokerChart: {
+      type: Boolean,
+      default: true
+    },
+    showHostChart: {
+      type: Boolean,
+      default: true
+    }
   },
   data () {
     return {
@@ -103,30 +103,30 @@ export default {
         this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
       })
     },
-     goBrokerChart () {
-       apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.broker, {}, {}).then((data) => {
-         let url = data.data || ''
-         if (url.indexOf('?') < 0) {
-           url += '?'
-         } else if (!url.endsWith('?')) {
-           url += '&'
-         }
-         url = url + 'var-topic=' + this.topicId
-         window.open(url)
-       })
-     },
-     goHostChart () {
-       apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.host, {}, {}).then((data) => {
-         let url = data.data || ''
-         if (url.indexOf('?') < 0) {
-           url += '?'
-         } else if (!url.endsWith('?')) {
-           url += '&'
-         }
-         url = url + 'var-topic=' + this.topicId
-         window.open(url)
-       })
-     }
+    goBrokerChart () {
+      apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.broker, {}, {}).then((data) => {
+        let url = data.data || ''
+        if (url.indexOf('?') < 0) {
+          url += '?'
+        } else if (!url.endsWith('?')) {
+          url += '&'
+        }
+        url = url + 'var-topic=' + this.topicId
+        window.open(url)
+      })
+    },
+    goHostChart () {
+      apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.host, {}, {}).then((data) => {
+        let url = data.data || ''
+        if (url.indexOf('?') < 0) {
+          url += '?'
+        } else if (!url.endsWith('?')) {
+          url += '&'
+        }
+        url = url + 'var-topic=' + this.topicId
+        window.open(url)
+      })
+    }
   }
 }
 </script>
