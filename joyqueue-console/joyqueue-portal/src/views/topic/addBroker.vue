@@ -20,7 +20,7 @@
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
-import {timeStampToString} from "../../utils/dateTimeUtils";
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'add-broker',
@@ -47,7 +47,7 @@ export default {
   mixins: [ crud ],
   data () {
     return {
-      startInfo: "/monitor/start",
+      startInfo: '/monitor/start',
       searchData: {
         keyword: '',
         group: '',
@@ -71,7 +71,7 @@ export default {
       this.getListByGroupAndbrokers(brokerGroupId, undefined)
     },
     onBrokerLoadComplete (val) {
-      this.$emit('on-broker-load-complete',val,tag=>{
+      this.$emit('on-broker-load-complete', val, tag => {
         for (let index = 0; index < tag.length; index++) {
           let row = {}
           Object.assign(row, tag[index])
@@ -139,12 +139,12 @@ export default {
       })
     },
     getList () {
-      if(this.searchData.keyword&&this.searchData.group){
-        this.$Message.error("验证不通过，ID/IP搜索和Broker分组编号不能同时搜索")
+      if (this.searchData.keyword && this.searchData.group) {
+        this.$Message.error('验证不通过，ID/IP搜索和Broker分组编号不能同时搜索')
         return
       }
       if (this.searchData.keyword) {
-        this.getListByGroupAndbrokers(this.searchData.brokerGroupId,this.selectedBrokers)
+        this.getListByGroupAndbrokers(this.searchData.brokerGroupId, this.selectedBrokers)
       } else {
         this.showTablePin = true
         let data = this.getSearchVal()
@@ -163,7 +163,7 @@ export default {
           this.showTablePin = false
         })
       }
-    },
+    }
   },
   mounted () {
   }
