@@ -674,7 +674,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
             verifyState(true);
 
-            if (waitForFlush()) {
+            if (waitForFlush() && writeCommand.eventListener != null) {
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
             } else {
                 long[] indices = write(writeCommand.messages);
