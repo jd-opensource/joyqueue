@@ -674,7 +674,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
             verifyState(true);
 
-            if (waitForFlush()) {
+            if (waitForFlush() && writeCommand.eventListener != null) {
                 writeCommand.eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_TIMEOUT, null));
             } else {
                 long[] indices = write(writeCommand.messages);
@@ -1550,7 +1550,8 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             this(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
                     DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_PRINT_METRIC_INTERVAL_MS,
                     new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE),
-                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE));
+                    // 索引在读取的时候默认加载到内存中
+                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, true));
         }
 
         public Config(int maxMessageLength, int writeRequestCacheSize, long flushIntervalMs,

@@ -41,11 +41,15 @@ import java.util.concurrent.TimeUnit;
 public class AsyncHttpClient {
 
     private static final int ASYNC_TIMEOUT = 2000;
+    private static final int MAX_CONN_TOTAL = 20;
+    private static final int MAX_CONN_PER_ROUTE = 10;
     private static final Logger logger = LoggerFactory.getLogger(AsyncHttpClient.class);
     private static CloseableHttpAsyncClient httpclient;
 
     static {
         httpclient = HttpAsyncClients.custom()
+                .setMaxConnTotal(MAX_CONN_TOTAL)
+                .setMaxConnPerRoute(MAX_CONN_PER_ROUTE)
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setConnectTimeout(ASYNC_TIMEOUT)
                         .setSocketTimeout(ASYNC_TIMEOUT)

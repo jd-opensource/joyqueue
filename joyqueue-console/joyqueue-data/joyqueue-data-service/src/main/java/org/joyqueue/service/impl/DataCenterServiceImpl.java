@@ -36,7 +36,12 @@ public class DataCenterServiceImpl implements DataCenterService {
 
     @Override
     public List<DataCenter> findAllDataCenter() throws Exception {
-        return   dataCenterNameServerService.findAllDataCenter();
+        return dataCenterNameServerService.findAllDataCenter();
+    }
+
+    @Override
+    public DataCenter findByIp(String ip) throws Exception {
+        return dataCenterNameServerService.findByIp(ip);
     }
 
     @Override
