@@ -42,7 +42,7 @@ public class DataCenterTest {
 //        for(DataCenter dataCenter:dataCenters){
 //            System.out.println(JSON.toJSONString(dataCenter));
 //        }
-        int testN=1000;
+        int testN=10000;
         for(int i=0;i<testN;i++){
            String rip= randomIp();
             DataCenter dc=matchDataCenterAndCount(rip);
@@ -50,7 +50,6 @@ public class DataCenterTest {
             String ipRange=dc.getUrl().substring(ipIndex+1);
             String[] ipArray=ipRange.split("-");
             Assert.assertTrue(between(ipArray[0],ipArray[1],rip));
-
         }
     }
 
@@ -58,9 +57,9 @@ public class DataCenterTest {
      * IP compare
      **/
     public boolean between(String startIp,String endIp,String curIp){
-        int start=ipToInt(startIp);
-        int end=ipToInt(endIp);
-        int cur=ipToInt(curIp);
+        long start=ipToLong(startIp);
+        long end=ipToLong(endIp);
+        long cur=ipToLong(curIp);
         if(cur>=start&&cur<=end){
             return true;
         }
@@ -70,14 +69,13 @@ public class DataCenterTest {
     /**
      * IP to int
      **/
-    public int ipToInt(String ip){
-       String[] arr= ip.split(".");
-       int weight=255;
-       int sum=0;
+    public long ipToLong(String ip){
+       String[] arr= ip.split("\\.");
+       long sum=0;
        for(String seg:arr){
-           sum+=Integer.valueOf(seg)*weight;
+           sum=(sum+Integer.valueOf(seg))<<8;
        }
-        return sum;
+        return sum>>8;
     }
 
 
