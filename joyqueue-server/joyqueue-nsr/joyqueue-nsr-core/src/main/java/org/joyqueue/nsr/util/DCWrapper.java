@@ -18,8 +18,6 @@ package org.joyqueue.nsr.util;
 import org.joyqueue.domain.DataCenter;
 import org.joyqueue.nsr.NsrPlugins;
 import org.joyqueue.toolkit.URL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +26,6 @@ import java.util.List;
  * 数据处理工具
  */
 public class DCWrapper {
-    private static final Logger LOG= LoggerFactory.getLogger(DCWrapper.class);
     public static String DC_URL_SEPARATOR = ";";
     public static String DC_TYPE_SEPARATOR = ":";
     private DataCenter dataCenter;
@@ -65,16 +62,9 @@ public class DCWrapper {
             URL url = URL.valueOf(uri);
             String type = uri.split(DC_TYPE_SEPARATOR)[0];
             NsrPlugins.DCMatchersPlugins.metas(type).forEach(matcher->{
-                DCMatcher dcMatcher=null;
-                try {
-                    dcMatcher = matcher.getTarget().getClass().newInstance();
-                }catch (Exception e){
-                    LOG.info("New DC matcher instance exception {}",matcher.getTarget().getClass(),e);
-                }
-                if(dcMatcher!=null) {
-                    dcMatcher.setUrl(url);
-                    dcMatchers.add(dcMatcher);
-                }
+                DCMatcher dcMatcher = matcher.getTarget();
+                dcMatcher.setUrl(url);
+                dcMatchers.add(matcher.getTarget());
             });
         }
 
