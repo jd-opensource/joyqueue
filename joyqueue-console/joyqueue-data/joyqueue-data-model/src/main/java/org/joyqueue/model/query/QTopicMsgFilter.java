@@ -28,17 +28,24 @@ public class QTopicMsgFilter extends QKeyword {
      */
     private String filter;
 
-    private String app;
+    private Integer partition;
 
     /**
      * 搜索的topic
      */
     private String topic;
-
     /**
-     * 从某个{@param timestamp}开始消费
+     * 消息格式
      */
-    private long timestamp;
+    private String msgFormat;
+
+    private int queryCount;
+
+    private long offset;
+
+    private long offsetStartTime;
+
+    private long offsetEndTime;
 
     private String description;
 
@@ -57,14 +64,6 @@ public class QTopicMsgFilter extends QKeyword {
         this.filter = filter;
     }
 
-    public String getApp() {
-        return app;
-    }
-
-    public void setApp(String app) {
-        this.app = app;
-    }
-
     public String getTopic() {
         return topic;
     }
@@ -75,14 +74,6 @@ public class QTopicMsgFilter extends QKeyword {
 
     public long getQueryTime() {
         return queryTime;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 
     public String getDescription() {
@@ -99,5 +90,53 @@ public class QTopicMsgFilter extends QKeyword {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public Integer getPartition() {
+        return partition;
+    }
+
+    public void setPartition(Integer partition) {
+        this.partition = partition;
+    }
+
+    public String getMsgFormat() {
+        return msgFormat;
+    }
+
+    public void setMsgFormat(String msgFormat) {
+        this.msgFormat = msgFormat;
+    }
+
+    public int getQueryCount() {
+        return queryCount;
+    }
+
+    public void setQueryCount(int queryCount) {
+        this.queryCount = queryCount;
+    }
+
+    public long getOffsetStartTime() {
+        return offsetStartTime;
+    }
+
+    public void setOffsetStartTime(long offsetStartTime) {
+        this.offsetStartTime = offsetStartTime;
+    }
+
+    public long getOffsetEndTime() {
+        return offsetEndTime;
+    }
+
+    public void setOffsetEndTime(long offsetEndTime) {
+        this.offsetEndTime = offsetEndTime;
+    }
+
+    public long getOffset() {
+        return offset;
+    }
+
+    public void setOffset(long offset) {
+        this.offset = offset;
     }
 }

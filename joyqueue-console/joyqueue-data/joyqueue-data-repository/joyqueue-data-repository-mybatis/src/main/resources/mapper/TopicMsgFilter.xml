@@ -7,61 +7,82 @@
 
     <resultMap id="baseResultMap" type="TopicMsgFilter">
         <result property="id" column="id" jdbcType="BIGINT"/>
-        <result property="app" column="app_code" jdbcType="VARCHAR"/>
         <result property="topic" column="topic_code" jdbcType="VARCHAR"/>
-        <result property="userCode" column="user_code" jdbcType="VARCHAR"/>
-        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="partition" column="partition" jdbcType="INTEGER"/>
         <result property="filter" column="filter" jdbcType="VARCHAR"/>
-        <result property="offsetTime" column="offsetTime" jdbcType="TIMESTAMP"/>
+        <result property="msgFormat" column="msg_fmt" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+        <result property="offset" column="offset" jdbcType="BIGINT"/>
+        <result property="offsetStartTime" column="start_time" jdbcType="TIMESTAMP"/>
+        <result property="offsetEndTime" column="end_time" jdbcType="TIMESTAMP"/>
+        <result property="queryCount" column="query_count" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="baseColumn">
         a.`id`,
         a.`topic_code` AS topic,
+        a.`partition`,
         a.`filter`,
-        a.`user_id` AS userId,
-        a.`user_code` AS userCode,
+        a.`msg_fmt` AS msgFormat,
         a.`create_time` AS createTime,
-        a.`offset_time` AS offsetTime,
-        a.`app_code` AS app,
+        a.`create_by` AS `createBy.id`,
+        a.`update_time` AS updateTime,
+        a.`update_by` AS `updateBy.id`,
+        a.`offset`,
+        a.`start_time` AS offsetStartTime,
+        a.`end_time` AS offsetEndTime,
+        a.`query_count` AS queryCount,
         a.`status`,
-        a.`url`,
-        a.`description`
+        a.`url`
     </sql>
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="TopicMsgFilter">
         INSERT INTO topic_msg_filter(
             `topic_code`,
             `filter`,
-            `user_id`,
-            `user_code`,
+            `partition`,
+            `msg_fmt`,
+            `create_by`,
             `create_time`,
-            `offset_time`,
-            `app_code`,
+            `update_by`,
+            `update_time`,
+            `offset`,
+            `start_time`,
+            `end_time`,
+            `query_count`,
             `status`,
             `url`)
         VALUES(
             #{topic},
             #{filter},
-            #{userId},
-            #{userCode},
+            #{partition},
+            #{msgFormat},
+            #{createBy.id},
             #{createTime},
-            #{offsetTime},
-            #{app},
+            #{updateBy.id},
+            #{updateTime},
+            #{offset},
+            #{offsetStartTime},
+            #{offsetEndTime},
+            #{queryCount},
             #{status},
             #{url})
     </insert>
 
-    <select id="nextOne" parameterType="String" resultType="TopicMsgFilter">
+    <select id="findByNextOne" parameterType="Integer" resultType="TopicMsgFilter">
         SELECT
         <include refid="baseColumn"/>
         FROM
-        topic_msg_filter a
-        WHERE a.user_code = #{userCode}
-        AND a.status == 0
-        limit 0,1
+        topic_msg_filter AS a
+        WHERE a.status = 0
+        ORDER BY a.create_time ASC
+        limit 0,#{size}
     </select>
 
     <select id="findTopicMsgFiltersByQuery" parameterType="QPageQuery" resultType="TopicMsgFilter">
@@ -69,10 +90,7 @@
         <include refid="baseColumn"/>
         FROM
         topic_msg_filter AS a
-        WHERE a.user_code = #{query.userCode}
-        <if test="query.status &gt;= -1 || query.status &lt;= 1 ">
-        AND a.status = #{query.status}
-        </if>
+        WHERE a.create_by = #{query.userId}
         ORDER BY a.create_time DESC
     </select>
 
@@ -80,35 +98,20 @@
         SELECT COUNT(a.id) FROM topic_msg_filter a
     </select>
 
-    <update id="state" parameterType="topicMsgFilter">
+    <update id="update" parameterType="topicMsgFilter">
         UPDATE
             `topic_msg_filter`
         SET
-           `status`=#{status},
-           <if test="topic != null">
-           `topic_code` =#{topic},
-           </if>
-           <if test="filter !=null">
-            `filter` =#{filter},
+            <if test="updateTime!=null">
+            `update_time`=#{updateTime},
             </if>
-            <if test="userId!=null">
-            `user_id` =#{userId},
+            <if test="updateBy!=null">
+            `update_by`=#{updateBy.id},
             </if>
-            <if test="userCode !=null">
-            `user_code` =#{userCode},
+            <if test="url!=null">
+            `url` = #{url}
             </if>
-            <if test="createTime!=null">
-            `create_time`=#{createTime},
-            </if>
-            <if test="offsetTime!=null">
-            `offset_time`=#{offsetTime},
-            </if>
-            <if test="app !=null">
-            `app_code`=#{app},
-            </if>
-            <if test="url ！=null">
-            `url` =#{url}
-            </if>
+            `status`=#{status}
         WHERE
             id=#{id}
     </update>

@@ -138,16 +138,21 @@ MERGE INTO `user`
 VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
 
 CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+ `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
  `topic_code` varchar(128) NOT NULL COMMENT '主题代码',
+ `partition` int(11) NOT NULL default -1 COMMENT '分区',
  `filter` varchar(128) NOT NULL COMMENT '消息过滤条件',
- `user_id` bigint(20) NOT NULL COMMENT '用户id',
- `user_code` varchar(64) NOT NULL COMMENT '用户erp',
- `create_time` datetime NOT NULL COMMENT '创建时间',
- `offset_time` datetime COMMENT '请求的offset所在的时间点',
- `app_code` varchar(100) NOT NULL COMMENT '应用',
+ `msg_fmt` varchar(64) NOT NULL COMMENT '消息格式',
+ `offset` bigint(20) COMMENT '位点',
+ `start_time` datetime COMMENT 'offset开始时间',
+ `end_time` datetime COMMENT 'offset结束时间',
+ `query_count` int(11) default 1 NOT NULL COMMENT '查询次数',
  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态：-1 结束，0 未执行，1 正在执行',
  `url` varchar(128) COMMENT '任务结束后生成的cfs链接',
+ `create_time` datetime NOT NULL COMMENT '消息过滤任务创建时间',
+ `create_by` int(10) NOT NULL DEFAULT '0' COMMENT '创建人',
+ `update_time` datetime NOT NULL COMMENT '更新时间',
+ `update_by` int(10) NOT NULL DEFAULT '0' COMMENT '更新人',
  `description` varchar(1024) NOT NULL DEFAULT '备注信息' COMMENT '备注信息',
  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8;

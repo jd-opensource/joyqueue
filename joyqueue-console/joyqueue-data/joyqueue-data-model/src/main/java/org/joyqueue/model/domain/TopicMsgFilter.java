@@ -27,29 +27,37 @@ public class TopicMsgFilter extends BaseModel {
      * app code
      */
     private String app;
+
     /**
      * topic code
      */
     private String topic;
-    /**
-     * user code
-     */
-    private String userCode;
 
-    private Long userId;
+    /**
+     *  如果没有指定partition，则置为-1搜索所有的分组
+     */
+    private Integer partition = -1;
     /**
      * 过滤条件
      */
     private String filter;
+
+    /**
+     * 消息格式
+     */
+    private String msgFormat;
+    /**
+     * 查询条数
+     */
+    private int queryCount;
     /**
      * 消息的偏移量
      */
     private long offset;
 
-    /**
-     * 从某个{@param offsetTime}开始消费
-     */
-    private Date offsetTime;
+    private Date offsetStartTime;
+
+    private Date offsetEndTime;
 
     /**
      * 任务状态：
@@ -66,14 +74,6 @@ public class TopicMsgFilter extends BaseModel {
     private String brokerAddr;
 
     private String token;
-
-    public String getApp() {
-        return app;
-    }
-
-    public void setApp(String app) {
-        this.app = app;
-    }
 
     public String getTopic() {
         return topic;
@@ -99,20 +99,20 @@ public class TopicMsgFilter extends BaseModel {
         return offset;
     }
 
-    public String getUserCode() {
-        return userCode;
+    public Date getOffsetStartTime() {
+        return offsetStartTime;
     }
 
-    public void setUserCode(String userCode) {
-        this.userCode = userCode;
+    public void setOffsetStartTime(Date offsetStartTime) {
+        this.offsetStartTime = offsetStartTime;
     }
 
-    public Date getOffsetTime() {
-        return offsetTime;
+    public Date getOffsetEndTime() {
+        return offsetEndTime;
     }
 
-    public void setOffsetTime(Date offsetTime) {
-        this.offsetTime = offsetTime;
+    public void setOffsetEndTime(Date offsetEndTime) {
+        this.offsetEndTime = offsetEndTime;
     }
 
     public String getBrokerAddr() {
@@ -129,14 +129,6 @@ public class TopicMsgFilter extends BaseModel {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     public String getDescription() {
@@ -163,5 +155,47 @@ public class TopicMsgFilter extends BaseModel {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Integer getPartition() {
+        return partition;
+    }
+
+    public void setPartition(Integer partition) {
+        this.partition = partition;
+    }
+
+    public String getMsgFormat() {
+        return msgFormat;
+    }
+
+    public void setMsgFormat(String msgFormat) {
+        this.msgFormat = msgFormat;
+    }
+
+    public int getQueryCount() {
+        return queryCount;
+    }
+
+    public void setQueryCount(int queryCount) {
+        this.queryCount = queryCount;
+    }
+
+    public String getApp() {
+        return app;
+    }
+
+    public void setApp(String app) {
+        this.app = app;
+    }
+
+    @Override
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    @Override
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }

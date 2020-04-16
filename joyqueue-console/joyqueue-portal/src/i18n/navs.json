@@ -88,6 +88,11 @@
           "component": "tool/operateHistory.vue"
         },
         {
+          "path": "msgFilter",
+          "name": "msgFilter",
+          "component": "tool/MessageFilter.vue"
+        },
+        {
           "path": "retry",
           "name": "retry",
           "component": "tool/retry.vue"
@@ -182,6 +187,11 @@
           "path":"operateHistory",
           "name": "operateHistory",
           "component": "tool/operateHistory.vue"
+        },
+        {
+          "path": "msgFilter",
+          "name": "msgFilter",
+          "component": "tool/MessageFilter.vue"
         },
         {
           "path": "retry",

@@ -18,6 +18,8 @@ package org.joyqueue.msg.filter.support;
 import org.joyqueue.msg.filter.Plugins;
 import org.joyqueue.msg.filter.TopicMsgFilterMatcher;
 import org.joyqueue.msg.filter.TopicMsgFilterOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ import java.util.List;
  * @date 2020/4/3
  **/
 public class TopicMessageFilterSupport {
+
+    private static final Logger logger = LoggerFactory.getLogger(TopicMessageFilterSupport.class);
 
     List<TopicMsgFilterOutput> filterOutputs;
 
@@ -54,9 +58,13 @@ public class TopicMessageFilterSupport {
     }
 
 
-    public void output(String input) {
-        filterOutputs.forEach(output ->{
-            output.output(input);
+    public void output(long id, long userId, String input) {
+        filterOutputs.forEach(output -> {
+            try {
+                output.output(id, userId, input);
+            }catch (Exception e){
+                logger.error("Output error, class: {}, error: {}",output.getClass(), e.getMessage());
+            }
         });
     }
 

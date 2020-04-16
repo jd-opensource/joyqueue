@@ -25,5 +25,5 @@ public interface TopicMsgFilterOutput {
      * 消息过滤输出
      * @param path 生成文件的本地路径
      */
-    void output(String path);
+    void output(long id, long userId, String path);
 }

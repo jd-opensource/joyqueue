@@ -36,9 +36,6 @@
       <d-tab-pane label="重试" name="retry" icon="zap" :closable="false" :visible="retryEnabled">
         <retry ref="retry" :search="retrySearch"/>
       </d-tab-pane>
-      <d-tab-pane label="消息过滤" name="messageFilter" icon="user-minus" :closable="false">
-        <message-filter :app="this.$route.query.app" :topic="this.$route.query.topic" :namespace="this.$route.query.namespace"/>
-      </d-tab-pane>
       <d-tab-pane label="归档" name="archive" icon="package" :closable="false" :visible="archiveEnabled">
         <archive ref="archive" :search="archiveSearch"/>
       </d-tab-pane>
@@ -65,7 +62,6 @@ import broker from './broker.vue'
 import archive from '../tool/archive.vue'
 import ProducerDetail from '../monitor/detail/producerDetail.vue'
 import ConsumerDetail from '../monitor/detail/consumerDetail.vue'
-import MessageFilter from '../setting/MessageFilter'
 import {generateProducerDetailTabName, generateConsumerDetailTabName} from '../../utils/common.js'
 
 export default {
@@ -79,8 +75,7 @@ export default {
     broker,
     archive,
     ProducerDetail,
-    ConsumerDetail,
-    MessageFilter
+    ConsumerDetail
   },
   data () {
     return {

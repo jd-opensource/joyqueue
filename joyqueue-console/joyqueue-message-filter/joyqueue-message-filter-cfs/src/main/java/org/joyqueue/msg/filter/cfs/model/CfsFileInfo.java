@@ -13,17 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.msg.filter;
+package org.joyqueue.msg.filter.cfs.model;
 
-import org.apache.commons.lang3.StringUtils;
+
 
 /**
  * @author jiangnan53
- * @date 2020/4/3
+ * @date 2020/4/15
  **/
-public class DefaultTopicMsgFilterMatcher implements TopicMsgFilterMatcher {
-    @Override
-    public boolean match(String content, String filter) {
-        return StringUtils.containsIgnoreCase(content,filter);
+public class CfsFileInfo {
+
+    /**
+     * 消息过滤记录id
+     */
+    private final long id;
+
+    private final String url;
+
+    public CfsFileInfo(long id, String url) {
+        this.id = id;
+        this.url = url;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

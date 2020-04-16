@@ -8,7 +8,7 @@
         <version>4.2.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <name>JoyQueue-Message-Filter-Api</name>
     <artifactId>joyqueue-message-filter-api</artifactId>
 
     <dependencies>

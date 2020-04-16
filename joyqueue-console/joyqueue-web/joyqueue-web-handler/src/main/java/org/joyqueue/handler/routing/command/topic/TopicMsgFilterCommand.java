@@ -58,18 +58,17 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
             qPageQuery.getQuery().setAdmin(session.getRole() == User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
         }
         PageResult<TopicMsgFilter> result = topicMsgFilterService.findTopicMsgFilters(qPageQuery);
-        return Responses.success(result.getPagination(),result.getResult());
+        return Responses.success(result.getPagination(), result.getResult());
     }
 
     @Path("msgFilter")
-    public Response filter(@Body QTopicMsgFilter msgFilter) throws Exception {
-        Preconditions.checkArgument(msgFilter != null, "Illegal args.");
-        msgFilter.setUserId(session.getId());
-        msgFilter.setUserName(session.getName());
-        msgFilter.setUserCode(session.getCode());
-        msgFilter.setRole(session.getRole());
-        topicMsgFilterService.execute(filterConvert(msgFilter));
-        return Responses.success();
+    public Response filter()  {
+        try {
+            topicMsgFilterService.execute();
+        }catch (Exception e) {
+            return Responses.error(500,e.getMessage());
+        }
+        return Responses.success("已经启动消息过滤任务");
     }
 
     @Path("addTopicMsgFilter")
@@ -90,14 +89,23 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
 
     private TopicMsgFilter filterConvert(QTopicMsgFilter filter) {
         TopicMsgFilter msgFilter = new TopicMsgFilter();
-        msgFilter.setApp(filter.getApp());
+        if (filter.getPartition() != null && filter.getPartition() >= 0) {
+            msgFilter.setPartition(filter.getPartition());
+        }
+        msgFilter.setMsgFormat(filter.getMsgFormat());
+        msgFilter.setQueryCount(filter.getQueryCount());
         msgFilter.setTopic(filter.getTopic());
         msgFilter.setFilter(filter.getFilter());
-        msgFilter.setCreateTime(new Date(filter.getQueryTime()));
+        msgFilter.setCreateTime(new Date());
         msgFilter.setCreateBy(new Identity(filter.getUserId(),filter.getUserCode()));
-        msgFilter.setOffsetTime(new Date(filter.getTimestamp()));
-        msgFilter.setUserCode(filter.getUserCode());
-        msgFilter.setUserId(filter.getUserId());
+        if (filter.getOffsetStartTime() > 0) {
+            msgFilter.setOffsetStartTime(new Date(filter.getOffsetStartTime()));
+            msgFilter.setOffsetEndTime(new Date(filter.getOffsetEndTime()));
+        } else {
+            msgFilter.setOffset(filter.getOffset());
+        }
+        msgFilter.setUpdateBy(new Identity(filter.getUserId(),filter.getUserCode()));
+        msgFilter.setUpdateTime(new Date());
 //        msgFilter.setDescription(filter.getDescription());
         return msgFilter;
     }

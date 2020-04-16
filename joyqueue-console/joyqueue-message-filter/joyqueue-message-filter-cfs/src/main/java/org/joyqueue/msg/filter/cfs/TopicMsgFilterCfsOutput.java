@@ -23,10 +23,10 @@ import org.joyqueue.msg.filter.TopicMsgFilterOutput;
  **/
 public class TopicMsgFilterCfsOutput implements TopicMsgFilterOutput {
 
-    private CfsManager cfsManager =  new CfsManager();
+    private final CfsManager cfsManager =  new CfsManager();
 
     @Override
-    public void output(String path) {
-        cfsManager.upload(path);
+    public void output(long id, long userId, String path) {
+        cfsManager.upload(id, userId, path);
     }
 }

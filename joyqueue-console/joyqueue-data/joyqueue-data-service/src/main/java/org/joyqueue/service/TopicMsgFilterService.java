@@ -34,10 +34,13 @@ public interface TopicMsgFilterService extends PageService<TopicMsgFilter, QTopi
 
     /**
      * 创建异步线程后台消费{@param filter.getTopic()}
-     * @param filter 过滤条件
      * @throws IOException
      */
-    void execute(TopicMsgFilter filter) throws Exception;
+    void execute() throws Exception;
 
     PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query);
+
+    int sync();
+
+    int maxSync();
 }
