@@ -189,7 +189,7 @@ export default {
       let topicFullName = getTopicCode(this.data.topic, this.data.namespace)
       let group = this.data.groupNo
 
-      apiRequest.getBase(this.urls.findMetadata + '/' + brokerId + '/' + topicFullName + '/' + group, {}, false)
+      apiRequest.getBase(this.urls.findMetadata + '?brokerId=' + brokerId + '&topicFullName=' + topicFullName + '&group=' + group, {}, false)
         .then((data) => {
           this.tableData.rowData[index] = Object.assign(row, data.data || [])
           this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
