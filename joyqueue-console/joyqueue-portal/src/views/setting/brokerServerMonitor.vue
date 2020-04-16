@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.startupInfo">
+      <h4>Broker信息:</h4>
+      <span>version:</span><span>{{detail.startupInfo.version}}</span>&nbsp&nbsp
+      <span>startupTime:</span><span v-if="detail.startupInfo.startupTime">{{ detail.startupInfo.startupTime }}</span> &nbsp&nbsp
+    </div>
     <div style="border:10px solid #f7f7f7;width:600px;" v-if="detail.store">
       <h4>存储监控:</h4>
       <span>started:</span><span v-if="detail.store.started">Running</span><span v-else>Stop</span>&nbsp&nbsp
@@ -35,25 +40,33 @@
       <h4>nsr:</h4>
       <span>started:</span><span v-if="detail.nameServer.started" >Running</span><span v-else>Stop</span>
     </div>
+    <div style="border:10px solid #f7f7f7;width:600px;" v-if="archiveMonitorData">
+      <h4>归档监控:</h4>
+      <span>待归档消费记录数:</span><span>{{archiveMonitorData.consumeBacklog}}</span>&nbsp&nbsp
+      <span>待归档生产记录数:</span><span>{{archiveMonitorData.produceBacklog}}</span>&nbsp&nbsp
+    </div>
   </div>
 </template>
 
 <script>
 
 import apiRequest from '../../utils/apiRequest.js'
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'brokerServerMonitor',
   props: {
-    brokerId: {
-      type: Number
-    }
   },
   data () {
     return {
+      archiveMonitorData: {},
       urls: {
-        findbroker: '/monitor/broker'
+        findbroker: '/monitor/broker',
+        archiveMonitorUrl: '/monitor/archive',
       },
+      brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
+      brokerIp: this.$route.params.brokerIp || this.$route.query.brokerIp,
+      brokerPort: this.$route.params.brokerPort || this.$route.query.brokerPort,
       detail: {
         store: {
 
@@ -74,12 +87,29 @@ export default {
     }
   },
   methods: {
-    getList () {
+    getList0 () {
       apiRequest.get(this.urls.findbroker + '/' + this.brokerId, '', {}).then(data => {
-        if (data.code == 200) {
+        if (data.code === 200) {
           this.detail = data.data
+          if (this.detail.startupInfo) {
+            this.detail.startupInfo.startupTime = timeStampToString(this.detail.startupInfo.startupTime)
+          }
         }
       })
+    },
+    archiveMonitor () {
+      let broker = {
+        ip: this.brokerIp,
+        port: this.brokerPort
+      }
+      apiRequest.postBase(this.urls.archiveMonitorUrl, {}, broker, false).then((data) => {
+        data.data = data.data || {}
+        this.archiveMonitorData = data.data
+      })
+    },
+    getList() {
+      this.getList0()
+      this.archiveMonitor()
     }
   },
   mounted () {

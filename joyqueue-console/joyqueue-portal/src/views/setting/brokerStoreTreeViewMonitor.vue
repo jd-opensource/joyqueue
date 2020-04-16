@@ -44,12 +44,10 @@ import apiRequest from '../../utils/apiRequest.js'
 export default {
   name: 'brokerStoreTreeViewMonitor',
   props: {
-    brokerId: {
-      type: Number
-    }
   },
   data () {
     return {
+      brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
       urls: {
         treeView: '/monitor/broker/storeTreeView',
         deleteStoreGarbageFile:'/manage/broker/garbageFile'
