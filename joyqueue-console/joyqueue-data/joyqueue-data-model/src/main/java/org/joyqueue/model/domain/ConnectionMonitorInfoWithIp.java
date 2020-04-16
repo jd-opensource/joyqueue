@@ -21,6 +21,7 @@ public class ConnectionMonitorInfoWithIp {
     private int consumer;
     private int producer;
     private int total;
+    private DataCenter dataCenter;
 
     public int getConsumer() {
         return consumer;
@@ -52,5 +53,13 @@ public class ConnectionMonitorInfoWithIp {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public DataCenter getDataCenter() {
+        return dataCenter;
+    }
+
+    public void setDataCenter(DataCenter dataCenter) {
+        this.dataCenter = dataCenter;
     }
 }
