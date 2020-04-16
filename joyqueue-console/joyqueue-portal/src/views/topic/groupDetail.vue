@@ -8,7 +8,7 @@
       </d-input>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-              @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-del="del" @on-leader="leader">
+              @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-del="del" @on-leader="leader" @on-broker-detail="brokerDetail">
     </my-table>
 
   </div>
@@ -126,6 +126,10 @@ export default {
           {
             txt: '指定leader',
             method: 'on-leader'
+          },
+          {
+            txt: 'broker详情',
+            method: 'on-broker-detail'
           }
         ]
       },
@@ -136,6 +140,16 @@ export default {
     handleSelectionChange (val) {
       this.multipleSelection = val
       this.$emit('on-choosed-broker', val)
+    },
+    brokerDetail(item) {
+      this.$router.push({
+        name: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+        params: {
+          brokerId: item.id,
+          brokerIp: item.ip,
+          brokerPort: item.port
+        }
+      })
     },
     leader (item) {
       let brokerIds = []
