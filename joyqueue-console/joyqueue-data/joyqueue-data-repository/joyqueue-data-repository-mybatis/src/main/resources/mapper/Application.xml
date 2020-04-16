@@ -155,7 +155,8 @@
                 <if test="query.keyword != null and query.keyword != '' ">
                   and (a.code like concat('%', #{query.keyword},'%' )
                     or a.alias_code like concat('%', #{query.keyword},'%' )
-                    or a.name like concat('%', #{query.keyword},'%' ))
+                    or a.name like concat('%', #{query.keyword},'%' )
+                    or a.department like concat('%', #{query.keyword},'%' ))
                 </if>
                 <if test="query.admin == false">
                     <if test="query.userId != null">
