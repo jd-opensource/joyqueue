@@ -330,7 +330,7 @@
         <route inherit="get"
                path="/v1/consumer/findAllSubscribeGroups" handlers="consumer#findAllSubscribeGroups render"/>
         <route inherit="get"
-               path="/v1/consumer/findAppsByTopic/topic/:topic" handlers="consumer#findAppsByTopic render"/>
+               path="/v1/consumer/findAppsByTopic" handlers="consumer#findAppsByTopic render"/>
 
         <!-- consumer Config -->
         <route inherit="post"
@@ -423,7 +423,7 @@
                errors="error"/>
 
         <route inherit="get"
-               path="/v1/monitor/broker/metadata/:brokerId/:topicFullName/:group" handlers="brokerMonitor#findBrokerMetadata render"
+               path="/v1/monitor/broker/metadata" handlers="brokerMonitor#findBrokerMetadata render"
                errors="error"/>
 
         <route inherit="get"
@@ -522,13 +522,13 @@
                path="/v1/retry/search" handlers="retry#search render"
                errors="error"/>
         <route inherit="delete"
-               path="/v1/retry/delete/:id/topic/:topic" handlers="retry#delete render"
+               path="/v1/retry/delete" handlers="retry#delete render"
                errors="error"/>
         <route inherit="put"
-               path="/v1/retry/recovery/:id/topic/:topic" handlers="retry#recovery render"
+               path="/v1/retry/recovery" handlers="retry#recovery render"
                errors="error"/>
         <route inherit="get"
-               path="/v1/retry/download/:id/topic/:topic" handlers="retry#download render"
+               path="/v1/retry/download" handlers="retry#download render"
                errors="error"/>
         <route inherit="get"
                path="/v1/retry/isServerEnabled" handlers="retry#isServerEnabled render"
