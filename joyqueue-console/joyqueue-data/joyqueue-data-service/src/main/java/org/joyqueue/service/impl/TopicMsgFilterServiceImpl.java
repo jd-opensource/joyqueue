@@ -249,7 +249,8 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         consumer.start();
         User user = userService.findById(msgFilter.getCreateBy().getId());
         msgFilter.getCreateBy().setCode(user.getCode());
-        String filePath = String.format(FILE_PATH_FORMAT, user.getCode(), msgFilter.getCreateBy().getId(), msgFilter.getTopic(), SystemClock.now());
+        String filePath = String.format(FILE_PATH_FORMAT, user.getCode(), msgFilter.getCreateBy().getId(), 
+                                        msgFilter.getTopic(), SystemClock.now());
         File file = createFile(filePath);
         if (file != null) {
             FileUtils.writeStringToFile(file, buildFileHeader(msgFilter), StandardCharsets.UTF_8, true);
@@ -264,7 +265,9 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         Map<Integer, Long> maxIndexMapper = Maps.newHashMap();
         if (msgFilter.getOffsetStartTime() != null && msgFilter.getOffsetEndTime() != null) {
             for (QueueMetaData.Partition partition : partitions) {
-                parseOffsetByTs(msgFilter.getApp(), msgFilter.getTopic(), partition.partitionId(), msgFilter.getOffsetStartTime().getTime(), msgFilter.getOffsetEndTime().getTime(), indexMapper, maxIndexMapper);
+                parseOffsetByTs(msgFilter.getApp(), msgFilter.getTopic(), partition.partitionId(), 
+                                msgFilter.getOffsetStartTime().getTime(), msgFilter.getOffsetEndTime().getTime(), 
+                                indexMapper, maxIndexMapper);
             }
         } else {
             for (QueueMetaData.Partition partition : partitions) {
@@ -338,7 +341,9 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         repository.update(msgFilter);
     }
 
-    private void parseOffsetByTs(String app, String topicCode, int partition, long startTime, long endTime, Map<Integer, Long> indexMapper, Map<Integer, Long> maxIndexMapper) {
+    private void parseOffsetByTs(String app, String topicCode, int partition, 
+                                 long startTime, long endTime, 
+                                 Map<Integer, Long> indexMapper, Map<Integer, Long> maxIndexMapper) {
         Subscribe subscribe = new Subscribe();
         subscribe.setApp(new Identity(app));
         Topic topic = new Topic(topicCode);
