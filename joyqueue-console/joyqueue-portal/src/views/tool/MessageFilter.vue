@@ -18,23 +18,23 @@
 <!--            <d-option v-for="item in topics" :value="item.value" :key="item.value">{{ item.value }}</d-option>-->
 <!--            <span slot="prepend">主题</span>-->
 <!--          </d-select>-->
-          <d-input v-model="search.topic" placeholder="请输入主题" class="left" style="width: 250px;margin-top: 5px">
+          <d-input v-model="search.topic" placeholder="请输入主题" class="left" style="width: 280px;margin-top: 5px">
             <span slot="prepend">主题</span>
           </d-input>
-          <d-select v-model="search.msgFormat" style="width:250px">
-            <d-option v-for="item in msgFormats" :value="item.value" :key="item.value">{{ item.label }}</d-option>
+          <d-select v-model="search.msgFormat" style="width:280px;margin-top: 5px">
+            <d-option v-for="(supportedMessageType, index) in msgFormats" :value="supportedMessageType" :key="index">{{ supportedMessageType }}</d-option>
             <span slot="prepend">消息格式</span>
           </d-select><br/>
-          <d-input v-model="search.partition" placeholder="分区为空默认查询所有分区" class="left" style="width: 250px;margin-top: 5px">
+          <d-input v-model="search.partition" placeholder="分区为空默认查询所有分区" class="left" style="width: 280px;margin-top: 5px">
             <span slot="prepend">分区</span>
           </d-input>
-          <d-input v-model="search.offset" placeholder="请输入位点值" class="left" style="width: 250px;margin-top: 5px">
+          <d-input v-model="search.offset" placeholder="请输入位点值" class="left" style="width: 280px;margin-top: 5px">
             <span slot="prepend">位点</span>
           </d-input>
-          <d-input v-model="search.queryCount" placeholder="请输入查询条数" class="left" style="width: 250px;margin-top: 5px">
+          <d-input v-model="search.queryCount" placeholder="请输入查询条数" class="left" style="width: 280px;margin-top: 5px">
             <span slot="prepend">查询条数</span>
           </d-input>
-          <d-input v-model="search.filter" placeholder="请输入消息关键字" class="left" style="width: 250px;margin-top: 5px">
+          <d-input v-model="search.filter" placeholder="请输入消息关键字" class="left" style="width: 280px;margin-top: 5px">
             <span slot="prepend">消息关键字</span>
           </d-input>
           <d-date-picker v-model="search.times" type="daterange" range-separator="至" start-placeholder="开始日期" class="left"
@@ -88,20 +88,13 @@ export default {
   data () {
     return {
       msgFormats: [
-        {
-          label: 'UTF-8',
-          value: 'UTF-8'
-        },
-        {
-          label: 'GBK',
-          value: 'GBK'
-        }
       ],
       apps: [],
       urls: {
         filter: '/topic/msgFilter',
         search: '/topic/findTopicMsgFilters',
-        add: '/topic/addTopicMsgFilter'
+        add: '/topic/addTopicMsgFilter',
+        msgTypes: '/archive/message-types'
       },
       showTablePin: false,
       filterQueryTableData: {
@@ -236,7 +229,7 @@ export default {
       createFilterDialog: {
         visible: false,
         title: '创建消息过滤任务',
-        width: '600',
+        width: '620',
         showFooter: false
       }
     }
@@ -334,6 +327,10 @@ export default {
     }
   },
   mounted () {
+    apiRequest.get(this.urls.msgTypes)
+      .then(data => {
+        this.msgFormats = data.data
+      })
     this.getList()
   }
 }

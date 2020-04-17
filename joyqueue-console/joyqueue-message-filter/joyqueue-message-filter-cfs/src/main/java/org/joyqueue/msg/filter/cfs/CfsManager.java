@@ -84,7 +84,7 @@ public class CfsManager {
     }
 
     public void upload(long id, long userId, String path) {
-        String objectKey = '/' + userId + '/' + path;
+        String objectKey = "/" + userId + "/" + path;
         try {
             AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
             S3Configuration configuration = S3Configuration.builder()

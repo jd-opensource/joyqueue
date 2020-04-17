@@ -44,6 +44,7 @@ import org.joyqueue.service.ApplicationTokenService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.ConsumeOffsetService;
 import org.joyqueue.service.ConsumerService;
+import org.joyqueue.service.MessagePreviewService;
 import org.joyqueue.service.TopicMsgFilterService;
 import org.joyqueue.service.UserService;
 import org.joyqueue.toolkit.time.SystemClock;
@@ -105,6 +106,9 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private MessagePreviewService messagePreviewService;
 
     private final TopicMessageFilterSupport topicMessageFilterSupport = new TopicMessageFilterSupport();
 
@@ -274,7 +278,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 List<Message> messages = consumer.batchReceive((short) partition.partitionId(), index, 1000 * 10);
                 for (Message message : messages) {
                     clock = SystemClock.now();
-                    String content = new String(message.getData());
+                    String content = messagePreviewService.preview(msgFilter.getMsgFormat(), message.getData());
                     if (topicMessageFilterSupport.match(content, msgFilter.getFilter())) {
                         filterClock = SystemClock.now();
                         strBuilder.append(content).append('\n');

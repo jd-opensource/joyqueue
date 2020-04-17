@@ -143,8 +143,8 @@ export default {
     },
     brokerDetail(item) {
       this.$router.push({
-        name: '/' + this.$i18n.locale + '/setting/brokerMonitor',
-        params: {
+        path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+        query: {
           brokerId: item.id,
           brokerIp: item.ip,
           brokerPort: item.port
