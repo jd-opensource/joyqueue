@@ -113,7 +113,7 @@ export default {
         consume: '/archive/consume',
         download: '/archive/download',
         retry: '/archive/retry',
-        getApps:'/consumer/findAppsByTopic/topic',
+        getApps: '/consumer/findAppsByTopic',
         preview: '/archive/preview',
         messageTypes: '/archive/message-types'
       },
@@ -290,7 +290,7 @@ export default {
     retryInit(item) {
       this.retryDialog.visible = true;
       this.retry.item = item;
-      apiRequest.get(this.urlOrigin.getApps + '/' + item.topic).then((data) => {
+      apiRequest.get(this.urlOrigin.getApps + '?topic=' + item.topic).then((data) => {
         this.retry.appList = data.data
       })
     },
