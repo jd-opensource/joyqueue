@@ -268,7 +268,14 @@ export default {
     },
     detail (item) {
       this.brokerId = item.id
-      this.monitorDetailDialog.visible = true
+      this.$router.push({
+        name: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+        params:{
+          brokerId: item.id,
+          brokerIp: item.ip,
+          brokerPort: item.port
+        }
+      })
     },
     beforeEdit () {
       return new Promise((resolve, reject) => {
@@ -286,7 +293,11 @@ export default {
     }
   },
   mounted () {
-    this.getList()
+  },
+  computed: {
+    curLang () {
+      return this.$i18n.locale
+    }
   }
 }
 </script>
