@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ *
  * @author liyue25
  * Date: 2018-12-20
  */
@@ -82,7 +83,7 @@ public class PreloadBufferPool {
 
     private PreloadBufferPool() {
         long printMetricInterval = Long.parseLong(System.getProperty(PRINT_METRIC_INTERVAL_MS_KEY,"30000"));
-        maxMemorySize = Format.parseSize(System.getProperty(MAX_MEMORY_KEY), Math.round(VM.maxDirectMemory() * CACHE_RATIO));
+        maxMemorySize = getMaxMemorySize();
         evictMemorySize = Math.round(maxMemorySize * EVICT_RATIO);
         coreMemorySize = Math.round(maxMemorySize * CORE_RATIO);
 
@@ -103,6 +104,37 @@ public class PreloadBufferPool {
                 Format.formatSize(maxMemorySize),
                 Format.formatSize(coreMemorySize),
                 Format.formatSize(evictMemorySize));
+    }
+
+    /**
+     * 计算可供缓存使用的最大堆外内存。
+     *
+     * 1. 如果PreloadBufferPool.MaxMemory设置为数值，直接使用设置值。
+     * 2. 如果PreloadBufferPool.MaxMemory设置为百分比，比如：90%，最大堆外内存 = 物理内存 * 90% - 最大堆内存（由JVM参数-Xmx配置）
+     * 3. 如果PreloadBufferPool.MaxMemory未设置或者设置了非法值，最大堆外内存 = VM.maxDirectMemory() * 90%。
+     * 其中VM.maxDirectMemory()取值为JVM参数-XX:MaxDirectMemorySize，如果未设置-XX:MaxDirectMemorySize，取值为JVM参数-Xmx。
+     *
+     * @return 可使用的最大堆外内存大小。
+     */
+    private long getMaxMemorySize() {
+        String mmsString = System.getProperty(MAX_MEMORY_KEY);
+        int pct = Format.getPercentage(mmsString);
+        if (pct > 0 && pct < 100) {
+            long physicalMemorySize = getPhysicalMemorySize();
+            long reservedHeapMemorySize = Runtime.getRuntime().maxMemory();
+            if (Long.MAX_VALUE == reservedHeapMemorySize) {
+                logger.warn("Runtime.getRuntime().maxMemory() returns unlimited!");
+                reservedHeapMemorySize = physicalMemorySize / 2;
+            }
+            // 如果设置了百分比，最大可使用堆外内存= 物理内存 * 百分比 - 最大堆内存
+            long mms = physicalMemorySize * pct / 100 - reservedHeapMemorySize;
+            if (mms > 0) {
+                return mms;
+            } else {
+                return Math.round(VM.maxDirectMemory() * CACHE_RATIO);
+            }
+        }
+        return Format.parseSize(System.getProperty(MAX_MEMORY_KEY), Math.round(VM.maxDirectMemory() * CACHE_RATIO));
     }
 
     private LoopThread buildMetricThread(long printMetricInterval) {
@@ -379,6 +411,11 @@ public class PreloadBufferPool {
 
     }
 
+    private static long getPhysicalMemorySize() {
+        com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
+                java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        return os.getTotalPhysicalMemorySize();
+    }
     /**
      * buffer监控
      */
