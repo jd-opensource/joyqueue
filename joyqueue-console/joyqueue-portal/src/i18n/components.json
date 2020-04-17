@@ -12,7 +12,7 @@
       "retry": "重试查询",
       "archive": "归档查询",
       "operateHistory": "操作历史查询",
-      "msgFilter": "消息过滤"
+      "msgFilter": "消息查询"
     },
     "setting": {
       "dataCenter": "数据中心管理",
@@ -35,7 +35,7 @@
       "retry": "Retry Query",
       "archive": "Archive Query",
       "operateHistory": "Operate History",
-      "msgFilter": "msgFilter"
+      "msgFilter": "Message Query"
     },
     "setting": {
       "dataCenter": "Data Center Manage",
