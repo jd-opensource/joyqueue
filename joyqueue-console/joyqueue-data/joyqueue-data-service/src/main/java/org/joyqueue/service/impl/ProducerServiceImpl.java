@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service("producerService")
@@ -124,10 +125,14 @@ public class ProducerServiceImpl  implements ProducerService {
     @Override
     public List<Producer> findByTopic(String namespace, String topic) {
         try {
-            return fillProducers(producerNameServerService.findByTopic(topic, namespace));
+            TopicName topicName = TopicName.parse(topic);
+            if (StringUtils.isNoneBlank(topicName.getNamespace()) && StringUtils.isBlank(namespace)) {
+                namespace = topicName.getNamespace();
+            }
+            return fillProducers(producerNameServerService.findByTopic(topicName.getCode(), namespace));
         } catch (Exception e) {
             logger.error("findByTopic producer with nameServer failed, producer is {}, {}", namespace, topic, e);
-            throw new RuntimeException(e);
+            return Collections.emptyList();
         }
     }
 
@@ -137,7 +142,7 @@ public class ProducerServiceImpl  implements ProducerService {
             return fillProducers(producerNameServerService.findByApp(app));
         } catch (Exception e) {
             logger.error("findByApp producer with nameServer failed, producer is {}", app, e);
-            throw new RuntimeException(e);
+            return Collections.emptyList();
         }
     }
 

@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,12 +133,26 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Override
     public List<Consumer> findByTopic(String topic, String namespace) throws Exception {
-        return fillConsumers(consumerNameServerService.findByTopic(topic, namespace));
+        try {
+            TopicName topicName = TopicName.parse(topic);
+            if (StringUtils.isNoneBlank(topicName.getNamespace()) && StringUtils.isBlank(namespace)) {
+                namespace = topicName.getNamespace();
+            }
+            return fillConsumers(consumerNameServerService.findByTopic(topic, namespace));
+        }catch (Exception e) {
+            logger.error("findByTopic consumer with nameServer failed, consumer is {}, {}", namespace, topic, e);
+            return Collections.emptyList();
+        }
     }
 
     @Override
     public List<Consumer> findByApp(String app) throws Exception {
-        return fillConsumers(consumerNameServerService.findByApp(app));
+        try {
+            return fillConsumers(consumerNameServerService.findByApp(app));
+        }catch (Exception e) {
+            logger.error("findByApp consumer with nameServer failed, producer is {}", app, e);
+            return Collections.emptyList();
+        }
     }
 
     @Override

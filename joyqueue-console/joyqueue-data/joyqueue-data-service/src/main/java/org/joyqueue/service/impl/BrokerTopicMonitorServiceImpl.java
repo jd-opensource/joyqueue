@@ -153,8 +153,9 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                 List<String> appList = getAppByTopic(qMonitor.getType(),topic);
 
                 BrokerTopicMonitor brokerTopicMonitor = getMonitorByAppAndTopic(topic,appList,broker,qMonitor.getType());
-
-                brokerTopicMonitors.add(brokerTopicMonitor);
+                if (brokerTopicMonitor.getBrokerTopicMonitorRecordList().size()>0) {
+                    brokerTopicMonitors.add(brokerTopicMonitor);
+                }
             }
             pageResult.setPagination(pagination);
             pageResult.setResult(brokerTopicMonitors);
