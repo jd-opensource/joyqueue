@@ -42,7 +42,7 @@ class ConsumePositionReplicator {
 
     void replicateConsumePosition() {
         storeService.getAllStores().stream()
-                .filter(PartitionGroupStore::writeable)
+                .filter(PartitionGroupStore::writable)
                 .forEach(store -> {
                     try {
                         TopicName topic = TopicName.parse(store.getTopic());

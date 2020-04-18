@@ -234,10 +234,10 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
     }
 
     @Override
-    public void maybeUpdateConfig(String topic, int partitionGroup, Collection<Integer> newBrokerIds) {
+    public void maybeUpdateReplicas(String topic, int partitionGroup, Collection<Integer> newReplicaBrokerIds) {
         JournalKeeperPartitionGroupStore store = storeMap.get(new TopicPartitionGroup(topic, partitionGroup));
         if(null != store) {
-            store.maybeUpdateConfig(toURIs(new ArrayList<>(newBrokerIds), topic, partitionGroup));
+            store.maybeUpdateConfig(toURIs(new ArrayList<>(newReplicaBrokerIds), topic, partitionGroup));
         } else {
             logger.warn("Update config failed, partition group not exist! Topic: {}, partitionGroup: {}.",
                     topic, partitionGroup);

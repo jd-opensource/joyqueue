@@ -18,19 +18,37 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>joyqueue-server</artifactId>
+        <artifactId>joyqueue-store</artifactId>
         <groupId>org.joyqueue</groupId>
         <version>4.2.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>JoyQueue-Store</name>
-    <description>Message storage API and locale storage implementation</description>
 
-    <artifactId>joyqueue-store</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>joyqueue-store-api</module>
-        <module>joyqueue-store-origin</module>
-        <module>joyqueue-store-journalkeeper</module>
-    </modules>
+    <artifactId>joyqueue-store-origin</artifactId>
+    <name>JoyQueue-Store-Origin</name>
+    <description>Message locale storage implementation</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-store-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-broker-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+    </dependencies>
 </project>

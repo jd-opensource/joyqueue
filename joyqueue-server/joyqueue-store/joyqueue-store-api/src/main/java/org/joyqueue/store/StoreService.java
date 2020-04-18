@@ -102,9 +102,9 @@ public interface StoreService {
      * @throws IOException 创建/删除Partition时读写文件异常时抛出
      * @param topic Topic
      * @param partitionGroup Partition group
-     * @param partitions 变更后的Partition数组
+     * @param expectPartitions 变更后的Partition数组
      */
-    void maybeRePartition(String topic, int partitionGroup, Collection<Short> partitions) throws IOException;
+    void maybeRePartition(String topic, int partitionGroup, Collection<Short> expectPartitions) throws IOException;
 
     /**
      * 如果当前节点是Leader，执行副本分布节点变更

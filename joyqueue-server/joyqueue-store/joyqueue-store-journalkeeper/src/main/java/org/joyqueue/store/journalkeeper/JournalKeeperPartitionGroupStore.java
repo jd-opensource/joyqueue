@@ -210,11 +210,11 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
     @Override
     public boolean readable() {
-        return writeable();
+        return writable();
     }
 
     @Override
-    public boolean writeable() {
+    public boolean writable() {
         try {
             return adminClient.getServerStatus(getUri()).get().getVoterState() == VoterState.LEADER;
         } catch (Throwable e) {
@@ -301,6 +301,11 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
     }
 
+    @Override
+    public void updatePreferredLeader(int brokerId) {
+
+    }
+
     private void updateConfig(List<URI> newConfigs, ClusterConfiguration clusterConfiguration) {
         adminClient
             .updateVoters(clusterConfiguration.getVoters(), newConfigs)
@@ -330,4 +335,6 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     TransactionStore getTransactionStore() {
         return transactionStore;
     }
+
+
 }

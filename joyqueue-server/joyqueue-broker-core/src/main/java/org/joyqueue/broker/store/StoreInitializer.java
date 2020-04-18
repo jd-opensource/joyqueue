@@ -216,7 +216,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         if(oldPartitionGroup.getReplicas().contains(currentBrokerId) || newPartitionGroup.getReplicas().contains(currentBrokerId)) {
             // 先处理配置变更
             if(!oldPartitionGroup.getReplicas().equals(newPartitionGroup.getReplicas())) {
-                storeService.maybeUpdateConfig(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getReplicas());
+                storeService.maybeUpdateReplicas(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getReplicas());
             }
             // 再处理分区变更
             if(!oldPartitionGroup.getPartitions().equals(newPartitionGroup.getPartitions())) {

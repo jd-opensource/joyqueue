@@ -120,7 +120,7 @@ public interface PartitionGroupStore {
      * 是否可写
      * @return true：可写， false：不可写
      */
-    boolean writeable();
+    boolean writable();
 
     /**
      * 等待集群可用后返回的Future
