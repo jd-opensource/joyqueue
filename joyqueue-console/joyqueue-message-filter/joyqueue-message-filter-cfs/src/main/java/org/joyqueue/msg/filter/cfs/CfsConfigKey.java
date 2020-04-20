@@ -32,7 +32,12 @@ public enum CfsConfigKey implements PropertyDef {
     CFS_JDBC_DRIVER("cfs.jdbc.driver","",Type.STRING),
     CFS_JDBC_URL("cfs.jdbc.url","",Type.STRING),
     CFS_JDBC_USERNAME("cfs.jdbc.username","",Type.STRING),
-    CFS_JDBC_PASSWORD("cfs.jdbc.password","",Type.STRING)
+    CFS_JDBC_PASSWORD("cfs.jdbc.password","",Type.STRING),
+    CFS_JDBC_MAX_ACTIVE("cfs.jdbc.max.active",1,Type.INT),
+    CFS_JDBC_MIN_IDLE("cfs.jdbc.min.idle",1,Type.INT),
+    CFS_JDBC_VALIDATION_QUERY("cfs.jdbc.validation.query","",Type.STRING),
+    CFS_JDBC_CONNECTION_PROPERTIES("cfs.jdbc.connection.properties","",Type.STRING),
+    CFS_JDBC_TRANSACTION_ISOLATION("cfs.jdbc.transaction.isolation","",Type.STRING)
     ;
 
     private final String name;

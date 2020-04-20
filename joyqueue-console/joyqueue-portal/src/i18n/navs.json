@@ -95,7 +95,7 @@
         {
           "path": "msgFilter",
           "name": "msgFilter",
-          "component": "tool/MessageFilter.vue"
+          "component": "tool/messageFilter.vue"
         },
         {
           "path": "retry",
@@ -201,7 +201,7 @@
         {
           "path": "msgFilter",
           "name": "msgFilter",
-          "component": "tool/MessageFilter.vue"
+          "component": "tool/messageFilter.vue"
         },
         {
           "path": "retry",

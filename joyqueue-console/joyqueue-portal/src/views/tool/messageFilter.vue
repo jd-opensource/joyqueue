@@ -217,7 +217,20 @@ export default {
           {
             title: '结果',
             key: 'url',
-            width: '25%'
+            width: '25%',
+            render: (h, params) => {
+              var html = []
+              if (params.item.url) {
+                var p = h('a', {
+                  attrs: {
+                    href: params.item.url,
+                    target: '_blank'
+                  }
+                }, 'download')
+                html.push(p)
+              }
+              return h('div', {}, html)
+            }
           }
         ]
       },

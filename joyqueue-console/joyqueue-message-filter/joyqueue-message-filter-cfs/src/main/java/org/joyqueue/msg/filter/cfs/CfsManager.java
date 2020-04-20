@@ -15,6 +15,8 @@
  */
 package org.joyqueue.msg.filter.cfs;
 
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.datasource.DataSourceConfig;
 import org.joyqueue.datasource.DataSourceFactory;
 import org.joyqueue.msg.filter.cfs.model.CfsFileInfo;
@@ -28,20 +30,22 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
-import software.amazon.awssdk.services.s3.S3Utilities;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetUrlRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import javax.sql.DataSource;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Paths;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.time.Duration;
 import java.util.Properties;
 
 /**
@@ -56,7 +60,8 @@ public class CfsManager {
 
     private DataSource dataSource;
 
-    private static final String UPDATE_URL_SQL = "UPDATE topic_msg_filter SET url = %s WHERE id = %s";
+    private static final String UPDATE_URL_SQL = "UPDATE topic_msg_filter SET url = ? , obj_key = ? WHERE id = ?";
+    private static final String FIND_URL_BY_ID_SQL = "SELECT url FROM topic_msg_filter WHERE id = ?";
 
     private final Region clientRegion;
     private final String endpoint;
@@ -76,6 +81,7 @@ public class CfsManager {
     }
 
     public CfsManager() {
+        dataSource = getDataSource();
         clientRegion = Region.of(CFS_CONFIG.getProperty(CfsConfigKey.CFS_REGION.getName(), CfsConfigKey.CFS_REGION.getValue().toString()));
         endpoint = CFS_CONFIG.getProperty(CfsConfigKey.CFS_ENDPOINT.getName(), CfsConfigKey.CFS_REGION.getValue().toString());
         accessKey = CFS_CONFIG.getProperty(CfsConfigKey.CFS_ACCESS_KEY.getName(), CfsConfigKey.CFS_ACCESS_KEY.getValue().toString());
@@ -84,11 +90,11 @@ public class CfsManager {
     }
 
     public void upload(long id, long userId, String path) {
-        String objectKey = "/" + userId + "/" + path;
         try {
             AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
             S3Configuration configuration = S3Configuration.builder()
                     .chunkedEncodingEnabled(true)
+                    .pathStyleAccessEnabled(true)
                     .build();
             S3Client client = S3Client.builder()
                     .region(clientRegion)
@@ -98,33 +104,100 @@ public class CfsManager {
                     .build();
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(objectKey)
+                    .key(path)
                     .build();
             RequestBody requestBody = RequestBody.fromFile(Paths.get(path));
-            PutObjectResponse putObjectResponse = client.putObject(putObjectRequest, requestBody);
+            client.putObject(putObjectRequest, requestBody);
             logger.info("cfs: upload file success");
-            String url = getCfsUrl(clientRegion, endpoint, objectKey, bucketName, configuration);
-            updateUrl(new CfsFileInfo(id, url));
+            String url = getCfsUrl(path);
             logger.info("userId: {}, url:{}", userId, url);
+            updateUrl(new CfsFileInfo(id,path,url));
         } catch (Exception e) {
             logger.error("cfs: failed to upload file :{}, error: {}", path, e.getMessage());
         }
     }
 
-    private String getCfsUrl(Region region, String endpoint, String objectKey, String bucketName, S3Configuration configuration) throws URISyntaxException {
-        GetUrlRequest getUrlRequest = GetUrlRequest.builder()
-                .bucket(bucketName).endpoint(new URI(endpoint)).key(objectKey).build();
-        S3Utilities s3Utilities = S3Utilities.builder().region(region).s3Configuration(configuration).build();
-        URL url = s3Utilities.getUrl(getUrlRequest);
-        return url.toString();
+    public InputStream download(long fileId) {
+        String url = "<EMPTY>";
+        try {
+            url = getUrlById(fileId);
+            String objectKey = url.substring(url.lastIndexOf('/') + 1);
+            AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
+            S3Configuration configuration = S3Configuration.builder()
+                    .chunkedEncodingEnabled(true)
+                    .pathStyleAccessEnabled(true)
+                    .build();
+            S3Client client = S3Client.builder()
+                    .region(clientRegion)
+                    .credentialsProvider(credentialsProvider)
+                    .endpointOverride(URI.create(endpoint))
+                    .serviceConfiguration(configuration)
+                    .build();
+            GetObjectRequest request = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .build();
+            InputStream inputStream = client.getObject(request);
+            while (true) {
+                if (inputStream.read() == -1) {
+                    break;
+                }
+            }
+            return inputStream;
+        } catch (IOException e) {
+            logger.error("Failed to download file which url is {}", url);
+        } catch (Exception e) {
+            logger.error("{}", e.getMessage());
+        }
+        return null;
+    }
+
+    private String getCfsUrl(String objectKey) {
+        AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
+        S3Presigner preSigner = S3Presigner.builder()
+                .credentialsProvider(credentialsProvider)
+                .endpointOverride(URI.create(endpoint))
+                .region(clientRegion).build();
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build();
+        GetObjectPresignRequest getObjectPresignRequest = GetObjectPresignRequest.builder()
+                .getObjectRequest(getObjectRequest).signatureDuration(Duration.ofDays(7)).build();
+        PresignedGetObjectRequest presignedGetObjectRequest = preSigner.presignGetObject(getObjectPresignRequest);
+        String url = presignedGetObjectRequest.url().toString();
+        preSigner.close();
+        return url;
+    }
+
+    private String getUrlById(long id) throws Exception {
+        return DaoUtil.queryObject(getDataSource(), FIND_URL_BY_ID_SQL, new DaoUtil.QueryCallback<String>() {
+            @Override
+            public void before(PreparedStatement statement) throws Exception {
+                statement.setLong(1, id);
+            }
+
+            @Override
+            public String map(ResultSet rs) throws Exception {
+                return rs.getString("url");
+            }
+        });
     }
 
     private void updateUrl(CfsFileInfo cfsFileInfo) throws Exception {
-        DaoUtil.update(getDataSource(), cfsFileInfo, UPDATE_URL_SQL, (statement, target) -> {
-            statement.setLong(1, target.getId());
-            statement.setString(2, target.getUrl());
+        Preconditions.checkArgument(cfsFileInfo != null);
+        int update = DaoUtil.update(getDataSource(), cfsFileInfo, UPDATE_URL_SQL, (statement, target) -> {
+            statement.setString(1, target.getUrl());
+            statement.setString(2, target.getObjectKey());
+            statement.setLong(3, target.getId());
         });
+        if (update >= 1) {
+            logger.info("update url success,file: {}, url: {}", cfsFileInfo.getId(), cfsFileInfo.getUrl());
+        } else {
+            logger.warn("Failed to update url [{}] which file id is {}", cfsFileInfo.getUrl(), cfsFileInfo.getId());
+        }
     }
+
 
     public void delete(String url) {
         String bucketName = "";
@@ -163,8 +236,19 @@ public class CfsManager {
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig.setDriver(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_DRIVER.getName(), CfsConfigKey.CFS_JDBC_DRIVER.getValue().toString()));
         dataSourceConfig.setUrl(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_URL.getName(), CfsConfigKey.CFS_JDBC_URL.getValue().toString()));
-        dataSourceConfig.setUser(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_USERNAME.getName(), CfsConfigKey.CFS_JDBC_USERNAME.getValue().toString()));
-        dataSourceConfig.setPassword(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_PASSWORD.getName(), CfsConfigKey.CFS_JDBC_PASSWORD.getValue().toString()));
+        String user = CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_USERNAME.getName(), CfsConfigKey.CFS_JDBC_USERNAME.getValue().toString());
+        if (StringUtils.isNoneBlank(user)) {
+            dataSourceConfig.setUser(user);
+        }
+        String password = CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_PASSWORD.getName(), CfsConfigKey.CFS_JDBC_PASSWORD.getValue().toString());
+        if (StringUtils.isNoneBlank(password)) {
+            dataSourceConfig.setPassword(password);
+        }
+        dataSourceConfig.setMinIdle(Integer.parseInt(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_MIN_IDLE.getName(), CfsConfigKey.CFS_JDBC_MIN_IDLE.getValue().toString())));
+        dataSourceConfig.setMaxPoolSize(Integer.parseInt(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_MAX_ACTIVE.getName(), CfsConfigKey.CFS_JDBC_MAX_ACTIVE.getValue().toString())));
+        dataSourceConfig.setValidationQuery(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_VALIDATION_QUERY.getName(), CfsConfigKey.CFS_JDBC_VALIDATION_QUERY.getValue().toString()));
+        dataSourceConfig.setConnectionProperties(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_CONNECTION_PROPERTIES.getName(), CfsConfigKey.CFS_JDBC_CONNECTION_PROPERTIES.getValue().toString()));
+        dataSourceConfig.setTransactionIsolation(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_TRANSACTION_ISOLATION.getName(), CfsConfigKey.CFS_JDBC_TRANSACTION_ISOLATION.getValue().toString()));
         return dataSourceConfig;
     }
 }

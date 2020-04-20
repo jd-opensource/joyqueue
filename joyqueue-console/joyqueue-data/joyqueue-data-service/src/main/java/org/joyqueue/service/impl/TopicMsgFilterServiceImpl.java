@@ -27,6 +27,7 @@ import io.openmessaging.message.Message;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.TopicMsgFilter;
@@ -66,6 +67,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.SynchronousQueue;
+import java.util.stream.Collectors;
 
 /**
  * @author jiangnan53
@@ -77,7 +79,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     private static final int MAX_POOL_SIZE = 3;
     private static final int APPEND_MAX_SIZE = 100;
     private static final String URL_FORMAT = "oms:joyqueue://%s@%s/default";
-    private static final String FILE_PATH_FORMAT = "%s_%s_%s_%s.txt";
+    private static final String FILE_PATH_FORMAT = "%s_%s_%s_%s_%s.txt";
     /**
      * 没有消费到任何数据
      */
@@ -138,7 +140,8 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     private void execute(TopicMsgFilter filter) throws Exception {
         List<String> apps;
         try {
-            apps = consumerService.findAppsByTopic(filter.getTopic());
+            TopicName topicName = TopicName.parse(filter.getTopic());
+            apps = consumerService.findByTopic(topicName.getCode(),topicName.getNamespace()).stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
         } catch (NullPointerException e) {
             throw new Exception("输入主题不存在或无关联应用");
         }
@@ -250,7 +253,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         User user = userService.findById(msgFilter.getCreateBy().getId());
         msgFilter.getCreateBy().setCode(user.getCode());
         String filePath = String.format(FILE_PATH_FORMAT, user.getCode(), msgFilter.getCreateBy().getId(), 
-                                        msgFilter.getTopic(), SystemClock.now());
+                                        msgFilter.getTopic(), Thread.currentThread().getId(),SystemClock.now());
         File file = createFile(filePath);
         if (file != null) {
             FileUtils.writeStringToFile(file, buildFileHeader(msgFilter), StandardCharsets.UTF_8, true);

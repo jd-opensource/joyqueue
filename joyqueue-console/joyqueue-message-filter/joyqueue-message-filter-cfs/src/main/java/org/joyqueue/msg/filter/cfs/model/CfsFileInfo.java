@@ -28,11 +28,14 @@ public class CfsFileInfo {
      */
     private final long id;
 
+    private final String objectKey;
+
     private final String url;
 
-    public CfsFileInfo(long id, String url) {
+    public CfsFileInfo(long id,String objectKey, String url) {
         this.id = id;
         this.url = url;
+        this.objectKey = objectKey;
     }
 
     public long getId() {
@@ -41,5 +44,9 @@ public class CfsFileInfo {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getObjectKey() {
+        return objectKey;
     }
 }
