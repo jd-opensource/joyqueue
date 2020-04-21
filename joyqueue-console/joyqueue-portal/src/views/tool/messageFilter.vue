@@ -18,9 +18,11 @@
 <!--            <d-option v-for="item in topics" :value="item.value" :key="item.value">{{ item.value }}</d-option>-->
 <!--            <span slot="prepend">主题</span>-->
 <!--          </d-select>-->
-          <d-input v-model="search.topic" placeholder="请输入主题" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">主题</span>
-          </d-input>
+          <d-tooltip content="如主题有namespace,请加上namespace">
+            <d-input v-model="search.topic" placeholder="请输入主题" class="left" style="width: 280px;margin-top: 5px">
+              <span slot="prepend">主题</span>
+            </d-input>
+          </d-tooltip>
           <d-select v-model="search.msgFormat" style="width:280px;margin-top: 5px">
             <d-option v-for="(supportedMessageType, index) in msgFormats" :value="supportedMessageType" :key="index">{{ supportedMessageType }}</d-option>
             <span slot="prepend">消息格式</span>

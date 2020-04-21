@@ -382,6 +382,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             for (QueueMetaData.Partition partition : metaData.partitions()) {
                 if (partition.partitionId() == msgFilter.getPartition()) {
                     partitions.add(partition);
+                    break;
                 }
             }
         } else {
