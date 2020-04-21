@@ -71,7 +71,7 @@ public class CfsManager {
 
     static {
         CFS_CONFIG = new Properties();
-        String configPath = CfsManager.class.getResource("/").getPath() + "cfs.properties";
+        String configPath = CfsManager.class.getResource("/").getPath() + "application.properties";
         try {
             InputStream inputStream = new FileInputStream(configPath);
             CFS_CONFIG.load(inputStream);
@@ -244,11 +244,6 @@ public class CfsManager {
         if (StringUtils.isNoneBlank(password)) {
             dataSourceConfig.setPassword(password);
         }
-        dataSourceConfig.setMinIdle(Integer.parseInt(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_MIN_IDLE.getName(), CfsConfigKey.CFS_JDBC_MIN_IDLE.getValue().toString())));
-        dataSourceConfig.setMaxPoolSize(Integer.parseInt(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_MAX_ACTIVE.getName(), CfsConfigKey.CFS_JDBC_MAX_ACTIVE.getValue().toString())));
-        dataSourceConfig.setValidationQuery(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_VALIDATION_QUERY.getName(), CfsConfigKey.CFS_JDBC_VALIDATION_QUERY.getValue().toString()));
-        dataSourceConfig.setConnectionProperties(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_CONNECTION_PROPERTIES.getName(), CfsConfigKey.CFS_JDBC_CONNECTION_PROPERTIES.getValue().toString()));
-        dataSourceConfig.setTransactionIsolation(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_TRANSACTION_ISOLATION.getName(), CfsConfigKey.CFS_JDBC_TRANSACTION_ISOLATION.getValue().toString()));
         return dataSourceConfig;
     }
 }
