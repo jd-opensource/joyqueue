@@ -4,7 +4,6 @@
       <div class="headLine">
         <d-button type="primary" class="left" @click="getList">查询状态</d-button>
         <d-button type="primary" class="left" @click="openCreateFilterDialog">添加任务</d-button>
-        <d-button type="primary" class="right" @click="doFilter">执行</d-button>
       </div>
     </d-form>
 
@@ -55,7 +54,7 @@ import apiRequest from '../../utils/apiRequest.js'
 import myDialog from '../../components/common/myDialog.vue'
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud'
-import {timeStampToString} from "../../utils/dateTimeUtils";
+import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
   name: 'messageFilter',
@@ -93,7 +92,6 @@ export default {
       ],
       apps: [],
       urls: {
-        filter: '/topic/msgFilter',
         search: '/topic/findTopicMsgFilters',
         add: '/topic/addTopicMsgFilter',
         msgTypes: '/archive/message-types'
@@ -138,7 +136,7 @@ export default {
             title: '查询方式',
             key: 'queryMethod',
             width: '9%',
-            formatter(item) {
+            formatter (item) {
               if (item.offsetStartTime && item.offsetEndTime) {
                 return '按位点时间'
               } else {
@@ -166,11 +164,11 @@ export default {
           {
             title: '查询条件',
             width: '15%',
-            formatter(item) {
+            formatter (item) {
               if (item.offsetStartTime && item.offsetEndTime) {
-                return timeStampToString(item.offsetStartTime)+' ' +timeStampToString(item.offsetEndTime)
+                return timeStampToString(item.offsetStartTime) + ' ' + timeStampToString(item.offsetEndTime)
               } else {
-                return '位点值:' + item.offset +', 查询条数:'+item.queryCount
+                return '位点值:' + item.offset + ', 查询条数:' + item.queryCount
               }
             }
           },
@@ -200,8 +198,8 @@ export default {
             key: 'status',
             width: '10%',
             formatter (item) {
-              switch(item.status) {
-                case 1 :{
+              switch (item.status) {
+                case 1 : {
                   return '正在执行'
                 }
                 case 0 : {
@@ -221,6 +219,9 @@ export default {
             key: 'url',
             width: '25%',
             render: (h, params) => {
+              if (params.item.status === -2) {
+                return h('div', {}, params.item.description)
+              }
               var html = []
               if (params.item.url) {
                 var p = h('a', {
@@ -268,16 +269,6 @@ export default {
       })
       this.createFilterDialog.visible = false
     },
-    doFilter () {
-      apiRequest.post(this.urls.filter, {}, {}).then((data) => {
-        if (data.code === 200) {
-          this.$Message.info(data.data)
-          this.getList()
-        } else {
-          this.$Message.error(data.message)
-        }
-      })
-    },
     getList () {
       this.showTablePin = true
       let data = {
@@ -316,7 +307,7 @@ export default {
       return true
     },
     validate () {
-      if (this.search.times && (this.search.offset||this.search.queryCount)) {
+      if (this.search.times && (this.search.offset || this.search.queryCount)) {
         this.$Message.error('位点时间不能和位点值，查询条数同时输入')
         return false
       }
@@ -324,7 +315,7 @@ export default {
         this.$Message.error('位点值和查询条数必须同时输入')
         return false
       }
-      if (!this.innerValidate('topic','主题')) {
+      if (!this.innerValidate('topic', '主题')) {
         return false
       }
       if (!this.search.msgFormat) {

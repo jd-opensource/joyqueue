@@ -132,7 +132,7 @@ public class ProducerServiceImpl  implements ProducerService {
             return fillProducers(producerNameServerService.findByTopic(topicName.getCode(), namespace));
         } catch (Exception e) {
             logger.error("findByTopic producer with nameServer failed, producer is {}, {}", namespace, topic, e);
-            return Collections.emptyList();
+            throw new RuntimeException(e);
         }
     }
 

@@ -39,7 +39,8 @@
         a.`end_time` AS offsetEndTime,
         a.`query_count` AS queryCount,
         a.`status`,
-        a.`url`
+        a.`url`,
+        a.`description`
     </sql>
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="TopicMsgFilter">
@@ -102,6 +103,30 @@
         UPDATE
             `topic_msg_filter`
         SET
+            <if test="topic!=null">
+            `topic_code` = #{topic},
+            </if>
+            <if test="partition!=null">
+            `partition` = #{partition},
+            </if>
+            <if test="filter!=null">
+            `filter` = #{filter},
+            </if>
+            <if test="msgFormat!=null">
+            `msg_fmt` = #{msgFormat},
+            </if>
+            <if test="offset !=0">
+            `offset` = #{offset},
+            </if>
+            <if test="offsetStartTime!=null">
+            `start_time` = #{offsetStartTime},
+            </if>
+            <if test="offsetEndTime!=null">
+            `end_time` = #{offsetEndTime},
+            </if>
+            <if test="queryCount!=0">
+            `query_count` = #{queryCount},
+            </if>
             <if test="updateTime!=null">
             `update_time`=#{updateTime},
             </if>
@@ -109,7 +134,10 @@
             `update_by`=#{updateBy.id},
             </if>
             <if test="url!=null">
-            `url` = #{url}
+            `url` = #{url},
+            </if>
+            <if test="description!=null">
+             `description` = #{description},
             </if>
             `status`=#{status}
         WHERE

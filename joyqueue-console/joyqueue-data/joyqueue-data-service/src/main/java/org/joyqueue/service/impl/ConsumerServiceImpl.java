@@ -135,23 +135,18 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Override
     public List<Consumer> findByTopic(String topic, String namespace) throws Exception {
-        try {
-            TopicName topicName = TopicName.parse(topic);
-            if (StringUtils.isNoneBlank(topicName.getNamespace()) && StringUtils.isBlank(namespace)) {
-                namespace = topicName.getNamespace();
-            }
-            return fillConsumers(consumerNameServerService.findByTopic(topic, namespace));
-        }catch (Exception e) {
-            logger.error("findByTopic consumer with nameServer failed, consumer is {}, {}", namespace, topic, e);
-            return Collections.emptyList();
+        TopicName topicName = TopicName.parse(topic);
+        if (StringUtils.isNoneBlank(topicName.getNamespace()) && StringUtils.isBlank(namespace)) {
+            namespace = topicName.getNamespace();
         }
+        return fillConsumers(consumerNameServerService.findByTopic(topic, namespace));
     }
 
     @Override
     public List<Consumer> findByApp(String app) throws Exception {
         try {
             return fillConsumers(consumerNameServerService.findByApp(app));
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.error("findByApp consumer with nameServer failed, producer is {}", app, e);
             return Collections.emptyList();
         }
@@ -176,7 +171,7 @@ public class ConsumerServiceImpl implements ConsumerService {
             qApplication.setUserId(user.getId());
             qApplication.setAdmin(false);
             List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
-            if (applicationList == null || applicationList.size() <=0 ) return Lists.newArrayList();
+            if (applicationList == null || applicationList.size() <= 0) return Lists.newArrayList();
             List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
             query.setAppList(appCodes);
         }
@@ -188,7 +183,7 @@ public class ConsumerServiceImpl implements ConsumerService {
             }
         }
 
-        List<String> apps = consumers.stream().map(m-> AppName.parse(m.getApp().getCode(),m.getSubscribeGroup()).getFullName()).collect(Collectors.toList());
+        List<String> apps = consumers.stream().map(m -> AppName.parse(m.getApp().getCode(), m.getSubscribeGroup()).getFullName()).collect(Collectors.toList());
         return apps;
     }
 

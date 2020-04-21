@@ -61,16 +61,6 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         return Responses.success(result.getPagination(), result.getResult());
     }
 
-    @Path("msgFilter")
-    public Response filter()  {
-        try {
-            topicMsgFilterService.execute();
-        }catch (Exception e) {
-            return Responses.error(500,e.getMessage());
-        }
-        return Responses.success("已经启动消息过滤任务");
-    }
-
     @Path("addTopicMsgFilter")
     public Response addTopicMsgFilter(@Body QTopicMsgFilter msgFilter) throws Exception {
         Preconditions.checkArgument(msgFilter != null, "Illegal args.");
@@ -106,7 +96,6 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         }
         msgFilter.setUpdateBy(new Identity(filter.getUserId(),filter.getUserCode()));
         msgFilter.setUpdateTime(new Date());
-//        msgFilter.setDescription(filter.getDescription());
         return msgFilter;
     }
 }
