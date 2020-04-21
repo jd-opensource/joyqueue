@@ -49,6 +49,7 @@ public enum NameServiceConfigKey implements PropertyDef {
     NAMESERVER_MESSENGER_IGNITE_ENABLE("nameservice.messenger.ignite.enable", false, Type.BOOLEAN), // TODO 临时配置，是否启用ignite推送,
     NAMESERVER_MESSENGER_PUBLISH_LEADER_CHANGE_ENABLE("nameservice.messenger.publish.leaderChange.enable", true, Type.BOOLEAN),
     NAMESERVER_MESSENGER_PUBLISH_TOPIC_ENABLE("nameservice.messenger.publish.topic.enable", true, Type.BOOLEAN),
+    NAMESERVER_MESSENGER_PUBLISH_LEADER_REPORT_ENABLE("nameservice.messenger.publish.leaderReport.enable", false, Type.BOOLEAN),
     NAMESERVER_MESSENGER_PUBLISH_SUBSCRIPTION_ENABLE("nameservice.messenger.publish.subscription.enable", true, Type.BOOLEAN),
     NAMESERVER_MESSENGER_PUBLISH_BROKER_ENABLE("nameservice.messenger.publish.broker.enable", true, Type.BOOLEAN),
     NAMESERVER_THIN_TRANSPORT_TIMEOUT("nameservice.thin.transport.timeout", 1000 * 1, Type.INT),

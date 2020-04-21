@@ -339,7 +339,7 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        if (config.getMessengerPublishTopicEnable()) {
+        if (config.getMessengerPublishLeaderReportEnable()) {
             messenger.publish(new UpdatePartitionGroupEvent(oldPartitionGroup.getTopic(), oldPartitionGroup, newPartitionGroup), replicas);
         }
     }

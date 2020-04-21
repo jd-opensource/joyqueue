@@ -159,6 +159,10 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_TOPIC_ENABLE);
     }
 
+    public boolean getMessengerPublishLeaderReportEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_LEADER_REPORT_ENABLE);
+    }
+
     public boolean getMessengerPublishSubscriptionEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_SUBSCRIPTION_ENABLE);
     }

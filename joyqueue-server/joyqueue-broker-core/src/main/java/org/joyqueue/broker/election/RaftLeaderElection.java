@@ -1236,11 +1236,14 @@ public class RaftLeaderElection extends LeaderElection  {
             if (electionConfig.enableReportLeaderPeriodicallyForce()) {
                 updateMetadata(localNodeId, currentTerm);
             } else {
-                PartitionGroup partitionGroup = clusterManager.getPartitionGroupByGroup(TopicName.parse(topicPartitionGroup.getTopic()), topicPartitionGroup.getPartitionGroupId());
-                if (partitionGroup != null && partitionGroup.getTerm() != null &&
-                        (partitionGroup.getTerm() == null || !partitionGroup.getTerm().equals(currentTerm)
-                            || partitionGroup.getLeader() == null || !partitionGroup.getLeader().equals(localNodeId))) {
-                    updateMetadata(localNodeId, currentTerm);
+                TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topicPartitionGroup.getTopic()));
+                if (topicConfig != null) {
+                    PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByGroup(topicPartitionGroup.getPartitionGroupId());
+                    if (partitionGroup != null && partitionGroup.getTerm() != null &&
+                            (partitionGroup.getTerm() == null || !partitionGroup.getTerm().equals(currentTerm)
+                                    || partitionGroup.getLeader() == null || !partitionGroup.getLeader().equals(localNodeId))) {
+                        updateMetadata(localNodeId, currentTerm);
+                    }
                 }
             }
         }

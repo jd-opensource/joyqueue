@@ -127,7 +127,7 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
         result.addAll(configs);
         List<Property> properties = supplier.getProperties();
         for (Property property : properties) {
-            if (property.getValue() != null) {
+            if ("all".equals(property.getGroup())) {
                 result.add(new Config(property.getGroup(), property.getKey(), String.valueOf(property.getValue())));
             }
         }

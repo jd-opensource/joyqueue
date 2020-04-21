@@ -447,9 +447,14 @@ public class PositionManager extends Service {
      * @return 指定分区已经消费到的消息序号
      */
     private long getMaxMsgIndex(TopicName topic, short partition, int groupId) {
-        PartitionGroupStore store = storeService.getStore(topic.getFullName(), groupId);
-        long rightIndex = store.getRightIndex(partition);
-        return rightIndex;
+        try {
+            PartitionGroupStore store = storeService.getStore(topic.getFullName(), groupId);
+            long rightIndex = store.getRightIndex(partition);
+            return rightIndex;
+        } catch (Exception e) {
+            logger.error("getMaxMsgIndex exception, topic: {}, partition: {}, groupId: {}", topic, partition, groupId);
+            return 0;
+        }
     }
 
     protected void checkState() {

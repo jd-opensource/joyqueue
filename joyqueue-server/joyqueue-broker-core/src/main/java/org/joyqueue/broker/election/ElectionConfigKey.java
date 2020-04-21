@@ -43,7 +43,7 @@ public enum ElectionConfigKey implements PropertyDef {
     TRANSFER_LEADER_MIN_LAG("election.transfer.leader.min.lag", 10 * 1024 * 1024L, Type.LONG),
     ENABLE_REBALANCE_LEADER("election.enable.rebalance.leader", false, Type.BOOLEAN),
     MIN_REBALANCE_INTERVAL("election.min.rebalance.interval", 60 * 60 * 1000, Type.INT),
-    ENABLE_REPORT_LEADER_PERIODICALLY("election.enable.report.leader.periodically", false, Type.BOOLEAN),
+    ENABLE_REPORT_LEADER_PERIODICALLY("election.enable.report.leader.periodically", true, Type.BOOLEAN),
     ENABLE_REPORT_LEADER_PERIODICALLY_FORCE("election.enable.report.leader.periodically.force", false, Type.BOOLEAN),
     OUTPUT_CONSUME_POS("election.consume.pos.output", false, Type.BOOLEAN);
 

@@ -59,28 +59,28 @@ public class GetAllMetadataRequestHandlerTest {
 
     @Test
     public void mergeMemoryConfigTest() {
-        nameServiceStub.getAllConfigs().add(new Config("group1", "key1", "value1"));
+        nameServiceStub.getAllConfigs().add(new Config("all", "key1", "value1"));
         GetAllMetadataResponse response = (GetAllMetadataResponse) getAllMetadataRequestHandler.handle(null, new JoyQueueCommand(new GetAllMetadataRequest())).getPayload();
         response.setMetadata((AllMetadata) GetAllMetadataResponseCodec.parseJson(response.getResponse(), AllMetadata.class));
 
         Assert.assertEquals(1, response.getMetadata().getConfigs().size());
         Assert.assertEquals("key1", response.getMetadata().getConfigs().get(0).getKey());
         Assert.assertEquals("value1", response.getMetadata().getConfigs().get(0).getValue());
-        Assert.assertEquals("group1", response.getMetadata().getConfigs().get(0).getGroup());
+        Assert.assertEquals("all", response.getMetadata().getConfigs().get(0).getGroup());
 
-        nameServiceStub.getAllMetadata().getConfigs().add(new Config("group1", "key1", "value1"));
+        nameServiceStub.getAllMetadata().getConfigs().add(new Config("all", "key1", "value1"));
         NameServiceStub.THROW_EXCEPTION = true;
         response = (GetAllMetadataResponse) getAllMetadataRequestHandler.handle(null, new JoyQueueCommand(new GetAllMetadataRequest())).getPayload();
         response.setMetadata((AllMetadata) GetAllMetadataResponseCodec.parseJson(response.getResponse(), AllMetadata.class));
 
-        Assert.assertEquals(2, response.getMetadata().getConfigs().size());
+        Assert.assertEquals(1, response.getMetadata().getConfigs().size());
         for (Config config : response.getMetadata().getConfigs()) {
             if (config.getKey().equals("nameservice.allmetadata.cache.enable")) {
                 Assert.assertEquals("false", config.getValue());
                 Assert.assertEquals(null, config.getGroup());
             } else if (config.getKey().equals("key1")) {
                 Assert.assertEquals("value1", config.getValue());
-                Assert.assertEquals("group1", config.getGroup());
+                Assert.assertEquals("all", config.getGroup());
             } else {
                 Assert.fail();
             }

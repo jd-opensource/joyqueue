@@ -72,7 +72,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
     public void run() {
         while (started) {
             try {
-                doCompensate(true);
+                doCompensate();
             } catch (Exception e) {
                 logger.error("compensate exception", e);
             }
@@ -83,7 +83,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
         }
     }
 
-    public void doCompensate(boolean isValidate) {
+    public void doCompensate() {
         if (!config.getCompensationEnable()) {
             return;
         }
@@ -139,7 +139,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                                 JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
                     }
 
-                    if (isValidate && !metadataValidator.validateChange(oldCache, newCache)) {
+                    if (!metadataValidator.validateChange(oldCache, newCache)) {
                         logger.error("doCompensate validate error");
                         if (logger.isDebugEnabled()) {
                             logger.debug("doCompensate validate error, oldCache: {}, newCache: {}", oldCache, newCache);
