@@ -142,7 +142,7 @@ public class ProducerServiceImpl  implements ProducerService {
             return fillProducers(producerNameServerService.findByApp(app));
         } catch (Exception e) {
             logger.error("findByApp producer with nameServer failed, producer is {}", app, e);
-            return Collections.emptyList();
+            throw new RuntimeException(e);
         }
     }
 
