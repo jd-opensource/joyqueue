@@ -24,9 +24,7 @@ import org.joyqueue.model.Pagination;
 import org.joyqueue.server.retry.api.ConsoleMessageRetry;
 import org.joyqueue.server.retry.api.RetryPolicyProvider;
 import org.joyqueue.server.retry.db.DBMessageRetry;
-import org.joyqueue.server.retry.model.RetryMessageModel;
-import org.joyqueue.server.retry.model.RetryQueryCondition;
-import org.joyqueue.server.retry.model.RetryStatus;
+import org.joyqueue.server.retry.model.*;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.db.DaoUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -52,8 +50,10 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
 
     // 数据源
     private DataSource dataSource;
+    private DataSource readDataSource;
     // 缓存服务
     private DBMessageRetry dbMessageRetry = new DBMessageRetry();
+
     // start flag
     private boolean isStartFlag = false;
     private PropertySupplier propertySupplier = null;
@@ -61,7 +61,8 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     @Override
     public void start() throws Exception {
         dbMessageRetry.start();
-        dataSource = dbMessageRetry.getDataSource();
+        this.dataSource = dbMessageRetry.getDataSource();
+        this.readDataSource=dbMessageRetry.getReadDataSource();
         isStartFlag = true;
 
         logger.info("ConsoleMessageRetry is started.");
@@ -83,7 +84,9 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     private static final String GET_BYID = "select * from message_retry where id = ? and topic = ?";
     private static final String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
     private static final String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
+    private final String STATE = "select topic,app,min(send_time),max(send_time),count(id) as num from message_retry where %s status=? group by topic,app order by num desc limit ?";
 
+    private static final String ALL_CONSUEMR="select topic,app from message_retry group by topic,app";
     @Override
     public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JoyQueueException {
 
@@ -288,6 +291,44 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
         } else {
             logger.error("update retry message error by retryQueryCondition:{}, status:{}, sendStartTime:{}, sendEndTime:{}", retryQueryCondition, status);
         }
+    }
+
+    @Override
+    public SimpleBatchRetryMessage queryRetryMessage(RetryQueryCondition retryQueryCondition) throws JoyQueueException {
+        return null;
+    }
+
+    @Override
+    public void clean(String topic, String app, Long[] msgIds) {
+
+    }
+
+    @Override
+    public List<RetryMonitorItem> top(int N, RetryQueryCondition condition) throws Exception{
+       String stateSQL=buildStateSQL(condition);
+        return  DaoUtil.queryList(readDataSource,stateSQL,new DaoUtil.QueryCallback<RetryMonitorItem>(){
+
+            @Override
+            public void before(PreparedStatement statement) throws Exception {
+
+            }
+
+            @Override
+            public RetryMonitorItem map(ResultSet rs) throws Exception {
+                return null;
+            }
+        });
+    }
+
+    public String  buildStateSQL(RetryQueryCondition condition){
+        StringBuilder sendTimeConditionBuilder= new StringBuilder();
+        if(condition.getStartTime()>0){
+            sendTimeConditionBuilder.append(" send_time >=? and ");
+        }
+        if(condition.getEndTime()>0){
+            sendTimeConditionBuilder.append(" send_time <=? and ");
+        }
+        return String.format(STATE,sendTimeConditionBuilder.toString());
     }
 
     @Override
