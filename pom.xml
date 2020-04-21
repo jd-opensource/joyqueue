@@ -193,6 +193,11 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-message-filter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-retry-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
