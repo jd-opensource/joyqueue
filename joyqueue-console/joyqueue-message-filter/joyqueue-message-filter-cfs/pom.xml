@@ -7,7 +7,6 @@
         <groupId>org.joyqueue</groupId>
         <version>4.2.4-SNAPSHOT</version>
     </parent>
-    <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
     <name>JoyQueue-Message-Filter-Cfs</name>
 
