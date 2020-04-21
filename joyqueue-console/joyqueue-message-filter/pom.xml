@@ -8,7 +8,6 @@
         <version>4.2.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.2.4-SNAPSHOT</version>
     <artifactId>joyqueue-message-filter</artifactId>
     <packaging>pom</packaging>
     <name>JoyQueue-Message-Filter</name>
