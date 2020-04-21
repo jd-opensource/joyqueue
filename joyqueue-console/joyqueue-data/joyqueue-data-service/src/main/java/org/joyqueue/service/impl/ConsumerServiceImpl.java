@@ -144,12 +144,7 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Override
     public List<Consumer> findByApp(String app) throws Exception {
-        try {
-            return fillConsumers(consumerNameServerService.findByApp(app));
-        } catch (Exception e) {
-            logger.error("findByApp consumer with nameServer failed, producer is {}", app, e);
-            return Collections.emptyList();
-        }
+        return fillConsumers(consumerNameServerService.findByApp(app));
     }
 
     @Override
