@@ -230,11 +230,11 @@ export default {
       })
     },
     download (item) {
-      document.location.assign("/v1"+this.urls.download+'/' +item.id+'/topic/'+item.topic)
+      document.location.assign('v1' + this.urls.download + '?id=' + item.id + '&topic=' + item.topic)
       // apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
     },
     recovery (item) {
-      apiRequest.put(this.urlOrigin.recovery + '/' + item.id +'/topic/'+item.topic).then(data => {
+      apiRequest.put(this.urlOrigin.recovery + '?id=' + item.id + 'topic=' + item.topic).then(data => {
         this.$Dialog.success({
           content: '恢复成功'
         })
@@ -242,7 +242,7 @@ export default {
       })
     },
     del (item) {
-      apiRequest.delete(this.urlOrigin.del + '/' + item.id +'/topic/'+item.topic).then(data => {
+      apiRequest.delete(this.urlOrigin.del + '?id=' + item.id + '&topic=' + item.topic).then(data => {
         this.$Dialog.success({
           content: '删除成功'
         })

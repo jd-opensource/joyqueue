@@ -61,6 +61,11 @@
           "component": "setting/broker.vue"
         },
         {
+          "path": "brokerMonitor",
+          "name": "brokerMonitor",
+          "component": "setting/brokerMonitor.vue"
+        },
+        {
           "path": "metric",
           "name": "metric",
           "component": "setting/metric.vue"
@@ -155,6 +160,11 @@
           "path": "broker",
           "name": "broker",
           "component": "setting/broker.vue"
+        },
+        {
+          "path": "brokerMonitor",
+          "name": "brokerMonitor",
+          "component": "setting/brokerMonitor.vue"
         },
         {
           "path": "metric",

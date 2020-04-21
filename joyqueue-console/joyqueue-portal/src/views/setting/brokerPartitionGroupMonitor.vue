@@ -21,18 +21,16 @@ export default {
     myDialog
   },
   props: {
-    brokerId: {
-      type: Number
-    }
   },
   mixins: [ crud ],
   data () {
     return {
+      brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
       urls: {
         search: '/monitor/broker/partition/search'
       },
       searchData: {
-        brokerId: this.brokerId
+        brokerId: this.$route.params.brokerId || this.$route.query.brokerId
       },
       searchRules: {
       },
