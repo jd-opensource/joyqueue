@@ -17,7 +17,6 @@ package org.joyqueue.springboot.starter;
 
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.joyqueue.handler.routing.command.topic.TopicMsgFilterCommand;
 import org.joyqueue.service.TopicMsgFilterService;
 import org.joyqueue.springboot.starter.condition.MsgQueryEnabledCondition;
 import org.joyqueue.springboot.starter.properties.MsgQueryConfigurationProperties;
@@ -42,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 @EnableConfigurationProperties(MsgQueryConfigurationProperties.class)
 public class MsgQueryConfiguration implements InitializingBean, DisposableBean {
 
-    private static final Logger logger = LoggerFactory.getLogger(TopicMsgFilterCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(MsgQueryConfiguration.class);
 
     private final ScheduledThreadPoolExecutor threadPoolExecutor = new ScheduledThreadPoolExecutor(1,new ThreadFactoryBuilder().setNameFormat("msg-query-%d").setDaemon(true).build());
 
