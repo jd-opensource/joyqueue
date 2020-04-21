@@ -26,6 +26,7 @@ import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.Consumer;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.Topic;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QApplication;
 import org.joyqueue.model.query.QConsumer;
 import org.joyqueue.nsr.ConsumerNameServerService;
@@ -34,6 +35,7 @@ import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.ConsumerService;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.util.LocalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,17 +169,17 @@ public class ConsumerServiceImpl implements ConsumerService {
 
     @Override
     public List<String> findAppsByTopic(String topic) throws Exception {
-//       User user = LocalSession.getSession().getUser();
+        User user = LocalSession.getSession().getUser();
         QConsumer query = new QConsumer(new Topic(topic));
-//      if (user.getRole() == User.UserRole.NORMAL.value()) {
-        QApplication qApplication = new QApplication();
-//      qApplication.setUserId(user.getId());
-//      qApplication.setAdmin(false);
-        List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
-        if (applicationList == null || applicationList.size() <= 0) return Lists.newArrayList();
-        List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
-        query.setAppList(appCodes);
-//      }
+        if (user.getRole() == User.UserRole.NORMAL.value()) {
+            QApplication qApplication = new QApplication();
+            qApplication.setUserId(user.getId());
+            qApplication.setAdmin(false);
+            List<Application> applicationList = applicationService.findByQuery(new ListQuery<>(qApplication));
+            if (applicationList == null || applicationList.size() <=0 ) return Lists.newArrayList();
+            List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
+            query.setAppList(appCodes);
+        }
         List<Consumer> consumers = Lists.newLinkedList();
         for (String app : query.getAppList()) {
             List appConsumers = consumerNameServerService.findByApp(app);
@@ -186,7 +188,7 @@ public class ConsumerServiceImpl implements ConsumerService {
             }
         }
 
-        List<String> apps = consumers.stream().map(m -> AppName.parse(m.getApp().getCode(), m.getSubscribeGroup()).getFullName()).collect(Collectors.toList());
+        List<String> apps = consumers.stream().map(m-> AppName.parse(m.getApp().getCode(),m.getSubscribeGroup()).getFullName()).collect(Collectors.toList());
         return apps;
     }
 

@@ -234,16 +234,31 @@ public class CfsManager {
 
     private DataSourceConfig initDataSourceConfig() {
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
-        dataSourceConfig.setDriver(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_DRIVER.getName(), CfsConfigKey.CFS_JDBC_DRIVER.getValue().toString()));
-        dataSourceConfig.setUrl(CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_URL.getName(), CfsConfigKey.CFS_JDBC_URL.getValue().toString()));
-        String user = CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_USERNAME.getName(), CfsConfigKey.CFS_JDBC_USERNAME.getValue().toString());
+        String driverClassName;
+        if (CFS_CONFIG.containsKey("spring.datasource.driverClassName")) {
+            driverClassName = CFS_CONFIG.getProperty("spring.datasource.driverClassName");
+        } else {
+            driverClassName = CFS_CONFIG.getProperty("spring.datasource.driver-class-name");
+        }
+        dataSourceConfig.setDriver(driverClassName);
+        dataSourceConfig.setUrl(CFS_CONFIG.getProperty("spring.datasource.url", ""));
+        String user = CFS_CONFIG.getProperty("spring.datasource.username", "");
         if (StringUtils.isNoneBlank(user)) {
             dataSourceConfig.setUser(user);
         }
-        String password = CFS_CONFIG.getProperty(CfsConfigKey.CFS_JDBC_PASSWORD.getName(), CfsConfigKey.CFS_JDBC_PASSWORD.getValue().toString());
+        String password = CFS_CONFIG.getProperty("spring.datasource.password", "");
         if (StringUtils.isNoneBlank(password)) {
             dataSourceConfig.setPassword(password);
         }
+        dataSourceConfig.setMinIdle(1);
+        dataSourceConfig.setMaxPoolSize(5);
+        dataSourceConfig.setValidationQuery("SELECT 1");
+        if (CFS_CONFIG.containsKey("spring.datasource.connectionProperties")) {
+            dataSourceConfig.setConnectionProperties(CFS_CONFIG.getProperty("spring.datasource.connectionProperties"));
+        } else if (CFS_CONFIG.containsKey("spring.datasource.connection-properties")) {
+            dataSourceConfig.setConnectionProperties(CFS_CONFIG.getProperty("spring.datasource.connection-properties"));
+        }
+        dataSourceConfig.setTransactionIsolation("TRANSACTION_READ_COMMITTED");
         return dataSourceConfig;
     }
 }

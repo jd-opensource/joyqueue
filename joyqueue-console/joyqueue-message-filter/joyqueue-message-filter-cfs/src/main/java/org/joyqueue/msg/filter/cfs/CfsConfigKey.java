@@ -29,10 +29,6 @@ public enum CfsConfigKey implements PropertyDef {
     CFS_BUCKET_NAME("cfs.bucket.name","",Type.STRING),
     CFS_ACCESS_KEY("cfs.access.key","",Type.STRING),
     CFS_SECRET_KEY("cfs.secret.key","",Type.STRING),
-    CFS_JDBC_DRIVER("spring.datasource.driverClassName","",Type.STRING),
-    CFS_JDBC_URL("spring.datasource.url","",Type.STRING),
-    CFS_JDBC_USERNAME("spring.datasource.username","",Type.STRING),
-    CFS_JDBC_PASSWORD("spring.datasource.password","",Type.STRING),
     ;
 
     private final String name;

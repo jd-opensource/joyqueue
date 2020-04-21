@@ -107,10 +107,6 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.joyqueue</groupId>
-            <artifactId>joyqueue-datasource-hikaricp</artifactId>
-        </dependency>
-        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
@@ -118,7 +114,7 @@
         <dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-message-filter-cfs</artifactId>
-            <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

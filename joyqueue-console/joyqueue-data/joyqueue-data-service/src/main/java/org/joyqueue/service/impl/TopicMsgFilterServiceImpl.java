@@ -37,6 +37,7 @@ import org.joyqueue.model.domain.Subscribe;
 import org.joyqueue.model.domain.Topic;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.User;
+import org.joyqueue.model.exception.NotFoundException;
 import org.joyqueue.model.query.QTopicMsgFilter;
 import org.joyqueue.monitor.PartitionAckMonitorInfo;
 import org.joyqueue.msg.filter.support.TopicMessageFilterSupport;
@@ -59,10 +60,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Calendar;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CompletableFuture;
@@ -76,20 +79,20 @@ import java.util.stream.Collectors;
 @Service("topicMsgFilterService")
 public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter, QTopicMsgFilter, TopicMsgFilterRepository> implements TopicMsgFilterService {
 
-    private static final int MAX_POOL_SIZE = 3;
-    private static final int APPEND_MAX_SIZE = 100;
-    private static final String URL_FORMAT = "oms:joyqueue://%s@%s/default";
-    private static final String FILE_PATH_FORMAT = "%s_%s_%s_%s_%s.txt";
+    private final int maxPoolSize = 3;
+    private final int appendMaxSize = 100;
+    private final String urlFormat = "oms:joyqueue://%s@%s/default";
+    private final String filePathFormat = "%s_%s_%s_%s_%s.txt";
     /**
      * 没有消费到任何数据
      */
-    private static final long DEFAULT_TIME_OUT = 30_000L;
+    private final long defaultTimeOut = 30_000L;
     /**
-     * 消费到数据但没命中filter时，超过{@param DEFAULT_FILTER_TIME_OUT}则追加文件
+     * 消费到数据但没命中filter时，超过{@param defaultFilterTimeOut}则追加文件
      */
-    private static final long DEFAULT_FILTER_TIME_OUT = 10_000L;
+    private final long defaultFilterTimeOut = 10_000L;
 
-    private static final ThreadPoolExecutor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(0, MAX_POOL_SIZE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(),
+    private final ThreadPoolExecutor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(0, maxPoolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(),
             new ThreadFactoryBuilder().setNameFormat("topic-msg-filter-%d").setDaemon(true).build());
 
     private static final Logger logger = LoggerFactory.getLogger(TopicMsgFilterServiceImpl.class);
@@ -124,8 +127,12 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                     try {
                         execute(filter);
                     } catch (Exception e) {
-                        // reject by thread pool and reset status to 0 to execute later
-                        updateMsgFilterStatus(filter, 0, "");
+                        if (e instanceof NullPointerException) {
+                            updateMsgFilterStatus(filter, -2, "",e.getMessage());
+                        } else {
+                            // reject by thread pool and reset status to 0 to execute later
+                            updateMsgFilterStatus(filter, 0, "","");
+                        }
                         logger.error("topic message filter execute error: {}", e.getMessage());
                     }
                 }
@@ -143,14 +150,16 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             TopicName topicName = TopicName.parse(filter.getTopic());
             apps = consumerService.findByTopic(topicName.getCode(),topicName.getNamespace()).stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
         } catch (NullPointerException e) {
-            throw new Exception("输入主题不存在或无关联应用");
+            throw new NotFoundException("topic not found or has unrelated app");
         }
         if (CollectionUtils.isNotEmpty(apps)) {
-            updateMsgFilterStatus(filter, 1, null);
+            updateMsgFilterStatus(filter, 1, null,"");
             filter.setApp(apps.get(0));
             List<ApplicationToken> appTokens = applicationTokenService.findByApp(filter.getApp());
             if (CollectionUtils.isNotEmpty(appTokens)) {
                 filter.setToken(appTokens.get(0).getToken());
+            } else {
+                filter.setToken(createToken(apps.get(0)));
             }
             List<Broker> brokers = brokerService.findByTopic(filter.getTopic());
             if (CollectionUtils.isNotEmpty(brokers)) {
@@ -162,7 +171,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                     return consume(filter);
                 } catch (Exception e) {
                     logger.error("Message filter cause error: {}", e.getMessage());
-                    updateMsgFilterStatus(filter, -2, "");
+                    updateMsgFilterStatus(filter, -2, "",e.getMessage());
                     return null;
                 }
             }, THREAD_POOL_EXECUTOR).whenCompleteAsync((result, throwable) -> {
@@ -179,13 +188,14 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                     execute();
                 } catch (Exception e) {
                     if (e instanceof IllegalAccessException) {
-                        logger.warn(e.getMessage());
+                        logger.warn("thread pool is full, please wait a second",e);
                     } else {
-                        logger.error(e.getMessage());
+                        logger.error("cause error",e);
                     }
                 }
             });
         } else {
+            updateMsgFilterStatus(filter, -2, "","topic not found or has unrelated app");
             throw new Exception("输入主题不存在或无关联应用");
         }
     }
@@ -242,8 +252,20 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
     }
 
+    private String createToken(String app) throws Exception {
+        ApplicationToken appToken = new ApplicationToken();
+        appToken.setEffectiveTime(new Date());
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR,50);
+        appToken.setApplication(new Identity(app));
+        appToken.setExpirationTime(calendar.getTime());
+        appToken.setToken(UUID.randomUUID().toString().replaceAll("-" , ""));
+        applicationTokenService.add(appToken);
+        return appToken.getToken();
+    }
+
     private TopicMsgFilter consume(TopicMsgFilter msgFilter) throws IOException {
-        final String url = String.format(URL_FORMAT, msgFilter.getApp(), msgFilter.getBrokerAddr());
+        final String url = String.format(urlFormat, msgFilter.getApp(), msgFilter.getBrokerAddr());
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, msgFilter.getToken());
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(url, keyValue);
@@ -252,7 +274,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         consumer.start();
         User user = userService.findById(msgFilter.getCreateBy().getId());
         msgFilter.getCreateBy().setCode(user.getCode());
-        String filePath = String.format(FILE_PATH_FORMAT, user.getCode(), msgFilter.getCreateBy().getId(), 
+        String filePath = String.format(filePathFormat, user.getCode(), msgFilter.getCreateBy().getId(),
                                         msgFilter.getTopic(), Thread.currentThread().getId(),SystemClock.now());
         File file = createFile(filePath);
         if (file != null) {
@@ -291,7 +313,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                         appendCount++;
                         appendTotalCount++;
                         // 每1w行追加一次
-                        if (appendCount >= APPEND_MAX_SIZE) {
+                        if (appendCount >= appendMaxSize) {
                             if (file != null && strBuilder.length() > 0) {
                                 FileUtils.writeStringToFile(file, strBuilder.toString(), StandardCharsets.UTF_8, true);
                                 appendCount = 0;
@@ -313,7 +335,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 }
             }
             // 如果一直有消费数据，但是一直没有命中filter,则超过filter超时时间且strBuilder不为空，追加文件
-            if (SystemClock.now() - filterClock >= DEFAULT_FILTER_TIME_OUT) {
+            if (SystemClock.now() - filterClock >= defaultFilterTimeOut) {
                 if (file != null && strBuilder.length() > 0) {
                     FileUtils.writeStringToFile(file, strBuilder.toString(), StandardCharsets.UTF_8, true);
                     appendCount = 0;
@@ -321,7 +343,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 }
                 filterClock = SystemClock.now();
             }
-            if (SystemClock.now() - clock >= DEFAULT_TIME_OUT) {
+            if (SystemClock.now() - clock >= defaultTimeOut) {
                 if (file != null && strBuilder.length() > 0) {
                     FileUtils.writeStringToFile(file, strBuilder.toString(), StandardCharsets.UTF_8, true);
                 }
@@ -329,16 +351,19 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             }
         }
         consumer.stop();
-        updateMsgFilterStatus(msgFilter, -1, "");
+        updateMsgFilterStatus(msgFilter, -1, "","");
         msgFilter.setUrl(filePath);
         logger.info("message filter consume finished");
         return msgFilter;
     }
 
-    private void updateMsgFilterStatus(TopicMsgFilter msgFilter, int status, String url) {
+    private void updateMsgFilterStatus(TopicMsgFilter msgFilter, int status, String url, String description) {
         msgFilter.setStatus(status);
         if (StringUtils.isNoneBlank(url)) {
             msgFilter.setUrl(url);
+        }
+        if (StringUtils.isNoneBlank(description)) {
+            msgFilter.setDescription(description);
         }
         msgFilter.setUpdateTime(new Date(SystemClock.now()));
         repository.update(msgFilter);
@@ -404,6 +429,6 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
 
     @Override
     public int maxSync() {
-        return MAX_POOL_SIZE;
+        return maxPoolSize;
     }
 }

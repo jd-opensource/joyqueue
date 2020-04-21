@@ -48,13 +48,13 @@ export default {
     }
   },
   data () {
-    let ipPattern ='(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
+    let ipPattern = '(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
     return {
       formData: this.data,
       rules: {
         blackList: [
           {
-            pattern: '^'+ipPattern+'(,'+ipPattern+')*$',
+            pattern: '^' + ipPattern + '(,' + ipPattern + ')*$',
             message: '请输入正确格式的ip',
             required: false,
             trigger: 'blur'}
