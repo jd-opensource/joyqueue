@@ -114,7 +114,6 @@
         <dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-message-filter</artifactId>
-            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
