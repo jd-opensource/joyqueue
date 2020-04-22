@@ -199,7 +199,12 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         for (String app : appList) {
             BrokerTopicMonitorRecord brokerTopicMonitorRecord = new BrokerTopicMonitorRecord();
             if (type == SubscribeType.CONSUMER) {
-                ConsumerMonitorInfo consumerMonitorInfo = queryMonitorConsumer(topic, app, broker);
+                ConsumerMonitorInfo consumerMonitorInfo = null;
+                try {
+                    consumerMonitorInfo = queryMonitorConsumer(topic, app, broker);
+                }catch (Exception e){
+                    logger.error("queryMonitorConsumer error",e);
+                }
                 if (consumerMonitorInfo != null) {
                     if (consumerMonitorInfo.getRetry() != null) {
                         brokerTopicMonitorRecord.setRetryCount(consumerMonitorInfo.getRetry().getCount());
@@ -213,7 +218,12 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                     brokerTopicMonitorRecord.setTotalSize(consumerMonitorInfo.getDeQueue().getTotalSize());
                 }
             } else if (type == SubscribeType.PRODUCER) {
-                ProducerMonitorInfo producerMonitorInfo = queryMonitorProducer(topic, app, broker);
+                ProducerMonitorInfo producerMonitorInfo = null;
+                try {
+                    producerMonitorInfo = queryMonitorProducer(topic, app, broker);
+                }catch (Exception e){
+                    logger.error("queryMonitorProducer error",e);
+                }
                 if (producerMonitorInfo != null) {
                     brokerTopicMonitorRecord.setConnections(producerMonitorInfo.getConnections());
                     brokerTopicMonitorRecord.setCount(producerMonitorInfo.getEnQueue().getCount());
