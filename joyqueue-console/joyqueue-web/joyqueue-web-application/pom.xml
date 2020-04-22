@@ -113,7 +113,7 @@
         </dependency>
         <dependency>
             <groupId>org.joyqueue</groupId>
-            <artifactId>joyqueue-message-filter</artifactId>
+            <artifactId>joyqueue-message-filter-cfs</artifactId>
             <scope>runtime</scope>
         </dependency>
     </dependencies>
