@@ -119,7 +119,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
 
     @Override
     public void execute() throws Exception {
-        int rest = this.maxSync() - this.sync();
+        int rest = maxPoolSize - threadPoolExecutor.getActiveCount();
         if (rest > 0) {
             List<TopicMsgFilter> msgFilters = repository.findByNextOne(rest);
             if (CollectionUtils.isNotEmpty(msgFilters)) {
@@ -256,7 +256,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         ApplicationToken appToken = new ApplicationToken();
         appToken.setEffectiveTime(new Date());
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 50);
+        calendar.add(Calendar.DAY_OF_YEAR, 7);
         appToken.setApplication(new Identity(app));
         appToken.setExpirationTime(calendar.getTime());
         appToken.setToken(UUID.randomUUID().toString().replaceAll("-", ""));
@@ -406,15 +406,5 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     @Override
     public PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query) {
         return repository.findTopicMsgFiltersByQuery(query);
-    }
-
-    @Override
-    public int sync() {
-        return threadPoolExecutor.getActiveCount();
-    }
-
-    @Override
-    public int maxSync() {
-        return maxPoolSize;
     }
 }

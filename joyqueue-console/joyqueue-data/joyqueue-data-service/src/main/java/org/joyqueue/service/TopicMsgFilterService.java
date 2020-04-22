@@ -39,8 +39,4 @@ public interface TopicMsgFilterService extends PageService<TopicMsgFilter, QTopi
     void execute() throws Exception;
 
     PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query);
-
-    int sync();
-
-    int maxSync();
 }
