@@ -84,9 +84,10 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     private static final String GET_BYID = "select * from message_retry where id = ? and topic = ?";
     private static final String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
     private static final String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
-    private final String STATE = "select topic,app,min(send_time),max(send_time),count(id) as num from message_retry where %s status=? group by topic,app order by num desc limit ?";
+    private final String STATE = "select topic,app,min(send_time),max(send_time),count(id) as num from message_retry where status=? group by topic,app order by num desc limit ?";
+    private final String CLEAN_BEFORE="delete from message_retry where topic=? and app=? and update_time<? and status=?";
+    private static final String ALL_CONSUMER="select topic,app from message_retry group by topic,app";
 
-    private static final String ALL_CONSUEMR="select topic,app from message_retry group by topic,app";
     @Override
     public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JoyQueueException {
 
@@ -294,41 +295,54 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     }
 
     @Override
-    public SimpleBatchRetryMessage queryRetryMessage(RetryQueryCondition retryQueryCondition) throws JoyQueueException {
-        return null;
-    }
-
-    @Override
-    public void clean(String topic, String app, Long[] msgIds) {
-
-    }
-
-    @Override
-    public List<RetryMonitorItem> top(int N, RetryQueryCondition condition) throws Exception{
-       String stateSQL=buildStateSQL(condition);
-        return  DaoUtil.queryList(readDataSource,stateSQL,new DaoUtil.QueryCallback<RetryMonitorItem>(){
-
+    public int cleanBefore(String topic, String app, int status, long expireTimeStamp) throws Exception {
+        return DaoUtil.delete(dataSource,1, CLEAN_BEFORE, new DaoUtil.UpdateCallback<Integer>() {
             @Override
-            public void before(PreparedStatement statement) throws Exception {
-
-            }
-
-            @Override
-            public RetryMonitorItem map(ResultSet rs) throws Exception {
-                return null;
+            public void before(PreparedStatement statement, Integer target) throws Exception {
+                statement.setString(1,topic);
+                statement.setString(2,app);
+                statement.setTimestamp(3,new Timestamp(expireTimeStamp));
+                statement.setInt(4,status);
             }
         });
     }
 
-    public String  buildStateSQL(RetryQueryCondition condition){
-        StringBuilder sendTimeConditionBuilder= new StringBuilder();
-        if(condition.getStartTime()>0){
-            sendTimeConditionBuilder.append(" send_time >=? and ");
-        }
-        if(condition.getEndTime()>0){
-            sendTimeConditionBuilder.append(" send_time <=? and ");
-        }
-        return String.format(STATE,sendTimeConditionBuilder.toString());
+    @Override
+    public List<RetryMonitorItem> top(int N, int status) throws Exception{
+
+        return  DaoUtil.queryList(readDataSource,STATE,new DaoUtil.QueryCallback<RetryMonitorItem>(){
+            @Override
+            public void before(PreparedStatement statement) throws Exception {
+                statement.setInt(1,status);
+                statement.setInt(2,N);
+            }
+            @Override
+            public RetryMonitorItem map(ResultSet rs) throws Exception {
+                RetryMonitorItem monitorItem=new RetryMonitorItem();
+                monitorItem.setTopic(rs.getString(1));
+                monitorItem.setApp(rs.getString(2));
+                monitorItem.setMinSendTime(rs.getTimestamp(3).getTime());
+                monitorItem.setMaxSendTime(rs.getTimestamp(4).getTime());
+                monitorItem.setCount(rs.getInt(5));
+                return monitorItem;
+            }
+        });
+    }
+
+    @Override
+    public List<RetryMonitorItem> allConsumer() throws Exception {
+        return DaoUtil.queryList(readDataSource, ALL_CONSUMER, new DaoUtil.QueryCallback<RetryMonitorItem>() {
+            @Override
+            public RetryMonitorItem map(ResultSet rs) throws Exception {
+                RetryMonitorItem monitorItem=new RetryMonitorItem();
+                monitorItem.setTopic(rs.getString(1));
+                monitorItem.setApp(rs.getString(2));
+                return monitorItem;
+            }
+            @Override
+            public void before(PreparedStatement statement) throws Exception {
+            }
+        });
     }
 
     @Override

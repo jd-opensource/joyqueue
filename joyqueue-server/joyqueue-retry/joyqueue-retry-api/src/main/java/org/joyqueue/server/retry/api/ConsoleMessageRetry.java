@@ -36,27 +36,31 @@ public interface ConsoleMessageRetry<T> extends MessageRetry<T> {
     void batchUpdateStatus(RetryQueryCondition retryQueryCondition, RetryStatus status, long updateTime, int updateBy) throws Exception;
 
     /**
-     * 根据条件{@link RetryQueryCondition}查询一批 retry message ids
-     * @return  message ids
+     *
+     * Physical delete retry message by topic,app ,the status and update time before  expire time
+     * @param topic  topic
+     * @param app  app
+     * @param status {@link RetryStatus}
+     * @param expireTimeStamp  clean before the expire time
+     * @return  affect rows
      *
      **/
-    SimpleBatchRetryMessage queryRetryMessage(RetryQueryCondition retryQueryCondition) throws JoyQueueException;
-
-    /**
-     *
-     * Physical delete retry message by topic,app,ids
-     *
-     **/
-    void clean(String topic,String app,T[] msgIds) throws Exception;
+    int cleanBefore(String topic,String app,int status,long expireTimeStamp) throws Exception;
 
     /**
      *
      * Top N topic and app by condition, if topics undefine, include all topics
      *
-     * @param condition  query condition
+     * @param status  query condition
      * @param N  top N
      *
      **/
-    List<RetryMonitorItem> top(int N,RetryQueryCondition condition) throws Exception;
+    List<RetryMonitorItem> top(int N,int status) throws Exception;
+
+    /**
+     *  All consumers on retry
+     *
+     **/
+    List<RetryMonitorItem> allConsumer() throws Exception;
 
 }
