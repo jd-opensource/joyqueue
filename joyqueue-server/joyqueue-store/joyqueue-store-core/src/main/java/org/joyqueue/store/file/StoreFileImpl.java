@@ -390,21 +390,25 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public void rollback(int position) throws IOException {
-        if (position < writePosition) {
-            writePosition = position;
-        }
-        if (position < flushPosition) {
-            fileLock.waitAndLock();
-            try {
-                flushPosition = position;
-                try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
-                    fileChannel.truncate(position + headerSize);
-                }
-            } finally {
-                fileLock.unlock();
+        long stamp = bufferLock.writeLock();
+        try {
+            if (position < writePosition) {
+                writePosition = position;
             }
+            if (position < flushPosition) {
+                fileLock.waitAndLock();
+                try {
+                    loadRwUnsafe();
+                    ensureOpen();
+                    flushPosition = position;
+                    fileChannel.truncate(position + headerSize);
+                } finally {
+                    fileLock.unlock();
+                }
+            }
+        } finally {
+            bufferLock.unlockWrite(stamp);
         }
-
     }
 
     @Override
