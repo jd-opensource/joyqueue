@@ -186,9 +186,6 @@
 
         <!--topic message filter-->
         <route inherit="post"
-               path="/v1/topic/msgFilter" handlers="topicMsgFilter#msgFilter render"
-               errors="error"/>
-        <route inherit="post"
                path="/v1/topic/findTopicMsgFilters" handlers="topicMsgFilter#findTopicMsgFilters render"
                errors="error"/>
         <route inherit="post"

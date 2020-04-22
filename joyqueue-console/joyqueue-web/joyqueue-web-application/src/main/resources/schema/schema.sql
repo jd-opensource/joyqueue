@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
  `end_time` datetime COMMENT 'offset结束时间',
  `query_count` int(11) default 1 NOT NULL COMMENT '查询次数',
  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态：-1 结束，0 未执行，1 正在执行',
- `url` varchar(512) COMMENT '任务结束后生成的cfs链接,默认有7天有效时间',
+ `url` varchar(512) COMMENT '任务结束后生成的s3链接,默认有7天有效时间',
  `obj_key` varchar(128) COMMENT '如果url失效,根据obj_key重新生成url',
  `create_time` datetime NOT NULL COMMENT '消息过滤任务创建时间',
  `create_by` int(10) NOT NULL DEFAULT '0' COMMENT '创建人',

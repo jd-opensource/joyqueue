@@ -15,6 +15,7 @@
  */
 package org.joyqueue.msg.filter.support;
 
+import org.joyqueue.msg.filter.FilterResponse;
 import org.joyqueue.msg.filter.Plugins;
 import org.joyqueue.msg.filter.TopicMsgFilterMatcher;
 import org.joyqueue.msg.filter.TopicMsgFilterOutput;
@@ -58,14 +59,16 @@ public class TopicMessageFilterSupport {
     }
 
 
-    public void output(long id, long userId, String input) {
+    public List<FilterResponse> output(String input) {
+        List<FilterResponse> responses = new ArrayList<>(filterOutputs.size());
         filterOutputs.forEach(output -> {
             try {
-                output.output(id, userId, input);
+                responses.add(output.output(input));
             }catch (Exception e){
                 logger.error("Output error, class: {}, error: {}",output.getClass(), e.getMessage());
             }
         });
+        return responses;
     }
 
     public boolean match(String content, String filter) {

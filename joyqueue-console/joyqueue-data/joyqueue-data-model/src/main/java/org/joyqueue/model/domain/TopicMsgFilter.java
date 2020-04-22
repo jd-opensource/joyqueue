@@ -59,6 +59,8 @@ public class TopicMsgFilter extends BaseModel {
 
     private Date offsetEndTime;
 
+    private String objectKey;
+
     /**
      * 任务状态：
      * -1 结束
@@ -197,5 +199,13 @@ public class TopicMsgFilter extends BaseModel {
     @Override
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getObjectKey() {
+        return objectKey;
+    }
+
+    public void setObjectKey(String objectKey) {
+        this.objectKey = objectKey;
     }
 }

@@ -40,6 +40,8 @@ import org.joyqueue.model.domain.User;
 import org.joyqueue.model.exception.NotFoundException;
 import org.joyqueue.model.query.QTopicMsgFilter;
 import org.joyqueue.monitor.PartitionAckMonitorInfo;
+import org.joyqueue.msg.filter.FilterResponse;
+import org.joyqueue.msg.filter.OutputType;
 import org.joyqueue.msg.filter.support.TopicMessageFilterSupport;
 import org.joyqueue.repository.TopicMsgFilterRepository;
 import org.joyqueue.service.ApplicationTokenService;
@@ -177,7 +179,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 }
             }, threadPoolExecutor).whenComplete((result, throwable) -> {
                 if (result != null) {
-                    topicMessageFilterSupport.output(result.getId(), result.getCreateBy().getId(), result.getUrl());
+                    handleFilterOutputs(topicMessageFilterSupport.output(result.getUrl()), result);
                     try {
                         Files.deleteIfExists(Paths.get(result.getUrl()));
                         logger.info("Delete file: {} success", result.getUrl());
@@ -242,14 +244,6 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         builder.append("CreateTime: ").append(msgFilter.getCreateTime()).append('\n');
         builder.append("---------------------------------------------------------------------").append('\n');
         return builder.toString();
-    }
-
-    private void deleteFile(String filePath) {
-        try {
-            Files.deleteIfExists(Paths.get(filePath));
-        } catch (IOException e) {
-            logger.error("Error deleting message filter file : {}", e.getMessage());
-        }
     }
 
     private String createToken(String app) throws Exception {
@@ -402,6 +396,19 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         return partitions;
     }
 
+    public void handleFilterOutputs(List<FilterResponse> responses, TopicMsgFilter msgFilter) {
+        for (FilterResponse response : responses) {
+            if (response.getType().equals(OutputType.S3)) {
+                TopicMsgFilter updateMsgFilter = new TopicMsgFilter();
+                updateMsgFilter.setUrl(response.getData().toString());
+                updateMsgFilter.setId(msgFilter.getId());
+                int lastIdx = updateMsgFilter.getUrl().lastIndexOf('/');
+                updateMsgFilter.setObjectKey(updateMsgFilter.getUrl().substring(lastIdx + 1));
+                updateMsgFilter.setStatus(msgFilter.getStatus());
+                repository.update(updateMsgFilter);
+            }
+        }
+    }
 
     @Override
     public PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query) {

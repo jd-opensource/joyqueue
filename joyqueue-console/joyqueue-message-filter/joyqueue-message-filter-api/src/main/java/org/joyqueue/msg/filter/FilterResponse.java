@@ -13,40 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.msg.filter.cfs.model;
-
+package org.joyqueue.msg.filter;
 
 
 /**
  * @author jiangnan53
- * @date 2020/4/15
+ * @date 2020/4/22
  **/
-public class CfsFileInfo {
+public class FilterResponse {
 
-    /**
-     * 消息过滤记录id
-     */
-    private final long id;
+    Object data;
 
-    private final String objectKey;
+    OutputType type;
 
-    private final String url;
-
-    public CfsFileInfo(long id,String objectKey, String url) {
-        this.id = id;
-        this.url = url;
-        this.objectKey = objectKey;
+    public FilterResponse(Object data, OutputType type) {
+        this.data = data;
+        this.type = type;
     }
 
-    public long getId() {
-        return id;
+    public Object getData() {
+        return data;
     }
 
-    public String getUrl() {
-        return url;
+    public OutputType getType() {
+        return type;
     }
 
-    public String getObjectKey() {
-        return objectKey;
-    }
 }

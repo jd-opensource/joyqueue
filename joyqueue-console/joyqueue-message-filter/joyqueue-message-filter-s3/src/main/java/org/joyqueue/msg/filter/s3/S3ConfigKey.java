@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.msg.filter.cfs;
+package org.joyqueue.msg.filter.s3;
 
 
 import org.joyqueue.toolkit.config.PropertyDef;
@@ -22,20 +22,20 @@ import org.joyqueue.toolkit.config.PropertyDef;
  * @author jiangnan53
  * @date 2020/4/15
  **/
-public enum CfsConfigKey implements PropertyDef {
+public enum S3ConfigKey implements PropertyDef {
 
-    CFS_REGION("cfs.region","",Type.STRING),
-    CFS_ENDPOINT("cfs.endpoint","",Type.STRING),
-    CFS_BUCKET_NAME("cfs.bucket.name","",Type.STRING),
-    CFS_ACCESS_KEY("cfs.access.key","",Type.STRING),
-    CFS_SECRET_KEY("cfs.secret.key","",Type.STRING),
+    S3_REGION("s3.region","",Type.STRING),
+    S3_ENDPOINT("s3.endpoint","",Type.STRING),
+    S3_BUCKET_NAME("s3.bucket.name","",Type.STRING),
+    S3_ACCESS_KEY("s3.access.key","",Type.STRING),
+    S3_SECRET_KEY("s3.secret.key","",Type.STRING),
     ;
 
     private final String name;
     private final Object value;
     private final Type type;
 
-    CfsConfigKey(String name, Object value, Type type) {
+    S3ConfigKey(String name, Object value, Type type) {
         this.name = name;
         this.value = value;
         this.type = type;

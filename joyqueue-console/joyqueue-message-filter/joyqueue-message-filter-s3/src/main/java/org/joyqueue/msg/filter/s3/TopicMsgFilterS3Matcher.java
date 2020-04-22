@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.msg.filter.cfs;
+package org.joyqueue.msg.filter.s3;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.msg.filter.TopicMsgFilterMatcher;
@@ -22,7 +22,7 @@ import org.joyqueue.msg.filter.TopicMsgFilterMatcher;
  * @author jiangnan53
  * @date 2020/4/3
  **/
-public class TopicMsgFilterCfsMatcher implements TopicMsgFilterMatcher {
+public class TopicMsgFilterS3Matcher implements TopicMsgFilterMatcher {
     @Override
     public boolean match(String content, String filter) {
         return StringUtils.containsIgnoreCase(content,filter);

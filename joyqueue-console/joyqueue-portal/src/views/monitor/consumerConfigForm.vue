@@ -94,7 +94,7 @@
 <script>
 import form from '../../mixins/form.js'
 import { deepCopy } from '../../utils/assist.js'
-import {ipValidator} from "../../utils/common";
+import {ipValidator} from '../../utils/common'
 
 export default {
   name: 'consumer-config-form',
@@ -153,18 +153,14 @@ export default {
       }
     }
     let batchSizeValidator = (rule, value, callback) => {
-      let min = rule.min
-      let max = rule.norMax
-      let hint = rule.hint
       if (this.$store.getters.isAdmin) {
-        max = rule.adminMax
-        hint = rule.hint2
+        if ((rule.min && value < rule.min) || (rule.adminMax && value > rule.adminMax)) {
+          callback(new Error(rule.adminHint))
+        } else {
+          callback()
+        }
       }
-      if ((min && value < min) || (max && value > max)) {
-        callback(new Error(hint))
-      } else {
-        callback()
-      }
+      numberValidator(rule, value, callback)
     }
     return {
       formData: {},
@@ -197,11 +193,11 @@ export default {
             type: 'number',
             trigger: 'change',
             min: 1,
-            norMax: 1000,
+            max: 1000,
             adminMax: 30000,
-            hint: '普通用户批量大小范围为1-1000',
-            hint2: '管理员批量大小范围为1-30000',
-            required: true
+            hint: '批量大小范围为1~1000',
+            adminHint: '批量大小范围为1~30000',
+            required: false
           }
         ],
         concurrent: [

@@ -203,7 +203,7 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-message-filter-cfs</artifactId>
+                <artifactId>joyqueue-message-filter-s3</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.msg.filter.cfs;
+package org.joyqueue.msg.filter;
 
-import org.joyqueue.msg.filter.TopicMsgFilterOutput;
+
 
 /**
  * @author jiangnan53
- * @date 2020/4/3
+ * @date 2020/4/22
  **/
-public class TopicMsgFilterCfsOutput implements TopicMsgFilterOutput {
-
-    private final CfsManager cfsManager =  new CfsManager();
-
-    @Override
-    public void output(long id, long userId, String path) {
-        cfsManager.upload(id, userId, path);
-    }
+public enum OutputType {
+    S3
 }
