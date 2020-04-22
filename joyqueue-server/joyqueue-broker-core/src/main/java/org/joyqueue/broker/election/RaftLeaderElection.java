@@ -1069,6 +1069,12 @@ public class RaftLeaderElection extends LeaderElection  {
                 topicPartitionGroup, localNode, SystemClock.now() - startTime);
     }
 
+    private void maybeNodeOnline() {
+        if (!replicableStore.serviceStatus()) {
+            replicableStore.enable();
+        }
+    }
+
     private synchronized void nodeOnline(int term) {
         long startTime = SystemClock.now();
 
@@ -1232,19 +1238,25 @@ public class RaftLeaderElection extends LeaderElection  {
                     electionConfig.enableReportLeaderPeriodically(), state());
         }
 
-        if (electionConfig.enableReportLeaderPeriodically() && state() == LEADER) {
-            if (electionConfig.enableReportLeaderPeriodicallyForce()) {
-                updateMetadata(localNodeId, currentTerm);
-            } else {
-                TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topicPartitionGroup.getTopic()));
-                if (topicConfig != null) {
-                    PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByGroup(topicPartitionGroup.getPartitionGroupId());
-                    if (partitionGroup != null && partitionGroup.getTerm() != null &&
-                            (partitionGroup.getTerm() == null || !partitionGroup.getTerm().equals(currentTerm)
-                                    || partitionGroup.getLeader() == null || !partitionGroup.getLeader().equals(localNodeId))) {
-                        updateMetadata(localNodeId, currentTerm);
+        if (state() == LEADER) {
+            if (electionConfig.enableReportLeaderPeriodically()) {
+                if (electionConfig.enableReportLeaderPeriodicallyForce()) {
+                    updateMetadata(localNodeId, currentTerm);
+                } else {
+                    TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topicPartitionGroup.getTopic()));
+                    if (topicConfig != null) {
+                        PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByGroup(topicPartitionGroup.getPartitionGroupId());
+                        if (partitionGroup != null && partitionGroup.getTerm() != null &&
+                                (partitionGroup.getTerm() == null || !partitionGroup.getTerm().equals(currentTerm)
+                                        || partitionGroup.getLeader() == null || !partitionGroup.getLeader().equals(localNodeId))) {
+                            updateMetadata(localNodeId, currentTerm);
+                        }
                     }
                 }
+            }
+
+            if (electionConfig.enableOnlineNodePeriodically()) {
+                maybeNodeOnline();
             }
         }
     }
