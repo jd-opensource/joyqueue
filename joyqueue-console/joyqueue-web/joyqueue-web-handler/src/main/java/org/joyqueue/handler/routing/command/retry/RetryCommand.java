@@ -16,6 +16,7 @@
 package org.joyqueue.handler.routing.command.retry;
 
 import com.google.common.base.Strings;
+import com.google.common.util.concurrent.RateLimiter;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -40,12 +41,15 @@ import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.Retry;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QRetry;
+import org.joyqueue.server.retry.model.RetryMonitorItem;
 import org.joyqueue.server.retry.model.RetryQueryCondition;
+import org.joyqueue.server.retry.model.RetryStatus;
 import org.joyqueue.service.ApplicationUserService;
 import org.joyqueue.service.ConsumerService;
 import org.joyqueue.service.RetryService;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.util.LocalSession;
+import org.joyqueue.util.NullUtil;
 import org.joyqueue.util.serializer.Serializer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -54,9 +58,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static com.jd.laf.web.vertx.response.Response.HTTP_BAD_REQUEST;
 import static com.jd.laf.web.vertx.response.Response.HTTP_INTERNAL_ERROR;
@@ -65,7 +73,7 @@ import static com.jd.laf.web.vertx.response.Response.HTTP_INTERNAL_ERROR;
  * Created by wangxiaofei1 on 2018/12/5.
  */
 public class RetryCommand implements Command<Response>, Poolable {
-    private Logger logger = LoggerFactory.getLogger(RetryCommand.class);
+    private Logger LOG = LoggerFactory.getLogger(RetryCommand.class);
 
     @CRequest
     private HttpServerRequest request;
@@ -80,7 +88,11 @@ public class RetryCommand implements Command<Response>, Poolable {
 
     @Autowired
     private ApplicationUserService applicationUserService;
-
+    private String dateFormatStyle="yyyy-MM-dd HH:mm:ss";
+    @org.springframework.beans.factory.annotation.Value("clean.up.")
+    private int DEFAULT_CLEAN_RETRY_MESSAGE_RATE_LIMIT=5;
+    private ThreadLocal<DateFormat> dateFormat=new ThreadLocal();
+    private RateLimiter cleanRetryMessageRateLimiter =RateLimiter.create(DEFAULT_CLEAN_RETRY_MESSAGE_RATE_LIMIT);
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QRetry> qPageQuery) throws Exception {
         if (qPageQuery == null || qPageQuery.getQuery() == null || Strings.isNullOrEmpty(qPageQuery.getQuery().getTopic()) || Strings.isNullOrEmpty(qPageQuery.getQuery().getApp())) {
@@ -111,6 +123,87 @@ public class RetryCommand implements Command<Response>, Poolable {
         }
         return Responses.error(HTTP_INTERNAL_ERROR,"恢复失败");
     }
+
+
+    /**
+     * 恢复
+     * @param topic
+     * @param app
+     * @throws Exception
+     */
+    @Path("cleanupConsumerRetry")
+    public Response cleanupConsumerRetry(@QueryParam(Constants.TOPIC) String topic, @QueryParam(Constants.APP_CODE)String app,@QueryParam("time") long expireTime) throws Exception {
+           if(Objects.isNull(topic)||Objects.isNull(app)||expireTime<=0){
+               throw new IllegalArgumentException("topic,app,time illegal");
+           }
+           DateFormat df= dateFormat.get();
+           if(df==null){
+               dateFormat.set(new SimpleDateFormat(dateFormatStyle));
+           }
+           String cleanExpireTime= dateFormat.get().format(new Date(expireTime));
+           LOG.info("clean {}/{} before {}",topic,app,cleanExpireTime);
+           RetryStatus[] retryStatuses={RetryStatus.RETRY_DELETE,RetryStatus.RETRY_SUCCESS,RetryStatus.RETRY_EXPIRE};
+           int affectSum=0;
+           try {
+               for (RetryStatus s : retryStatuses) {
+                   if(cleanRetryMessageRateLimiter.tryAcquire(1,1, TimeUnit.SECONDS)) {
+                       affectSum += retryService.cleanBefore(topic, app, s.getValue(), expireTime);
+                   }
+               }
+           }catch (Exception e){
+               LOG.info("clean retry message exception",e);
+               throw e;
+           }
+        return Responses.success(affectSum);
+    }
+
+    @Path("cleanupAllConsumerRetry")
+    public Response cleanupAllConsumerRetryMessage(@QueryParam("time") long expireTime) throws Exception {
+        if(expireTime<=0){
+            throw new IllegalArgumentException("topic,app,time illegal");
+        }
+        DateFormat df= dateFormat.get();
+        if(df==null){
+            dateFormat.set(new SimpleDateFormat(dateFormatStyle));
+        }
+        String cleanExpireTime= dateFormat.get().format(new Date(expireTime));
+        RetryStatus[] retryStatuses={RetryStatus.RETRY_DELETE,RetryStatus.RETRY_SUCCESS,RetryStatus.RETRY_EXPIRE};
+        List<RetryMonitorItem> allConsumers=retryService.allConsumer();
+        int affectSum=0;
+        long startMs=SystemClock.now();
+        long allStartMs=startMs;
+        try {
+            if (NullUtil.isNotEmpty(allConsumers)) {
+                for (RetryMonitorItem c : allConsumers) {
+                    LOG.info("Starting clean {}/{} before {}", c.getTopic(), c.getApp(), cleanExpireTime);
+                    for (RetryStatus s : retryStatuses) {
+                        if(cleanRetryMessageRateLimiter.tryAcquire(1,1, TimeUnit.SECONDS)) {
+                            affectSum += retryService.cleanBefore(c.getTopic(), c.getApp(), s.getValue(), expireTime);
+                            long endMS = SystemClock.now();
+                            LOG.info("Finish clean {}/{} before {},time elapsed {}ms", c.getTopic(), c.getApp(), cleanExpireTime, endMS - startMs);
+                            startMs = endMS;
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+            LOG.info("clean retry message exception,affect {}",e,affectSum);
+            throw e;
+        }
+        long endMS = SystemClock.now();
+        LOG.info("Finish clean all consumer retry message ,before {},time elapsed {}ms",  cleanExpireTime, endMS - allStartMs);
+        return Responses.success(affectSum);
+    }
+
+    @Path("retryMonitor")
+    public Response retryMonitor(@QueryParam("top") int top,@QueryParam("status") int status) throws Exception {
+        List<RetryMonitorItem> topRetryConsumers=null;
+        if(cleanRetryMessageRateLimiter.tryAcquire(1,1,TimeUnit.SECONDS)){
+            topRetryConsumers= retryService.top(top,status);
+        }
+        return Responses.success(topRetryConsumers);
+    }
+
 
     /**
      * 单个下载

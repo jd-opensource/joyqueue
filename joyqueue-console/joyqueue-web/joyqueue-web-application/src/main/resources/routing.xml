@@ -526,6 +526,19 @@
                path="/v1/retry/batchDelete" handlers="retry#batchDelete render"
                errors="error"/>
 
+        <route inherit="delete"
+               path="/v1/retry/cleanup/consumer" handlers="retry#cleanupConsumerRetry render"
+               errors="error"/>
+
+        <route inherit="delete"
+               path="/v1/retry/cleanup/allConsumer" handlers="retry#cleanupAllConsumerRetry render"
+               errors="error"/>
+
+        <route inherit="get"
+               path="/v1/retry/monitor/search" handlers="retry#retryMonitor render"
+               errors="error"/>
+
+
         <!-- archive -->
         <route inherit="post"
                path="/v1/archive/search" handlers="archive#search render"
