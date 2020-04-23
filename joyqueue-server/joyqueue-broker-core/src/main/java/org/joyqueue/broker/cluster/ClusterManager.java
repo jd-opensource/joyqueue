@@ -632,7 +632,7 @@ public class ClusterManager extends Service {
         if (!partitionGroup.getReplicas().contains(getBrokerId())) {
             return false;
         }
-        if (!config.getTopicLocalElectionEnable() || partitionGroup.getReplicas().size() == 1) {
+        if (!config.getTopicLocalElectionEnable() || partitionGroup.getElectType().equals(PartitionGroup.ElectType.fix)) {
             return getBrokerId().equals(partitionGroup.getLeader());
         }
         ClusterNode clusterNode = clusterNameService.getTopicGroupNode(partitionGroup.getTopic(), partitionGroup.getGroup());
@@ -1080,7 +1080,13 @@ public class ClusterManager extends Service {
 
         protected Consumer buildConsumeCache(Consumer consumer) {
             logger.info("build consumer cache, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-            consumerCache.get(consumer.getTopic().getFullName()).put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
+            ConcurrentHashMap<String, CacheConsumer> consumers = consumerCache.get(consumer.getTopic().getFullName());
+            if (consumers == null) {
+                consumers = new ConcurrentHashMap<>();
+                consumerCache.putIfAbsent(consumer.getTopic().getFullName(), consumers);
+                consumers = consumerCache.get(consumer.getTopic().getFullName());
+            }
+            consumers.put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
             return consumer;
         }
 
@@ -1129,7 +1135,13 @@ public class ClusterManager extends Service {
 
         protected Producer buildProduceCache(Producer producer) {
             logger.info("build producer cache, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-            producerCache.get(producer.getTopic().getFullName()).put(producer.getApp(), new CacheProducer(producer));
+            ConcurrentHashMap<String, CacheProducer> producers = producerCache.get(producer.getTopic().getFullName());
+            if (producers == null) {
+                producers = new ConcurrentHashMap<>();
+                producerCache.putIfAbsent(producer.getTopic().getFullName(), producers);
+                producers = producerCache.get(producer.getTopic().getFullName());
+            }
+            producers.put(producer.getApp(), new CacheProducer(producer));
             return producer;
         }
 

@@ -607,7 +607,7 @@ public class ReplicaGroup extends Service {
         // sync leader write position by the way
         getReplica(leaderId).writePosition(replicableStore.rightPosition());
         replicasWithoutLearners.sort((r1, r2) ->
-                Long.valueOf(r1.writePosition()).compareTo(r2.writePosition()));
+                Long.compare(r2.writePosition(), r1.writePosition()));
 
         long commitPosition = replicasWithoutLearners.get(replicasWithoutLearners.size() / 2).writePosition();
         replicableStore.commit(commitPosition);
