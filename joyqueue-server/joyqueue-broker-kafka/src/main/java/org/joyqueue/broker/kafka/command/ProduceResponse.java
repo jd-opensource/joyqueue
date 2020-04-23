@@ -16,7 +16,7 @@
 package org.joyqueue.broker.kafka.command;
 
 import org.joyqueue.broker.kafka.KafkaCommandType;
-import org.joyqueue.broker.network.traffic.ProduceTrafficPayload;
+import org.joyqueue.broker.network.traffic.ProduceResponseTrafficPayload;
 import org.joyqueue.broker.network.traffic.Traffic;
 
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Created by zhangkepeng on 16-8-1.
  */
-public class ProduceResponse extends KafkaRequestOrResponse implements ProduceTrafficPayload {
+public class ProduceResponse extends KafkaRequestOrResponse implements ProduceResponseTrafficPayload {
 
     private Traffic traffic;
     private Map<String, List<PartitionResponse>> partitionResponses;

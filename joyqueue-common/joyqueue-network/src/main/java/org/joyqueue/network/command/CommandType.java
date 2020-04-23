@@ -87,4 +87,8 @@ public class CommandType {
     public static final int TRANSACTION_COMMIT_REQUEST = 70;
     // 事务回滚
     public static final int TRANSACTION_ROLLBACK_REQUEST = 71;
+
+    // 主题组
+    public static final int GET_PARTITION_GROUP_CLUSTER_REQUEST = 72;
+    public static final int GET_PARTITION_GROUP_CLUSTER_RESPONSE = -72;
 }

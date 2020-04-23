@@ -70,6 +70,10 @@ public enum KafkaConfigKey implements PropertyDef {
     PRODUCE_DELAY_ENABLE("kafka.produce.delay.enable", true, Type.BOOLEAN),
     PRODUCE_DELAY("kafka.produce.delay", 1000 * 1, Type.INT),
 
+    // 启用认证
+    AUTH_ENABLE("kafka.auth.enable", false, Type.BOOLEAN),
+    AUTH_ENABLE_PREFIX("kafka.auth.enable.", null, Type.BOOLEAN),
+
     ;
 
     private String name;

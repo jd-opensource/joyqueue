@@ -179,7 +179,7 @@ public class PositionManager extends Service {
         Map<ConsumePartition, Position> consumeInfo = new HashMap<>();
 
         if (appList != null && !appList.isEmpty()) {
-            List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+            List<PartitionGroup> partitionGroupList = clusterManager.getLocalPartitionGroups(topic);
             for (PartitionGroup group : partitionGroupList) {
                 if (group.getGroup() == partitionGroup) {
                     Set<Short> partitions = group.getPartitions();
@@ -446,11 +446,15 @@ public class PositionManager extends Service {
      * @param partition 消费分区
      * @return 指定分区已经消费到的消息序号
      */
-    private long getMaxMsgIndex(TopicName topic, short partition) {
-        Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
-        PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
-        long rightIndex = store.getRightIndex(partition);
-        return rightIndex;
+    private long getMaxMsgIndex(TopicName topic, short partition, int groupId) {
+        try {
+            PartitionGroupStore store = storeService.getStore(topic.getFullName(), groupId);
+            long rightIndex = store.getRightIndex(partition);
+            return rightIndex;
+        } catch (Exception e) {
+            logger.error("getMaxMsgIndex exception, topic: {}, partition: {}, groupId: {}", topic, partition, groupId);
+            return 0;
+        }
     }
 
     protected void checkState() {
@@ -472,7 +476,7 @@ public class PositionManager extends Service {
         }
         checkState();
         // 从元数据中获取分组和分区数据，初始化拉取和应答位置
-        List<Short> partitionList = clusterManager.getMasterPartitionList(topic);
+        List<Short> partitionList = clusterManager.getReplicaPartitions(topic);
 
         logger.debug("add consumer partitionList:[{}]", partitionList.toString());
 
@@ -484,7 +488,7 @@ public class PositionManager extends Service {
             consumePartition.setPartitionGroup(partitionGroupId);
 
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = getMaxMsgIndex(topic, partition);
+            long currentIndex = getMaxMsgIndex(topic, partition, partitionGroupId);
             currentIndex = Math.max(currentIndex, 0);
             // 为新订阅的应用初始化消费位置对象
             Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
@@ -550,7 +554,7 @@ public class PositionManager extends Service {
         AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = getMaxMsgIndex(topic, partition);
+            long currentIndex = getMaxMsgIndex(topic, partition, partitionGroup.getGroup());
             long currentIndexVal = Math.max(currentIndex, 0);
 
             appList.stream().forEach(app -> {

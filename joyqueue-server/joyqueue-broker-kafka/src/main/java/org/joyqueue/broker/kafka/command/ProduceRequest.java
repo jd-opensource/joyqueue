@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.kafka.command;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.message.KafkaBrokerMessage;
 
@@ -146,6 +147,32 @@ public class ProduceRequest extends KafkaRequestOrResponse {
 
         public List<KafkaBrokerMessage> getMessages() {
             return messages;
+        }
+
+        public int getSize() {
+            if (CollectionUtils.isEmpty(messages)) {
+                return 0;
+            }
+            int result = 0;
+            for (KafkaBrokerMessage message : messages) {
+                if (message.isBatch()) {
+                    result += message.getFlag();
+                } else {
+                    result += 1;
+                }
+            }
+            return result;
+        }
+
+        public int getTraffic() {
+            if (CollectionUtils.isEmpty(messages)) {
+                return 0;
+            }
+            int result = 0;
+            for (KafkaBrokerMessage message : messages) {
+                result += message.getSize();
+            }
+            return result;
         }
     }
 }

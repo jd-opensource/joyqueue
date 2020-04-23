@@ -22,7 +22,6 @@ import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.network.session.Consumer;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class PartitionManagerTest {
         Mockito.when(clusterManager.getConsumerPolicy(Mockito.any(), Mockito.anyString())).thenReturn(consumerPolicy);
         Mockito.when(clusterManager.getPriorityPartitionList(new TopicName("topic"))).thenReturn(Lists.newArrayList((short) 1));
         Mockito.when(clusterManager.getPartitionGroupId(Mockito.any(), Mockito.anyShort())).thenReturn(1);
-        Mockito.when(clusterManager.getMasterPartitionList(Mockito.any())).thenReturn(Lists.newArrayList((short) 0, (short) 1, (short) 2));
+        Mockito.when(clusterManager.getLocalPartitions(new TopicName("topic"))).thenReturn(Lists.newArrayList((short) 0, (short) 1, (short) 2));
         Mockito.when(clusterManager.getRetryRandomBound(Mockito.anyString(), Mockito.anyString())).thenReturn(1000);
     }
 
