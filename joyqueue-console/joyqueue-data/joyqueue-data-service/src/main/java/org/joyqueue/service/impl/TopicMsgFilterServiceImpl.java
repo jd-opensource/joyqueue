@@ -22,6 +22,7 @@ import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.extension.QueueMetaData;
+import io.openmessaging.joyqueue.JoyQueueBuiltinKeys;
 import io.openmessaging.joyqueue.consumer.ExtensionConsumer;
 import io.openmessaging.message.Message;
 import org.apache.commons.collections.CollectionUtils;
@@ -263,6 +264,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         final String url = String.format(urlFormat, msgFilter.getApp(), msgFilter.getBrokerAddr());
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, msgFilter.getToken());
+        keyValue.put(JoyQueueBuiltinKeys.IO_THREADS, 1);
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(url, keyValue);
         ExtensionConsumer consumer = (ExtensionConsumer) messagingAccessPoint.createConsumer();
         consumer.bindQueue(msgFilter.getTopic());
