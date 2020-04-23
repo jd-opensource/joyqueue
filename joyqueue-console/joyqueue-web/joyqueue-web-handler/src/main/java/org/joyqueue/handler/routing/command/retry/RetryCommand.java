@@ -27,6 +27,7 @@ import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.joyqueue.domain.ConsumeRetry;
+import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.handler.annotation.Operator;
 import org.joyqueue.handler.annotation.PageQuery;
@@ -35,11 +36,7 @@ import org.joyqueue.handler.Constants;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.domain.ApplicationUser;
-import org.joyqueue.model.domain.BaseModel;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.Retry;
-import org.joyqueue.model.domain.User;
+import org.joyqueue.model.domain.*;
 import org.joyqueue.model.query.QRetry;
 import org.joyqueue.server.retry.model.RetryMonitorItem;
 import org.joyqueue.server.retry.model.RetryQueryCondition;
@@ -211,6 +208,20 @@ public class RetryCommand implements Command<Response>, Poolable {
         List<RetryMonitorItem> topRetryConsumers=null;
         if(cleanRetryMessageRateLimiter.tryAcquire(1,1,TimeUnit.SECONDS)){
             topRetryConsumers= retryService.top(top,status);
+            // TO DO attach exist subscribe
+            if(NullUtil.isNotEmpty(topRetryConsumers)){
+                for(RetryMonitorItem c:topRetryConsumers){
+                   TopicName topicName=TopicName.parse(c.getTopic());
+                   List<Consumer> consumers=consumerService.findByTopic(topicName.getCode(),topicName.getNamespace());
+                   for(Consumer consumer:consumers){
+                        String consumerFullName=new AppName(consumer.getApp().getCode(),consumer.getSubscribeGroup()).getFullName();
+                        if(c.getApp().equals(consumerFullName)){
+                            c.setExistSubscribe(true);
+                            break;
+                        }
+                   }
+                }
+            }
         }
         return Responses.success(topRetryConsumers);
     }

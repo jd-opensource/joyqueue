@@ -107,7 +107,7 @@ export default {
           {
             title: '主题',
             key: 'topic',
-            width: '20%'
+            width: '15%'
           },
           {
             title: '应用',
@@ -133,6 +133,11 @@ export default {
           {
             title: '记录数',
             key: 'count',
+            width: '15%'
+          },
+          {
+            title: '消费订阅',
+            key: 'existSubscribe',
             width: '15%'
           }
         ]

@@ -12,6 +12,7 @@ public class RetryMonitorItem {
     private int  count;
     private short status;
     private int  order;
+    private boolean existSubscribe;
 
     public String getTopic() {
         return topic;
@@ -67,5 +68,13 @@ public class RetryMonitorItem {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public boolean isExistSubscribe() {
+        return existSubscribe;
+    }
+
+    public void setExistSubscribe(boolean existSubscribe) {
+        this.existSubscribe = existSubscribe;
     }
 }
