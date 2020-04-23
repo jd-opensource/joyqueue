@@ -107,7 +107,7 @@ export default {
           {
             title: '主题',
             key: 'topic',
-            width: '10%'
+            width: '20%'
           },
           {
             title: '应用',

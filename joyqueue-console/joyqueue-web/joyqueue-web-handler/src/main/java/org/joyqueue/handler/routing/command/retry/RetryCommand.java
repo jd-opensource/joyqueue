@@ -145,6 +145,7 @@ public class RetryCommand implements Command<Response>, Poolable {
            RetryStatus[] retryStatuses={RetryStatus.RETRY_DELETE,RetryStatus.RETRY_SUCCESS,RetryStatus.RETRY_EXPIRE};
            int affectSum=0;
           long startMs=SystemClock.now();
+          long allStartMs=startMs;
            try {
                for (RetryStatus s : retryStatuses) {
                    if(cleanRetryMessageRateLimiter.tryAcquire(1,1, TimeUnit.SECONDS)) {
@@ -158,6 +159,8 @@ public class RetryCommand implements Command<Response>, Poolable {
                LOG.info("clean retry message exception",e);
                throw e;
            }
+        long endMS = SystemClock.now();
+        LOG.info("Finish clean all consumer retry message ,before {},affect {},time elapsed {}ms",  cleanExpireTime,affectSum,endMS - allStartMs);
         return Responses.success(affectSum);
     }
 
@@ -199,7 +202,7 @@ public class RetryCommand implements Command<Response>, Poolable {
             throw e;
         }
         long endMS = SystemClock.now();
-        LOG.info("Finish clean all consumer retry message ,before {},time elapsed {}ms",  cleanExpireTime, endMS - allStartMs);
+        LOG.info("Finish clean all consumer retry message ,before {},affect {},time elapsed {}ms",  cleanExpireTime,affectSum,endMS - allStartMs);
         return Responses.success(affectSum);
     }
 
