@@ -126,7 +126,7 @@ public class RetryCommand implements Command<Response>, Poolable {
 
 
     /**
-     * 恢复
+     * 清理消费者的重试消息
      * @param topic
      * @param app
      * @throws Exception
@@ -144,10 +144,14 @@ public class RetryCommand implements Command<Response>, Poolable {
            LOG.info("clean {}/{} before {}",topic,app,cleanExpireTime);
            RetryStatus[] retryStatuses={RetryStatus.RETRY_DELETE,RetryStatus.RETRY_SUCCESS,RetryStatus.RETRY_EXPIRE};
            int affectSum=0;
+          long startMs=SystemClock.now();
            try {
                for (RetryStatus s : retryStatuses) {
                    if(cleanRetryMessageRateLimiter.tryAcquire(1,1, TimeUnit.SECONDS)) {
                        affectSum += retryService.cleanBefore(topic, app, s.getValue(), expireTime);
+                       long endMS = SystemClock.now();
+                       LOG.info("Finish clean {}/{}/{} before {},time elapsed {}ms", topic, app,s.getValue(), cleanExpireTime, endMS - startMs);
+                       startMs = endMS;
                    }
                }
            }catch (Exception e){
@@ -157,6 +161,10 @@ public class RetryCommand implements Command<Response>, Poolable {
         return Responses.success(affectSum);
     }
 
+    /**
+     * 清理消费者的重试消息
+     *
+     **/
     @Path("cleanupAllConsumerRetry")
     public Response cleanupAllConsumerRetryMessage(@QueryParam("time") long expireTime) throws Exception {
         if(expireTime<=0){
@@ -180,7 +188,7 @@ public class RetryCommand implements Command<Response>, Poolable {
                         if(cleanRetryMessageRateLimiter.tryAcquire(1,1, TimeUnit.SECONDS)) {
                             affectSum += retryService.cleanBefore(c.getTopic(), c.getApp(), s.getValue(), expireTime);
                             long endMS = SystemClock.now();
-                            LOG.info("Finish clean {}/{} before {},time elapsed {}ms", c.getTopic(), c.getApp(), cleanExpireTime, endMS - startMs);
+                            LOG.info("Finish clean {}/{}/{} before {},time elapsed {}ms", c.getTopic(), c.getApp(),s.getValue(), cleanExpireTime, endMS - startMs);
                             startMs = endMS;
                         }
                     }
@@ -210,6 +218,7 @@ public class RetryCommand implements Command<Response>, Poolable {
      * @param
      * @return
      * @throws Exception
+     *
      */
     @Path("download")
     public void download(@QueryParam(Constants.ID) Long id, @QueryParam(Constants.TOPIC)String topic) throws Exception {
