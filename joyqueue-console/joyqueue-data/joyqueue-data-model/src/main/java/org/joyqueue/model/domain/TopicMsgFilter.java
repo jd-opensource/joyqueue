@@ -36,7 +36,7 @@ public class TopicMsgFilter extends BaseModel {
     /**
      *  如果没有指定partition，则置为-1搜索所有的分组
      */
-    private Integer partition = -1;
+    private Integer partition ;
     /**
      * 过滤条件
      */

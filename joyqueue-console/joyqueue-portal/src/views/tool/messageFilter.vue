@@ -38,7 +38,7 @@
           <d-input v-model="search.filter" placeholder="请输入消息关键字" class="left" style="width: 280px;margin-top: 5px">
             <span slot="prepend">消息关键字</span>
           </d-input>
-          <d-date-picker v-model="search.times" type="daterange" range-separator="至" start-placeholder="开始日期" class="left"
+          <d-date-picker v-model="search.times" type="datetimerange" range-separator="至" start-placeholder="开始日期" class="left"
                          style="margin-top: 5px" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
             <span slot="prepend">位点时间范围</span>
           </d-date-picker>
@@ -259,12 +259,13 @@ export default {
       if (this.search.times) {
         data.offsetStartTime = this.search.times[0]
         data.offsetEndTime = this.search.times[1]
-        delete this.search.times
       }
       apiRequest.post(this.urls.add, {}, data).then((data) => {
         if (data.code === 200) {
           this.$Message.info('添加成功')
           this.getList()
+          delete this.search.offsetStartTime
+          delete this.search.offsetEndTime
         }
       })
       this.createFilterDialog.visible = false

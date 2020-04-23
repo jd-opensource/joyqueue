@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.domain.Broker;
 import org.joyqueue.model.domain.ApplicationToken;
@@ -88,7 +89,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     /**
      * 没有消费到任何数据
      */
-    private final long defaultTimeOut = 30_000L;
+    private final long defaultTimeOut = 60_000L;
     /**
      * 消费到数据但没命中filter时，超过{@param defaultFilterTimeOut}则追加文件
      */
@@ -172,7 +173,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 try {
                     return consume(filter);
                 } catch (Exception e) {
-                    logger.error("Message filter cause error: {}", e.getMessage());
+                    logger.error("Message filter cause error", e);
                     // status = -2, message query execute error
                     updateMsgFilterStatus(filter, -2, "", e.getMessage());
                     return null;
@@ -283,18 +284,20 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         Map<Integer, Long> indexMapper = Maps.newHashMap();
         Map<Integer, Long> maxIndexMapper = Maps.newHashMap();
         if (msgFilter.getOffsetStartTime() != null && msgFilter.getOffsetEndTime() != null) {
-            for (QueueMetaData.Partition partition : partitions) {
-                parseOffsetByTs(msgFilter.getApp(), msgFilter.getTopic(), partition.partitionId(),
-                        msgFilter.getOffsetStartTime().getTime(), msgFilter.getOffsetEndTime().getTime(),
-                        indexMapper, maxIndexMapper);
-            }
+            parseOffsetByTs(msgFilter.getApp(), msgFilter.getTopic(), partitions.size() == 1 ? partitions.get(0).partitionId() : -1,
+                    msgFilter.getOffsetStartTime().getTime(), msgFilter.getOffsetEndTime().getTime(),
+                    indexMapper, maxIndexMapper);
+
         } else {
             for (QueueMetaData.Partition partition : partitions) {
                 indexMapper.put(partition.partitionId(), msgFilter.getOffset());
             }
         }
-        while (msgFilter.getQueryCount() > appendTotalCount) {
+        while (consumerCondition(msgFilter, appendTotalCount, maxIndexMapper)) {
             for (QueueMetaData.Partition partition : partitions) {
+                if (msgFilter.getOffsetStartTime() != null && maxIndexMapper.size() > 0 && !maxIndexMapper.containsKey(partition.partitionId())) {
+                    continue;
+                }
                 long index = indexMapper.computeIfAbsent(partition.partitionId(), k -> 0L);
                 List<Message> messages = consumer.batchReceive((short) partition.partitionId(), index, 1000 * 10);
                 for (Message message : messages) {
@@ -313,6 +316,12 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                     if (message.extensionHeader().isPresent()) {
                         index = message.extensionHeader().get().getOffset() + 1;
                         indexMapper.put(partition.partitionId(), index);
+                        if (maxIndexMapper.size() > 0 && maxIndexMapper.getOrDefault(partition.partitionId(),-2L) >= 0) {
+                            // endTime < now()
+                            if (indexMapper.get(partition.partitionId()) >= maxIndexMapper.get(partition.partitionId())) {
+                                maxIndexMapper.remove(partition.partitionId());
+                            }
+                        }
                     }
                 }
             }
@@ -337,6 +346,15 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         return msgFilter;
     }
 
+    private boolean consumerCondition(TopicMsgFilter msgFilter, int totalCount, Map<Integer, Long> maxIndexMap) {
+        if (msgFilter.getOffsetStartTime() != null) {
+            return maxIndexMap.size() > 0;
+        } else {
+            return msgFilter.getQueryCount() > totalCount;
+        }
+    }
+
+
     private void updateMsgFilterStatus(TopicMsgFilter msgFilter, int status, String url, String description) {
         msgFilter.setStatus(status);
         if (StringUtils.isNoneBlank(url)) {
@@ -354,9 +372,11 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                                  Map<Integer, Long> indexMapper, Map<Integer, Long> maxIndexMapper) {
         Subscribe subscribe = new Subscribe();
         subscribe.setApp(new Identity(app));
-        Topic topic = new Topic(topicCode);
+        TopicName topicName = TopicName.parse(topicCode);
+        Topic topic = new Topic(topicName.getCode());
+        Namespace namespace = new Namespace(topicName.getNamespace());
         subscribe.setTopic(topic);
-        subscribe.setNamespace(topic.getNamespace());
+        subscribe.setNamespace(namespace);
         subscribe.setType("消费者");
         parseOffset(subscribe, partition, startTime, indexMapper);
         parseOffset(subscribe, partition, endTime, maxIndexMapper);
@@ -368,7 +388,12 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             for (PartitionAckMonitorInfo monitorInfo : partitionAckMonitorInfos) {
                 if (partition == monitorInfo.getPartition()) {
                     map.put(partition, monitorInfo.getIndex());
+                    break;
                 }
+            }
+        } else {
+            for (PartitionAckMonitorInfo monitorInfo : partitionAckMonitorInfos) {
+                map.put((int) monitorInfo.getPartition(), monitorInfo.getIndex());
             }
         }
     }
@@ -399,13 +424,17 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     public void handleFilterOutputs(List<FilterResponse> responses, TopicMsgFilter msgFilter) {
         for (FilterResponse response : responses) {
             if (response.getType().equals(OutputType.S3)) {
-                TopicMsgFilter updateMsgFilter = new TopicMsgFilter();
-                updateMsgFilter.setUrl(response.getData().toString());
-                updateMsgFilter.setId(msgFilter.getId());
-                int lastIdx = updateMsgFilter.getUrl().lastIndexOf('/');
-                updateMsgFilter.setObjectKey(updateMsgFilter.getUrl().substring(lastIdx + 1));
-                updateMsgFilter.setStatus(msgFilter.getStatus());
-                repository.update(updateMsgFilter);
+                try {
+                    TopicMsgFilter updateMsgFilter = new TopicMsgFilter();
+                    updateMsgFilter.setUrl(response.getData().toString());
+                    updateMsgFilter.setId(msgFilter.getId());
+                    int lastIdx = updateMsgFilter.getUrl().lastIndexOf('/');
+                    updateMsgFilter.setObjectKey(updateMsgFilter.getUrl().substring(lastIdx + 1));
+                    updateMsgFilter.setStatus(msgFilter.getStatus());
+                    repository.update(updateMsgFilter);
+                } catch (Exception e) {
+                    logger.error("Failed to update url", e);
+                }
             }
         }
     }

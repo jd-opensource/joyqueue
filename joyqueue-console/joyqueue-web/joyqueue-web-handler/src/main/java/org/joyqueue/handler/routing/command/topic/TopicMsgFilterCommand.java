@@ -81,6 +81,8 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         TopicMsgFilter msgFilter = new TopicMsgFilter();
         if (filter.getPartition() != null && filter.getPartition() >= 0) {
             msgFilter.setPartition(filter.getPartition());
+        } else {
+            msgFilter.setPartition(-1);
         }
         msgFilter.setMsgFormat(filter.getMsgFormat());
         msgFilter.setQueryCount(filter.getQueryCount());
