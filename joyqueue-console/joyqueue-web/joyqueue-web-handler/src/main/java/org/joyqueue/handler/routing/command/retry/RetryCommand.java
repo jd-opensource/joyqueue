@@ -160,7 +160,7 @@ public class RetryCommand implements Command<Response>, Poolable {
                throw e;
            }
         long endMS = SystemClock.now();
-        LOG.info("Finish clean all consumer retry message ,before {},affect {},time elapsed {}ms",  cleanExpireTime,affectSum,endMS - allStartMs);
+        LOG.info("Finish clean  {}/{} retry message ,before {},affect {},time elapsed {}ms", topic,app,cleanExpireTime,affectSum,endMS - allStartMs);
         return Responses.success(affectSum);
     }
 
