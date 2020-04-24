@@ -136,12 +136,17 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         } else if (bufferType == MAPPED_BUFFER) {
             unloadUnsafe();
         }
-        ByteBuffer buffer = bufferPool.allocateDirect(this);
-        loadDirectBuffer(buffer);
+        loadDirectBuffer();
         writeClosed = false;
     }
 
-    private void loadDirectBuffer(ByteBuffer buffer) throws IOException {
+    private void loadDirectBuffer() throws IOException {
+        if(this.capacity  < file.length() - headerSize) {
+            this.capacity = (int )(file.length() - headerSize);
+        }
+
+        ByteBuffer buffer = bufferPool.allocateDirect(this);
+
         boolean needLoadFileContent = file.exists() && file.length() > headerSize;
         boolean writeTimestamp = !file.exists();
         // 打开文件描述符
@@ -398,10 +403,14 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             if (position < flushPosition) {
                 fileLock.waitAndLock();
                 try {
-                    loadRwUnsafe();
-                    ensureOpen();
                     flushPosition = position;
-                    fileChannel.truncate(position + headerSize);
+                    if (fileChannel != null && fileChannel.isOpen()) {
+                        fileChannel.truncate(position + headerSize);
+                    } else {
+                        try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
+                            fileChannel.truncate(position + headerSize);
+                        }
+                    }
                 } finally {
                     fileLock.unlock();
                 }
