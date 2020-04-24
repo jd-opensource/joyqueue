@@ -171,7 +171,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     @Override
     public PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         // 消费普通分区消息
-        List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         PullResult pullResult;
 
         if (partitionManager.isRetry(consumer)) {

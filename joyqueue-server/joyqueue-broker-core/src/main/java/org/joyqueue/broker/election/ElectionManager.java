@@ -26,7 +26,7 @@ import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.broker.replication.ReplicaGroup;
 import org.joyqueue.broker.replication.ReplicationManager;
-import org.joyqueue.broker.replication.TransportSession;
+import org.joyqueue.broker.replication.ReplicationTransportSession;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
@@ -75,11 +75,11 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     private ClusterManager clusterManager;
 
     // 发送给一个broker的命令使用同一个连接
-    private final Map<String, TransportSession> sessions = new ConcurrentHashMap<>();
+    private final Map<String, ReplicationTransportSession> sessions = new ConcurrentHashMap<>();
     private ScheduledExecutorService electionTimerExecutor;
     private ExecutorService electionExecutor;
 
-    private EventBus<ElectionEvent> electionEventManager;
+    private EventBus<ElectionEvent> electionEventManager = new EventBus<>("LeaderElectionEvent");
     private ElectionMetadataManager electionMetadataManager;
     private ReplicationManager replicationManager;
 
@@ -148,7 +148,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     public void doStart() throws Exception {
         super.doStart();
 
-        electionEventManager = new EventBus<>("LeaderElectionEvent");
         electionEventManager.start();
         addListener(brokerMonitor.new ElectionListener());
         leaderElections = new ConcurrentHashMap<>();
@@ -173,6 +172,12 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         electionMetadataManager = new ElectionMetadataManager(electionConfig.getMetadataPath());
         electionMetadataManager.recover(this);
 
+        for (Map.Entry<TopicPartitionGroup, ElectionMetadata> entry : electionMetadataManager.getAllElectionMetadata().entrySet()) {
+            TopicPartitionGroup topicPartitionGroup = entry.getKey();
+            ElectionMetadata electionMetadata = entry.getValue();
+            electionEventManager.add(new ElectionEvent(ElectionEvent.Type.START_ELECTION, electionMetadata.getCurrentTerm(), electionMetadata.getLeaderId(), topicPartitionGroup));
+        }
+
         logger.info("Election manager started.");
     }
 
@@ -188,7 +193,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElections.clear();
-        for (Map.Entry<String, TransportSession> entry : sessions.entrySet()) {
+        for (Map.Entry<String, ReplicationTransportSession> entry : sessions.entrySet()) {
             entry.getValue().stop();
         }
 
@@ -506,14 +511,14 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             return;
         }
 
-        TransportSession transport = sessions.get(address);
+        ReplicationTransportSession transport = sessions.get(address);
         if (transport == null) {
             synchronized (sessions) {
                 transport = sessions.get(address);
                 if (transport == null) {
                     logger.info("Send election command, create transport of address {}", address);
 
-                    transport = new TransportSession(address, transportClient);
+                    transport = new ReplicationTransportSession(address, transportClient);
                     sessions.put(address, transport);
                 }
             }

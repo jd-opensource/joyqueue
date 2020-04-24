@@ -18,7 +18,7 @@ package org.joyqueue.broker.network.traffic;
 import org.joyqueue.network.transport.command.Payload;
 
 /**
- * TrafficCommand
+ * TrafficPayload
  *
  * author: gaohaoxiang
  * date: 2019/5/16

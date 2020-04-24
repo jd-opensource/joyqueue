@@ -17,6 +17,9 @@ package org.joyqueue.broker.kafka.command;
 
 
 import org.joyqueue.broker.kafka.KafkaCommandType;
+import org.joyqueue.broker.kafka.helper.KafkaClientHelper;
+import org.joyqueue.broker.network.traffic.FetchRequestTrafficPayload;
+import org.joyqueue.broker.network.traffic.Traffic;
 
 import java.util.List;
 import java.util.Map;
@@ -24,13 +27,19 @@ import java.util.Map;
 /**
  * Created by zhangkepeng on 16-7-27.
  */
-public class FetchRequest extends KafkaRequestOrResponse {
+public class FetchRequest extends KafkaRequestOrResponse implements FetchRequestTrafficPayload {
     private int replicaId;
     private int maxWait;
     private int minBytes;
     private int maxBytes;
     private byte isolationLevel;
     private Map<String, List<PartitionRequest>> partitionRequests;
+    private Traffic traffic = new Traffic();
+
+    @Override
+    public Traffic getTraffic() {
+        return traffic;
+    }
 
     public int getMinBytes() {
         return minBytes;
@@ -58,6 +67,17 @@ public class FetchRequest extends KafkaRequestOrResponse {
 
     public void setPartitionRequests(Map<String, List<PartitionRequest>> partitionRequests) {
         this.partitionRequests = partitionRequests;
+
+        for (Map.Entry<String, List<PartitionRequest>> entry : partitionRequests.entrySet()) {
+            traffic.record(entry.getKey(), 1, 1);
+        }
+    }
+
+    @Override
+    public void setClientId(String clientId) {
+        // TODO clientId处理
+        super.setClientId(clientId);
+        traffic.setApp(KafkaClientHelper.parseClient(clientId));
     }
 
     public Map<String, List<PartitionRequest>> getPartitionRequests() {

@@ -17,12 +17,14 @@ package org.joyqueue.store;
 
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
+import org.joyqueue.store.event.StoreEvent;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.index.IndexItem;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.store.transaction.TransactionStoreManager;
 import org.joyqueue.store.utils.PreloadBufferPool;
+import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.service.Service;
@@ -359,6 +361,25 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     @Override
     public BufferPoolMonitorInfo monitorInfo() {
         return bufferPool.monitorInfo();
+    }
+
+    @Override
+    public StoreNodes getNodes(String topic, int partitionGroup) {
+        PartitionGroupStoreManager partitionGroupStoreManger = partitionGroupStore(topic, partitionGroup);
+        if (partitionGroupStoreManger == null) {
+            return null;
+        }
+        return new StoreNodes(new StoreNode(0, true, true));
+    }
+
+    @Override
+    public void addListener(EventListener<StoreEvent> listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeListener(EventListener<StoreEvent> listener) {
+        throw new UnsupportedOperationException();
     }
 
     private String getPartitionGroupRelPath(String topic, int partitionGroup) {

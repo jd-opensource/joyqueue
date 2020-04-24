@@ -60,6 +60,7 @@ public class BrokerMonitorConverter {
         enQueueMonitorInfo.setTotalSize(enQueueStat.getTotalSize());
         enQueueMonitorInfo.setTps(enQueueStat.getTps());
         enQueueMonitorInfo.setTraffic(enQueueStat.getTraffic());
+        enQueueMonitorInfo.setTotalTraffic(enQueueStat.getTotalTraffic());
         return enQueueMonitorInfo;
     }
 
@@ -76,6 +77,7 @@ public class BrokerMonitorConverter {
         deQueueMonitorInfo.setTotalSize(deQueueStat.getTotalSize());
         deQueueMonitorInfo.setTps(deQueueStat.getTps());
         deQueueMonitorInfo.setTraffic(deQueueStat.getTraffic());
+        deQueueMonitorInfo.setTotalTraffic(deQueueStat.getTotalTraffic());
         return deQueueMonitorInfo;
     }
 

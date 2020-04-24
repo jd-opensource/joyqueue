@@ -36,6 +36,7 @@ import org.joyqueue.broker.kafka.converter.CheckResultConverter;
 import org.joyqueue.broker.kafka.helper.KafkaClientHelper;
 import org.joyqueue.broker.kafka.message.KafkaBrokerMessage;
 import org.joyqueue.broker.kafka.message.converter.KafkaMessageConverter;
+import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.broker.network.traffic.Traffic;
 import org.joyqueue.domain.TopicName;
@@ -76,6 +77,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     private ClusterManager clusterManager;
     private MessageConvertSupport messageConvertSupport;
     private SessionManager sessionManager;
+    private BrokerMonitor brokerMonitor;
     private DelayedOperationManager<DelayedOperation> delayPurgatory;
 
     @Override
@@ -85,6 +87,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
         this.clusterManager = kafkaContext.getBrokerContext().getClusterManager();
         this.messageConvertSupport = kafkaContext.getBrokerContext().getMessageConvertSupport();
         this.sessionManager = kafkaContext.getBrokerContext().getSessionManager();
+        this.brokerMonitor = kafkaContext.getBrokerContext().getBrokerMonitor();
         this.delayPurgatory = new DelayedOperationManager<>("kafka-fetch-delay");
         this.delayPurgatory.start();
     }
@@ -92,6 +95,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
     @Override
     public Command handle(Transport transport, Command request) {
         FetchRequest fetchRequest = (FetchRequest) request.getPayload();
+        Connection connection = SessionHelper.getConnection(transport);
         Map<String, List<FetchRequest.PartitionRequest>> partitionRequestMap = fetchRequest.getPartitionRequests();
         String clientId = KafkaClientHelper.parseClient(fetchRequest.getClientId());
         String clientIp = ((InetSocketAddress) transport.remoteAddress()).getHostString();
@@ -105,7 +109,6 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
             TopicName topic = TopicName.parse(entry.getKey());
             List<FetchResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
 
-            Connection connection = SessionHelper.getConnection(transport);
             String consumerId = connection.getConsumer(topic.getFullName(), clientId);
             Consumer consumer = sessionManager.getConsumerById(consumerId);
             org.joyqueue.domain.Consumer.ConsumerPolicy consumerPolicy = clusterManager.tryGetConsumerPolicy(topic, clientId);
@@ -118,7 +121,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                     continue;
                 }
 
-                if (currentBytes > maxBytes) {
+                if (fetchRequest.getTraffic().isLimited(topic.getFullName()) || currentBytes > maxBytes) {
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode()));
                     continue;
                 }
@@ -128,7 +131,6 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
                     logger.warn("checkReadable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}", transport, topic, partition, clientId, checkResult.getJoyQueueCode());
                     short errorCode = CheckResultConverter.convertFetchCode(checkResult.getJoyQueueCode());
                     partitionResponses.add(new FetchResponse.PartitionResponse(partition, errorCode));
-                    traffic.record(topic.getFullName(), 0);
                     continue;
                 }
 
@@ -138,7 +140,7 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
                 currentBytes += partitionResponse.getBytes();
                 partitionResponses.add(partitionResponse);
-                traffic.record(topic.getFullName(), (partitionResponse.getMessages() == null ? 0 : partitionResponse.getMessages().size()));
+                traffic.record(topic.getFullName(), partitionResponse.getBytes(), partitionResponse.getSize());
             }
 
             fetchPartitionResponseMap.put(entry.getKey(), partitionResponses);
@@ -146,10 +148,11 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
         FetchResponse fetchResponse = new FetchResponse();
         fetchResponse.setPartitionResponses(fetchPartitionResponseMap);
+        fetchResponse.setTraffic(traffic);
         Command response = new Command(fetchResponse);
 
-        // 如果当前拉取消息量小于最小限制，那么延迟响应
-        if (fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0 && config.getFetchDelay()) {
+        // 如果没有被限流，并且当前拉取消息量小于最小限制，那么延迟响应
+        if (!fetchRequest.getTraffic().isLimited() && fetchRequest.getMinBytes() > currentBytes && fetchRequest.getMaxWait() > 0 && config.getFetchDelay()) {
             delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(fetchRequest.getMaxWait()) {
                 @Override
                 protected void onComplete() {

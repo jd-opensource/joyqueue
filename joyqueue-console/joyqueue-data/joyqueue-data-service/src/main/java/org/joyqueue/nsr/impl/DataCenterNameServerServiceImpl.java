@@ -21,6 +21,7 @@ import org.joyqueue.model.domain.DataCenter;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.nsr.DataCenterNameServerService;
 import org.joyqueue.nsr.NameServerBase;
+import org.joyqueue.nsr.model.DataCenterQuery;
 import org.joyqueue.nsr.util.DCWrapper;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,7 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
      */
     @Override
     public List<DataCenter> findAllDataCenter() throws Exception {
-        String result = post(LIST_DATACENTER, null);
+        String result = post(LIST_DATACENTER, new DataCenterQuery());
         List<org.joyqueue.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(org.joyqueue.domain.DataCenter.class);
         return dataCenterList.stream().map(dataCenter -> nsrDataCenterConverter.revert(dataCenter)).collect(Collectors.toList());
     }

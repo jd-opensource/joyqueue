@@ -17,6 +17,8 @@ package org.joyqueue.broker.limit.support;
 
 import org.joyqueue.broker.limit.RateLimiter;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * RateLimiter
  *
@@ -25,14 +27,21 @@ import org.joyqueue.broker.limit.RateLimiter;
  */
 public class DefaultRateLimiter implements RateLimiter {
 
+    private int tps;
+    private int traffic;
+
     private com.google.common.util.concurrent.RateLimiter tpsRateLimiter;
     private com.google.common.util.concurrent.RateLimiter trafficRateLimiter;
+    private Semaphore semaphore = new Semaphore(1);
 
     public DefaultRateLimiter(int tps) {
+        this.tps = tps;
         this.tpsRateLimiter = com.google.common.util.concurrent.RateLimiter.create(tps);
     }
 
     public DefaultRateLimiter(int tps, int traffic) {
+        this.tps = tps;
+        this.traffic = traffic;
         this.tpsRateLimiter = com.google.common.util.concurrent.RateLimiter.create(tps);
         this.trafficRateLimiter = com.google.common.util.concurrent.RateLimiter.create(traffic);
     }
@@ -44,7 +53,10 @@ public class DefaultRateLimiter implements RateLimiter {
 
     @Override
     public boolean tryAcquireTps(int tps) {
-        return tpsRateLimiter.tryAcquire(tps);
+        if (tps <= 0) {
+            return true;
+        }
+        return tpsRateLimiter.tryAcquire(Math.min(tps, this.tps));
     }
 
     @Override
@@ -52,6 +64,17 @@ public class DefaultRateLimiter implements RateLimiter {
         if (traffic <= 0) {
             return true;
         }
-        return trafficRateLimiter.tryAcquire(traffic);
+        return trafficRateLimiter.tryAcquire(Math.min(traffic, this.traffic));
+    }
+
+    @Override
+    public boolean tryAcquireRequire() {
+        return semaphore.tryAcquire();
+    }
+
+    @Override
+    public boolean releaseRequire() {
+        semaphore.release();
+        return true;
     }
 }

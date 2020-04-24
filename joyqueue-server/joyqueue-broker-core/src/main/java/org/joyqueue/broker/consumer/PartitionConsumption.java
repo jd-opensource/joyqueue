@@ -135,7 +135,7 @@ class PartitionConsumption extends Service {
 
         if (pullResult.count() < 1) {
             // 消费普通分区消息
-            List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+            List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
             if (partitionManager.isRetry(consumer)) {
                 partitionList = new ArrayList<>(partitionList);
                 partitionList.add(Partition.RETRY_PARTITION_ID);

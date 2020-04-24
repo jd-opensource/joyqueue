@@ -13,52 +13,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.coordinator.session;
+package org.joyqueue.network.transport.session.session;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalNotification;
-import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
-import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.domain.Broker;
-import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;
+import org.joyqueue.network.transport.TransportClientFactory;
 import org.joyqueue.network.transport.config.ClientConfig;
+import org.joyqueue.network.transport.exception.TransportException;
+import org.joyqueue.network.transport.session.session.config.TransportSessionConfig;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * CoordinatorSessionManager
+ * TransportSessionManager
  *
  * author: gaohaoxiang
  * date: 2018/11/9
  */
-public class CoordinatorSessionManager extends Service {
+public class TransportSessionManager extends Service {
 
-    protected static final Logger logger = LoggerFactory.getLogger(CoordinatorSessionManager.class);
+    protected static final Logger logger = LoggerFactory.getLogger(TransportSessionManager.class);
 
-    private CoordinatorConfig config;
+    private TransportSessionConfig config;
+    private TransportClientFactory transportClientFactory;
+    private ClientConfig clientConfig;
     private TransportClient client;
-    private Cache<Integer, CoordinatorSession> sessions;
+    private Cache<Integer, TransportSession> sessions;
 
-    public CoordinatorSessionManager(CoordinatorConfig config) {
+    public TransportSessionManager(TransportSessionConfig config, ClientConfig clientConfig, TransportClientFactory transportClientFactory) {
         this.config = config;
+        this.clientConfig = clientConfig;
+        this.transportClientFactory = transportClientFactory;
     }
 
     @Override
     protected void validate() throws Exception {
-        client = new BrokerTransportClientFactory().create(new ClientConfig());
+        client = transportClientFactory.create(clientConfig);
         sessions = CacheBuilder.newBuilder()
                 .expireAfterAccess(config.getSessionExpireTime(), TimeUnit.MILLISECONDS)
-                .removalListener((RemovalNotification<Integer, CoordinatorSession>  notification) -> {
+                .removalListener((RemovalNotification<Integer, TransportSession>  notification) -> {
                     try {
-                        CoordinatorSession session = notification.getValue();
-                        logger.info("create session, id: {}, ip: {}, port: {}", session.getBrokerId(), session.getBrokerHost(), session.getBrokerHost());
+                        TransportSession session = notification.getValue();
+                        logger.info("create session, id: {}, ip: {}, port: {}", session.getId(), session.getHost(), session.getPort());
                         session.stop();
                     } catch (Exception e) {
                         logger.error("stop session exception, id: {}", notification.getKey(), e);
@@ -77,27 +80,26 @@ public class CoordinatorSessionManager extends Service {
         }
     }
 
-    public CoordinatorSession getSession(Broker broker) {
+    public TransportSession getSession(Broker broker) {
         return getSession(broker.getId());
     }
 
-    public CoordinatorSession getSession(int brokerId) {
+    public TransportSession getSession(int brokerId) {
         return sessions.getIfPresent(brokerId);
     }
 
-    public CoordinatorSession getOrCreateSession(Broker broker) {
+    public TransportSession getOrCreateSession(Broker broker) {
         return getOrCreateSession(broker.getId(), broker.getIp(), broker.getBackEndPort());
     }
 
-    public CoordinatorSession getOrCreateSession(int brokerId, String brokerHost, int brokerPort) {
+    public TransportSession getOrCreateSession(int brokerId, String brokerHost, int brokerPort) {
         try {
             return sessions.get(brokerId, () -> {
                 logger.info("create session, id: {}, ip: {}, port: {}", brokerId, brokerHost, brokerPort);
-                Transport transport = client.createTransport(new InetSocketAddress(brokerHost, brokerPort));
-                return new CoordinatorSession(brokerId, brokerHost, brokerPort, config, transport);
+                return new TransportSession(brokerId, brokerHost, brokerPort, clientConfig, config, client);
             });
         } catch (ExecutionException e) {
-            throw new RuntimeException(String.format("create session failed, broker: {id: %s, ip: %s, port: %s}",
+            throw new TransportException.ConnectionException(String.format("create session failed, broker: {id: %s, ip: %s, port: %s}",
                     brokerId, brokerHost, brokerPort), e);
         }
     }

@@ -54,25 +54,33 @@ public class KafkaConnectionHandler extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Command) {
-            this.connectionStatistic(ctx, (Command) msg);
+            boolean handleConnection = this.handleConnection(ctx, (Command) msg);
+            if (!handleConnection) {
+                ctx.channel().close();
+                return;
+            }
         }
         super.channelRead(ctx, msg);
     }
 
-    protected void connectionStatistic(ChannelHandlerContext ctx, Command command) {
+    protected boolean handleConnection(ChannelHandlerContext ctx, Command command) {
         Channel channel = ctx.channel();
         Object payload = command.getPayload();
         ChannelTransport transport = TransportHelper.getTransport(channel);
 
         if (payload instanceof FetchRequest) {
             FetchRequest fetchRequest = (FetchRequest) payload;
-            kafkaConnectionManager.addConnection(transport, fetchRequest.getClientId(), String.valueOf(fetchRequest.getVersion()));
+            if (!kafkaConnectionManager.addConnection(transport, fetchRequest.getClientId(), String.valueOf(fetchRequest.getVersion()))) {
+                return false;
+            }
             for (Map.Entry<String, List<FetchRequest.PartitionRequest>> entry : fetchRequest.getPartitionRequests().entrySet()) {
                 kafkaConnectionManager.addConsumer(transport, entry.getKey());
             }
         } else if (payload instanceof ProduceRequest) {
             ProduceRequest produceRequest = (ProduceRequest) payload;
-            kafkaConnectionManager.addConnection(transport, produceRequest.getClientId(), String.valueOf(produceRequest.getVersion()));
+            if (!kafkaConnectionManager.addConnection(transport, produceRequest.getClientId(), String.valueOf(produceRequest.getVersion()))) {
+                return false;
+            }
             for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> entry : produceRequest.getPartitionRequests().entrySet()) {
                 kafkaConnectionManager.addProducer(transport, entry.getKey());
             }
@@ -82,14 +90,17 @@ public class KafkaConnectionHandler extends ChannelDuplexHandler {
         } else if (payload instanceof ApiVersionsRequest) {
             ApiVersionsRequest apiVersionsRequest = (ApiVersionsRequest) payload;
             if (StringUtils.isBlank(apiVersionsRequest.getClientSoftwareVersion())) {
-                return;
+                return true;
             }
             String language = StringUtils.replace(apiVersionsRequest.getClientSoftwareName(), "apache-kafka-", "");
             String version = apiVersionsRequest.getClientSoftwareVersion();
             if (Language.parse(language).equals(Language.OTHER)) {
                 version = apiVersionsRequest.getClientSoftwareName() + "-" + apiVersionsRequest.getClientSoftwareVersion();
             }
-            kafkaConnectionManager.addConnection(transport, apiVersionsRequest.getClientId(), version, Language.parse(language));
+            if (!kafkaConnectionManager.addConnection(transport, apiVersionsRequest.getClientId(), version, Language.parse(language))) {
+                return false;
+            }
         }
+        return true;
     }
 }

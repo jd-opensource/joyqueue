@@ -39,6 +39,19 @@ public class KafkaConfig {
         this.brokerConfig = new BrokerConfig(propertySupplier);
     }
 
+    public boolean getAuthEnable(String app) {
+        Object appEnable = PropertySupplier.getValue(propertySupplier,
+                KafkaConfigKey.AUTH_ENABLE_PREFIX.getName() + app,
+                KafkaConfigKey.AUTH_ENABLE_PREFIX.getType(),
+                KafkaConfigKey.AUTH_ENABLE_PREFIX.getValue());
+
+        if (appEnable != null) {
+            return (boolean) appEnable;
+        }
+
+        return (boolean) propertySupplier.getValue(KafkaConfigKey.AUTH_ENABLE);
+    }
+
     public boolean getProduceDelayEnable() {
         return getConfig(KafkaConfigKey.PRODUCE_DELAY_ENABLE);
     }
@@ -112,11 +125,11 @@ public class KafkaConfig {
     }
 
     public int getSessionMaxTimeout() {
-        return getConfig(KafkaConfigKey.SESSION_MIN_TIMEOUT);
+        return getConfig(KafkaConfigKey.SESSION_MAX_TIMEOUT);
     }
 
     public int getSessionMinTimeout() {
-        return getConfig(KafkaConfigKey.SESSION_MAX_TIMEOUT);
+        return getConfig(KafkaConfigKey.SESSION_MIN_TIMEOUT);
     }
 
     public int getRebalanceInitialDelay() {
