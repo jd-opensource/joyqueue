@@ -18,6 +18,7 @@ package org.joyqueue.store.file;
 import org.joyqueue.store.utils.BufferHolder;
 import org.joyqueue.store.utils.PreloadBufferPool;
 import org.joyqueue.toolkit.concurrent.CasLock;
+import org.joyqueue.toolkit.concurrent.CasReadWriteLock;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.StampedLock;
 
 /**
  * 支持并发、带缓存页、顺序写入的文件
@@ -55,10 +55,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private final boolean loadOnRead;
     // 对应的File
     private final File file;
-    // buffer读写锁：
-    // 访问(包括读和写）buffer时加读锁；
-    // 加载、释放buffer时加写锁；
-    private final StampedLock bufferLock = new StampedLock();
+
     private final LogSerializer<T> serializer;
     // 缓存页
     private ByteBuffer pageBuffer = null;
@@ -78,6 +75,9 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private FileChannel fileChannel;
     private RandomAccessFile raf;
     private volatile boolean writeClosed = true;
+
+    // pageBuffer 引用计数
+    private final CasReadWriteLock bufferLock = new CasReadWriteLock();
 
     StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength, boolean loadOnRead) {
         this.filePosition = filePosition;
@@ -208,26 +208,26 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public boolean unload() {
-        long stamp = bufferLock.writeLock();
-        try {
-            if (isClean()) {
-                unloadUnsafe();
-                return true;
-            } else {
-                return false;
+        if (isClean()) {
+            if(bufferLock.tryLockWrite()) {
+                try {
+                    unloadUnsafe();
+                    return true;
+                } finally {
+                    bufferLock.unlockWrite();
+                }
             }
-        } finally {
-            bufferLock.unlockWrite(stamp);
         }
+        return false;
     }
 
     @Override
     public void forceUnload() {
-        long stamp = bufferLock.writeLock();
+        bufferLock.lockWrite();
         try {
             unloadUnsafe();
         } finally {
-            bufferLock.unlockWrite(stamp);
+            bufferLock.unlockWrite();
         }
     }
 
@@ -242,30 +242,25 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     public <R> R read(int position, int length, BufferReader<R> bufferReader) throws IOException {
-        touch();
-        long stamp = bufferLock.readLock();
-        try {
-            while (!hasPage()) {
-                long ws = bufferLock.tryConvertToWriteLock(stamp);
-                if (ws != 0L) {
-                    // 升级成写锁成功
-                    stamp = ws;
+        if(!hasPage()) {
+            bufferLock.lockWrite();
+            try {
+                if(!hasPage()) {
                     loadRoUnsafe();
-                } else {
-                    bufferLock.unlockRead(stamp);
-                    stamp = bufferLock.writeLock();
                 }
+            } finally {
+                bufferLock.unlockWrite();
             }
-            long rs = bufferLock.tryConvertToReadLock(stamp);
-            if (rs != 0L) {
-                stamp = rs;
-            }
+        }
+        touch();
+        bufferLock.lockRead();
+        try {
             ByteBuffer byteBuffer = pageBuffer.asReadOnlyBuffer();
             byteBuffer.position(position);
             byteBuffer.limit(writePosition);
             return bufferReader.read(byteBuffer, length);
         } finally {
-            bufferLock.unlock(stamp);
+            bufferLock.unlockRead();
         }
     }
 
@@ -284,27 +279,22 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public int append(T t) throws IOException {
-        touch();
-        long stamp = bufferLock.readLock();
-        try {
-            while (bufferType != DIRECT_BUFFER) {
-                long ws = bufferLock.tryConvertToWriteLock(stamp);
-                if (ws != 0L) {
-                    // 升级成写锁成功
-                    stamp = ws;
+        if(bufferType != DIRECT_BUFFER) {
+            bufferLock.lockWrite();
+            try {
+                if(bufferType != DIRECT_BUFFER) {
                     loadRwUnsafe();
-                } else {
-                    bufferLock.unlockRead(stamp);
-                    stamp = bufferLock.writeLock();
                 }
+            } finally {
+                bufferLock.unlockWrite();
             }
-            long rs = bufferLock.tryConvertToReadLock(stamp);
-            if (rs != 0L) {
-                stamp = rs;
-            }
+        }
+        touch();
+        bufferLock.lockRead();
+        try {
             return appendToPageBuffer(t, serializer);
         } finally {
-            bufferLock.unlock(stamp);
+            bufferLock.unlockRead();
         }
     }
 
@@ -318,31 +308,27 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public int appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
-        touch();
-        long stamp = bufferLock.readLock();
-        try {
-            while (bufferType != DIRECT_BUFFER) {
-                long ws = bufferLock.tryConvertToWriteLock(stamp);
-                if (ws != 0L) {
-                    // 升级成写锁成功
-                    stamp = ws;
+        if(!hasPage()) {
+            bufferLock.lockWrite();
+            try {
+                if(bufferType != DIRECT_BUFFER) {
                     loadRwUnsafe();
-                } else {
-                    bufferLock.unlockRead(stamp);
-                    stamp = bufferLock.writeLock();
                 }
+            } finally {
+                bufferLock.unlockWrite();
             }
-            long rs = bufferLock.tryConvertToReadLock(stamp);
-            if (rs != 0L) {
-                stamp = rs;
-            }
+        }
+
+        touch();
+        bufferLock.lockRead();
+        try {
             return appendToPageBuffer(byteBuffer, (src, dest) -> {
                 int writeLength = src.remaining();
                 dest.put(src);
                 return writeLength;
             });
         } finally {
-            bufferLock.unlock(stamp);
+            bufferLock.unlockRead();
         }
     }
 
@@ -355,22 +341,23 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
      */
     @Override
     public int flush() throws IOException {
-        long stamp = bufferLock.readLock();
-        try {
-            if (writePosition > flushPosition && fileLock.tryLock()) {
-
+        if (writePosition > flushPosition) {
+            if (bufferLock.tryLockRead()) {
                 try {
-
-                    return flushPageBuffer(fileChannel);
+                    if(fileLock.tryLock()) {
+                        try {
+                            return flushPageBuffer(fileChannel);
+                        } finally {
+                            fileLock.unlock();
+                        }
+                    }
                 } finally {
-                    fileLock.unlock();
+                    bufferLock.unlockRead();
                 }
-
             }
-            return 0;
-        } finally {
-            bufferLock.unlockRead(stamp);
         }
+        return 0;
+
     }
 
 
@@ -395,7 +382,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public void rollback(int position) throws IOException {
-        long stamp = bufferLock.writeLock();
+        bufferLock.lockWrite();
         try {
             if (position < writePosition) {
                 writePosition = position;
@@ -416,7 +403,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 }
             }
         } finally {
-            bufferLock.unlockWrite(stamp);
+            bufferLock.unlockWrite();
         }
     }
 

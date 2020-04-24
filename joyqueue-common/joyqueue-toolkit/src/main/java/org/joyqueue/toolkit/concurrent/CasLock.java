@@ -35,8 +35,26 @@ public class CasLock {
      * 如果锁碰撞频率较高，此方法会大量占用CPU资源。
      */
     public void waitAndLock() {
+        int yieldCount = 0;
         while (!tryLock()) {
-            Thread.yield();
+            yieldCount = yieldCount > 50 ? yieldCount - 50 : yieldCount;
+
+            if(yieldCount == 50 - 1) {
+                sleepQuietly(1);
+            } else if (yieldCount % 20 == 20 - 1) {
+                sleepQuietly(0);
+            } else {
+                Thread.yield();
+
+            }
+            yieldCount ++;
+        }
+    }
+
+    private void sleepQuietly(int i){
+        try {
+            Thread.sleep(i);
+        } catch (InterruptedException ignored) {
         }
     }
 
@@ -73,5 +91,9 @@ public class CasLock {
         if (thread == lockThread.get() && references.decrementAndGet() == 0) {
             lockThread.set(FREE);
         }
+    }
+
+    public boolean isLocked() {
+        return lockThread.get() == FREE;
     }
 }
