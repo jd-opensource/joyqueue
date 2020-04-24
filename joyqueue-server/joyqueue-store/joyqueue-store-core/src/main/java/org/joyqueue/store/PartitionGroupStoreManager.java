@@ -35,7 +35,6 @@ import org.joyqueue.toolkit.concurrent.CasLock;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.format.Format;
-import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.metric.Metric;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
