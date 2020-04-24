@@ -19,7 +19,7 @@
         <d-button type="primary" class="right" style="margin-right: 20px" @click="getList">刷新
           <icon name="plus-circle" style="margin-left: 3px;"></icon>
         </d-button>
-        <my-table :data="tableData" :showPin="showTablePin" style="height: 500px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+        <my-table :data="tableData" :showPin="showTablePin" style="overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
       </d-tab-pane>
@@ -27,7 +27,7 @@
         <d-button type="primary" class="right" style="margin-right: 20px" @click="getList">刷新
           <icon name="plus-circle" style="margin-left: 3px;"></icon>
         </d-button>
-        <my-table :data="tableData" :showPin="showTablePin" style="height: 500px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+        <my-table :data="tableData" :showPin="showTablePin" style="overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
       </d-tab-pane>
@@ -41,7 +41,7 @@
         </grid-row>
         <grid-row>
           <grid-col>
-            <broker-connection-monitor ref="brokerConnectionMonitor" style="height: 500px;overflow-y:auto"></broker-connection-monitor>
+            <broker-connection-monitor ref="brokerConnectionMonitor" style="overflow-y:auto"></broker-connection-monitor>
           </grid-col>
         </grid-row>
       </d-tab-pane>
@@ -55,7 +55,7 @@
         </grid-row>
         <grid-row>
           <grid-col>
-            <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="height: 500px;overflow-y:auto"></broker-partition-group-monitor>
+            <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="overflow-y:auto"></broker-partition-group-monitor>
           </grid-col>
         </grid-row>
       </d-tab-pane>
@@ -87,8 +87,8 @@ import BrokerPartitionGroupMonitor from './brokerPartitionGroupMonitor'
 import BrokerServerMonitor from './brokerServerMonitor.vue'
 import BrokerStoreTreeViewMonitor from './brokerStoreTreeViewMonitor.vue'
 import bytesToSize from '../../utils/byteUtils'
-import GridRow from "../../components/grid/row";
-import GridCol from "../../components/grid/col";
+import GridRow from '../../components/grid/row'
+import GridCol from '../../components/grid/col'
 
 export default {
   name: 'brokerMonitor',
@@ -132,7 +132,7 @@ export default {
                 for (var i = 0; i < list.length; i++) {
                   var p = h('router-link', {
                     attrs: {
-                      to: '/'+this.$i18n.locale+'/topic/detail?id='+params.item.topic+'&topic='+params.item.topic
+                      to: '/' + this.$i18n.locale + '/topic/detail?id=' + params.item.topic + '&topic=' + params.item.topic
                     }
                   }, params.item.topic)
                   html.push(p)
@@ -149,9 +149,9 @@ export default {
               var html = []
               if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
-                  var p = h('router-link',{
+                  var p = h('router-link', {
                     attrs: {
-                      to: '/'+this.$i18n.locale+'/application/detail?app='+list[i].app
+                      to: '/' + this.$i18n.locale + '/application/detail?app=' + list[i].app
                     }
                   }, list[i].app)
                   html.push(p)
