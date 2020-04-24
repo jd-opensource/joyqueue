@@ -412,6 +412,9 @@
         <route inherit="post"
                path="/v1/monitor/broker/partition/search" handlers="brokerMonitor#partitionGroupMonitor render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/monitor/broker/group/metric" handlers="brokerMonitor#findPartitionGroupMetric render"
+               errors="error"/>
         <route inherit="get"
                path="/v1/monitor/broker/:brokerId" handlers="brokerMonitor#findBrokerDetail render"
                errors="error"/>

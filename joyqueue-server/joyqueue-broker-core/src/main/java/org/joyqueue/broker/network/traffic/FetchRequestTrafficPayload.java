@@ -16,14 +16,14 @@
 package org.joyqueue.broker.network.traffic;
 
 /**
- * ProduceTrafficPayload
+ * FetchRequestTrafficPayload
  *
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public interface ProduceTrafficPayload extends TrafficPayload, TrafficType {
+public interface FetchRequestTrafficPayload extends RequestTrafficPayload, TrafficType {
 
-    String TYPE = "produce";
+    String TYPE = "fetch";
 
     @Override
     default String getTrafficType() {

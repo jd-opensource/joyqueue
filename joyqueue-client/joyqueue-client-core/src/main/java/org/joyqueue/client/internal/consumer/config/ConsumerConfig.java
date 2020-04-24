@@ -29,7 +29,7 @@ public class ConsumerConfig {
     public static final int NONE_BATCH_SIZE = -1;
     public static final long NONE_ACK_TIMEOUT = -1;
     public static final int NONE_BROADCAST_INDEX_EXPIRE_TIME = -1;
-    public static final int NONE_THREAD = 1;
+    public static final int NONE_THREAD = -1;
 
     private String app;
     private String group;

@@ -18,7 +18,9 @@ package org.joyqueue.broker.kafka.session;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.helper.SessionHelper;
+import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.helper.KafkaClientHelper;
+import org.joyqueue.broker.kafka.network.helper.KafkaSessionHelper;
 import org.joyqueue.broker.monitor.SessionManager;
 import org.joyqueue.message.SourceType;
 import org.joyqueue.network.session.Connection;
@@ -26,6 +28,8 @@ import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.session.Language;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.network.transport.Transport;
+import org.joyqueue.response.BooleanResponse;
+import org.joyqueue.security.Authentication;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -44,29 +48,55 @@ public class KafkaConnectionManager {
 
     protected static final Logger logger = LoggerFactory.getLogger(KafkaConnectionManager.class);
 
+    private KafkaConfig config;
     private SessionManager sessionManager;
+    private Authentication authentication;
 
-    public KafkaConnectionManager(SessionManager sessionManager) {
+    public KafkaConnectionManager(KafkaConfig config, SessionManager sessionManager, Authentication authentication) {
+        this.config = config;
         this.sessionManager = sessionManager;
+        this.authentication = authentication;
     }
 
-    public void addConnection(Transport transport, String clientId, String version) {
-        addConnection(transport, clientId, version, Language.JAVA);
+    public boolean addConnection(Transport transport, String clientId, String version) {
+        return addConnection(transport, clientId, version, Language.JAVA);
     }
 
-    public void addConnection(Transport transport, String clientId, String version, Language language) {
+    public boolean addConnection(Transport transport, String clientId, String version, Language language) {
         Connection connection = SessionHelper.getConnection(transport);
         if (connection != null) {
-            return;
+            return true;
         }
 
-        clientId = KafkaClientHelper.parseClient(clientId);
+        boolean isAuth = false;
+        String app = KafkaClientHelper.parseClient(clientId);
+
+        if (KafkaSessionHelper.isAuth(transport)) {
+            isAuth = true;
+        } else {
+            String token = KafkaClientHelper.parseToken(clientId);
+            if (config.getAuthEnable(app) && StringUtils.isBlank(token)) {
+                logger.warn("user auth failed, token is null, transport: {}, app: {}", transport, app);
+                return false;
+            }
+
+            if (StringUtils.isNotBlank(token)) {
+                BooleanResponse authResponse = authentication.auth(app.split("\\.")[0], token);
+                if (!authResponse.isSuccess()) {
+                    logger.warn("user auth failed, transport: {}, app: {}, code: {}", transport, app, authResponse.getJoyQueueCode());
+                    return false;
+                }
+                KafkaSessionHelper.setIsAuth(transport, true);
+                isAuth = true;
+            }
+        }
+
         InetSocketAddress remoteAddress = (InetSocketAddress) transport.remoteAddress();
-        String id = this.generateConnectionId(remoteAddress, clientId, version);
+        String id = this.generateConnectionId(remoteAddress, app, version);
 
         connection = new Connection();
         connection.setId(id);
-        connection.setApp(clientId);
+        connection.setApp(app);
         connection.setVersion(version);
         connection.setAddress(IpUtil.toByte(remoteAddress));
         connection.setAddressStr(IpUtil.toAddress(remoteAddress));
@@ -75,9 +105,11 @@ public class KafkaConnectionManager {
         connection.setSource(SourceType.KAFKA.name());
         connection.setTransport(transport);
         connection.setCreateTime(SystemClock.now());
+        connection.setAuth(isAuth);
         if (this.sessionManager.addConnection(connection)) {
             SessionHelper.putIfAbsentConnection(transport, connection);
         }
+        return true;
     }
 
     public void addProducer(Transport transport, String topic) {

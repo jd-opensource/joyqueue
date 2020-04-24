@@ -17,8 +17,10 @@ package org.joyqueue.store;
 
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
+import org.joyqueue.store.event.StoreEvent;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.store.transaction.TransactionStore;
+import org.joyqueue.toolkit.concurrent.EventListener;
 
 import java.io.IOException;
 import java.util.List;
@@ -139,4 +141,21 @@ public interface StoreService {
      */
     BufferPoolMonitorInfo monitorInfo();
 
+    /**
+     * 获取存储节点
+     * @return
+     */
+    StoreNodes getNodes(String topic, int partitionGroup);
+
+    /**
+     * 添加监听器
+     * @param listener
+     */
+    void addListener(EventListener<StoreEvent> listener);
+
+    /**
+     * 移除监听器
+     * @param listener
+     */
+    void removeListener(EventListener<StoreEvent> listener);
 }

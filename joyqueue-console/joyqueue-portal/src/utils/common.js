@@ -102,7 +102,7 @@ export function getCodeRule2 () {
 export function getCodeRule3 () {
   return [
     {required: true, message: '请输入英文名', trigger: 'change'},
-    {pattern: /^[a-zA-Z]+[a-zA-Z0-9/._-]{1,39}[a-zA-Z0-9]+$/, message: '支持字母、数字、英文句号(.)、下划线(_)和横线(-)，以英文字母开头，不超过39个字符', trigger: 'change'}
+    {pattern: /^[a-zA-Z]+[a-zA-Z0-9/._-]{1,100}[a-zA-Z0-9]+$/, message: '支持字母、数字、英文句号(.)、下划线(_)和横线(-)，以英文字母开头，不超过100个字符', trigger: 'change'}
   ]
 }
 

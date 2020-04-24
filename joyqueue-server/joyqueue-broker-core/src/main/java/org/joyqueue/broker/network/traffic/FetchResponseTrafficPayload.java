@@ -21,7 +21,7 @@ package org.joyqueue.broker.network.traffic;
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public interface FetchTrafficPayload extends TrafficPayload, TrafficType {
+public interface FetchResponseTrafficPayload extends ResponseTrafficPayload, TrafficType {
 
     String TYPE = "fetch";
 

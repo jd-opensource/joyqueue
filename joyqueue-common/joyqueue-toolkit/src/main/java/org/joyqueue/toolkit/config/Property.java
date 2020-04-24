@@ -52,6 +52,8 @@ public class Property {
     protected String key;
     //值
     protected Object value;
+    // 组
+    protected String group;
     //版本
     protected long version;
     //优先级
@@ -69,9 +71,14 @@ public class Property {
     }
 
     public Property(String name, String key, Object value, long version, int priority) {
+        this(name, key, value, null, version, priority);
+    }
+
+    public Property(String name, String key, Object value, String group, long version, int priority) {
         this.name = name;
         this.key = key;
         this.value = value;
+        this.group = group;
         this.version = version;
         this.priority = priority;
     }
@@ -86,6 +93,10 @@ public class Property {
 
     public Object getValue() {
         return value;
+    }
+
+    public String getGroup() {
+        return group;
     }
 
     public long getVersion() {

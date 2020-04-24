@@ -16,6 +16,8 @@
 package org.joyqueue.broker.limit.filter;
 
 import org.joyqueue.broker.network.protocol.ProtocolCommandHandlerFilter;
+import org.joyqueue.broker.network.traffic.RequestTrafficPayload;
+import org.joyqueue.broker.network.traffic.ResponseTrafficPayload;
 import org.joyqueue.broker.network.traffic.Traffic;
 import org.joyqueue.broker.network.traffic.TrafficPayload;
 import org.joyqueue.broker.network.traffic.TrafficType;
@@ -39,36 +41,88 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
     @Override
     public Command invoke(CommandHandlerInvocation invocation) throws TransportException {
         Command request = invocation.getRequest();
-        Command response = invocation.invoke();
+        boolean isRequired = false;
 
-        if (response == null) {
-            return response;
+        RequestTrafficPayload requestTrafficPayload = getRequestTrafficPayload(request);
+        if (requestTrafficPayload != null) {
+            if (limitIfNeeded(requestTrafficPayload)) {
+                requestTrafficPayload.getTraffic().limited(true);
+            } else {
+                if (requireIfAcquired(requestTrafficPayload)) {
+                    isRequired = true;
+                } else {
+                    requestTrafficPayload.getTraffic().limited(true);
+                }
+            }
+        } else {
+            isRequired = true;
         }
 
-        TrafficPayload trafficPayload = null;
-        if (response != null && response.getPayload() instanceof TrafficPayload) {
-            trafficPayload = (TrafficPayload) response.getPayload();
-        } else if (request != null && request.getPayload() instanceof TrafficPayload) {
-            trafficPayload = (TrafficPayload) request.getPayload();
-        }
+        try {
+            Command response = invocation.invoke();
+            if (response == null) {
+                return response;
+            }
 
-        if (trafficPayload == null) {
-            return response;
-        }
+            ResponseTrafficPayload responseTrafficPayload = getResponseTrafficPayload(request, response);
+            if (responseTrafficPayload == null) {
+                return response;
+            }
 
-        return maybeLimit(invocation.getTransport(), invocation.getRequest(), response, trafficPayload);
+            if (!limitIfNeeded(responseTrafficPayload)) {
+                if (requestTrafficPayload != null && requestTrafficPayload.getTraffic().isLimited()) {
+                    return doLimit(invocation.getTransport(), request, response, isRequired);
+                } else {
+                    return response;
+                }
+            }
+
+            return doLimit(invocation.getTransport(), request, response, isRequired);
+        } finally {
+            if (isRequired && requestTrafficPayload != null) {
+                releaseRequire(requestTrafficPayload);
+            }
+        }
     }
 
-    protected Command maybeLimit(Transport transport, Command request, Command response, TrafficPayload trafficPayload) {
-        if (!(trafficPayload instanceof TrafficType) || trafficPayload.getTraffic() == null) {
-            return response;
+    protected RequestTrafficPayload getRequestTrafficPayload(Command request) {
+        if (request != null && request.getPayload() instanceof RequestTrafficPayload) {
+            return (RequestTrafficPayload) request.getPayload();
         }
+        return null;
+    }
 
-        if (!limitIfNeeded((TrafficType) trafficPayload, trafficPayload.getTraffic())) {
-            return response;
+    protected ResponseTrafficPayload getResponseTrafficPayload(Command request, Command response) {
+        if (response != null && response.getPayload() instanceof ResponseTrafficPayload) {
+            return (ResponseTrafficPayload) response.getPayload();
+        } else if (request != null && request.getPayload() instanceof ResponseTrafficPayload) {
+            return (ResponseTrafficPayload) request.getPayload();
         }
+        return null;
+    }
 
-        return doLimit(transport, request, response);
+    protected boolean releaseRequire(TrafficPayload trafficPayload) {
+        Traffic traffic = trafficPayload.getTraffic();
+        if (!(trafficPayload instanceof TrafficType) || traffic == null) {
+            return false;
+        }
+        return releaseRequire((TrafficType) trafficPayload, traffic);
+    }
+
+    protected boolean requireIfAcquired(TrafficPayload trafficPayload) {
+        Traffic traffic = trafficPayload.getTraffic();
+        if (!(trafficPayload instanceof TrafficType) || traffic == null) {
+            return false;
+        }
+        return requireIfAcquired((TrafficType) trafficPayload, traffic);
+    }
+
+    protected boolean limitIfNeeded(TrafficPayload trafficPayload) {
+        Traffic traffic = trafficPayload.getTraffic();
+        if (!(trafficPayload instanceof TrafficType) || traffic == null) {
+            return false;
+        }
+        return limitIfNeeded((TrafficType) trafficPayload, traffic);
     }
 
     protected boolean limitIfNeeded(TrafficType trafficType, Traffic traffic) {
@@ -83,7 +137,35 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
         return false;
     }
 
+    protected boolean requireIfAcquired(TrafficType trafficType, Traffic traffic) {
+        String type = trafficType.getTrafficType();
+        String app = traffic.getApp();
+
+        for (String topic : traffic.getTopics()) {
+            if (requireIfAcquired(topic, app, type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected boolean releaseRequire(TrafficType trafficType, Traffic traffic) {
+        String type = trafficType.getTrafficType();
+        String app = traffic.getApp();
+
+        for (String topic : traffic.getTopics()) {
+            if (releaseRequire(topic, app, type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected abstract boolean requireIfAcquired(String topic, String app, String type);
+
+    protected abstract boolean releaseRequire(String topic, String app, String type);
+
     protected abstract boolean limitIfNeeded(String topic, String app, String trafficType, Traffic traffic);
 
-    protected abstract Command doLimit(Transport transport, Command request, Command response);
+    protected abstract Command doLimit(Transport transport, Command request, Command response, boolean isRequired);
 }

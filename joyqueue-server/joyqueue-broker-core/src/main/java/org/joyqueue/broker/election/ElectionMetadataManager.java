@@ -16,11 +16,11 @@
 package org.joyqueue.broker.election;
 
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,6 +107,14 @@ public class ElectionMetadataManager {
                 }
             }
         }
+    }
+
+    /**
+     * 获取全部election metadata
+     * @return
+     */
+    Map<TopicPartitionGroup, ElectionMetadata> getAllElectionMetadata() {
+        return metadataMap;
     }
 
     /**

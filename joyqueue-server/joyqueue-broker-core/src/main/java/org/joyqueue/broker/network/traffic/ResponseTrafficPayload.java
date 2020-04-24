@@ -13,31 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.event;
+package org.joyqueue.broker.network.traffic;
 
 /**
- * BrokerEvent
+ * ResponseTrafficPayload
  *
  * author: gaohaoxiang
- * date: 2018/11/13
+ * date: 2019/5/16
  */
-public class BrokerEvent {
+public interface ResponseTrafficPayload extends TrafficPayload {
 
-    private BrokerEventType type;
-
-    public BrokerEvent(BrokerEventType type) {
-        this.type = type;
-    }
-
-    public BrokerEventType getType() {
-        return type;
-    }
-
-    public enum BrokerEventType {
-        START,
-
-        STOP,
-
-        ;
-    }
 }

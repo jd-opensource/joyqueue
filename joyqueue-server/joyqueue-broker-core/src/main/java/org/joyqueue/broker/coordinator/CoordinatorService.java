@@ -18,12 +18,17 @@ package org.joyqueue.broker.coordinator;
 import com.google.common.collect.Maps;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
+import org.joyqueue.broker.coordinator.config.CoordinatorConfigKey;
 import org.joyqueue.broker.coordinator.group.GroupMetadataManager;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
 import org.joyqueue.broker.coordinator.support.CoordinatorInitializer;
 import org.joyqueue.broker.coordinator.support.CoordinatorResolver;
 import org.joyqueue.broker.coordinator.transaction.TransactionMetadataManager;
+import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
+import org.joyqueue.network.transport.config.TransportConfigSupport;
+import org.joyqueue.network.transport.session.session.TransportSessionManager;
+import org.joyqueue.network.transport.session.session.config.TransportSessionConfig;
 import org.joyqueue.nsr.NameService;
+import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.service.Service;
 
 import java.util.concurrent.ConcurrentMap;
@@ -42,19 +47,20 @@ public class CoordinatorService extends Service {
 
     private CoordinatorInitializer coordinatorInitializer;
     private CoordinatorResolver coordinatorResolver;
-    private CoordinatorSessionManager coordinatorSessionManager;
+    private TransportSessionManager coordinatorSessionManager;
     private Coordinator coordinator;
 
     private final ConcurrentMap<String, GroupMetadataManager> groupMetadataManagerMap = Maps.newConcurrentMap();
     private final ConcurrentMap<String, TransactionMetadataManager> transactionMetadataManagerMap = Maps.newConcurrentMap();
 
-    public CoordinatorService(CoordinatorConfig config, ClusterManager clusterManager, NameService nameService) {
-        this.config = config;
+    public CoordinatorService(PropertySupplier propertySupplier, ClusterManager clusterManager, NameService nameService) {
+        this.config = new CoordinatorConfig(propertySupplier);
         this.clusterManager = clusterManager;
         this.nameService = nameService;
         this.coordinatorInitializer = new CoordinatorInitializer(config, clusterManager, nameService);
         this.coordinatorResolver = new CoordinatorResolver(config, clusterManager);
-        this.coordinatorSessionManager = new CoordinatorSessionManager(config);
+        this.coordinatorSessionManager = new TransportSessionManager(new TransportSessionConfig(propertySupplier),
+                TransportConfigSupport.buildClientConfig(propertySupplier, CoordinatorConfigKey.TRANSPORT_KEY_PREFIX), new BrokerTransportClientFactory());
         this.coordinator = new Coordinator(config, clusterManager, coordinatorResolver, coordinatorInitializer, coordinatorSessionManager);
     }
 

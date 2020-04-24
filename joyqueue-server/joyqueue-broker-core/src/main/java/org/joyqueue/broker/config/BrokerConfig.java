@@ -131,6 +131,10 @@ public class BrokerConfig implements PropertySupplierAware {
         if (null != adminUser) this.adminUser = adminUser.getString();
     }
 
+    public boolean getServerShardedThreads() {
+        return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_SHARDED_THREADS);
+    }
+
     public int getServerCommonThreads() {
         return propertySupplier.getValue(BrokerConfigKey.FRONTEND_SERVER_COMMON_THREADS);
     }

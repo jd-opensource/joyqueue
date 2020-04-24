@@ -18,6 +18,7 @@ package org.joyqueue.broker;
 import com.google.common.base.Preconditions;
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.config.Configuration;
@@ -26,8 +27,8 @@ import org.joyqueue.broker.config.scan.ClassScanner;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
-import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import org.joyqueue.broker.election.ElectionService;
+import org.joyqueue.broker.event.BrokerEventBus;
 import org.joyqueue.broker.extension.ExtensionManager;
 import org.joyqueue.broker.helper.AwareHelper;
 import org.joyqueue.broker.manage.BrokerManageService;
@@ -65,7 +66,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * BrokerService
@@ -81,6 +89,7 @@ public class BrokerService extends Service {
     private Authentication authentication;
     private ProtocolManager protocolManager;
     private BrokerServer brokerServer;
+    private ClusterNameService clusterNameService;
     private ClusterManager clusterManager;
     private Produce produce;
     private Consume consume;
@@ -96,6 +105,7 @@ public class BrokerService extends Service {
     private ArchiveManager archiveManager;
     private MessageConvertSupport messageConvertSupport;
     private ExtensionManager extensionManager;
+    private BrokerEventBus brokerEventBus;
     private String[] args;
 
     public BrokerService() {
@@ -114,6 +124,9 @@ public class BrokerService extends Service {
         enrichServicePorts(configuration);
         brokerContext.propertySupplier(configuration);
 
+        this.brokerEventBus = new BrokerEventBus(brokerContext);
+        this.brokerContext.eventBus(brokerEventBus);
+
         //build broker config
         this.brokerConfig = new BrokerConfig(configuration);
         String dataPath = brokerConfig.getAndCreateDataPath();
@@ -131,9 +144,12 @@ public class BrokerService extends Service {
         this.nameService.addListener(configurationManager);
         this.configurationManager.setConfigProvider(new ConfigProviderImpl(nameService));
 
-
         //build and cluster manager
-        this.clusterManager = new ClusterManager(brokerConfig, nameService, brokerContext);
+        this.clusterNameService = new ClusterNameService(nameService, brokerEventBus, configuration);
+        this.clusterNameService.start();
+        this.brokerContext.clusterNameService(clusterNameService);
+
+        this.clusterManager = new ClusterManager(brokerConfig, nameService, clusterNameService, brokerContext);
         this.clusterManager.start();
         this.brokerContext.clusterManager(this.clusterManager);
 
@@ -157,8 +173,7 @@ public class BrokerService extends Service {
         this.brokerContext.brokerMonitorService(this.brokerMonitorService);
 
         // new coordinator service
-        this.coordinatorService = new CoordinatorService(new CoordinatorConfig(configuration),
-                clusterManager, nameService);
+        this.coordinatorService = new CoordinatorService(configuration, clusterManager, nameService);
         this.brokerContext.coordinnatorService(this.coordinatorService);
 
         this.messageConvertSupport = new MessageConvertSupport();
@@ -194,6 +209,7 @@ public class BrokerService extends Service {
         this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
                 brokerMonitorService,
                 clusterManager,
+                clusterNameService,
                 storeService.getManageService(),
                 storeService,
                 consume,
@@ -333,6 +349,8 @@ public class BrokerService extends Service {
 
     @Override
     protected void doStart() throws Exception {
+        startIfNecessary(brokerEventBus);
+        startIfNecessary(clusterNameService);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
         startIfNecessary(storeInitializer);
@@ -347,10 +365,10 @@ public class BrokerService extends Service {
         startIfNecessary(extensionManager);
         startIfNecessary(protocolManager);
         startIfNecessary(nameService);
+        startIfNecessary(archiveManager);
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
-        startIfNecessary(archiveManager);
         printConfig();
     }
 
@@ -392,6 +410,7 @@ public class BrokerService extends Service {
         destroy(coordinatorService);
         destroy(sessionManager);
         destroy(clusterManager);
+        destroy(clusterNameService);
         destroy(storeManager);
         destroy(storeInitializer);
         destroy(storeService);
@@ -401,6 +420,7 @@ public class BrokerService extends Service {
         destroy(brokerMonitorService);
         destroy(brokerManageService);
         destroy(nameService);
+        destroy(brokerEventBus);
 
         logger.info("Broker stopped!!!!");
     }
