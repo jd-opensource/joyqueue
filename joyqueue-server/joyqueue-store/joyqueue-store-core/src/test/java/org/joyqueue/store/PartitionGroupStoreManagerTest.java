@@ -827,7 +827,7 @@ public class PartitionGroupStoreManagerTest {
         recoverStore();
     }
 
-    private void recoverStore() {
+    private void recoverStore() throws Exception {
         if (null == bufferPool) {
             bufferPool = PreloadBufferPool.getInstance();
             bufferPool.addPreLoad(32 * 1024 * 1024, 2, 4);
