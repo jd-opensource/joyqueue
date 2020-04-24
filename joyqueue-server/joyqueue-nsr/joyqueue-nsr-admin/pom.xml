@@ -21,7 +21,7 @@
     <parent>
         <artifactId>joyqueue-nsr</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.5-SNAPSHOT</version>
+        <version>4.2.6-SNAPSHOT</version>
     </parent>
     <artifactId>joyqueue-nsr-admin</artifactId>
     <name>JoyQueue-NamingService-Admin</name>
