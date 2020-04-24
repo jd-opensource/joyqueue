@@ -4,7 +4,7 @@
 import apiRequest from '../utils/apiRequest.js'
 import apiUrl from '../utils/apiUrl.js'
 import LangConfig from '../i18n/langs.json'
-import {deepCopy} from "../utils/assist";
+import {deepCopy} from '../utils/assist'
 
 export default {
   computed: {
