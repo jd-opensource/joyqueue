@@ -20,10 +20,10 @@
     <parent>
         <artifactId>joyqueue-data</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.5-SNAPSHOT</version>
+        <version>4.2.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.2.5-SNAPSHOT</version>
+    <version>4.2.5</version>
 
     <artifactId>joyqueue-data-model</artifactId>
     <name>JoyQueue-Data-Model</name>
