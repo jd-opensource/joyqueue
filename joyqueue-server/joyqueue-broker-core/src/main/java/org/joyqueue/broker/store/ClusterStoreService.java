@@ -166,12 +166,12 @@ public class ClusterStoreService extends Service implements StoreService, LifeCy
     }
 
     @Override
-    public void restorePartitionGroup(String topic, int partitionGroup) {
+    public void restorePartitionGroup(String topic, int partitionGroup) throws Exception {
         storeService.restorePartitionGroup(topic, partitionGroup);
     }
 
     @Override
-    public void createPartitionGroup(String topic, int partitionGroup, short[] partitions) {
+    public void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
         storeService.createPartitionGroup(topic, partitionGroup, partitions);
     }
 
