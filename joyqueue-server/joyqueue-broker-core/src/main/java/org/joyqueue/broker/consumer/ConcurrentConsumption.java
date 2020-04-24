@@ -177,7 +177,7 @@ class ConcurrentConsumption extends Service implements ConcurrentConsumer {
     @Override
     public PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         // 消费普通分区消息
-        List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         // 首先尝试从过期未应答队列获取分区段进行消费
         PartitionSegment partitionSegment = pollPartitionSegment(consumer, partitionList);
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));

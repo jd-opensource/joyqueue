@@ -1,2 +1,3 @@
 org.joyqueue.nsr.nameservice.NameServer
 org.joyqueue.nsr.nameservice.ThinNameService
+org.joyqueue.nsr.nameservice.ThinNameServer

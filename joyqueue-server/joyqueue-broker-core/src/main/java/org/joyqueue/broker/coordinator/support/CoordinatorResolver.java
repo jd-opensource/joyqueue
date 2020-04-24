@@ -17,6 +17,7 @@ package org.joyqueue.broker.coordinator.support;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.ObjectUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import org.joyqueue.broker.coordinator.domain.CoordinatorDetail;
@@ -25,7 +26,6 @@ import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

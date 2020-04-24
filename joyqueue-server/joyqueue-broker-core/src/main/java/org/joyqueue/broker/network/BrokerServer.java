@@ -59,8 +59,8 @@ public class BrokerServer extends Service {
 
     @Override
     protected void doStart() throws Exception {
-        this.frontendServer.start();
         this.backendServer.start();
+        this.frontendServer.start();
     }
 
     @Override

@@ -104,6 +104,8 @@ public class TransportConfigSupport {
                     transportConfig.getRetryPolicy().setRetryDelay(property.getInteger());
                 } else if (fullKey.equals(keyPrefix + TRANSPORT_RETRY_MAX)) {
                     transportConfig.getRetryPolicy().setMaxRetrys(property.getInteger());
+                } else if (fullKey.equals(keyPrefix + TRANSPORT_CLEAR_INTERVAL)) {
+                    transportConfig.setClearInterval(property.getInteger());
                 }
             }
 
@@ -133,6 +135,7 @@ public class TransportConfigSupport {
     public static final String TRANSPORT_SEND_TIMEOUT = "transport.sendTimeout";
     public static final String TRANSPORT_RETRY_DELAY = "transport.retryDelay";
     public static final String TRANSPORT_RETRY_MAX = "transport.retryMax";
+    public static final String TRANSPORT_CLEAR_INTERVAL = "transport.clearInterval";
 
     //server transport config
     public static final String TRANSPORT_SERVER_PORT = "transport.server.port";

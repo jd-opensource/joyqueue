@@ -153,7 +153,7 @@ public class LongPollingManager extends Service {
         String topic = consumer.getTopic();
         // 长轮询数量不能超过主题队列数量
         AtomicInteger count = getCount(consumer);
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(topic));
         if (count.get() >= masterPartitionList.size()) {
             return false;
         }

@@ -144,6 +144,15 @@ public interface MetadataMonitorService {
     Map<String, String> getConfigsMetadata();
 
     /**
+     * 更新配置
+     * @param key
+     * @param group
+     * @param value
+     * @return
+     */
+    String updateConfigMetadata(String key, String group, String value);
+
+    /**
      * 查询集群信息
      * @return
      */

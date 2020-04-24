@@ -161,6 +161,7 @@ public class BaseRepository {
     protected String getTraceKey(String name) {
         return "NameService.journalkeeper." + name.replace(" = ?", "_")
                 .replace(" ", "_")
+                .replace("`", "")
                 .replace(",", "");
     }
 }

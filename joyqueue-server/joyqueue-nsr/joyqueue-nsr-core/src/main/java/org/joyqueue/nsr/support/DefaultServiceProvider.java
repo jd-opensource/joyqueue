@@ -20,6 +20,7 @@ import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
 import org.joyqueue.nsr.InternalServiceProvider;
 import org.joyqueue.nsr.ServiceProvider;
+import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.message.Messenger;
 import org.joyqueue.nsr.service.AppTokenService;
 import org.joyqueue.nsr.service.BrokerService;
@@ -70,11 +71,13 @@ public class DefaultServiceProvider extends Service implements ServiceProvider, 
     private PartitionGroupReplicaService partitionGroupReplicaService;
     private ProducerService producerService;
     private TopicService topicService;
+    private NameServiceConfig config;
     private Messenger messenger;
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
         this.supplier = supplier;
+        this.config = new NameServiceConfig(supplier);
     }
 
     @Override
@@ -91,20 +94,22 @@ public class DefaultServiceProvider extends Service implements ServiceProvider, 
         enrichIfNecessary(messenger);
 
         appTokenService = new DefaultAppTokenService(internalServiceProvider.getService(AppTokenInternalService.class));
-        brokerService = new DefaultBrokerService(internalServiceProvider.getService(BrokerInternalService.class), internalServiceProvider.getService(TransactionInternalService.class), messenger);
+        brokerService = new DefaultBrokerService(internalServiceProvider.getService(BrokerInternalService.class), internalServiceProvider.getService(TransactionInternalService.class),
+                config, messenger);
         configService = new DefaultConfigService(internalServiceProvider.getService(ConfigInternalService.class));
         consumerService = new DefaultConsumerService(internalServiceProvider.getService(TopicInternalService.class), internalServiceProvider.getService(PartitionGroupInternalService.class),
                 internalServiceProvider.getService(BrokerInternalService.class), internalServiceProvider.getService(ConsumerInternalService.class),
-                internalServiceProvider.getService(TransactionInternalService.class), messenger);
+                internalServiceProvider.getService(TransactionInternalService.class), config, messenger);
         dataCenterService = new DefaultDataCenterService(internalServiceProvider.getService(DataCenterInternalService.class));
         namespaceService = new DefaultNamespaceService(internalServiceProvider.getService(NamespaceInternalService.class));
         partitionGroupService = new DefaultPartitionGroupService(internalServiceProvider.getService(PartitionGroupInternalService.class));
         partitionGroupReplicaService = new DefaultPartitionGroupReplicaService(internalServiceProvider.getService(PartitionGroupReplicaInternalService.class));
         producerService = new DefaultProducerService(internalServiceProvider.getService(TopicInternalService.class), internalServiceProvider.getService(PartitionGroupInternalService.class),
                 internalServiceProvider.getService(BrokerInternalService.class), internalServiceProvider.getService(ProducerInternalService.class),
-                internalServiceProvider.getService(TransactionInternalService.class), messenger);
-        topicService = new DefaultTopicService(messenger, internalServiceProvider.getService(TopicInternalService.class), internalServiceProvider.getService(PartitionGroupInternalService.class),
-                internalServiceProvider.getService(BrokerInternalService.class), internalServiceProvider.getService(TransactionInternalService.class));
+                internalServiceProvider.getService(TransactionInternalService.class), config, messenger);
+        topicService = new DefaultTopicService(config, messenger, internalServiceProvider.getService(TopicInternalService.class),
+                internalServiceProvider.getService(PartitionGroupInternalService.class), internalServiceProvider.getService(BrokerInternalService.class),
+                internalServiceProvider.getService(TransactionInternalService.class));
     }
 
     protected  <T> T enrichIfNecessary(T obj) throws Exception {

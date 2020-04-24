@@ -15,11 +15,11 @@
  */
 package org.joyqueue.client.internal.producer.support;
 
+import com.jd.laf.extension.Extension;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import org.joyqueue.network.domain.BrokerNode;
-import com.jd.laf.extension.Extension;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -46,6 +46,7 @@ public class WeightedRoundRobinPartitionSelector extends AbstractPartitionSelect
         int currentWeight = this.currentWeight.get();
         int size = partitions.size();
         boolean weightChange = this.lastTopicMetadata != topicMetadata;
+        int retry = 0;
 
         if (weightChange) {
             this.lastTopicMetadata = topicMetadata;
@@ -74,7 +75,11 @@ public class WeightedRoundRobinPartitionSelector extends AbstractPartitionSelect
             }
             PartitionMetadata partition = partitions.get(index);
             BrokerNode partitionLeader = partition.getLeader();
-            if (partitionLeader == null || !partitionLeader.isWritable()) {
+            if (partitionLeader == null) {
+                if (retry > 5) {
+                    return null;
+                }
+                retry++;
                 continue;
             }
             int partitionWeight = partitionLeader.getWeight();

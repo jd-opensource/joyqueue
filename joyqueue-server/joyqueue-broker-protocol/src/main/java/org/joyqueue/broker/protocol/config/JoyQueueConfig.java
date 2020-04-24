@@ -26,6 +26,10 @@ import org.joyqueue.toolkit.config.PropertySupplier;
 public class JoyQueueConfig {
     protected PropertySupplier propertySupplier;
 
+    public static void main(String[] args) {
+
+    }
+
     public JoyQueueConfig() {
 
     }

@@ -76,6 +76,7 @@ public class ClusterClientManager extends Service {
     protected void validate() throws Exception {
         transportConfig = transportConfig.copy();
         transportConfig.setConnections(1);
+        transportConfig.setIoThreads(1);
 
         URL url = URL.valueOf(String.format("joyqueue://%s", nameServerConfig.getAddress()));
         if (url.getPort() == 0) {

@@ -141,6 +141,10 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_REPORT_LEADER_PERIODICALLY_FORCE);
     }
 
+    public boolean enableOnlineNodePeriodically() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_ONLINE_NODE_PERIODICALLY);
+    }
+
     public boolean getOutputConsumePos() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.OUTPUT_CONSUME_POS);
     }

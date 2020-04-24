@@ -56,6 +56,8 @@ public class Connection {
     private long createTime;
     // 是否系统连接
     private boolean isSystem;
+    // 是否认证
+    private boolean isAuth;
 
     public Connection() {
     }
@@ -251,5 +253,13 @@ public class Connection {
 
     public void setSystem(boolean system) {
         isSystem = system;
+    }
+
+    public void setAuth(boolean auth) {
+        isAuth = auth;
+    }
+
+    public boolean isAuth() {
+        return isAuth;
     }
 }

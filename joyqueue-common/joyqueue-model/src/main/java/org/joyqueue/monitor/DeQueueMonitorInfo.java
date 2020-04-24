@@ -29,6 +29,7 @@ public class DeQueueMonitorInfo extends BaseMonitorInfo {
     private double max;
     private double min;
     private double avg;
+    @Deprecated
     private long totalSize;
 
     // 分钟级
@@ -40,6 +41,9 @@ public class DeQueueMonitorInfo extends BaseMonitorInfo {
     // 秒级
     private long tps;
     private long traffic;
+
+    // 总体
+    private long totalTraffic;
 
     public long getCount() {
         return count;
@@ -127,5 +131,13 @@ public class DeQueueMonitorInfo extends BaseMonitorInfo {
 
     public long getTraffic() {
         return traffic;
+    }
+
+    public void setTotalTraffic(long totalTraffic) {
+        this.totalTraffic = totalTraffic;
+    }
+
+    public long getTotalTraffic() {
+        return totalTraffic;
     }
 }

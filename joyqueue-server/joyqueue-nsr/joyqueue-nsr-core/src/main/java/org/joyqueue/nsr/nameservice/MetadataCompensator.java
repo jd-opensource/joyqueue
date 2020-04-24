@@ -63,15 +63,15 @@ import java.util.Map;
  * author: gaohaoxiang
  * date: 2019/8/30
  */
-public class NameServiceCompensator extends Service {
+public class MetadataCompensator extends Service {
 
-    protected static final Logger logger = LoggerFactory.getLogger(NameServiceCompensator.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MetadataCompensator.class);
 
     private NameServiceConfig config;
     private EventBus<NameServerEvent> eventBus;
     private int brokerId = -1;
 
-    public NameServiceCompensator(NameServiceConfig config, EventBus<NameServerEvent> eventBus) {
+    public MetadataCompensator(NameServiceConfig config, EventBus<NameServerEvent> eventBus) {
         this.config = config;
         this.eventBus = eventBus;
     }
@@ -88,11 +88,11 @@ public class NameServiceCompensator extends Service {
         if (brokerId <= 0) {
             return;
         }
-        if (config.getCompensationTopicEnable()) {
-            compensateTopic(oldCache, newCache);
-        }
         if (config.getCompensationBrokerEnable()) {
             compensateBroker(oldCache, newCache);
+        }
+        if (config.getCompensationTopicEnable()) {
+            compensateTopic(oldCache, newCache);
         }
         if (config.getCompensationProducerEnable()) {
             compensateProducer(oldCache, newCache);
@@ -121,7 +121,7 @@ public class NameServiceCompensator extends Service {
                 if (newTopicConfig.isReplica(brokerId)) {
                     publishEvent(new AddTopicEvent(newTopicConfig, Lists.newArrayList(newTopicConfig.getPartitionGroups().values())));
 
-                    for (PartitionGroup partitionGroup : newTopicConfig.fetchPartitionGroupByBrokerId(brokerId)) {
+                    for (PartitionGroup partitionGroup : newTopicConfig.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
                         publishEvent(new AddPartitionGroupEvent(newTopicConfig.getName(), partitionGroup));
                     }
                 }
@@ -133,9 +133,13 @@ public class NameServiceCompensator extends Service {
                     }
                 } else {
                     if (newTopicConfig.isReplica(brokerId)) {
-                        // 更新topic
-                        if (!compareTopic(oldTopicConfig, newTopicConfig)) {
-                            publishEvent(new UpdateTopicEvent(oldTopicConfig, newTopicConfig));
+                        if (!oldTopicConfig.isReplica(brokerId)) {
+                            publishEvent(new AddTopicEvent(newTopicConfig, Lists.newArrayList(newTopicConfig.getPartitionGroups().values())));
+                        } else {
+                            // 更新topic
+                            if (!compareTopic(oldTopicConfig, newTopicConfig)) {
+                                publishEvent(new UpdateTopicEvent(oldTopicConfig, newTopicConfig));
+                            }
                         }
 
                         // 更新partitionGroup
@@ -165,8 +169,12 @@ public class NameServiceCompensator extends Service {
         // 删除topic
         for (Map.Entry<TopicName, TopicConfig> oldTopicEntry : oldCache.getTopicConfigMap().entrySet()) {
             TopicConfig newTopic = newCache.getTopicConfigMap().get(oldTopicEntry.getKey());
-            if (newTopic == null && oldTopicEntry.getValue().isReplica(brokerId)) {
-                publishEvent(new RemoveTopicEvent(oldTopicEntry.getValue(), Lists.newArrayList(oldTopicEntry.getValue().getPartitionGroups().values())));
+            TopicConfig oldTopic = oldTopicEntry.getValue();
+            if (newTopic == null && oldTopic.isReplica(brokerId)) {
+                for (PartitionGroup partitionGroup : oldTopic.fetchTopicPartitionGroupsByBrokerId(brokerId)) {
+                    publishEvent(new RemovePartitionGroupEvent(oldTopic.getName(), partitionGroup));
+                }
+                publishEvent(new RemoveTopicEvent(oldTopic, Lists.newArrayList(oldTopicEntry.getValue().getPartitionGroups().values())));
             }
         }
     }
