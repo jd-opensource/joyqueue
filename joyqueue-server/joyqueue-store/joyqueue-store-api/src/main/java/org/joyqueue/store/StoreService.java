@@ -69,7 +69,7 @@ public interface StoreService {
     /**
      * 从磁盘恢复partition group，系统启动时调用
      */
-    void restorePartitionGroup(String topic, int partitionGroup);
+    void restorePartitionGroup(String topic, int partitionGroup) throws Exception;
 
     /**
      * 创建PartitionGroup。仅当topic创建或者向topic中添加partitionGroup的时候调用，需要提供节点信息。
@@ -78,7 +78,7 @@ public interface StoreService {
      * @param partitionGroup Partition group
      * @param partitions Partition
      */
-    void createPartitionGroup(String topic, int partitionGroup, short[] partitions);
+    void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception;
 
     /**
      * 获取{@link PartitionGroupStore} 实例

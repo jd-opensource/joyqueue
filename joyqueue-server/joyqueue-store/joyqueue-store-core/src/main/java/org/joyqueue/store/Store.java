@@ -256,7 +256,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
 
     @Override
-    public synchronized void restorePartitionGroup(String topic, int partitionGroup){
+    public synchronized void restorePartitionGroup(String topic, int partitionGroup) throws Exception {
 
         PartitionGroupStoreManager partitionGroupStoreManger = partitionGroupStore(topic, partitionGroup);
         if (null == partitionGroupStoreManger) {
@@ -274,7 +274,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     @Override
-    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) {
+    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
         if (!storeMap.containsKey(topic + "/" + partitionGroup)) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             if (groupBase.exists()) delete(groupBase);
