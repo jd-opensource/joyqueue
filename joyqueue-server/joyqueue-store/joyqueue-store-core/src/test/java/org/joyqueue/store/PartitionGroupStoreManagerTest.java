@@ -126,8 +126,13 @@ public class PartitionGroupStoreManagerTest {
     @Test
     @Ignore
     public void readPerformanceTest() throws Exception {
-        short[] partitions = new short[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-        Short [] p = new Short[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        short partitionCount = 1024;
+        short[] partitions = new short [partitionCount];
+        Short [] p = new Short[partitionCount];
+        for (short i = 0; i < partitionCount; i++) {
+            partitions[i] = i;
+            p[i] = i;
+        }
         store.rePartition(p);
         writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION, partitions);
         destroyStore();

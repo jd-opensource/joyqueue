@@ -94,6 +94,6 @@ public class CasLock {
     }
 
     public boolean isLocked() {
-        return lockThread.get() == FREE;
+        return lockThread.get() != FREE;
     }
 }

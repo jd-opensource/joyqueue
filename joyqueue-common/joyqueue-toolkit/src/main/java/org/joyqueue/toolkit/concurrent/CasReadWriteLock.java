@@ -3,7 +3,19 @@ package org.joyqueue.toolkit.concurrent;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * 基于Cas高性能不可重入读写锁。
+ * 基于CAS和引用计数实现的，高性能、不可重入、读写锁。
+ *
+ * 思路是用一个原子变量refCnt记录锁状态：
+ * 1. 大于0（FREE），为读锁状态，可以一个或任意多个持有者持有读锁。
+ * 2. 等于0 (FREE)，为空闲状态。
+ * 3. 等于-1（LOCK_WRITE），为写锁状态，写锁只能有一个持有者，且和所有读锁持有者互斥。
+ *
+ * 另外，在等待锁时，优化了CPU占用。
+ *
+ * 注意：
+ *
+ * 1. 该锁为不可重入锁；
+ * 2. 为了提升性能，锁的实现没有任何安全检查。
  *
  */
 public class CasReadWriteLock {
@@ -16,6 +28,9 @@ public class CasReadWriteLock {
     // LOCK_WRITE: 写锁中
     private final AtomicLong refCnt = new AtomicLong(FREE);
 
+    /**
+     * 反复自旋
+     */
     public void lockRead() {
         int yieldCount = 0;
         while (!tryLockRead()) {
@@ -72,12 +87,6 @@ public class CasReadWriteLock {
         }
     }
 
-    private boolean canUpgrade() {
-        long ref;
-        return (ref = refCnt.get()) >= 1 && refCnt.compareAndSet(ref, ref + 1);
-    }
-
-
     public boolean tryUpgradeToWriteLock() {
         if (upgradeLock.tryLock()) {
             try {
@@ -109,4 +118,7 @@ public class CasReadWriteLock {
         refCnt.compareAndSet(LOCK_WRITE, FREE);
     }
 
+    public void downgradeToReadLock() {
+        refCnt.compareAndSet(LOCK_WRITE, 1);
+    }
 }

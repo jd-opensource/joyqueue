@@ -238,19 +238,22 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     public <R> R read(int position, int length, BufferReader<R> bufferReader) throws IOException {
-        if(!hasPage()) {
-            bufferLock.lockWrite();
-            try {
-                if(!hasPage()) {
-                    loadRoUnsafe();
-                }
-            } finally {
-                bufferLock.unlockWrite();
-            }
-        }
-        touch();
         bufferLock.lockRead();
+        touch();
         try {
+            while (!hasPage()) {
+                if (!bufferLock.tryUpgradeToWriteLock()) {
+                    bufferLock.unlockRead();
+                    bufferLock.lockWrite();
+                }
+                try {
+                    if(!hasPage()) {
+                        loadRoUnsafe();
+                    }
+                } finally {
+                    bufferLock.downgradeToReadLock();
+                }
+            }
             ByteBuffer byteBuffer = pageBuffer.asReadOnlyBuffer();
             byteBuffer.position(position);
             byteBuffer.limit(writePosition);
@@ -275,57 +278,47 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
     @Override
     public int append(T t) throws IOException {
-        if(bufferType != DIRECT_BUFFER) {
-            bufferLock.lockWrite();
-            try {
-                if(bufferType != DIRECT_BUFFER) {
-                    loadRwUnsafe();
-                }
-            } finally {
-                bufferLock.unlockWrite();
-            }
-        }
-        touch();
+        return appendToPageBuffer(t, serializer);
+    }
+
+    private boolean notWriteableBuffer() {
+        return bufferType != DIRECT_BUFFER;
+    }
+
+    private <R> int appendToPageBuffer(R t, BufferAppender<R> bufferAppender) throws IOException {
         bufferLock.lockRead();
+        touch();
         try {
-            return appendToPageBuffer(t, serializer);
+            while (notWriteableBuffer()) {
+                if (!bufferLock.tryUpgradeToWriteLock()) {
+                    bufferLock.unlockRead();
+                    bufferLock.lockWrite();
+                }
+                try {
+                    if(notWriteableBuffer()) {
+                        loadRwUnsafe();
+                    }
+                } finally {
+                    bufferLock.downgradeToReadLock();
+                }
+            }
+            pageBuffer.position(writePosition);
+            int writeLength = bufferAppender.append(t, pageBuffer);
+            writePosition += writeLength;
+            return writeLength;
         } finally {
             bufferLock.unlockRead();
         }
-    }
 
-    // Not thread safe!
-    private <R> int appendToPageBuffer(R t, BufferAppender<R> bufferAppender) {
-        pageBuffer.position(writePosition);
-        int writeLength = bufferAppender.append(t, pageBuffer);
-        writePosition += writeLength;
-        return writeLength;
     }
 
     @Override
     public int appendByteBuffer(ByteBuffer byteBuffer) throws IOException {
-        if(!hasPage()) {
-            bufferLock.lockWrite();
-            try {
-                if(bufferType != DIRECT_BUFFER) {
-                    loadRwUnsafe();
-                }
-            } finally {
-                bufferLock.unlockWrite();
-            }
-        }
-
-        touch();
-        bufferLock.lockRead();
-        try {
-            return appendToPageBuffer(byteBuffer, (src, dest) -> {
-                int writeLength = src.remaining();
-                dest.put(src);
-                return writeLength;
-            });
-        } finally {
-            bufferLock.unlockRead();
-        }
+        return appendToPageBuffer(byteBuffer, (src, dest) -> {
+            int writeLength = src.remaining();
+            dest.put(src);
+            return writeLength;
+        });
     }
 
     private void touch() {
