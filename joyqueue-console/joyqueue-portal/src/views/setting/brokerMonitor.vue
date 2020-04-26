@@ -126,18 +126,14 @@ export default {
             title: '主题',
             key: 'topic',
             render: (h, params) => {
-              var list = params.item.brokerTopicMonitorRecordList
+              var topic = params.item.topic
               var html = []
-              if (list !== undefined) {
-                for (var i = 0; i < list.length; i++) {
-                  var p = h('router-link', {
-                    attrs: {
-                      to: '/' + this.$i18n.locale + '/topic/detail?id=' + params.item.topic + '&topic=' + params.item.topic
-                    }
-                  }, params.item.topic)
-                  html.push(p)
+              var p = h('router-link', {
+                attrs: {
+                  to: '/' + this.$i18n.locale + '/topic/detail?id=' + topic + '&topic=' + topic
                 }
-              }
+              }, params.item.topic)
+              html.push(p)
               return h('div', {}, html)
             }
           },
@@ -155,6 +151,9 @@ export default {
                     }
                   }, list[i].app)
                   html.push(p)
+                  if (i < list.length - 1) {
+                    html.push(h('br'))
+                  }
                 }
               }
               return h('div', {}, html)

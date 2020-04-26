@@ -11,7 +11,8 @@
     "tool": {
       "retry": "重试查询",
       "archive": "归档查询",
-      "operateHistory": "操作历史查询"
+      "operateHistory": "操作历史查询",
+      "msgFilter": "消息查询"
     },
     "setting": {
       "dataCenter": "数据中心管理",
@@ -33,7 +34,8 @@
     "tool": {
       "retry": "Retry Query",
       "archive": "Archive Query",
-      "operateHistory": "Operate History"
+      "operateHistory": "Operate History",
+      "msgFilter": "Message Query"
     },
     "setting": {
       "dataCenter": "Data Center Manage",

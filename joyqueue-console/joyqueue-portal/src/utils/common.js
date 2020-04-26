@@ -85,6 +85,13 @@ export function getCodeRule () {
   ]
 }
 
+export function ipValidator () {
+  let ipPattern = '(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
+  return [
+    {pattern: '^' + ipPattern + '(,' + ipPattern + ')*$', message: '请输入正确格式的ip', required: false, trigger: 'blur'}
+  ]
+}
+
 export function getCodeRule2 () {
   return [
     {required: true, message: '请输入英文名', trigger: 'change'},
@@ -322,11 +329,11 @@ export function subscribeGroupInputRender (h, params, subscribeRef) {
     },
     on: {
       input: (item) => {
-      params.item.subscribeGroup = (item.value || item) || ''
-      subscribeRef.tableData.rowData[params.index] = params.item
+        params.item.subscribeGroup = (item.value || item) || ''
+        subscribeRef.tableData.rowData[params.index] = params.item
+      }
     }
-  }
-})
+  })
 }
 
 export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {

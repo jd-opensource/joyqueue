@@ -94,6 +94,7 @@
 <script>
 import form from '../../mixins/form.js'
 import { deepCopy } from '../../utils/assist.js'
+import {ipValidator} from '../../utils/common'
 
 export default {
   name: 'consumer-config-form',
@@ -151,7 +152,16 @@ export default {
         callback()
       }
     }
-    let ipPattern = '(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
+    let batchSizeValidator = (rule, value, callback) => {
+      if (this.$store.getters.isAdmin) {
+        if ((rule.min && value < rule.min) || (rule.adminMax && value > rule.adminMax)) {
+          callback(new Error(rule.adminHint))
+        } else {
+          callback()
+        }
+      }
+      numberValidator(rule, value, callback)
+    }
     return {
       formData: {},
       rules: {
@@ -179,11 +189,14 @@ export default {
         ],
         batchSize: [
           {
-            validator: numberValidator,
+            validator: batchSizeValidator,
             type: 'number',
             trigger: 'change',
             min: 1,
-            hint: '普通用户批量大小范围为1~1000',
+            max: 1000,
+            adminMax: 30000,
+            hint: '批量大小范围为1~1000',
+            adminHint: '批量大小范围为1~30000',
             required: false
           }
         ],
@@ -220,13 +233,7 @@ export default {
             required: false
           }
         ],
-        blackList: [
-          {
-            pattern: '^'+ipPattern+'(,'+ipPattern+')*$',
-            message: '请输入正确格式的ip',
-            required: false,
-            trigger: 'blur'}
-        ]
+        blackList: ipValidator()
       }
     }
   },
@@ -246,14 +253,6 @@ export default {
       return data
     },
     validate (callback) {
-      if (!this.$store.getters.isAdmin && this.formData.batchSize > 1000) {
-        this.$Message.error('普通用户的批量大小范围为1-1000')
-        return false
-      }
-      if (this.formData.batchSize > 30000) {
-        this.$Message.error('批量大小不能超过30000')
-        return false
-      }
       this.$refs['form'].validate(valid => {
         if (valid) {
           callback && callback()

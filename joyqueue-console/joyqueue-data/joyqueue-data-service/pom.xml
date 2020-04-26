@@ -133,6 +133,11 @@
             <artifactId>joyqueue-client-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-message-filter-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
