@@ -61,7 +61,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private ByteBuffer pageBuffer = null;
     private int bufferType = NO_BUFFER;
     private PreloadBufferPool bufferPool;
-    private int capacity;
+    private final int capacity;
     private long lastAccessTime = SystemClock.now();
     // 当前刷盘位置
     private int flushPosition;
@@ -84,13 +84,13 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         this.headerSize = headerSize;
         this.serializer = serializer;
         this.bufferPool = bufferPool;
-        this.capacity = maxFileDataLength;
         this.loadOnRead = loadOnRead;
         this.file = new File(base, String.valueOf(filePosition));
         if (file.exists() && file.length() > headerSize) {
             this.writePosition = (int) (file.length() - headerSize);
             this.flushPosition = writePosition;
         }
+        this.capacity = Math.max(maxFileDataLength, (int )(file.length() - headerSize));
     }
 
     @Override
@@ -141,10 +141,6 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     private void loadDirectBuffer() throws IOException {
-        if(this.capacity  < file.length() - headerSize) {
-            this.capacity = (int )(file.length() - headerSize);
-        }
-
         ByteBuffer buffer = bufferPool.allocateDirect(this);
 
         boolean needLoadFileContent = file.exists() && file.length() > headerSize;
