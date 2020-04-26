@@ -19,7 +19,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.joyqueue</groupId>
-    <version>4.2.5.1</version>
+    <version>4.2.5.2-SNAPSHOT</version>
     <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
     <url>http://www.joyqueue.org</url>
@@ -52,7 +52,7 @@
         <connection>scm:git:git@github.com:chubaostream/joyqueue.git</connection>
         <developerConnection>scm:git:git@github.com:chubaostream/joyqueue.git</developerConnection>
         <url>https://github.com/chubaostream/joyqueue.git</url>
-        <tag>4.2.5.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
