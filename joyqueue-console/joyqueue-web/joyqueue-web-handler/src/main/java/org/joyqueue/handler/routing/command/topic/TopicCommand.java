@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,16 +29,19 @@ import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.AppUnsubscribedTopic;
 import org.joyqueue.model.domain.Broker;
+import org.joyqueue.model.domain.DataCenter;
 import org.joyqueue.model.domain.Topic;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QTopic;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.ConsumerService;
+import org.joyqueue.service.DataCenterService;
 import org.joyqueue.service.ProducerService;
 import org.joyqueue.service.TopicPartitionGroupService;
 import org.joyqueue.service.TopicService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 主题 处理器
@@ -53,6 +56,8 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
     protected ConsumerService consumerService;
     @Value(nullable = false)
     protected ProducerService producerService;
+    @Value
+    protected DataCenterService dataCenterService;
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QTopic> qPageQuery) throws Exception {
@@ -66,7 +71,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         if (topic == null || topic.getBrokerGroup() == null || topic.getBrokers() == null || topic.getBrokers().isEmpty()) {
             new ConfigException(ErrorCode.BadRequest);
         }
-        if(topic.getReplica()>topic.getBrokers().size())topic.setReplica(topic.getBrokers().size());
+        if (topic.getReplica() > topic.getBrokers().size()) topic.setReplica(topic.getBrokers().size());
         service.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
         return Responses.success(topic);
     }
@@ -84,9 +89,9 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         }
         //新建主题
         List<Broker> brokerList = brokerService.findByGroup(topic.getBrokerGroup().getId());
-        Preconditions.checkArgument(null==brokerList||brokerList.size()<1,topic.getBrokerGroup().getCode()+"分组暂时无可用broker");
+        Preconditions.checkArgument(null == brokerList || brokerList.size() < 1, topic.getBrokerGroup().getCode() + "分组暂时无可用broker");
         topic.setBrokers(brokerList);
-        if(topic.getReplica()>brokerList.size())topic.setReplica(brokerList.size());
+        if (topic.getReplica() > brokerList.size()) topic.setReplica(brokerList.size());
         service.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
         return Responses.success(topic);
     }
@@ -98,8 +103,8 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
             throw new ConfigException(ErrorCode.BadRequest);
         }
         qTopic.setUserId(Long.valueOf(String.valueOf(session.getId())));
-        qTopic.setAdmin(session.getRole()== User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
-        qTopic.setKeyword(qTopic.getKeyword()==null?null:qTopic.getKeyword().trim());
+        qTopic.setAdmin(session.getRole() == User.UserRole.ADMIN.value() ? Boolean.TRUE : Boolean.FALSE);
+        qTopic.setKeyword(qTopic.getKeyword() == null ? null : qTopic.getKeyword().trim());
         PageResult<AppUnsubscribedTopic> result = service.findAppUnsubscribedByQuery(qPageQuery);
 
         return Responses.success(result.getPagination(), result.getResult());
@@ -108,7 +113,12 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
     @Path("getById")
     public Response getById(@Body Topic model) {
         try {
-            return Responses.success(service.findById(model.getId()));
+            Topic topic = service.findById(model.getId());
+            List<Broker> brokers = brokerService.findByTopic(topic.getCode());
+            List<String> centers = dataCenterService.findByIps(brokers.stream().map(Broker::getIp).collect(Collectors.toList()))
+                    .stream().map(DataCenter::getName).distinct().sorted(String::compareTo).collect(Collectors.toList());
+            topic.setDataCenters(centers);
+            return Responses.success(topic);
         } catch (Exception e) {
             return Responses.error(e);
         }
