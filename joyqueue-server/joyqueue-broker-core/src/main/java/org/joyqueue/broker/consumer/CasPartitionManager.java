@@ -111,10 +111,15 @@ public class CasPartitionManager implements PartitionManager {
             return false;
         }
 
-        PartitionLock partitionLock = ownerShipCache.computeIfAbsent(consumePartition, key -> new PartitionLock(counterService, occupyTimeout));
-
+        PartitionLock partitionLock = ownerShipCache.get(consumePartition);
+        if (partitionLock == null) {
+            partitionLock = new PartitionLock(counterService, occupyTimeout);
+            PartitionLock newPartitionLock = ownerShipCache.putIfAbsent(consumePartition, partitionLock);
+            if (newPartitionLock != null) {
+                partitionLock = newPartitionLock;
+            }
+        }
         return partitionLock.tryLock(clientId);
-
     }
 
 

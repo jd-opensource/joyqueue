@@ -94,4 +94,12 @@ public class ConsumeConfig {
     public boolean useLegacyConcurrentConsumer() {
         return propertySupplier.getValue(ConsumeConfigKey.USE_LEGACY_CONCURRENT_CONSUMER);
     }
+
+    public int getPartitionSelectRetryMax() {
+        return propertySupplier.getValue(ConsumeConfigKey.PARTITION_SELECT_RETRY_MAX);
+    }
+
+    public int getPartitionSelectRetryInterval() {
+        return propertySupplier.getValue(ConsumeConfigKey.PARTITION_SELECT_RETRY_INTERVAL);
+    }
 }
