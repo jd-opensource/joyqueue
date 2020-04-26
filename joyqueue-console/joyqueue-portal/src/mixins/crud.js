@@ -4,6 +4,7 @@
 import apiRequest from '../utils/apiRequest.js'
 import apiUrl from '../utils/apiUrl.js'
 import LangConfig from '../i18n/langs.json'
+import {deepCopy} from '../utils/assist'
 
 export default {
   computed: {
@@ -120,7 +121,7 @@ export default {
       if (typeof (this.beforeEditData) === 'function') {
         this.editData = this.beforeEditData(item)
       } else {
-        this.editData = item
+        this.editData = deepCopy(item)
       }
     },
     beforeEdit (item) {

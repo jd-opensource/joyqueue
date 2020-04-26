@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -96,15 +97,19 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
             CompletableFuture.allOf(
                     replicas.stream()
                             .map(replica -> CompletableFuture.runAsync(() -> {
-                                PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(),replica.getGroup());
-                                if (group == null) {
-                                    logger.warn("group is null topic {},replica {}", replica.getTopic(), replica.getGroup());
-                                    throw new RuntimeException(String.format("group is null topic %s,replica %s", replica.getTopic(), replica.getGroup()));
+                                try {
+                                    PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(), replica.getGroup());
+                                    if (group == null) {
+                                        logger.warn("group is null topic {},replica {}", replica.getTopic(), replica.getGroup());
+                                        throw new RuntimeException(String.format("group is null topic %s,replica %s", replica.getTopic(), replica.getGroup()));
+                                    }
+                                    if (!group.getReplicas().contains(broker.getId())) {
+                                        return;
+                                    }
+                                    doRestore(group, replica, broker);
+                                } catch (Exception e) {
+                                    throw new CompletionException(e);
                                 }
-                                if (!group.getReplicas().contains(broker.getId())) {
-                                    return;
-                                }
-                                doRestore(group, replica, broker);
                                     }, executor)
                             ).toArray(CompletableFuture[]::new)
             ).get();
@@ -113,7 +118,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         }
     }
 
-    protected void doRestore(PartitionGroup group, Replica replica, Broker broker) {
+    protected void doRestore(PartitionGroup group, Replica replica, Broker broker) throws Exception {
         if (config.getForceRestore()) {
             logger.info("force restore topic {}, group.no {} group {}", replica.getTopic().getFullName(), replica.getGroup(), group);
             if (storeService.partitionGroupExists(group.getTopic().getFullName(), group.getGroup())) {
