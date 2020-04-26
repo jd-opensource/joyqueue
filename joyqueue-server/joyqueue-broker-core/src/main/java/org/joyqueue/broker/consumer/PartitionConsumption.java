@@ -178,6 +178,10 @@ class PartitionConsumption extends Service {
     private PullResult getFromPartition(Consumer consumer, List<Short> partitionList, int count, long ackTimeout, long accessTimes) throws JoyQueueException {
         int partitionSize = partitionList.size();
         int listIndex = -1;
+
+        int retryMax = config.getPartitionSelectRetryMax();
+        int retryInterval = config.getPartitionSelectRetryInterval();
+
         for (int i = 0; i < partitionSize; i++) {
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex, accessTimes);
             short partition = partitionList.get(listIndex);
@@ -189,6 +193,12 @@ class PartitionConsumption extends Service {
                             consumer.getTopic(), consumer.getApp(), count, partition, partitionList, pullMsgCount);
                 }
                 return pullResult;
+            }
+            if (i != 0 && i % retryMax == 0) {
+                try {
+                    Thread.currentThread().sleep(retryInterval);
+                } catch (InterruptedException e) {
+                }
             }
             listIndex++;
         }

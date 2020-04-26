@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LongPollingManager extends Service {
     public static final String LONG_POLLING_QUEUE_SIZE = "broker.consume.long_polling_queue_size";
     //TODO 设置一个合理的值
-    public static final int MAX_LONG_POLLING_QUEUE_SIZE = 100000;
+    public static final int MAX_LONG_POLLING_QUEUE_SIZE = 10000;
 
     protected static Logger logger = LoggerFactory.getLogger(LongPollingManager.class);
     // 长轮询请求queue
