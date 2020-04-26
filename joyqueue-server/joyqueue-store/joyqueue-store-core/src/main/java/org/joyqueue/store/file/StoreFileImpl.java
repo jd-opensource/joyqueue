@@ -64,7 +64,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private ByteBuffer pageBuffer = null;
     private int bufferType = NO_BUFFER;
     private PreloadBufferPool bufferPool;
-    private int capacity;
+    private final int capacity;
     private long lastAccessTime = SystemClock.now();
     // 当前刷盘位置
     private int flushPosition;
@@ -84,13 +84,13 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         this.headerSize = headerSize;
         this.serializer = serializer;
         this.bufferPool = bufferPool;
-        this.capacity = maxFileDataLength;
         this.loadOnRead = loadOnRead;
         this.file = new File(base, String.valueOf(filePosition));
         if (file.exists() && file.length() > headerSize) {
             this.writePosition = (int) (file.length() - headerSize);
             this.flushPosition = writePosition;
         }
+        this.capacity = Math.max(maxFileDataLength, (int )(file.length() - headerSize));
     }
 
     @Override
@@ -136,12 +136,13 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         } else if (bufferType == MAPPED_BUFFER) {
             unloadUnsafe();
         }
-        ByteBuffer buffer = bufferPool.allocateDirect(this);
-        loadDirectBuffer(buffer);
+        loadDirectBuffer();
         writeClosed = false;
     }
 
-    private void loadDirectBuffer(ByteBuffer buffer) throws IOException {
+    private void loadDirectBuffer() throws IOException {
+        ByteBuffer buffer = bufferPool.allocateDirect(this);
+
         boolean needLoadFileContent = file.exists() && file.length() > headerSize;
         boolean writeTimestamp = !file.exists();
         // 打开文件描述符
@@ -398,10 +399,14 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             if (position < flushPosition) {
                 fileLock.waitAndLock();
                 try {
-                    loadRwUnsafe();
-                    ensureOpen();
                     flushPosition = position;
-                    fileChannel.truncate(position + headerSize);
+                    if (fileChannel != null && fileChannel.isOpen()) {
+                        fileChannel.truncate(position + headerSize);
+                    } else {
+                        try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
+                            fileChannel.truncate(position + headerSize);
+                        }
+                    }
                 } finally {
                     fileLock.unlock();
                 }
