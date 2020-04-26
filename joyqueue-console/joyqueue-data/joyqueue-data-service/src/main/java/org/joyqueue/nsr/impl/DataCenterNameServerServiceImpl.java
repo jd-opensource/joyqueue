@@ -25,8 +25,12 @@ import org.joyqueue.nsr.model.DataCenterQuery;
 import org.joyqueue.nsr.util.DCWrapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -101,5 +105,26 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
         DataCenter dataCenter = nsrDataCenterConverter.revert(org.joyqueue.domain.DataCenter.DEFAULT);
         dataCenter.setName(DEFAULT_DATA_CENTER_NAME);
         return dataCenter;
+    }
+
+    @Override
+    public List<DataCenter> findByIps(List<String> ips) throws Exception {
+        String result = post(LIST_DATACENTER, null);
+        List<org.joyqueue.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(org.joyqueue.domain.DataCenter.class);
+        if (dataCenterList == null || dataCenterList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Set<DataCenter> centers = new HashSet<>();
+        for(String ip: ips) {
+            Set<DataCenter> centerSet = dataCenterList.stream().filter(
+                    dataCenter -> new DCWrapper(dataCenter).match(ip)).map(center -> nsrDataCenterConverter.revert(center)).collect(Collectors.toSet());
+            centers.addAll(centerSet);
+        }
+        if (centers.size() == 0) {
+            DataCenter dataCenter = nsrDataCenterConverter.revert(org.joyqueue.domain.DataCenter.DEFAULT);
+            dataCenter.setName(DEFAULT_DATA_CENTER_NAME);
+            centers.add(dataCenter);
+        }
+        return new ArrayList<>(centers);
     }
 }
