@@ -133,13 +133,9 @@ public class MetadataCompensator extends Service {
                     }
                 } else {
                     if (newTopicConfig.isReplica(brokerId)) {
-                        if (!oldTopicConfig.isReplica(brokerId)) {
-                            publishEvent(new AddTopicEvent(newTopicConfig, Lists.newArrayList(newTopicConfig.getPartitionGroups().values())));
-                        } else {
-                            // 更新topic
-                            if (!compareTopic(oldTopicConfig, newTopicConfig)) {
-                                publishEvent(new UpdateTopicEvent(oldTopicConfig, newTopicConfig));
-                            }
+                        // 更新topic
+                        if (!compareTopic(oldTopicConfig, newTopicConfig)) {
+                            publishEvent(new UpdateTopicEvent(oldTopicConfig, newTopicConfig));
                         }
 
                         // 更新partitionGroup

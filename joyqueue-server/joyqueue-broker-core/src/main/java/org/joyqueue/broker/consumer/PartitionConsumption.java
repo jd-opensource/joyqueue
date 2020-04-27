@@ -180,7 +180,6 @@ class PartitionConsumption extends Service {
         int listIndex = -1;
 
         int retryMax = config.getPartitionSelectRetryMax();
-        int retryInterval = config.getPartitionSelectRetryInterval();
 
         for (int i = 0; i < partitionSize; i++) {
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex, accessTimes);
@@ -194,11 +193,8 @@ class PartitionConsumption extends Service {
                 }
                 return pullResult;
             }
-            if (i != 0 && i % retryMax == 0) {
-                try {
-                    Thread.currentThread().sleep(retryInterval);
-                } catch (InterruptedException e) {
-                }
+            if (i != 0 && i == retryMax) {
+                break;
             }
             listIndex++;
         }
