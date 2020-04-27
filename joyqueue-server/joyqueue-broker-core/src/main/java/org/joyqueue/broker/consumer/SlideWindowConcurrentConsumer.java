@@ -295,11 +295,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         int retryMax = consumeConfig.getPartitionSelectRetryMax();
 
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
-        for (int i = 0; i < partitionSize; i++) {
-            if (i != 0 && i == retryMax) {
-                break;
-            }
-
+        for (int i = 0; i < retryMax; i++) {
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex + i, accessTimes);
             short partition = partitionList.get(listIndex);
             ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);

@@ -181,7 +181,7 @@ class PartitionConsumption extends Service {
 
         int retryMax = config.getPartitionSelectRetryMax();
 
-        for (int i = 0; i < partitionSize; i++) {
+        for (int i = 0; i < retryMax; i++) {
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex, accessTimes);
             short partition = partitionList.get(listIndex);
             PullResult pullResult = getMessage4Sequence(consumer, partition, count, ackTimeout);
@@ -192,9 +192,6 @@ class PartitionConsumption extends Service {
                             consumer.getTopic(), consumer.getApp(), count, partition, partitionList, pullMsgCount);
                 }
                 return pullResult;
-            }
-            if (i != 0 && i == retryMax) {
-                break;
             }
             listIndex++;
         }
