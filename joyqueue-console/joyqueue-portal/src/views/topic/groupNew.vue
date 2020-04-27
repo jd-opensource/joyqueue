@@ -40,7 +40,7 @@
 import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud.js'
-import dataCenter from "../setting/dataCenter";
+
 export default {
   name: 'group-new',
   components: {
