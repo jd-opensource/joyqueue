@@ -27,7 +27,6 @@ import sun.nio.ch.DirectBuffer;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -212,16 +211,8 @@ public class PreloadBufferPool {
 
             sorted = Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
                     .filter(BufferHolder::isFree)
-                    .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime()))
-                    .sorted((h1, h2) -> {
-                        if (h1.get().writable() != h2.get().writable()) { // 二者只读状态不同
-                            // 优先清理只读的页，避免频繁加载正在写入的页
-                            return h1.get().writable() ? 1 : -1;
-                        } else {
-                            // 只读状态相同，按照最后访问时间排序
-                            return Long.compare(h1.getLastAccessTime(), h2.getLastAccessTime());
-                        }
-                    })
+                    .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime(), bufferHolder.writable()))
+                    .sorted(this::compareBufferHolder)
                     .collect(Collectors.toList());
 
             while (needEviction() && !sorted.isEmpty()) {
@@ -231,6 +222,16 @@ public class PreloadBufferPool {
                     holder.evict();
                 }
             }
+        }
+    }
+
+    private int compareBufferHolder(LruWrapper<BufferHolder> h1, LruWrapper<BufferHolder> h2) {
+        if (h1.isWritable() != h2.isWritable()) { // 二者只读状态不同
+            // 优先清理只读的页，避免频繁加载正在写入的页
+            return h1.isWritable() ? 1 : -1;
+        } else {
+            // 只读状态相同，按照最后访问时间排序
+            return Long.compare(h1.getLastAccessTime(), h2.getLastAccessTime());
         }
     }
 
@@ -285,8 +286,9 @@ public class PreloadBufferPool {
                     List<LruWrapper<BufferHolder>> outdated = directBufferHolders.stream()
                             .filter(b -> b.size() == preLoadCache.bufferSize)
                             .filter(BufferHolder::isFree)
-                            .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime()))
-                            .sorted(Comparator.comparing(LruWrapper::getLastAccessTime)).collect(Collectors.toList());
+                            .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime(), bufferHolder.writable()))
+                            .sorted(this::compareBufferHolder)
+                            .collect(Collectors.toList());
                     while (preLoadCache.cache.size() < preLoadCache.coreCount && !outdated.isEmpty()) {
                         LruWrapper<BufferHolder> wrapper = outdated.remove(0);
                         BufferHolder holder = wrapper.get();
@@ -462,11 +464,13 @@ public class PreloadBufferPool {
 
     private static class LruWrapper<V> {
         private final long lastAccessTime;
+        private final boolean writable;
         private final V t;
 
-        LruWrapper(V t, long lastAccessTime) {
+        LruWrapper(V t, long lastAccessTime, boolean writable) {
             this.lastAccessTime = lastAccessTime;
             this.t = t;
+            this.writable = writable;
         }
 
         private long getLastAccessTime() {
@@ -475,6 +479,10 @@ public class PreloadBufferPool {
 
         private V get() {
             return t;
+        }
+
+        public boolean isWritable() {
+            return writable;
         }
     }
 }
