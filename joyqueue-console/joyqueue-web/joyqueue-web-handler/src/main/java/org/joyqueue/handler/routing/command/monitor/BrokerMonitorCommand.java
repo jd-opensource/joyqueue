@@ -143,6 +143,12 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
         }
     }
 
+    @Path("findTopicCount")
+    public Response findTopicCount(@QueryParam("brokerId") Long brokerId) throws Exception {
+        List<String> topicList = brokerTopicMonitorService.queryTopicList(brokerId);
+        return Responses.success(topicList.size());
+    }
+
     /**
      * 指定topic、app 在broker 上的连接数
      *

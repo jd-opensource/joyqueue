@@ -159,6 +159,9 @@
         <route inherit="get"
                path="/v1/dataCenter/findAll" handlers="dataCenter#findAll render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/dataCenter/findByIps" handlers="dataCenter#findByIps render"
+               errors="error"/>
 
         <!--topic 主题 操作 post-id -->
         <route inherit="post"
@@ -419,6 +422,9 @@
                path="/v1/monitor/broker/:brokerId" handlers="brokerMonitor#findBrokerDetail render"
                errors="error"/>
         <route inherit="get"
+               path="/v1/monitor/findTopicCount" handlers="brokerMonitor#findTopicCount render"
+               errors="error"/>
+        <route inherit="get"
                path="/v1/monitor/start/:brokerId" handlers="brokerMonitor#startInfo render"
                errors="error"/>
 
@@ -435,9 +441,6 @@
         <route inherit="post"
                path="/v1/monitor/producer/sendMessage" handlers="brokerMonitor#sendMessage render"
                errors="error"/>
-
-
-
 
         <!--metric -->
         <route inherit="post"

@@ -16,6 +16,7 @@
 package org.joyqueue.handler.routing.command.config;
 
 
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
@@ -67,6 +68,12 @@ public class DataCenterCommand extends NsrCommandSupport<DataCenter,DataCenterSe
             throw new ConfigException(deleteErrorCode());
         }
         return Responses.success();
+    }
+
+    @Path("findByIps")
+    public Response findByIps(@Body List<String> ips) throws Exception {
+        List<DataCenter> dataCenters = service.findByIps(ips);
+        return Responses.success(dataCenters);
     }
 
 }

@@ -16,6 +16,9 @@
             <d-option v-for="item in addData.replicaGroups" :value="item.brokerId" :key="item.id">{{item.brokerId}}</d-option>
           </d-select>
         </d-form-item>
+        <d-form-item label="IP/ID搜索:" required style="margin-right: 20px;">
+          <d-input v-model="searchData.keyword" @on-enter="getList" placeholder="请输入IP/ID"  style="width: 150px"></d-input>
+        </d-form-item>
         <d-form-item label="Broker分组：" required style="margin-right: 20px;">
           <d-input v-model="searchData.group" @on-enter="getList" placeholder="请输入Broker分组"  style="width: 150px"></d-input>
         </d-form-item>
@@ -37,6 +40,7 @@
 import apiRequest from '../../utils/apiRequest.js'
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud.js'
+import dataCenter from "../setting/dataCenter";
 export default {
   name: 'group-new',
   components: {
@@ -63,7 +67,7 @@ export default {
         replicaGroups: [],
         partitions: 1,
         electType: 0,
-        recLeader:'',
+        recLeader: ''
       },
       page: {
         page: 1,
@@ -72,7 +76,9 @@ export default {
       },
       urls: {
         search: '/partitionGroupReplica/searchBrokerToAddNew',
-        add: `/partitionGroup/add`
+        add: `/partitionGroup/add`,
+        findDCByIps: '/dataCenter/findByIps',
+        findTopicCount: '/monitor/findTopicCount'
       },
       searchData: {
         keyword: '',
@@ -84,22 +90,32 @@ export default {
           {
             title: 'brokerId',
             key: 'id',
-            width: '25%'
+            width: '15%'
           },
           {
             title: 'Broker分组',
             key: 'group.code',
-            width: '25%'
+            width: '15%'
           },
           {
             title: 'IP',
             key: 'ip',
-            width: '25%'
+            width: '15%'
           },
           {
             title: '端口',
             key: 'port',
+            width: '10%'
+          },
+          {
+            title: '数据中心',
+            key: 'dataCenters',
             width: '20%'
+          },
+          {
+            title: '主题数',
+            key: 'topicCount',
+            width: '10%'
           }
         ]
       },
@@ -114,11 +130,37 @@ export default {
       }
       this.multipleSelection = val
       this.addData.replicaGroups = brokerIds
-      if (this.addData.replicaGroups.length == 0) {
-        this.addData.recLeader = '';
+      if (this.addData.replicaGroups.length === 0) {
+        this.addData.recLeader = ''
       } else {
-        this.addData.recLeader=this.addData.replicaGroups[0].brokerId;
+        this.addData.recLeader = this.addData.replicaGroups[0].brokerId
       }
+    },
+    findTopicCount (i) {
+      if (this.tableData.rowData[i].id) {
+        let brokerId = this.tableData.rowData[i].id
+        apiRequest.get(this.urls.findTopicCount + '?brokerId=' + brokerId, {}).then((data) => {
+          this.tableData.rowData[i].topicCount = data.data
+          this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+        })
+      }
+    },
+    findDCByIps (i, ip) {
+      let data = []
+      data.push(ip)
+      apiRequest.post(this.urls.findDCByIps, {}, data).then((data) => {
+        if (data && data.data) {
+          let dcName = data.data.map(item => item.name).sort()
+          let str = ''
+          for (let i in dcName) {
+            if (dcName.hasOwnProperty(i)) {
+              str = str + dcName[i] + ' '
+            }
+          }
+          this.tableData.rowData[i].dataCenters = str
+          this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+        }
+      })
     },
     // 查询
     getList () {
@@ -157,6 +199,12 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
+        for (let i in this.tableData.rowData) {
+          if (this.tableData.rowData.hasOwnProperty(i)) {
+            this.findTopicCount(i)
+            this.findDCByIps(i, this.tableData.rowData[i].ip)
+          }
+        }
         if (this.firstOpen && this.tableData.rowData.length > 0) {
           let groupCode = ''
           if (this.tableData.rowData[0].group) {

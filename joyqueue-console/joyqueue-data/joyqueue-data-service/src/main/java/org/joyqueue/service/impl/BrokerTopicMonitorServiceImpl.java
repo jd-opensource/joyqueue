@@ -193,6 +193,12 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
         return getStartInfo(broker);
     }
 
+    @Override
+    public List<String> queryTopicList(Long brokerId) throws Exception {
+        Broker broker = brokerService.findById(brokerId.intValue());
+        return queryTopicList(broker);
+    }
+
     private BrokerTopicMonitor getMonitorByAppAndTopic(String topic, List<String> appList, Broker broker, SubscribeType type) throws Exception {
         BrokerTopicMonitor brokerTopicMonitor = new BrokerTopicMonitor();
         List<BrokerTopicMonitorRecord> brokerMonitorRecordList = new ArrayList<>();
@@ -332,7 +338,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
      * 查询topicList
      * @return
      */
-    private List<String> queryTopicList(Broker broker) throws Exception {
+    public List<String> queryTopicList(Broker broker) throws Exception {
         String path = "topicList";
         String[] args = new String[2];
         args[0] = broker.getIp();
