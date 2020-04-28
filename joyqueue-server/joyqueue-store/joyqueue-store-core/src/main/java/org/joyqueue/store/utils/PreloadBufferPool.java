@@ -226,9 +226,9 @@ public class PreloadBufferPool {
     }
 
     private int compareBufferHolder(LruWrapper<BufferHolder> h1, LruWrapper<BufferHolder> h2) {
-        if (h1.isWritable() != h2.isWritable()) { // 二者只读状态不同
+        if (h1.getRwState() != h2.getRwState()) { // 二者只读状态不同
             // 优先清理只读的页，避免频繁加载正在写入的页
-            return h1.isWritable() ? 1 : -1;
+            return Integer.compare(h1.getRwState(), h2.getRwState());
         } else {
             // 只读状态相同，按照最后访问时间排序
             return Long.compare(h1.getLastAccessTime(), h2.getLastAccessTime());
@@ -463,14 +463,16 @@ public class PreloadBufferPool {
     }
 
     private static class LruWrapper<V> {
+        private static final int READ_ONLY = 0;
+        private static final int READ_WRITE = 1;
         private final long lastAccessTime;
-        private final boolean writable;
+        private final int rwState;
         private final V t;
 
         LruWrapper(V t, long lastAccessTime, boolean writable) {
             this.lastAccessTime = lastAccessTime;
             this.t = t;
-            this.writable = writable;
+            this.rwState = writable ? READ_WRITE : READ_ONLY;
         }
 
         private long getLastAccessTime() {
@@ -481,8 +483,8 @@ public class PreloadBufferPool {
             return t;
         }
 
-        public boolean isWritable() {
-            return writable;
+        public int getRwState() {
+            return rwState;
         }
     }
 }
