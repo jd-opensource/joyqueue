@@ -231,11 +231,11 @@ public class StoreConfig {
     }
 
     public boolean isMessageFileLoadOnRead() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.MESSAGE_FILE_LOAD_ON_READ);
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.MESSAGE_FILE_LOAD_ON_READ, DEFAULT_MESSAGE_FILE_LOAD_ON_READ);
     }
 
     public boolean isIndexFileLoadOnRead() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.INDEX_FILE_LOAD_ON_READ);
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.INDEX_FILE_LOAD_ON_READ, DEFAULT_INDEX_FILE_LOAD_ON_READ);
     }
 
 }
