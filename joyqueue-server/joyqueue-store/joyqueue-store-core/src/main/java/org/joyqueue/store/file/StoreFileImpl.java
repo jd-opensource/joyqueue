@@ -153,7 +153,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             writeTimestamp();
         }
         if (needLoadFileContent) {
-            logger.warn("Reload file for write! size: {}, file: {}.", file.length(), file);
+            logger.debug("Reload file for write! size: {}, file: {}.", file.length(), file);
             fileChannel.position(headerSize);
             int length;
             do {

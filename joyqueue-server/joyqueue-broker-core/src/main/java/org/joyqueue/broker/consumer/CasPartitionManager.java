@@ -113,13 +113,13 @@ public class CasPartitionManager implements PartitionManager {
 
         PartitionLock partitionLock = ownerShipCache.get(consumePartition);
         if (partitionLock == null) {
-            partitionLock = new PartitionLock(counterService, occupyTimeout);
+            partitionLock = new PartitionLock(counterService);
             PartitionLock newPartitionLock = ownerShipCache.putIfAbsent(consumePartition, partitionLock);
             if (newPartitionLock != null) {
                 partitionLock = newPartitionLock;
             }
         }
-        return partitionLock.tryLock(clientId);
+        return partitionLock.tryLock(clientId, occupyTimeout);
     }
 
 
@@ -510,25 +510,24 @@ public class CasPartitionManager implements PartitionManager {
     static class PartitionLock {
         private final AtomicBoolean locked = new AtomicBoolean(false);
         private final CasLock casLock = new CasLock();
-        private AtomicLong timestamp = new AtomicLong(SystemClock.now());
+        private final AtomicLong timestamp = new AtomicLong(SystemClock.now());
         private String lockedBy = null;
-        private final long timeoutMs;
         private final CounterService counterService;
+        private long lastTimeoutMs = 0L;
 
-
-        PartitionLock(CounterService counterService, long timeoutMs) {
-            this.timeoutMs = timeoutMs;
+        PartitionLock(CounterService counterService) {
             this.counterService = counterService;
         }
 
-        boolean tryLock(String consumer) {
+        boolean tryLock(String consumer, long timeoutMs) {
             if(casLock.tryLock()) {
                 try {
-                    maybeReleaseTimeout();
+                    maybeReleaseTimeout(timeoutMs);
                     if (locked.compareAndSet(false, true)) {
                         counterService.increaseOccupyTimes(consumer);
                         lockedBy = consumer;
                         timestamp.set(SystemClock.now());
+                        this.lastTimeoutMs = timeoutMs;
                         return true;
                     }
                 } finally {
@@ -570,7 +569,7 @@ public class CasPartitionManager implements PartitionManager {
         }
 
 
-        void maybeReleaseTimeout() {
+        void maybeReleaseTimeout(long timeoutMs) {
             final long finalTimestamp = timestamp.get();
             final long now = SystemClock.now();
             if (locked.get() && finalTimestamp + timeoutMs < now) {
@@ -592,7 +591,7 @@ public class CasPartitionManager implements PartitionManager {
         }
 
         boolean isLocked() {
-            maybeReleaseTimeout();
+            maybeReleaseTimeout(this.lastTimeoutMs);
             return locked.get();
         }
 

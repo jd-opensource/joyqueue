@@ -103,9 +103,13 @@ public class MqttSubscriptionManager extends Service {
             for (MqttSubscription subscription : topicFilters) {
                 for (String topic : topics) {
                     TopicFilter newTopicFilter = new TopicFilter(topic);
-                    if (newTopicFilter.match(subscription.getTopicFilter())) {
-                        MqttSubscription newSubscription = new MqttSubscription(subscription.getClientId(), newTopicFilter, subscription.getRequestedQos());
-                        list.add(newSubscription);
+                    try {
+                        if (newTopicFilter.match(subscription.getTopicFilter())) {
+                            MqttSubscription newSubscription = new MqttSubscription(subscription.getClientId(), newTopicFilter, subscription.getRequestedQos());
+                            list.add(newSubscription);
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Topic meta data <{}> filter match subscription <{}> filter error: {}", topic, subscription.getTopicFilter(), e);
                     }
                 }
             }

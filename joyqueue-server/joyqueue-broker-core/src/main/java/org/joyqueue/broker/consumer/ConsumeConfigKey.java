@@ -39,7 +39,6 @@ public enum ConsumeConfigKey implements PropertyDef {
     USE_LEGACY_CONCURRENT_CONSUMER("consume.legacy.concurrent.consumer", false, Type.BOOLEAN),
 
     PARTITION_SELECT_RETRY_MAX("consume.partition.select.retry.max", 20, Type.INT),
-    PARTITION_SELECT_RETRY_INTERVAL("consume.partition.select.retry.interval", 10, Type.INT),
 
     ;
     private String name;

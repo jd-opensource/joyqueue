@@ -98,8 +98,4 @@ public class ConsumeConfig {
     public int getPartitionSelectRetryMax() {
         return propertySupplier.getValue(ConsumeConfigKey.PARTITION_SELECT_RETRY_MAX);
     }
-
-    public int getPartitionSelectRetryInterval() {
-        return propertySupplier.getValue(ConsumeConfigKey.PARTITION_SELECT_RETRY_INTERVAL);
-    }
 }
