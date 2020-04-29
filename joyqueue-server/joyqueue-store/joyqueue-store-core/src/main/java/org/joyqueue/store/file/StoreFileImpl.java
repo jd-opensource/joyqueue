@@ -53,6 +53,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private final int headerSize;
 
     private final boolean loadOnRead;
+    private final boolean flushForce;
     // 对应的File
     private final File file;
     // buffer读写锁：
@@ -79,12 +80,13 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private RandomAccessFile raf;
     private volatile boolean writeClosed = true;
 
-    StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength, boolean loadOnRead) {
+    StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength, boolean loadOnRead, boolean flushForce) {
         this.filePosition = filePosition;
         this.headerSize = headerSize;
         this.serializer = serializer;
         this.bufferPool = bufferPool;
         this.loadOnRead = loadOnRead;
+        this.flushForce = flushForce;
         this.file = new File(base, String.valueOf(filePosition));
         if (file.exists() && file.length() > headerSize) {
             this.writePosition = (int) (file.length() - headerSize);
@@ -458,7 +460,9 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     private void closeFileChannel() throws IOException {
-        force();
+        if (flushForce) {
+            force();
+        }
         if (null != fileChannel) {
             fileChannel.close();
         }
@@ -514,6 +518,9 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             fileLock.waitAndLock();
             ensureOpen();
             try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("force file, file: {}, writePosition: {}, flushPosition: {}", file.getAbsolutePath(), writePosition, flushPosition);
+                }
                 fileChannel.force(true);
             } catch (Throwable t) {
                 forced.set(false);

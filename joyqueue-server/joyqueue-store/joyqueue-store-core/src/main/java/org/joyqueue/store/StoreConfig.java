@@ -36,6 +36,7 @@ public class StoreConfig {
     public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
     public static final boolean DEFAULT_MESSAGE_FILE_LOAD_ON_READ = false;
     public static final boolean DEFAULT_INDEX_FILE_LOAD_ON_READ = true;
+    public static final boolean DEFAULT_FLUSH_FORCE = true;
 
     public static final String STORE_PATH = "/store";
     /**
@@ -158,6 +159,10 @@ public class StoreConfig {
 
     public long getFlushIntervalMs() {
         return PropertySupplier.getValue(propertySupplier, StoreConfigKey.FLUSH_INTERVAL_MS, this.flushIntervalMs);
+    }
+
+    public boolean isFlushForce() {
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.FLUSH_FORCE, DEFAULT_FLUSH_FORCE);
     }
 
     public void setFlushIntervalMs(long flushIntervalMs) {

@@ -80,6 +80,10 @@ public enum StoreConfigKey implements PropertyDef {
      */
     FLUSH_INTERVAL_MS("store.flush.interval", DEFAULT_FLUSH_INTERVAL_MS, Type.LONG),
     /**
+     * 是否强制刷盘
+     */
+    FLUSH_FORCE("store.flush.force", StoreConfig.DEFAULT_FLUSH_FORCE, Type.BOOLEAN),
+    /**
      * 文件头长度
      */
     FILE_HEADER_SIZE("store.file.header.size", DEFAULT_FILE_HEADER_SIZE, Type.INT),

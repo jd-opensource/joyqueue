@@ -365,6 +365,7 @@ public class PartitionGroupStoreManagerTest {
         int indexFileSize = 512 * 1024;
         boolean indexLoadOnRead = true;
         boolean storeLoadOnRead = false;
+        boolean flushForce = false;
         List<ByteBuffer> messages = MessageUtils.build(count, 1024);
 
 
@@ -394,8 +395,8 @@ public class PartitionGroupStoreManagerTest {
         }
         PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
-                new PositioningStore.Config(storeFileSize, storeLoadOnRead),
-                new PositioningStore.Config(indexFileSize, indexLoadOnRead));
+                new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
+                new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);
@@ -432,8 +433,8 @@ public class PartitionGroupStoreManagerTest {
 
         config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
-                new PositioningStore.Config(storeFileSize, storeLoadOnRead),
-                new PositioningStore.Config(indexFileSize, indexLoadOnRead));
+                new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
+                new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);
@@ -875,7 +876,7 @@ public class PartitionGroupStoreManagerTest {
                 1L,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
                 new PositioningStore.Config(32 * 1024 * 1024),
-                new PositioningStore.Config(128 * 1024,true));
+                new PositioningStore.Config(128 * 1024,true, false));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);
