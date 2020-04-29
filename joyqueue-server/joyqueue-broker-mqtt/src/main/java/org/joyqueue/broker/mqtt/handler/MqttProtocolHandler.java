@@ -351,7 +351,7 @@ public class MqttProtocolHandler extends Service {
             }
 
             List<MqttTopicSubscription> topicSubscribes = subscribeMessage.payload().topicSubscriptions();
-            LOG.info("Subscribe topics: {}", topicSubscribes);
+            LOG.info("Subscribe topics: {}, clientID: {}", topicSubscribes, clientID);
 
             try {
                 if (null != topicSubscribes) {
@@ -404,6 +404,7 @@ public class MqttProtocolHandler extends Service {
                 resultCodes.add(MqttQoS.AT_LEAST_ONCE.value());
             }
         }
+        LOG.info("Do subscribe topics: {}, clientGroup: {}", needSubsTopicFilters, clientGroup);
         return subscriptionManager.subscribes(clientGroup, needSubsTopicFilters);
     }
 
