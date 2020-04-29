@@ -50,6 +50,7 @@ public class PositioningStore<T> implements Closeable {
     private final int diskFullRatio;
     private final int maxMessageLength;
     private final boolean loadOnRead;
+    private final boolean flushForce;
     private final File base;
     private final LogSerializer<T> serializer;
     private final PreloadBufferPool bufferPool;
@@ -72,6 +73,7 @@ public class PositioningStore<T> implements Closeable {
         this.fileDataSize = config.fileDataSize;
         this.maxMessageLength = config.maxMessageLength;
         this.loadOnRead = config.loadOnRead;
+        this.flushForce = config.flushForce;
         if(config.diskFullRatio <= 0 || config.diskFullRatio > 100) {
             logger.warn("Invalid config diskFullRatio: {}, using default: {}.", config.diskFullRatio, Config.DEFAULT_DISK_FULL_RATIO);
             diskFullRatio = Config.DEFAULT_DISK_FULL_RATIO;
@@ -257,7 +259,7 @@ public class PositioningStore<T> implements Closeable {
         if (null != files) {
             for (File file : files) {
                 filePosition = Long.parseLong(file.getName());
-                storeFileMap.put(filePosition, new StoreFileImpl<>(filePosition, base, fileHeaderSize, serializer, bufferPool, fileDataSize, loadOnRead));
+                storeFileMap.put(filePosition, new StoreFileImpl<>(filePosition, base, fileHeaderSize, serializer, bufferPool, fileDataSize, loadOnRead, flushForce));
 //                storeFileMap.put(filePosition, new FastWriteStoreFile<>(filePosition, base, fileHeaderSize, serializer, 10 * 1024 * 1024));
             }
         }
@@ -378,11 +380,13 @@ public class PositioningStore<T> implements Closeable {
                 }
                 StoreFile storeFile = entry.getValue();
                 if (!storeFile.isClean()) {
-                    // 在文件第一次刷盘之前，需要把上一个文件fsync到磁盘上，避免服务器宕机导致文件不连续
-                    if (storeFile.flushPosition() == 0) {
-                        Map.Entry<Long, StoreFile<T>> prevEntry = storeFileMap.floorEntry(entry.getKey() - 1);
-                        if(null != prevEntry) {
-                            prevEntry.getValue().force();
+                    if (flushForce) {
+                        // 在文件第一次刷盘之前，需要把上一个文件fsync到磁盘上，避免服务器宕机导致文件不连续
+                        if (storeFile.flushPosition() == 0) {
+                            Map.Entry<Long, StoreFile<T>> prevEntry = storeFileMap.floorEntry(entry.getKey() - 1);
+                            if(null != prevEntry) {
+                                prevEntry.getValue().force();
+                            }
                         }
                     }
                     storeFile.flush();
@@ -399,7 +403,7 @@ public class PositioningStore<T> implements Closeable {
     }
 
     private StoreFile<T> createStoreFile(long position) {
-        StoreFile<T> storeFile = new StoreFileImpl<>(position, base, fileHeaderSize, serializer, bufferPool, fileDataSize, loadOnRead);
+        StoreFile<T> storeFile = new StoreFileImpl<>(position, base, fileHeaderSize, serializer, bufferPool, fileDataSize, loadOnRead, flushForce);
         StoreFile<T> present;
         if ((present = storeFileMap.putIfAbsent(position, storeFile)) != null) {
             storeFile = present;
@@ -696,6 +700,7 @@ public class PositioningStore<T> implements Closeable {
         public static final int DEFAULT_DISK_FULL_RATIO = 90;
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
         public static final boolean DEFAULT_LOAD_ON_READ = false;
+        public static final boolean DEFAULT_FLUSH_FORCE = true;
 
         /**
          * 文件头长度
@@ -714,6 +719,7 @@ public class PositioningStore<T> implements Closeable {
          * 读取文件的时候，是否预加载整个文件到内存中。
          */
         private final boolean loadOnRead;
+        private final boolean flushForce;
 
         public Config() {
             this(DEFAULT_FILE_DATA_SIZE,
@@ -729,22 +735,23 @@ public class PositioningStore<T> implements Closeable {
             this(fileDataSize, fileHeaderSize, DEFAULT_DISK_FULL_RATIO);
         }
         public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio) {
-            this(fileDataSize, fileHeaderSize, diskFullRatio, DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_LOAD_ON_READ);
+            this(fileDataSize, fileHeaderSize, diskFullRatio, DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_LOAD_ON_READ, DEFAULT_FLUSH_FORCE);
         }
-        public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio, int maxMessageLength, boolean loadOnRead) {
+        public Config(int fileDataSize, int fileHeaderSize, int diskFullRatio, int maxMessageLength, boolean loadOnRead, boolean flushForce) {
             this.fileDataSize = fileDataSize;
             this.fileHeaderSize = fileHeaderSize;
             this.diskFullRatio = diskFullRatio;
             this.maxMessageLength = maxMessageLength;
             this.loadOnRead = loadOnRead;
+            this.flushForce = flushForce;
         }
 
-        public Config(int fileDataSize, boolean loadOnRead) {
-            this(fileDataSize, DEFAULT_FILE_HEADER_SIZE, DEFAULT_DISK_FULL_RATIO, DEFAULT_MAX_MESSAGE_LENGTH, loadOnRead);
+        public Config(int fileDataSize, boolean loadOnRead, boolean flushForce) {
+            this(fileDataSize, DEFAULT_FILE_HEADER_SIZE, DEFAULT_DISK_FULL_RATIO, DEFAULT_MAX_MESSAGE_LENGTH, loadOnRead, flushForce);
         }
 
         public Config(int messageFileSize, int fileHeaderSize, int diskFullRatio, int maxMessageLength) {
-            this(messageFileSize,fileHeaderSize,diskFullRatio, maxMessageLength, DEFAULT_LOAD_ON_READ);
+            this(messageFileSize,fileHeaderSize,diskFullRatio, maxMessageLength, DEFAULT_LOAD_ON_READ, DEFAULT_FLUSH_FORCE);
         }
     }
 

@@ -1511,6 +1511,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
         public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
         public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
+        public static final boolean DEFAULT_FLUSH_FORCE = true;
         public static final long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
         public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
         public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0L;
@@ -1554,7 +1555,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                     DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_PRINT_METRIC_INTERVAL_MS,
                     new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE),
                     // 索引在读取的时候默认加载到内存中
-                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, true));
+                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, true, DEFAULT_FLUSH_FORCE));
         }
 
         public Config(int maxMessageLength, int writeRequestCacheSize, long flushIntervalMs,
