@@ -222,6 +222,7 @@ export default {
           this.$Dialog.success({
             content: '批量删除成功'
           })
+          this.getList()
         } else {
           this.$Dialog.error({
             content: data.message
