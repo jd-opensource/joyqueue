@@ -173,7 +173,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             TopicName topicName = TopicName.parse(filter.getTopic());
             apps = consumerService.findByTopic(topicName.getCode(), topicName.getNamespace()).stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
         } catch (NullPointerException e) {
-            throw new NotFoundException("topic not found or hasn't related app");
+            throw new NotFoundException("topic not found or doesn't have related app");
         }
         if (CollectionUtils.isNotEmpty(apps)) {
             updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.RUNNING, null, "");
@@ -196,8 +196,8 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 }
             });
         } else {
-            updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.ERROR, "", "topic not found or hasn't related app");
-            throw new NotFoundException("topic not found or hasn't related app");
+            updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.ERROR, "", "topic not found or doesn't have related app");
+            throw new NotFoundException("topic not found or doesn't have related app");
         }
     }
 
