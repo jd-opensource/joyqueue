@@ -20,10 +20,10 @@
     <parent>
         <artifactId>joyqueue-web</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.4-SNAPSHOT</version>
+        <version>4.2.5.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>4.2.5.4-SNAPSHOT</version>
 
     <artifactId>joyqueue-web-application</artifactId>
 
@@ -109,6 +109,11 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-message-filter-s3</artifactId>
             <scope>runtime</scope>
         </dependency>
     </dependencies>

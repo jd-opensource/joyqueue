@@ -52,7 +52,7 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
             // make sure no message expired
             updateMessageExpireTime(writeMsgMs+oneMinutes);
     }
-    public void createTopic(){
+    public void createTopic() throws Exception {
         for(int i=0;i<partitionGroup;i++){
             this.storeService.createPartitionGroup(topic,i,partitions((short)(i*partitionForPartitionGroup),partitionForPartitionGroup));
             this.storeService.getReplicableStore(topic, i).enable();

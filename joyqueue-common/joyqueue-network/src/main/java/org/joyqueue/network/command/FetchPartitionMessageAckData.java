@@ -78,4 +78,15 @@ public class FetchPartitionMessageAckData {
         }
         return buffers.size();
     }
+
+    public int getTraffic() {
+        if (buffers == null) {
+            return 0;
+        }
+        int result = 0;
+        for (ByteBuffer buffer : buffers) {
+            result += buffer.limit();
+        }
+        return result;
+    }
 }

@@ -119,6 +119,9 @@ public class DefaultTransportClient extends TransportClientSupport implements Tr
     @Override
     protected void doStop() {
         requestBarrier.clear();
+        if (transportEventBus != null) {
+            transportEventBus.stop();
+        }
         super.doStop();
     }
 }

@@ -25,6 +25,9 @@ import org.joyqueue.toolkit.config.PropertyDef;
  */
 public enum CoordinatorConfigKey implements PropertyDef {
 
+    // 协调者作用域
+    GROUP_NAMESPACE("coordinator.group.namespace", "", Type.STRING),
+
     // 协调者主题
     GROUP_TOPIC_CODE("coordinator.group.topic.code", "__group_coordinators", Type.STRING),
     // 协调者主题分区
@@ -49,6 +52,8 @@ public enum CoordinatorConfigKey implements PropertyDef {
     SESSION_EXPIRE_TIME("coordinator.session.expire.time", 1000 * 60 * 10, Type.INT),
 
     ;
+
+    public static final String TRANSPORT_KEY_PREFIX = "coordinator.";
 
     private String name;
     private Object value;

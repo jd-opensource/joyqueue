@@ -123,4 +123,6 @@ public interface StoreFile<T> extends Timed {
      * 结束写入，文件变为只读。
      */
     void closeWrite();
+
+    int size();
 }

@@ -32,6 +32,9 @@ import java.util.Map;
 public class Traffic {
 
     private Map<String, Integer> topicTraffic;
+    private Map<String, Integer> topicTps;
+    private Map<String, Boolean> isLimited;
+    private boolean limited = false;
     private String app;
 
     public Traffic() {
@@ -42,12 +45,20 @@ public class Traffic {
         this.app = app;
     }
 
-    public Traffic(Map<String, Integer> topicTraffic, String app) {
-        this.topicTraffic = topicTraffic;
-        this.app = app;
+    public void record(String topic, int traffic, int tps) {
+        recordTps(topic, tps);
+        recordTraffic(topic, traffic);
     }
 
-    public void record(String topic, int traffic) {
+    public void recordTps(String topic, int tps) {
+        if (topicTps == null) {
+            topicTps = Maps.newHashMap();
+        }
+        tps = ObjectUtils.defaultIfNull(topicTps.get(topic), 0) + tps;
+        topicTps.put(topic, tps);
+    }
+
+    public void recordTraffic(String topic, int traffic) {
         if (topicTraffic == null) {
             topicTraffic = Maps.newHashMap();
         }
@@ -62,6 +73,39 @@ public class Traffic {
         return Lists.newArrayList(topicTraffic.keySet());
     }
 
+    public void limited(boolean limited) {
+        this.limited = limited;
+    }
+
+    public boolean isLimited() {
+        return limited;
+    }
+
+    public void limited(String topic, boolean limited) {
+        if (isLimited == null) {
+            isLimited = Maps.newHashMap();
+        }
+        isLimited.put(topic, limited);
+    }
+
+    public boolean isLimited(String topic) {
+        if (limited) {
+            return true;
+        }
+        if (isLimited == null) {
+            return false;
+        }
+        Boolean result = isLimited.get(topic);
+        if (result == null) {
+            return false;
+        }
+        return result;
+    }
+
+    public void setApp(String app) {
+        this.app = app;
+    }
+
     public String getApp() {
         return app;
     }
@@ -71,5 +115,12 @@ public class Traffic {
             return 0;
         }
         return topicTraffic.get(topic);
+    }
+
+    public int getTps(String topic) {
+        if (topicTps == null) {
+            return 1;
+        }
+        return topicTps.get(topic);
     }
 }

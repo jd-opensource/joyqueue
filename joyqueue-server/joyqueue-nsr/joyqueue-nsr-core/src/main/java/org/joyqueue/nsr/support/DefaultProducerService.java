@@ -21,6 +21,7 @@ import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.Producer;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.event.AddProducerEvent;
 import org.joyqueue.nsr.event.RemoveProducerEvent;
 import org.joyqueue.nsr.event.UpdateProducerEvent;
@@ -53,16 +54,18 @@ public class DefaultProducerService implements ProducerService {
     private BrokerInternalService brokerInternalService;
     private ProducerInternalService producerInternalService;
     private TransactionInternalService transactionInternalService;
+    private NameServiceConfig config;
     private Messenger messenger;
 
     public DefaultProducerService(TopicInternalService topicInternalService, PartitionGroupInternalService partitionGroupInternalService,
                                   BrokerInternalService brokerInternalService, ProducerInternalService producerInternalService,
-                                  TransactionInternalService transactionInternalService, Messenger messenger) {
+                                  TransactionInternalService transactionInternalService, NameServiceConfig config, Messenger messenger) {
         this.topicInternalService = topicInternalService;
         this.partitionGroupInternalService = partitionGroupInternalService;
         this.brokerInternalService = brokerInternalService;
         this.producerInternalService = producerInternalService;
         this.transactionInternalService = transactionInternalService;
+        this.config = config;
         this.messenger = messenger;
     }
 
@@ -121,7 +124,9 @@ public class DefaultProducerService implements ProducerService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new AddProducerEvent(producer.getTopic(), producer), replicas);
+        if (config.getMessengerPublishSubscriptionEnable()) {
+            messenger.publish(new AddProducerEvent(producer.getTopic(), producer), replicas);
+        }
         return producer;
     }
 
@@ -153,7 +158,9 @@ public class DefaultProducerService implements ProducerService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new UpdateProducerEvent(producer.getTopic(), oldProducer, producer), replicas);
+        if (config.getMessengerPublishSubscriptionEnable()) {
+            messenger.publish(new UpdateProducerEvent(producer.getTopic(), oldProducer, producer), replicas);
+        }
         return producer;
     }
 
@@ -185,7 +192,9 @@ public class DefaultProducerService implements ProducerService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new RemoveProducerEvent(producer.getTopic(), producer), replicas);
+        if (config.getMessengerPublishSubscriptionEnable()) {
+            messenger.publish(new RemoveProducerEvent(producer.getTopic(), producer), replicas);
+        }
     }
 
     protected List<Broker> getReplicas(List<PartitionGroup> partitionGroups) {

@@ -200,7 +200,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
         if(retryTokenAvailable(consumers)) {
             RetryMessageModel retryMessageModel = retryMessageModelList.get(0);
             TraceStat totalRetryTrace = tracer.begin("BrokerRetryManager.addRetry");
-            TraceStat appRetryTrace = tracer.begin(String.format("BrokerRetryManager.addRetry.%s.%s", retryMessageModel.getApp(), retryMessageModel.getTopic()));
+            TraceStat appRetryTrace = tracer.begin(String.format("BrokerRetryManager.addRetry.%s.%s", retryMessageModel.getApp().replace(".", "_"), retryMessageModel.getTopic()));
             try {
                 long startTime = SystemClock.now();
                 delegate.addRetry(retryMessageModelList);

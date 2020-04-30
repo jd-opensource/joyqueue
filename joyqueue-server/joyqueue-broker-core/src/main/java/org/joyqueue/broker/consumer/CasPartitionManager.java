@@ -111,10 +111,15 @@ public class CasPartitionManager implements PartitionManager {
             return false;
         }
 
-        PartitionLock partitionLock = ownerShipCache.computeIfAbsent(consumePartition, key -> new PartitionLock(counterService, occupyTimeout));
-
-        return partitionLock.tryLock(clientId);
-
+        PartitionLock partitionLock = ownerShipCache.get(consumePartition);
+        if (partitionLock == null) {
+            partitionLock = new PartitionLock(counterService);
+            PartitionLock newPartitionLock = ownerShipCache.putIfAbsent(consumePartition, partitionLock);
+            if (newPartitionLock != null) {
+                partitionLock = newPartitionLock;
+            }
+        }
+        return partitionLock.tryLock(clientId, occupyTimeout);
     }
 
 
@@ -217,7 +222,7 @@ public class CasPartitionManager implements PartitionManager {
         }
 
         Boolean retry = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp()).getRetry();
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         if (!retry.booleanValue() || !masterPartitionList.contains((short) 0)) {
             logger.debug("retry enable is false.");
             return false;
@@ -301,7 +306,7 @@ public class CasPartitionManager implements PartitionManager {
 
         String clientId = consumer.getId();
         int occupyNum = counterService.getOccupyTimes(clientId);
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         int partitionNum = masterPartitionList.size();
         if (partitionNum > occupyNum) {
             isFree = true;
@@ -505,25 +510,24 @@ public class CasPartitionManager implements PartitionManager {
     static class PartitionLock {
         private final AtomicBoolean locked = new AtomicBoolean(false);
         private final CasLock casLock = new CasLock();
-        private AtomicLong timestamp = new AtomicLong(SystemClock.now());
+        private final AtomicLong timestamp = new AtomicLong(SystemClock.now());
         private String lockedBy = null;
-        private final long timeoutMs;
         private final CounterService counterService;
+        private long lastTimeoutMs = 0L;
 
-
-        PartitionLock(CounterService counterService, long timeoutMs) {
-            this.timeoutMs = timeoutMs;
+        PartitionLock(CounterService counterService) {
             this.counterService = counterService;
         }
 
-        boolean tryLock(String consumer) {
+        boolean tryLock(String consumer, long timeoutMs) {
             if(casLock.tryLock()) {
                 try {
-                    maybeReleaseTimeout();
+                    maybeReleaseTimeout(timeoutMs);
                     if (locked.compareAndSet(false, true)) {
                         counterService.increaseOccupyTimes(consumer);
                         lockedBy = consumer;
                         timestamp.set(SystemClock.now());
+                        this.lastTimeoutMs = timeoutMs;
                         return true;
                     }
                 } finally {
@@ -565,7 +569,7 @@ public class CasPartitionManager implements PartitionManager {
         }
 
 
-        void maybeReleaseTimeout() {
+        void maybeReleaseTimeout(long timeoutMs) {
             final long finalTimestamp = timestamp.get();
             final long now = SystemClock.now();
             if (locked.get() && finalTimestamp + timeoutMs < now) {
@@ -587,7 +591,7 @@ public class CasPartitionManager implements PartitionManager {
         }
 
         boolean isLocked() {
-            maybeReleaseTimeout();
+            maybeReleaseTimeout(this.lastTimeoutMs);
             return locked.get();
         }
 
@@ -617,7 +621,7 @@ public class CasPartitionManager implements PartitionManager {
          * 移除占用
          */
         private void removeOccupyByConsumer(Consumer consumer) {
-            List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+            List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
             final String clientId = consumer.getId();
             masterPartitionList.forEach(partition -> {
                 ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);

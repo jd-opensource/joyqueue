@@ -15,7 +15,8 @@
  */
 package org.joyqueue.broker.kafka.coordinator.transaction.synchronizer;
 
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
+import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.transaction.TransactionIdManager;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionMarker;
@@ -24,10 +25,9 @@ import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionOffse
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionPrepare;
 import org.joyqueue.broker.kafka.coordinator.transaction.domain.TransactionState;
 import org.joyqueue.broker.kafka.coordinator.transaction.log.TransactionLog;
-import org.joyqueue.nsr.NameService;
+import org.joyqueue.network.transport.session.session.TransportSessionManager;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,23 +46,24 @@ public class TransactionSynchronizer extends Service {
     private KafkaConfig config;
     private TransactionIdManager transactionIdManager;
     private TransactionLog transactionLog;
-    private CoordinatorSessionManager sessionManager;
-    private NameService nameService;
+    private TransportSessionManager sessionManager;
+    private ClusterNameService clusterNameService;
 
     private TransactionCommitSynchronizer transactionCommitSynchronizer;
     private TransactionAbortSynchronizer transactionAbortSynchronizer;
 
-    public TransactionSynchronizer(KafkaConfig config, TransactionIdManager transactionIdManager, TransactionLog transactionLog, CoordinatorSessionManager sessionManager, NameService nameService) {
+    public TransactionSynchronizer(KafkaConfig config, TransactionIdManager transactionIdManager, TransactionLog transactionLog,
+                                   TransportSessionManager sessionManager, ClusterNameService clusterNameService) {
         this.config = config;
         this.transactionIdManager = transactionIdManager;
         this.transactionLog = transactionLog;
         this.sessionManager = sessionManager;
-        this.nameService = nameService;
+        this.clusterNameService = clusterNameService;
     }
 
     @Override
     protected void validate() throws Exception {
-        transactionCommitSynchronizer = new TransactionCommitSynchronizer(config, sessionManager, transactionIdManager, nameService);
+        transactionCommitSynchronizer = new TransactionCommitSynchronizer(config, sessionManager, transactionIdManager, clusterNameService);
         transactionAbortSynchronizer = new TransactionAbortSynchronizer(config, sessionManager, transactionIdManager);
     }
 

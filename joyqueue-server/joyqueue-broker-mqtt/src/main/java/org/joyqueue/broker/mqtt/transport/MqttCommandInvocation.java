@@ -96,10 +96,10 @@ public class MqttCommandInvocation extends SimpleChannelInboundHandler<Object> {
                 ctx.close().addListener(CLOSE_ON_FAILURE);
             } else if (event.state().equals(IdleState.WRITER_IDLE)) {
                 //未进行写操作
-                LOG.info("WRITER_IDLE: {}", clientId);
+                LOG.info("WRITER_IDLE: {}, start close channel...", clientId);
             } else if (event.state().equals(IdleState.ALL_IDLE)) {
                 //未进行读写
-                LOG.info("ALL_IDLE: {}", clientId);
+                LOG.info("ALL_IDLE: {}, start close channel...", clientId);
                 ctx.fireChannelInactive();
                 ctx.close().addListener(CLOSE_ON_FAILURE);
             }

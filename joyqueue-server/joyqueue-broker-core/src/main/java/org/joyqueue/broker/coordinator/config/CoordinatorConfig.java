@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.coordinator.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
@@ -36,8 +37,18 @@ public class CoordinatorConfig {
         this.propertySupplier = propertySupplier;
     }
 
+    public String getGroupNamespace() {
+        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_NAMESPACE);
+    }
+
     public TopicName getGroupTopic() {
-        return TopicName.parse(PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_TOPIC_CODE));
+        String topic = PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_TOPIC_CODE);
+        String namespace = getGroupNamespace();
+        if (StringUtils.isBlank(namespace) || namespace.equals("null")) {
+            return TopicName.parse(topic);
+        } else {
+            return TopicName.parse(topic, namespace);
+        }
     }
 
     public short getGroupTopicPartitions() {
@@ -49,7 +60,13 @@ public class CoordinatorConfig {
     }
 
     public TopicName getTransactionTopic() {
-        return TopicName.parse(PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_CODE));
+        String topic = PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_CODE);
+        String namespace = getGroupNamespace();
+        if (StringUtils.isBlank(namespace) || namespace.equals("null")) {
+            return TopicName.parse(topic);
+        } else {
+            return TopicName.parse(topic, namespace);
+        }
     }
 
     public short getTransactionTopicPartitions() {

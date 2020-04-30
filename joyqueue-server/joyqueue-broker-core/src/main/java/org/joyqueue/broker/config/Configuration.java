@@ -136,10 +136,14 @@ public class Configuration implements PropertySupplier {
      * @param key
      * @param value
      */
-    public Property addProperty(final String key, final String value) {
-        Property property = new Property(name, key, value, 0, priority);
+    public Property addProperty(final String key, final String value, final String group) {
+        Property property = new Property(name, key, value, group, 0, priority);
         properties.put(key, property);
         return property;
+    }
+
+    public Property addProperty(final String key, final String value) {
+        return addProperty(key, value, null);
     }
 
     protected static void process(final String source, final int start, final Object value, final Map<String, Object> context) {

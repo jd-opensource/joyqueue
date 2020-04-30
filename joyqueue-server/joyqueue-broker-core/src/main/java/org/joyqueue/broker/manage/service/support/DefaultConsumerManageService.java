@@ -18,6 +18,7 @@ package org.joyqueue.broker.manage.service.support;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.manage.service.ConsumerManageService;
@@ -31,7 +32,6 @@ import org.joyqueue.network.session.Consumer;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreService;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -190,7 +190,8 @@ public class DefaultConsumerManageService implements ConsumerManageService {
             if (CollectionUtils.isEmpty(consumers)) {
                 continue;
             }
-            for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(clusterManager.getBrokerId())) {
+
+            for (PartitionGroup partitionGroup : clusterManager.getLocalPartitionGroups(topicConfig)) {
                 for (Short partition : partitionGroup.getPartitions()) {
                     for (org.joyqueue.domain.Consumer consumer : consumers) {
                         apps.add(consumer.getApp());

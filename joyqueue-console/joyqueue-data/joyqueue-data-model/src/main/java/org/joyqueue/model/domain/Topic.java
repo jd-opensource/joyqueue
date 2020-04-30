@@ -70,6 +70,8 @@ public class Topic extends BaseNsrModel {
 
     private String labels;
 
+    private List<String> dataCenters;
+
     private Namespace namespace = new Namespace(DEFAULT_NAMESPACE_ID, DEFAULT_NAMESPACE_CODE);
 
 //    private List<BrokerGroup> brokerGroups;
@@ -202,6 +204,14 @@ public class Topic extends BaseNsrModel {
 
     public void setReplica(int replica) {
         this.replica = replica;
+    }
+
+    public List<String> getDataCenters() {
+        return dataCenters;
+    }
+
+    public void setDataCenters(List<String> dataCenters) {
+        this.dataCenters = dataCenters;
     }
 
     @Override

@@ -106,6 +106,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     private DelayHandler delayHandler = new DelayHandler();
     // 消费归档服务
     private ArchiveManager archiveManager;
+    private ConsumeConfig consumeConfig;
 
     private static final long CLEAN_INTERVAL_SEC = 600L;
 
@@ -115,7 +116,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
 
     SlideWindowConcurrentConsumer(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
                                   MessageRetry messageRetry, PositionManager positionManager,
-                                  FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager) {
+                                  FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager, ConsumeConfig consumeConfig) {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.partitionManager = partitionManager;
@@ -123,6 +124,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         this.positionManager = positionManager;
         this.filterMessageSupport = filterMessageSupport;
         this.archiveManager = archiveManager;
+        this.consumeConfig = consumeConfig;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("ConcurrentConsumerClearExecutor", true));
     }
 
@@ -171,7 +173,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     @Override
     public PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         // 消费普通分区消息
-        List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         PullResult pullResult;
 
         if (partitionManager.isRetry(consumer)) {
@@ -289,8 +291,15 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     private PullResult getFromPartition(Consumer consumer, List<Short> partitionList, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         int partitionSize = partitionList.size();
         int listIndex = -1;
+
+        int retryMax = consumeConfig.getPartitionSelectRetryMax();
+
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         for (int i = 0; i < partitionSize; i++) {
+            if (i == retryMax) {
+                break;
+            }
+
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex + i, accessTimes);
             short partition = partitionList.get(listIndex);
             ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);

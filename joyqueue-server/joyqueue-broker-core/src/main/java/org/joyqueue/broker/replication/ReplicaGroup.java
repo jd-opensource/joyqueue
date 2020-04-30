@@ -100,7 +100,7 @@ public class ReplicaGroup extends Service {
 
     private Consume consume;
     private BrokerMonitor brokerMonitor;
-    private final ConcurrentMap<String, TransportSession> sessions = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ReplicationTransportSession> sessions = new ConcurrentHashMap<>();
     private final TransportClient transportClient;
 
     private static final long ONE_SECOND_NANO = 1000 * 1000 * 1000;
@@ -164,7 +164,7 @@ public class ReplicaGroup extends Service {
         }
 
         if (sessions != null && !sessions.isEmpty()) {
-            for (TransportSession transport : sessions.values()) {
+            for (ReplicationTransportSession transport : sessions.values()) {
                 if (transport != null) {
                     transport.stop();
                 }
@@ -607,7 +607,7 @@ public class ReplicaGroup extends Service {
         // sync leader write position by the way
         getReplica(leaderId).writePosition(replicableStore.rightPosition());
         replicasWithoutLearners.sort((r1, r2) ->
-                Long.valueOf(r1.writePosition()).compareTo(r2.writePosition()));
+                Long.compare(r2.writePosition(), r1.writePosition()));
 
         long commitPosition = replicasWithoutLearners.get(replicasWithoutLearners.size() / 2).writePosition();
         replicableStore.commit(commitPosition);
@@ -973,14 +973,14 @@ public class ReplicaGroup extends Service {
      * @throws TransportException
      */
     protected void sendCommand(String address, Command command, int timeout, CommandCallback callback) throws TransportException {
-        TransportSession transport = sessions.get(address);
+        ReplicationTransportSession transport = sessions.get(address);
         if (transport == null) {
             synchronized (sessions) {
                 transport = sessions.get(address);
                 if (transport == null) {
                     logger.info("Replication manager create transport of {}", address);
 
-                    transport = new TransportSession(address, transportClient);
+                    transport = new ReplicationTransportSession(address, transportClient);
                     sessions.put(address, transport);
                 }
             }

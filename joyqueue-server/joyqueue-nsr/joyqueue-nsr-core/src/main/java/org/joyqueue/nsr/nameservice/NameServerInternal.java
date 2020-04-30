@@ -16,6 +16,8 @@
 package org.joyqueue.nsr.nameservice;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.laf.extension.ExtensionPoint;
@@ -73,6 +75,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -461,18 +466,31 @@ public class NameServerInternal extends Service implements NameService, Property
         return appTopicConfigs;
     }
 
+    // TODO 临时
+    private Cache<String, Boolean> hasSubscribeCache = CacheBuilder.newBuilder().expireAfterWrite(1000 * 60, TimeUnit.MILLISECONDS).build();
+
     @Override
     public boolean hasSubscribe(String subscribeApp, Subscription.Type subscribe) {
-        //TODO Ignite 不可用
-        switch (subscribe) {
-            case CONSUMPTION:
-                List<Consumer> consumers = metaManager.getConsumer(subscribeApp);
-                return (null != consumers && consumers.size() > 0) ? true : false;
-            case PRODUCTION:
-                List<Producer> producers = metaManager.getProducer(subscribeApp);
-                return (null != producers && producers.size() > 0) ? true : false;
+        try {
+            return hasSubscribeCache.get(subscribeApp + "_" + subscribe, new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    //TODO Ignite 不可用
+                    switch (subscribe) {
+                        case CONSUMPTION:
+                            List<Consumer> consumers = metaManager.getConsumer(subscribeApp);
+                            return (null != consumers && consumers.size() > 0) ? true : false;
+                        case PRODUCTION:
+                            List<Producer> producers = metaManager.getProducer(subscribeApp);
+                            return (null != producers && producers.size() > 0) ? true : false;
+                    }
+                    return false;
+                }
+            });
+        } catch (ExecutionException e) {
+            logger.error("hasSubscribe, subscribeApp: {}, subscribe: {}", subscribeApp, subscribe, e);
+            return true;
         }
-        return false;
     }
 
     @Override

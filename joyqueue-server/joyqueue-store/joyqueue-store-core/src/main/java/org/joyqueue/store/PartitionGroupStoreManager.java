@@ -31,11 +31,12 @@ import org.joyqueue.store.message.BatchMessageParser;
 import org.joyqueue.store.message.MessageParser;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.store.utils.PreloadBufferPool;
+import org.joyqueue.toolkit.concurrent.CasLock;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.format.Format;
-import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.metric.Metric;
+import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,7 @@ import java.util.stream.Stream;
  * @author liyue25
  * Date: 2018/8/13
  */
-public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, Closeable {
+public class PartitionGroupStoreManager extends Service implements ReplicableStore, Closeable {
     private static final Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManager.class);
     private static final long EVENT_TIMEOUT_MILLS = 60 * 1000L;
     private final PositioningStore<ByteBuffer> store;
@@ -93,7 +94,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private final BlockingQueue<WriteCommand> writeCommandCache;
     private long replicationPosition;
     private long indexPosition;
-    private AtomicBoolean started, enabled;
+    private AtomicBoolean enabled;
     private int term; // 当前轮次
     private Metric produceMetrics = null, consumeMetrics = null;
     private Metric.MetricInstance produceMetric = null, consumeMetric;
@@ -106,6 +107,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     private long lastFlushCheckpointTimestamp = 0L;
     static final String CHECKPOINT_FILE= "checkpoint.json";
     private int lastEntryTerm = -1;
+    private final CasLock flushLock = new CasLock();
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool) {
@@ -115,7 +117,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         this.config = config;
         this.writeCommandCache = new LinkedBlockingQueue<>(config.writeRequestCacheSize);
         this.bufferPool = bufferPool;
-        this.started = new AtomicBoolean(false);
         this.enabled = new AtomicBoolean(false);
         this.callbackMap.put(QosLevel.PERSISTENCE, new CallbackPositioningBelt());
         this.callbackMap.put(QosLevel.REPLICATION, new CallbackPositioningBelt());
@@ -733,27 +734,29 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     private void flush() {
-        try {
-            boolean flushed;
-            do {
-                long t0 = System.nanoTime();
-                long before = store.flushPosition();
-                flushed = store.flush() | flushIndices();
-                if (null != produceMetric && flushed) {
-                    long t1 = System.nanoTime();
-                    produceMetric.addTraffic("FlushTraffic", store.flushPosition() - before);
-                    produceMetric.addLatency("FlushLatency", t1 - t0);
-                    produceMetric.addCounter("FlushCount", 1);
-                }
-                if(flushed) {
-                    callbackMap.get(QosLevel.PERSISTENCE).callbackBefore(flushPosition());
-                }
-//                this.callbackThread.wakeup();
-                flushCheckpointPeriodically();
-            } while (flushed);
-
-        } catch (IOException e) {
-            logger.warn("Exception:", e);
+        if(flushLock.tryLock()) {
+            try {
+                boolean flushed;
+                do {
+                    long t0 = System.nanoTime();
+                    long before = store.flushPosition();
+                    flushed = store.flush() | flushIndices();
+                    if (null != produceMetric && flushed) {
+                        long t1 = System.nanoTime();
+                        produceMetric.addTraffic("FlushTraffic", store.flushPosition() - before);
+                        produceMetric.addLatency("FlushLatency", t1 - t0);
+                        produceMetric.addCounter("FlushCount", 1);
+                    }
+                    if (flushed) {
+                        callbackMap.get(QosLevel.PERSISTENCE).callbackBefore(flushPosition());
+                    }
+                    flushCheckpointPeriodically();
+                } while (flushed && isStarted());
+            } catch (IOException e) {
+                logger.warn("Exception:", e);
+            } finally {
+                flushLock.unlock();
+            }
         }
     }
 
@@ -785,6 +788,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     void asyncWrite(QosLevel qosLevel, EventListener<WriteResult> eventListener, WriteRequest... writeRequests) {
+        ensureStarted();
         if(isDiskFull()) {
             if (eventListener != null)
                 eventListener.onEvent(new WriteResult(JoyQueueCode.SE_DISK_FULL, null));
@@ -947,20 +951,19 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     @Override
-    public synchronized void start() {
-        if(started.compareAndSet(false, true)) {
-            if (config.printMetricIntervalMs > 0) {
-                metricThread.start();
-            }
-            startFlushThread();
+    protected void doStart() throws Exception {
+        if (config.printMetricIntervalMs > 0) {
+            metricThread.start();
+        }
+        startFlushThread();
+        if (enabled.get()) {
+            startWriteThread();
         }
     }
 
 
     private void startFlushThread() {
-        if(started.get()) {
-            flushLoopThread.start();
-        }
+       flushLoopThread.start();
     }
 
 
@@ -970,37 +973,35 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     @Override
-    public synchronized void stop() {
-        // 此处不用logger打印异常的原因是：
-        // 调用close方法一般是程序退出时，
-        // 此时logger已经被关闭，无法使用。
+    protected void doStop() {
         try {
-            if (started.compareAndSet(true, false)) {
-                logSafe("Stopping store {}-{}...", topic, partitionGroup);
-                logSafe("Waiting for flush finished {}-{}...", topic, partitionGroup);
-                try {
-                    while (!isAllStoreClean()) {
-                        Thread.sleep(50);
-                    }
-                } catch (InterruptedException e) {
-                    logger.error(e.getMessage(), e);
-                }
-                logSafe("Stopping flush thread {}-{}...", topic, partitionGroup);
 
-                stopFlushThread();
-                flushCheckpoint();
-
-                if (config.printMetricIntervalMs > 0) {
-                    logSafe("Stopping metric threads {}-{}...", topic, partitionGroup);
-                    metricThread.stop();
+            logSafe("Stopping store {}-{}...", topic, partitionGroup);
+            logSafe("Waiting for flush finished {}-{}...", topic, partitionGroup);
+            try {
+                while (!isAllStoreClean()) {
+                    Thread.sleep(50);
                 }
-                System.out.println("Store stopped. " + base.getAbsolutePath());
-                logSafe("Store stopped {}-{}.", topic, partitionGroup);
+            } catch (InterruptedException e) {
+                logger.error(e.getMessage(), e);
             }
+            stopWriteThread();
+            logSafe("Stopping flush thread {}-{}...", topic, partitionGroup);
+
+            stopFlushThread();
+            flushCheckpoint();
+
+            if (config.printMetricIntervalMs > 0) {
+                logSafe("Stopping metric threads {}-{}...", topic, partitionGroup);
+                metricThread.stop();
+            }
+            System.out.println("Store stopped. " + base.getAbsolutePath());
+            logSafe("Store stopped {}-{}.", topic, partitionGroup);
         } catch (Throwable t) {
             logger.error(t.getMessage(),t);
         }
     }
+
 
     private void logSafe(String format, Object... arguments) {
         try {
@@ -1024,11 +1025,6 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     private void stopWriteThread() {
         writeLoopThread.stop();
-    }
-
-    @Override
-    public boolean isStarted() {
-        return started.get();
     }
 
     long getLeftIndex(short partition) {
@@ -1061,7 +1057,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     @Override
     public void enable() {
-        if (started.get() && enabled.compareAndSet(false, true)) {
+        if (isStarted() && enabled.compareAndSet(false, true)) {
             startWriteThread();
         }
     }
@@ -1077,25 +1073,25 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     @Override
     public void setRightPosition(long position) throws IOException {
-        stopFlushThread();
+        flushLock.waitAndLock();
         try {
             rollback(position);
         } finally {
-            startFlushThread();
+            flushLock.unlock();
         }
     }
 
 
     @Override
     public void clear(long position) throws IOException {
-        stopFlushThread();
+        flushLock.waitAndLock();
         try {
             for (Partition partition : partitionMap.values()) {
                 partition.store.setRight(0L);
             }
             store.clear(position);
         } finally {
-            startFlushThread();
+            flushLock.unlock();
         }
     }
 
@@ -1188,6 +1184,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
 
     @Override
     public long appendEntryBuffer(ByteBuffer byteBuffer) throws IOException, TimeoutException {
+        ensureStarted();
         if(!writeLock.tryLock()) {
             throw new IllegalStateException("Acquire write lock failed!");
         }
@@ -1252,6 +1249,12 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         }
     }
 
+    private void ensureStarted() {
+        if(!isStarted()) {
+            throw new IllegalStateException("Store stopped.");
+        }
+    }
+
     private void updateLastEntryTerm(ByteBuffer byteBuffer) {
         int term = MessageParser.getInt(byteBuffer, MessageParser.TERM);
         if(term >= 0) {
@@ -1278,7 +1281,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
     }
 
     private void rollback(long position, Map<Short, Long> partitionSnapshot) throws IOException{
-        stopFlushThread();
+        flushLock.waitAndLock();
         try {
             // 回滚分区索引
             partitionSnapshot.forEach((partition, snapshotPosition) -> {
@@ -1299,7 +1302,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             // 回滚commit log
             store.setRight(position);
         } finally {
-            startFlushThread();
+            flushLock.unlock();
         }
     }
 
@@ -1508,6 +1511,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
         public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
         public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
+        public static final boolean DEFAULT_FLUSH_FORCE = true;
         public static final long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
         public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
         public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0L;
@@ -1551,7 +1555,7 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
                     DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_PRINT_METRIC_INTERVAL_MS,
                     new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE),
                     // 索引在读取的时候默认加载到内存中
-                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, true));
+                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, true, DEFAULT_FLUSH_FORCE));
         }
 
         public Config(int maxMessageLength, int writeRequestCacheSize, long flushIntervalMs,

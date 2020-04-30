@@ -120,10 +120,7 @@ public class TransactionLog extends Service {
         TopicConfig topicConfig = coordinator.getTransactionTopicConfig();
         for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
             PartitionGroup partitionGroup = entry.getValue();
-            if (partitionGroup.getLeader() == null || partitionGroup.getLeader() <= 0) {
-                continue;
-            }
-            if (partitionGroup.getLeader().equals(clusterManager.getBrokerId())) {
+            if (clusterManager.isLeader(partitionGroup)) {
                 result.addAll(partitionGroup.getPartitions());
             }
         }
@@ -155,10 +152,7 @@ public class TransactionLog extends Service {
         TopicConfig topicConfig = coordinator.getTransactionTopicConfig();
         for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
             PartitionGroup partitionGroup = entry.getValue();
-            if (partitionGroup.getLeader() == null || partitionGroup.getLeader() <= 0) {
-                continue;
-            }
-            if (partitionGroup.getLeader().equals(clusterManager.getBrokerId())) {
+            if (clusterManager.isLeader(partitionGroup)) {
                 return partitionGroup.getPartitions().iterator().next();
             }
         }

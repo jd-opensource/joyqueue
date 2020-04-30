@@ -1,11 +1,16 @@
 /**
- * Copyright 2019 The JoyQueue Authors.
+ * Partially copied from Apache Kafka.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Original LICENSE :
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -142,11 +147,9 @@ public class DelayedOperationManager<T extends DelayedOperation> {
             }
         }
 
-        synchronized (operation) {
-            isCompletedByMe = operation.tryComplete();
-            if (isCompletedByMe) {
-                return true;
-            }
+        isCompletedByMe = operation.maybeTryComplete();
+        if (isCompletedByMe) {
+            return true;
         }
 
         // if it cannot be completed by now and hence is watched, add to the expire queue also
@@ -323,7 +326,7 @@ public class DelayedOperationManager<T extends DelayedOperation> {
                 if (curr.isCompleted()) {
                     // another thread has completed this operation, just remove it
                     iter.remove();
-                } else if (curr.safeTryComplete()) {
+                } else if (curr.maybeTryComplete()) {
                     iter.remove();
                     completed += 1;
                 }

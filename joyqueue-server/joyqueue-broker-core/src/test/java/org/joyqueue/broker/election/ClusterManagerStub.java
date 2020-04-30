@@ -15,8 +15,11 @@
  */
 package org.joyqueue.broker.election;
 
+import com.google.common.collect.Maps;
+import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.toolkit.config.PropertySupplier;
 
 import java.util.Set;
 
@@ -25,7 +28,8 @@ import java.util.Set;
  */
 public class ClusterManagerStub extends ClusterManager {
     public ClusterManagerStub() {
-        super(null, null,null);
+        super(null, null,null,
+                new BrokerContext().propertySupplier(new PropertySupplier.MapSupplier(Maps.newHashMap())));
     }
 
     @Override

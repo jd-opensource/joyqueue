@@ -365,6 +365,7 @@ public class PartitionGroupStoreManagerTest {
         int indexFileSize = 512 * 1024;
         boolean indexLoadOnRead = true;
         boolean storeLoadOnRead = false;
+        boolean flushForce = false;
         List<ByteBuffer> messages = MessageUtils.build(count, 1024);
 
 
@@ -394,8 +395,8 @@ public class PartitionGroupStoreManagerTest {
         }
         PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
-                new PositioningStore.Config(storeFileSize, storeLoadOnRead),
-                new PositioningStore.Config(indexFileSize, indexLoadOnRead));
+                new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
+                new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);
@@ -407,6 +408,41 @@ public class PartitionGroupStoreManagerTest {
             store.asyncWrite(QosLevel.RECEIVE, null,writeRequests);
         }
 
+
+        // 等待建索引和刷盘都完成
+        t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() <  2 * length && store.flushPosition() < 2 * length) {
+            Thread.sleep(10L);
+        }
+        store.commit(store.rightPosition());
+
+        long rollbackPosition = store.position(store.rightPosition(), -13);
+        ByteBuffer byteBuffer = store.readEntryBuffer(rollbackPosition, (int) (store.rightPosition() - rollbackPosition));
+
+        destroyStore();
+
+        // 模拟Follower
+        storeFileSize = 32 * 1024 * 1024;
+        indexFileSize = 128 * 1024;
+
+        if (null == bufferPool) {
+            bufferPool = PreloadBufferPool.getInstance();
+            bufferPool.addPreLoad(storeFileSize, 2, 4);
+            bufferPool.addPreLoad(indexFileSize, 2, 4);
+        }
+
+        config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
+                new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
+
+        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
+                bufferPool);
+        this.store.recover();
+        this.store.start();
+
+        this.store.setRightPosition(rollbackPosition);
+        this.store.appendEntryBuffer(byteBuffer);
 
         // 等待建索引和刷盘都完成
         t0 = SystemClock.now();
@@ -827,7 +863,7 @@ public class PartitionGroupStoreManagerTest {
         recoverStore();
     }
 
-    private void recoverStore() {
+    private void recoverStore() throws Exception {
         if (null == bufferPool) {
             bufferPool = PreloadBufferPool.getInstance();
             bufferPool.addPreLoad(32 * 1024 * 1024, 2, 4);
@@ -840,7 +876,7 @@ public class PartitionGroupStoreManagerTest {
                 1L,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
                 new PositioningStore.Config(32 * 1024 * 1024),
-                new PositioningStore.Config(128 * 1024,true));
+                new PositioningStore.Config(128 * 1024,true, false));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);

@@ -39,4 +39,14 @@ public class NoneRateLimiter implements RateLimiter {
     public boolean tryAcquireTraffic(int traffic) {
         return true;
     }
+
+    @Override
+    public boolean tryAcquireRequire() {
+        return true;
+    }
+
+    @Override
+    public boolean releaseRequire() {
+        return true;
+    }
 }

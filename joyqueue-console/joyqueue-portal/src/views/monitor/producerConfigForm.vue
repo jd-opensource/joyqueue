@@ -20,6 +20,7 @@
 
 <script>
 import form from '../../mixins/form.js'
+import {ipValidator} from '../../utils/common'
 
 export default {
   name: 'producer-config-form',
@@ -48,17 +49,10 @@ export default {
     }
   },
   data () {
-    let ipPattern ='(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
     return {
       formData: this.data,
       rules: {
-        blackList: [
-          {
-            pattern: '^'+ipPattern+'(,'+ipPattern+')*$',
-            message: '请输入正确格式的ip',
-            required: false,
-            trigger: 'blur'}
-        ]
+        blackList: ipValidator()
       }
     }
   },
