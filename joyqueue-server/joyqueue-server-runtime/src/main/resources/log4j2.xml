@@ -12,7 +12,6 @@
         <root level="INFO">
             <appender-ref ref="Console"/>
         </root>
-        <logger name="org.joyqueue.broker.store.GlobalStorageLimitCleaningStrategy" level="DEBUG"></logger>
     </loggers>
 
 </configuration>
