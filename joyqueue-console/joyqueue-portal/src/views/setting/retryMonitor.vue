@@ -214,6 +214,10 @@ export default {
           })
           this.dialogCancel('cleanAllRetryMessage')
           this.getList()
+        } else {
+          this.$Dialog.error({
+            content: data.message
+          })
         }
       })
     },
@@ -232,6 +236,10 @@ export default {
           })
           this.dialogCancel('cleanSingleConsumerDialog')
           this.getList()
+        } else {
+          this.$Dialog.error({
+            content: data.message
+          })
         }
       })
     },
