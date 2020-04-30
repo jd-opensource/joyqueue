@@ -165,6 +165,10 @@ export default {
     // 查询
     getList () {
       // 1. 查询数据库里的数据
+      if (this.searchData.keyword && this.searchData.group) {
+        this.$Message.error('IP/ID不能和broker分组同时进行搜索')
+        return
+      }
       this.showTablePin = true
       let data = {
         pagination: {

@@ -208,4 +208,20 @@ public class TopicMsgFilter extends BaseModel {
     public void setObjectKey(String objectKey) {
         this.objectKey = objectKey;
     }
+
+    public enum FilterStatus {
+        ERROR(-2),
+        FINISHED(-1),
+        WAITING(0),
+        RUNNING(1),
+        UPLOADING(2),
+        ;
+        private int status;
+        public int getStatus() {
+            return status;
+        }
+        FilterStatus(int status) {
+            this.status = status;
+        }
+    }
 }
