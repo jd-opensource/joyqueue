@@ -150,7 +150,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
     }
 
-    private void enrichTopicMsgFilter (TopicMsgFilter filter, String app) throws Exception {
+    private void enrichTopicMsgFilter(TopicMsgFilter filter, String app) throws Exception {
         filter.setApp(app);
         List<ApplicationToken> appTokens = applicationTokenService.findByApp(filter.getApp());
         if (CollectionUtils.isNotEmpty(appTokens)) {
@@ -177,7 +177,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
         if (CollectionUtils.isNotEmpty(apps)) {
             updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.RUNNING, null, "");
-            enrichTopicMsgFilter(filter,apps.get(0));
+            enrichTopicMsgFilter(filter, apps.get(0));
             CompletableFuture.supplyAsync(() -> {
                 try {
                     return consume(filter);
@@ -311,7 +311,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             List<QueueMetaData.Partition> partitions = partitions(consumer, msgFilter);
             Map<Integer, Long> indexMapper = Maps.newHashMap();
             Map<Integer, Long> maxIndexMapper = Maps.newHashMap();
-            enrichIndexMap(msgFilter,partitions,indexMapper,maxIndexMapper);
+            enrichIndexMap(msgFilter, partitions, indexMapper, maxIndexMapper);
             while (consumerCondition(msgFilter, totalCount, maxIndexMapper)) {
                 for (QueueMetaData.Partition partition : partitions) {
                     if (msgFilter.getOffsetStartTime() != null && maxIndexMapper.size() > 0 && !maxIndexMapper.containsKey(partition.partitionId())) {
