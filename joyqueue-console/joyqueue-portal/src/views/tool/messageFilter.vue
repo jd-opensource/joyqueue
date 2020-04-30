@@ -101,11 +101,14 @@ export default {
       if (this.search.times && (this.search.offset || this.search.queryCount)) {
         return callback(new Error('位点时间不能和位点值，查询条数同时输入'))
       }
-      if (this.search.offset && !this.search.queryCount) {
-        return callback(new Error('位点值和查询条数必须同时输入'))
-      }
       if (!this.search.times && !this.search.offset) {
         return callback(new Error('位点时间范围和位点值至少输入一个'))
+      }
+      return callback()
+    }
+    let queryCountValidator = (rule, value, callback) => {
+      if (this.search.offset && !this.search.queryCount) {
+        return callback(new Error('位点值和查询条数必须同时输入'))
       }
       return callback()
     }
@@ -251,7 +254,8 @@ export default {
               if (params.item.url) {
                 var p = h('a', {
                   attrs: {
-                    href: params.item.url
+                    href: params.item.url,
+                    target: '_blank'
                   }
                 }, 'download')
                 html.push(p)
@@ -282,13 +286,14 @@ export default {
         ],
         msgFormat: [
           {
-            required: true
+            required: true,
+            message: '消息格式不能为空'
           }
         ],
         filter: [
           {
             required: true,
-            message: '消息格式不能为空',
+            message: '查询内容不能为空',
             trigger: 'blur'
           }
         ],
@@ -305,7 +310,7 @@ export default {
         ],
         queryCount: [
           {
-            validator: offsetValidator,
+            validator: queryCountValidator,
             trigger: 'change'
           }
         ]
