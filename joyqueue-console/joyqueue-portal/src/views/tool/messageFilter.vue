@@ -1,48 +1,49 @@
 <template>
   <div>
-    <d-form ref="form" label-width="80px">
-      <div class="headLine">
-        <d-button type="primary" class="left" @click="getList">查询状态</d-button>
-        <d-button type="primary" class="left" @click="openCreateFilterDialog">添加任务</d-button>
-      </div>
-    </d-form>
+    <div class="headLine">
+      <d-button type="primary" class="left" @click="getList">刷新</d-button>
+      <d-button type="primary" class="left" @click="openCreateFilterDialog">添加任务</d-button>
+    </div>
 
     <my-table :data="tableData" :showPin="showTablePin" :showPagination="true" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
               @on-selection-change="handleSelectionChange"></my-table>
 
     <my-dialog :dialog="createFilterDialog" @on-dialog-confirm="closeCreateFilterDialog" @on-dialog-cancel="closeCreateFilterDialog" >
-      <d-form ref="form" :model="search" label-width="80px">
+      <d-form ref="search" :model="search" label-width="80px" :rules="rules">
         <div class="headLine">
-<!--          <d-select v-model="search.topic" style="width:250px">-->
-<!--            <d-option v-for="item in topics" :value="item.value" :key="item.value">{{ item.value }}</d-option>-->
-<!--            <span slot="prepend">主题</span>-->
-<!--          </d-select>-->
-          <d-tooltip content="如主题有namespace,请加上namespace">
-            <d-input v-model="search.topic" placeholder="请输入主题" class="left" style="width: 280px;margin-top: 5px">
-              <span slot="prepend">主题</span>
+          <d-form-item label="主题:" prop="topic">
+            <d-tooltip content="如主题有namespace,请加上namespace">
+              <d-input v-model="search.topic" placeholder="请输入主题" class="left" style="width: 280px;margin-top: 5px">
+              </d-input>
+            </d-tooltip>
+          </d-form-item>
+          <d-form-item label="消息格式" prop="msgFormat">
+            <d-select v-model="search.msgFormat" style="width:280px;margin-top: 5px">
+              <d-option v-for="(supportedMessageType, index) in msgFormats" :value="supportedMessageType" :key="index">{{ supportedMessageType }}</d-option>
+            </d-select>
+          </d-form-item>
+          <d-form-item label="分区" prop="partition">
+            <d-input v-model="search.partition" placeholder="分区为空默认查询所有分区" oninput="value=value.replace(/[^\d]/g, '')" class="left" style="width: 280px;margin-top: 5px">
             </d-input>
-          </d-tooltip>
-          <d-select v-model="search.msgFormat" style="width:280px;margin-top: 5px">
-            <d-option v-for="(supportedMessageType, index) in msgFormats" :value="supportedMessageType" :key="index">{{ supportedMessageType }}</d-option>
-            <span slot="prepend">消息格式</span>
-          </d-select><br/>
-          <d-input v-model="search.partition" placeholder="分区为空默认查询所有分区" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">分区</span>
-          </d-input>
-          <d-input v-model="search.offset" placeholder="请输入位点值" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">位点</span>
-          </d-input>
-          <d-input v-model="search.queryCount" placeholder="请输入查询条数" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">查询条数</span>
-          </d-input>
-          <d-input v-model="search.filter" placeholder="请输入消息关键字" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">消息关键字</span>
-          </d-input>
-          <d-date-picker v-model="search.times" type="datetimerange" range-separator="至" start-placeholder="开始日期" class="left"
-                         style="margin-top: 5px" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
-            <span slot="prepend">位点时间范围</span>
-          </d-date-picker>
-          <d-button type="primary" class="right" style="margin-right: 30px;margin-top: 40px" @click="add">创建</d-button>
+          </d-form-item>
+          <d-form-item label="位点" prop="offset">
+            <d-input v-model="search.offset" placeholder="请输入位点值" oninput="value=value.replace(/[^\d]/g, '')" class="left" style="width: 280px;margin-top: 5px">
+            </d-input>
+          </d-form-item>
+          <d-form-item label="查询条数" prop="queryCount">
+            <d-input v-model="search.queryCount" placeholder="请输入查询条数" oninput="value=value.replace(/[^\d]/g, '')" class="left" style="width: 280px;margin-top: 5px">
+            </d-input>
+          </d-form-item>
+          <d-form-item label="查询条件" prop="filter">
+            <d-input v-model="search.filter" placeholder="请输入查询条件" class="left" style="width: 280px;margin-top: 5px">
+            </d-input>
+          </d-form-item>
+          <d-form-item label="时间范围" prop="times">
+            <d-date-picker v-model="search.times" type="datetimerange" range-separator="至" start-placeholder="开始日期" class="left"
+                           style="margin-top: 5px" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
+            </d-date-picker>
+          </d-form-item>
+          <d-button type="primary" class="right" style="margin-right: 30px;" @click="add('search')">创建</d-button>
         </div>
       </d-form>
     </my-dialog>
@@ -87,6 +88,27 @@ export default {
     }
   },
   data () {
+    let timesValidator = (rule, value, callback) => {
+      if (this.search.times && (this.search.offset || this.search.queryCount)) {
+        return callback(new Error('位点时间不能和位点值，查询条数同时输入'))
+      }
+      if (!this.search.times && !this.search.offset) {
+        return callback(new Error('位点时间范围和位点值至少输入一个'))
+      }
+      return callback()
+    }
+    let offsetValidator = (rule, value, callback) => {
+      if (this.search.times && (this.search.offset || this.search.queryCount)) {
+        return callback(new Error('位点时间不能和位点值，查询条数同时输入'))
+      }
+      if (this.search.offset && !this.search.queryCount) {
+        return callback(new Error('位点值和查询条数必须同时输入'))
+      }
+      if (!this.search.times && !this.search.offset) {
+        return callback(new Error('位点时间范围和位点值至少输入一个'))
+      }
+      return callback()
+    }
     return {
       msgFormats: [
       ],
@@ -199,6 +221,9 @@ export default {
             width: '10%',
             formatter (item) {
               switch (item.status) {
+                case 2 : {
+                  return '正在上传'
+                }
                 case 1 : {
                   return '正在执行'
                 }
@@ -226,8 +251,7 @@ export default {
               if (params.item.url) {
                 var p = h('a', {
                   attrs: {
-                    href: params.item.url,
-                    target: '_blank'
+                    href: params.item.url
                   }
                 }, 'download')
                 html.push(p)
@@ -245,41 +269,80 @@ export default {
       createFilterDialog: {
         visible: false,
         title: '创建消息过滤任务',
-        width: '620',
+        width: '450',
         showFooter: false
+      },
+      rules: {
+        topic: [
+          {
+            required: true,
+            message: '主题不能为空',
+            trigger: 'change'
+          }
+        ],
+        msgFormat: [
+          {
+            required: true
+          }
+        ],
+        filter: [
+          {
+            required: true,
+            message: '消息格式不能为空',
+            trigger: 'blur'
+          }
+        ],
+        offset: [
+          {
+            validator: offsetValidator,
+            trigger: 'change'
+          }
+        ],
+        times: [
+          {
+            validator: timesValidator
+          }
+        ],
+        queryCount: [
+          {
+            validator: offsetValidator,
+            trigger: 'change'
+          }
+        ]
       }
     }
   },
   methods: {
-    add () {
-      if (!this.validate()) {
-        return
-      }
-      let data = this.search
-      if (this.search.times) {
-        data.offsetStartTime = this.search.times[0]
-        data.offsetEndTime = this.search.times[1]
-      }
-      apiRequest.post(this.urls.add, {}, data).then((data) => {
-        if (data.code === 200) {
-          this.$Message.info('添加成功')
-          this.getList()
-          delete this.search.offsetStartTime
-          delete this.search.offsetEndTime
+    add: function (formName) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          let data = this.search
+          if (this.search.times) {
+            data.offsetStartTime = this.search.times[0]
+            data.offsetEndTime = this.search.times[1]
+          }
+          apiRequest.post(this.urls.add, {}, data).then((data) => {
+            if (data.code === 200) {
+              this.$Message.info('添加成功')
+              this.getList()
+              delete this.search.offsetStartTime
+              delete this.search.offsetEndTime
+            }
+          })
+          this.createFilterDialog.visible = false
         }
       })
-      this.createFilterDialog.visible = false
     },
     getList () {
       this.showTablePin = true
-      let data = {
+      let params = {
         pagination: {
           page: this.page.page,
           size: this.page.size
         },
         query: {}
       }
-      apiRequest.post(this.urls.search, {}, data, true).then((data) => {
+      apiRequest.post(this.urls.search, {}, params, true).then((data) => {
         data.data = data.data || []
         data.pagination = data.pagination || {
           totalRecord: data.data.length
@@ -299,44 +362,15 @@ export default {
     },
     closeCreateFilterDialog (item) {
       this.createFilterDialog.visible = false
-    },
-    innerValidate (field, name) {
-      if (!this.search[field] || this.search[field].length === 0) {
-        this.$Message.error(name + '项不可为空')
-        return false
-      }
-      return true
-    },
-    validate () {
-      if (this.search.times && (this.search.offset || this.search.queryCount)) {
-        this.$Message.error('位点时间不能和位点值，查询条数同时输入')
-        return false
-      }
-      if (this.search.offset && !this.search.queryCount) {
-        this.$Message.error('位点值和查询条数必须同时输入')
-        return false
-      }
-      if (!this.innerValidate('topic', '主题')) {
-        return false
-      }
-      if (!this.search.msgFormat) {
-        this.$Message.error('消息格式不能为空')
-        return false
-      }
-      if (!this.innerValidate('filter', '过滤内容')) {
-        return false
-      }
-      if (!this.search.times && !this.search.offset) {
-        this.$Message.error('位点时间范围和位点值至少输入一个')
-        return false
-      }
-      return true
     }
   },
   mounted () {
     apiRequest.get(this.urls.msgTypes)
       .then(data => {
         this.msgFormats = data.data
+        if (this.msgFormats.length > 0) {
+          this.search.msgFormat = this.msgFormats[0]
+        }
       })
     this.getList()
   }
