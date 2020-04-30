@@ -41,7 +41,6 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QBroker> qPageQuery) throws Exception {
         Preconditions.checkArgument(qPageQuery!=null, "Illegal args.");
-
         PageResult<Broker> result  = service.search(qPageQuery);
         return Responses.success(result.getPagination(), result.getResult());
     }

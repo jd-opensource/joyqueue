@@ -15,6 +15,9 @@
  */
 package org.joyqueue.model.domain;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -179,5 +182,22 @@ public class Broker extends BaseModel {
 
     public void setPermission(String permission) {
         this.permission = permission;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Broker broker = (Broker) o;
+        return new EqualsBuilder()
+                .append(id, broker.id)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(id)
+                .toHashCode();
     }
 }
