@@ -21,7 +21,11 @@ import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.query.QRetry;
 import org.joyqueue.server.retry.model.RetryMessageModel;
+import org.joyqueue.server.retry.model.RetryMonitorItem;
 import org.joyqueue.server.retry.model.RetryQueryCondition;
+import org.joyqueue.server.retry.model.RetryStatus;
+
+import java.util.List;
 
 /**
  * Created by wangxiaofei1 on 2018/12/5.
@@ -44,6 +48,34 @@ public interface RetryService {
     void delete(ConsumeRetry retry) throws Exception;
 
     void batchDelete(RetryQueryCondition retryQueryCondition, Long updateTime, int updateBy) throws Exception;
+
+    /**
+     *
+     * Physical delete retry message by topic,app ,the status and update time before  expire time
+     * @param topic  topic
+     * @param app  app
+     * @param status {@link RetryStatus}
+     * @param expireTimeStamp  clean before the expire time
+     * @return  affect rows
+     *
+     **/
+    int cleanBefore(String topic,String app,int status,long expireTimeStamp) throws Exception;
+
+    /**
+     *
+     * Top N topic and app by condition, if topics undefine, include all topics
+     *
+     * @param status  query condition
+     * @param N  top N
+     *
+     **/
+    List<RetryMonitorItem> top(int N, int status) throws Exception;
+
+    /**
+     *  All consumers on retry
+     *
+     **/
+    List<RetryMonitorItem> allConsumer() throws Exception;
 
     /**
      * 重试服务是否可用

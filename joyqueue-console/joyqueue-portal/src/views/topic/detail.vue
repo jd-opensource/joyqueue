@@ -84,7 +84,7 @@ export default {
         isRetryEnabled: `/retry/isServerEnabled`
       },
       archiveEnabled: false,
-      retryEnabled: false
+      retryEnabled: true
     }
   },
   methods: {
