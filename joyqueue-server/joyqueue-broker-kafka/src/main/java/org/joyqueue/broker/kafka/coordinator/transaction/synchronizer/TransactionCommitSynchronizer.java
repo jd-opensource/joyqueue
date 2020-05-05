@@ -17,8 +17,7 @@ package org.joyqueue.broker.kafka.coordinator.transaction.synchronizer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.joyqueue.broker.coordinator.session.CoordinatorSession;
-import org.joyqueue.broker.coordinator.session.CoordinatorSessionManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.index.command.ConsumeIndexStoreRequest;
 import org.joyqueue.broker.index.command.ConsumeIndexStoreResponse;
 import org.joyqueue.broker.index.model.IndexAndMetadata;
@@ -37,7 +36,8 @@ import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.JoyQueueCommand;
-import org.joyqueue.nsr.NameService;
+import org.joyqueue.network.transport.session.session.TransportSession;
+import org.joyqueue.network.transport.session.session.TransportSessionManager;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,15 +59,15 @@ public class TransactionCommitSynchronizer extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCommitSynchronizer.class);
 
     private KafkaConfig config;
-    private CoordinatorSessionManager sessionManager;
+    private TransportSessionManager sessionManager;
     private TransactionIdManager transactionIdManager;
-    private NameService nameService;
+    private ClusterNameService clusterNameService;
 
-    public TransactionCommitSynchronizer(KafkaConfig config, CoordinatorSessionManager sessionManager, TransactionIdManager transactionIdManager, NameService nameService) {
+    public TransactionCommitSynchronizer(KafkaConfig config, TransportSessionManager sessionManager, TransactionIdManager transactionIdManager, ClusterNameService clusterNameService) {
         this.config = config;
         this.sessionManager = sessionManager;
         this.transactionIdManager = transactionIdManager;
-        this.nameService = nameService;
+        this.clusterNameService = clusterNameService;
     }
 
     public boolean commitPrepare(TransactionMetadata transactionMetadata, Set<TransactionPrepare> prepareList) throws Exception {
@@ -87,9 +87,9 @@ public class TransactionCommitSynchronizer extends Service {
                 txIds.add(txId);
             }
 
-            CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+            TransportSession session = sessionManager.getOrCreateSession(broker);
             TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
-            session.async(new JoyQueueCommand(transactionCommitRequest), new CommandCallback() {
+            session.async(new JoyQueueCommand(transactionCommitRequest), config.getTransactionSyncTimeout(), new CommandCallback() {
                 @Override
                 public void onSuccess(Command request, Command response) {
                     if (response.getHeader().getStatus() != JoyQueueCode.SUCCESS.getCode() &&
@@ -127,11 +127,11 @@ public class TransactionCommitSynchronizer extends Service {
             Map<String, Map<Integer, IndexAndMetadata>> saveOffsetParam = buildSaveOffsetParam(entry.getValue());
 
             try {
-                CoordinatorSession session = sessionManager.getOrCreateSession(broker);
+                TransportSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(transactionMetadata.getApp(), saveOffsetParam);
                 Command request = new JoyQueueCommand(indexStoreRequest);
 
-                session.async(request, new CommandCallback() {
+                session.async(request, config.getTransactionSyncTimeout(), new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
                         ConsumeIndexStoreResponse payload = (ConsumeIndexStoreResponse) response.getPayload();
@@ -189,7 +189,7 @@ public class TransactionCommitSynchronizer extends Service {
         Map<Broker, List<TransactionOffset>> result = Maps.newHashMap();
 
         for (TransactionOffset offset : offsets) {
-            TopicConfig topic = nameService.getTopicConfig(TopicName.parse(offset.getTopic()));
+            TopicConfig topic = clusterNameService.getTopicConfig(TopicName.parse(offset.getTopic()));
             if (topic == null) {
                 continue;
             }
@@ -201,7 +201,7 @@ public class TransactionCommitSynchronizer extends Service {
             if (leader == null || leader <= 0) {
                 continue;
             }
-            Broker broker = nameService.getBroker(leader);
+            Broker broker = clusterNameService.getNameService().getBroker(leader);
             if (broker == null) {
                 continue;
             }

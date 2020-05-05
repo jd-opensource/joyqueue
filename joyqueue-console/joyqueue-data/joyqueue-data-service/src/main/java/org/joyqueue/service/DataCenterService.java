@@ -28,4 +28,6 @@ public interface DataCenterService extends NsrService<DataCenter, String> {
     List<DataCenter> findAllDataCenter() throws Exception;
 
     DataCenter findByIp(String ip) throws Exception;
+
+    List<DataCenter> findByIps(List<String> ips) throws Exception;
 }

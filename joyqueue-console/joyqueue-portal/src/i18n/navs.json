@@ -74,6 +74,11 @@
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
+        },
+        {
+          "path": "retryMonitor",
+          "name": "retryMonitor",
+          "component": "setting/retryMonitor.vue"
         }
       ]
     },
@@ -91,6 +96,11 @@
           "path": "operateHistory",
           "name": "operateHistory",
           "component": "tool/operateHistory.vue"
+        },
+        {
+          "path": "msgFilter",
+          "name": "msgFilter",
+          "component": "tool/messageFilter.vue"
         },
         {
           "path": "retry",
@@ -175,6 +185,11 @@
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
+        },
+        {
+          "path": "retryMonitor",
+          "name": "retryMonitor",
+          "component": "setting/retryMonitor.vue"
         }
       ]
     },
@@ -192,6 +207,11 @@
           "path":"operateHistory",
           "name": "operateHistory",
           "component": "tool/operateHistory.vue"
+        },
+        {
+          "path": "msgFilter",
+          "name": "msgFilter",
+          "component": "tool/messageFilter.vue"
         },
         {
           "path": "retry",

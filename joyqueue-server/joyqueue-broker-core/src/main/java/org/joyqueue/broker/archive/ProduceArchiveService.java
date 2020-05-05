@@ -192,13 +192,12 @@ public class ProduceArchiveService extends Service {
     private void updateArchiveItem() throws JoyQueueException {
         List<SendArchiveItem> list = new ArrayList<>();
         List<TopicConfig> topics = clusterManager.getTopics();
-        int brokerId = clusterManager.getBroker().getId();
         topics.stream().forEach(topicConfig -> {
             TopicName name = topicConfig.getName();
             // 检查是否开启发送归档
             if (clusterManager.checkArchiveable(name)) {
                 logger.info("Topic:{} send archive is enable.", name.getFullName());
-                List<Short> partitionSet = topicConfig.fetchPartitionByBroker(brokerId);
+                List<Short> partitionSet = clusterManager.getLocalPartitions(topicConfig);
                 partitionSet.stream().forEach(partition -> {
                     list.add(new SendArchiveItem(name.getFullName(), partition));
                 });
@@ -523,7 +522,7 @@ public class ProduceArchiveService extends Service {
      * @return
      */
     public long getCurrentIndexSum(String topic) {
-        List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(topic));
         long sum = partitionList.stream().mapToLong(partition ->
                 Math.max(0, (consume.getMaxIndex(new Consumer(topic, ""), partition) - 1))).sum();
         return sum;

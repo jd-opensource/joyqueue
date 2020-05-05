@@ -1,11 +1,16 @@
 /**
- * Copyright 2019 The JoyQueue Authors.
+ * Partially copied from Apache Kafka.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Original LICENSE :
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,6 +20,7 @@
  */
 package org.joyqueue.broker.kafka.coordinator.group.delay;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.kafka.KafkaErrorCode;
 import org.joyqueue.broker.kafka.coordinator.group.GroupBalanceManager;
 import org.joyqueue.broker.kafka.coordinator.group.GroupMetadataManager;
@@ -23,7 +29,6 @@ import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMemberMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupState;
 import org.joyqueue.toolkit.delay.DelayedOperation;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * DelayedJoin
- *
- * author: gaohaoxiang
- * date: 2018/11/7
- */
 public class DelayedJoin extends DelayedOperation {
 
     protected static final Logger logger = LoggerFactory.getLogger(DelayedJoin.class);
@@ -46,7 +45,7 @@ public class DelayedJoin extends DelayedOperation {
     private GroupMetadata group;
 
     public DelayedJoin(GroupBalanceManager groupBalanceManager, GroupMetadataManager groupMetadataManager, GroupMetadata group, long rebalanceTimeout) {
-        super(rebalanceTimeout);
+        super(rebalanceTimeout, group.getLock());
         this.groupBalanceManager = groupBalanceManager;
         this.groupMetadataManager = groupMetadataManager;
         this.group = group;
@@ -54,13 +53,13 @@ public class DelayedJoin extends DelayedOperation {
 
     @Override
     protected boolean tryComplete() {
-        synchronized (group) {
+        return group.inLock(() -> {
             if (group.getNotYetRejoinedMembers().isEmpty()) {
                 return forceComplete();
             } else {
                 return false;
             }
-        }
+        });
     }
 
     @Override
@@ -70,9 +69,9 @@ public class DelayedJoin extends DelayedOperation {
 
     @Override
     protected void onComplete() {
-        synchronized (group) {
+        group.inLock(() -> {
             doComplete();
-        }
+        });
     }
 
     protected void doComplete() {

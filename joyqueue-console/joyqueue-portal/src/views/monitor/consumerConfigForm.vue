@@ -94,6 +94,7 @@
 <script>
 import form from '../../mixins/form.js'
 import { deepCopy } from '../../utils/assist.js'
+import {ipValidator} from '../../utils/common'
 
 export default {
   name: 'consumer-config-form',
@@ -150,7 +151,6 @@ export default {
         callback()
       }
     }
-
     let batchSizeValidator = (rule, value, callback) => {
       if (this.$store.getters.isAdmin) {
         if ((rule.min && value < rule.min) || (rule.adminMax && value > rule.adminMax)) {
@@ -159,15 +159,8 @@ export default {
           callback()
         }
       }
-
-      if ((rule.min && value < rule.min) || (rule.max && value > rule.max)) {
-        callback(new Error(rule.hint))
-      } else {
-        callback()
-      }
+      numberValidator(rule, value, callback)
     }
-
-    let ipPattern = '(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
     return {
       formData: {},
       rules: {
@@ -239,13 +232,7 @@ export default {
             required: false
           }
         ],
-        blackList: [
-          {
-            pattern: '^' + ipPattern + '(,' + ipPattern + ')*$',
-            message: '请输入正确格式的ip',
-            required: false,
-            trigger: 'blur'}
-        ]
+        blackList: ipValidator()
       }
     }
   },

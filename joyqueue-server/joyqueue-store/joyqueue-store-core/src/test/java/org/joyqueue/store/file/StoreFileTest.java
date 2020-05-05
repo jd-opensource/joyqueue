@@ -54,7 +54,7 @@ public class StoreFileTest {
     @Test
     public void timestampTest() throws IOException {
         long start = SystemClock.now();
-        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), PreloadBufferPool.getInstance(), 1024 * 1024 * 10, false);
+        StoreFileImpl<ByteBuffer> storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), PreloadBufferPool.getInstance(), 1024 * 1024 * 10, false, false);
         storeFile.append(MessageTestUtils.createMessage(new byte[10]));
         storeFile.flush();
         long timestamp = storeFile.timestamp();
@@ -67,7 +67,7 @@ public class StoreFileTest {
 
         storeFile.unload();
 
-        storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), PreloadBufferPool.getInstance(), 1024 * 1024 * 10, false);
+        storeFile = new StoreFileImpl<>(666L, base, 128, new StoreMessageSerializer(1024), PreloadBufferPool.getInstance(), 1024 * 1024 * 10, false, false);
 
         Assert.assertEquals(timestamp, storeFile.timestamp());
 

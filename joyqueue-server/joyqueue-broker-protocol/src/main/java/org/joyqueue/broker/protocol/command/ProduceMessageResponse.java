@@ -15,7 +15,7 @@
  */
 package org.joyqueue.broker.protocol.command;
 
-import org.joyqueue.broker.network.traffic.ProduceTrafficPayload;
+import org.joyqueue.broker.network.traffic.ProduceResponseTrafficPayload;
 import org.joyqueue.broker.network.traffic.Traffic;
 
 /**
@@ -24,7 +24,7 @@ import org.joyqueue.broker.network.traffic.Traffic;
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public class ProduceMessageResponse extends org.joyqueue.network.command.ProduceMessageResponse implements ProduceTrafficPayload {
+public class ProduceMessageResponse extends org.joyqueue.network.command.ProduceMessageResponse implements ProduceResponseTrafficPayload {
 
     private Traffic traffic;
 

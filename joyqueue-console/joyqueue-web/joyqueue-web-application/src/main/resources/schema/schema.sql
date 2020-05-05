@@ -158,3 +158,24 @@ CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
 MERGE INTO `user`
 (`id`, `code`, `name`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
 VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
+
+CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
+ `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+ `topic_code` varchar(128) NOT NULL COMMENT '主题代码',
+ `partition` int(11) NOT NULL default -1 COMMENT '分区',
+ `filter` varchar(128) NOT NULL COMMENT '消息过滤条件',
+ `msg_fmt` varchar(64) NOT NULL COMMENT '消息格式',
+ `offset` bigint(20) COMMENT '位点',
+ `start_time` datetime COMMENT 'offset开始时间',
+ `end_time` datetime COMMENT 'offset结束时间',
+ `query_count` int(11) default 1 NOT NULL COMMENT '查询次数',
+ `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态：-1 结束，0 未执行，1 正在执行',
+ `url` varchar(512) COMMENT '任务结束后生成的s3链接,默认有7天有效时间',
+ `obj_key` varchar(128) COMMENT '如果url失效,根据obj_key重新生成url',
+ `create_time` datetime NOT NULL COMMENT '消息过滤任务创建时间',
+ `create_by` int(10) NOT NULL DEFAULT '0' COMMENT '创建人',
+ `update_time` datetime NOT NULL COMMENT '更新时间',
+ `update_by` int(10) NOT NULL DEFAULT '0' COMMENT '更新人',
+ `description` varchar(1024) NOT NULL DEFAULT '备注信息' COMMENT '备注信息',
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8;

@@ -174,7 +174,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         this.concurrentConsumption =
                 consumeConfig.useLegacyConcurrentConsumer() ?
                     new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager):
-                    new SlideWindowConcurrentConsumer(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager)
+                    new SlideWindowConcurrentConsumer(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, consumeConfig)
         ;
         this.resetBroadcastIndexTimer = new Timer("joyqueuue-consume-reset-broadcast-index-timer");
     }
@@ -571,7 +571,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     @Override
     public boolean resetPullIndex(String topic, String app) throws JoyQueueException {
         // 获取当前broker上master角色的partition集合
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(topic));
         // 遍历partition集合，重置消费拉取位置
         int successCount = 0;
         for (short partition : masterPartitionList) {
@@ -595,7 +595,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
 
     @Override
     public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, String app, int partitionGroup) {
-        List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+        List<PartitionGroup> partitionGroupList = clusterManager.getLocalPartitionGroups(topic);
         if (CollectionUtils.isEmpty(partitionGroupList)) {
             return null;
         }
@@ -604,7 +604,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
 
     @Override
     public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, int partitionGroup) {
-        List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+        List<PartitionGroup> partitionGroupList = clusterManager.getLocalPartitionGroups(topic);
         if (CollectionUtils.isEmpty(partitionGroupList)) {
             return null;
         }
@@ -679,7 +679,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
                 continue;
             }
 
-            for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(clusterManager.getBrokerId())) {
+            for (PartitionGroup partitionGroup : clusterManager.getLocalPartitionGroups(topicConfig)) {
                 doResetBroadcastIndex(topicConfig, partitionGroup, broadcastConsumers);
             }
         }

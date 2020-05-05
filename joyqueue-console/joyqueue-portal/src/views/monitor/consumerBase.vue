@@ -161,8 +161,7 @@ export default {
           },
           {
             txt: '限流',
-            method: 'on-rateLimit',
-            isAdmin: true
+            method: 'on-rateLimit'
           }
         ]
       }
@@ -610,7 +609,7 @@ export default {
         this.page.total = data.pagination.totalRecord
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
-        data.data.sort(function (a,b) {
+        data.data.sort(function (a, b) {
           return a.topic.code - b.topic.code
         })
         if (data.data.length > this.page.size) {

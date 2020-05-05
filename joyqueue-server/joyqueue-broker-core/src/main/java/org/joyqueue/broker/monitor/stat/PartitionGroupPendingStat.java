@@ -26,6 +26,7 @@ public class PartitionGroupPendingStat implements PendingStat<Short,Long> {
     private int  partitionGroup;
     private long pending;
     private Map<Short/*partition*/,Long/*pending*/> partitionPendingStatMap =new HashMap<>();
+    private Map<Short/*partition*/,PartitionStat> partitionStatHashMap =new HashMap<>();
 
     public String getTopic() {
         return topic;
@@ -67,5 +68,13 @@ public class PartitionGroupPendingStat implements PendingStat<Short,Long> {
     @Override
     public Map<Short, Long> getPendingStatSubMap() {
         return partitionPendingStatMap;
+    }
+
+    public Map<Short, PartitionStat> getPartitionStatHashMap() {
+        return partitionStatHashMap;
+    }
+
+    public void setPartitionStatHashMap(Map<Short, PartitionStat> partitionStatHashMap) {
+        this.partitionStatHashMap = partitionStatHashMap;
     }
 }
