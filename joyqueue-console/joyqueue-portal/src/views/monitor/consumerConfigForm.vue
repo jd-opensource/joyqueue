@@ -5,81 +5,81 @@
     :rules="rules"
     label-width="120px"
   >
-  <grid-row v-if="tips">
-    {{tips}}
-  </grid-row>
-  <grid-row>
-    <grid-col span="6">
-      <d-form-item label="消费归档">
-        <d-switch :disabled="archiveDisabled" v-model="formData.archive"></d-switch>
-      </d-form-item>
-    </grid-col>
-    <grid-col span="6">
-      <d-form-item label="重试服务">
-        <d-switch v-model="formData.retry"></d-switch>
-      </d-form-item>
-    </grid-col>
-    <grid-col span="6">
-      <d-form-item label="暂停消费">
-        <d-switch v-model="formData.paused"></d-switch>
-      </d-form-item>
-    </grid-col>
-    <grid-col span="6">
-      <d-form-item label="就近机房消费">
-        <d-switch :disabled="nearbyDisabled" v-model="formData.nearBy"></d-switch>
-      </d-form-item>
-    </grid-col>
-  </grid-row>
-  <grid-row>
-    <grid-col span="8">
-      <d-form-item label="延迟消费" prop="delay">
-        <d-input placeholder="请输入值,最大延迟1小时" v-model.number="formData.delay">
-          <i slot="append">ms</i>
-        </d-input>
-      </d-form-item>
-    </grid-col>
-    <grid-col span="8">
-      <d-form-item label="并行消费" prop="concurrent">
-        <d-input
-          :disabled="concurrentDisabled"
-          placeholder="请输入并行数,范围1-50,默认1"
-          v-model.number="formData.concurrent"
-        />
-      </d-form-item>
-    </grid-col>
-    <grid-col span="8">
+    <grid-row v-if="tips">
+      {{tips}}
+    </grid-row>
+    <grid-row>
+      <grid-col span="6">
+        <d-form-item label="消费归档">
+          <d-switch :disabled="archiveDisabled" v-model="formData.archive"></d-switch>
+        </d-form-item>
+      </grid-col>
+      <grid-col span="6">
+        <d-form-item label="重试服务">
+          <d-switch v-model="formData.retry"></d-switch>
+        </d-form-item>
+      </grid-col>
+      <grid-col span="6">
+        <d-form-item label="暂停消费">
+          <d-switch v-model="formData.paused"></d-switch>
+        </d-form-item>
+      </grid-col>
+      <grid-col span="6">
+        <d-form-item label="就近机房消费">
+          <d-switch :disabled="nearbyDisabled" v-model="formData.nearBy"></d-switch>
+        </d-form-item>
+      </grid-col>
+    </grid-row>
+    <grid-row>
+      <grid-col span="8">
+        <d-form-item label="延迟消费" prop="delay">
+          <d-input placeholder="请输入值,最大延迟1小时" v-model.number="formData.delay">
+            <i slot="append">ms</i>
+          </d-input>
+        </d-form-item>
+      </grid-col>
+      <grid-col span="8">
+        <d-form-item label="并行消费" prop="concurrent">
+          <d-input
+            :disabled="concurrentDisabled"
+            placeholder="请输入并行数,范围1-50,默认1"
+            v-model.number="formData.concurrent"
+          />
+        </d-form-item>
+      </grid-col>
+      <grid-col span="8">
         <d-form-item label="应答超时" prop="ackTimeout">
           <d-input
             placeholder="请输入值，默认10s"
             v-model.number="formData.ackTimeout"
           >
-          <i slot="append">ms</i>
+            <i slot="append">ms</i>
           </d-input>
         </d-form-item>
-    </grid-col>
-  </grid-row>
-  <grid-row>
-    <grid-col span="8">
-      <d-form-item label="批量大小" prop="batchSize">
-        <d-input
-          laceholder="请输入批量数，范围1-1000，默认10"
-          v-model.number="formData.batchSize"
-        />
-      </d-form-item>
-    </grid-col>
-    <grid-col span="8">
-      <d-form-item label="重试次数" prop="maxRetrys">
-        <d-input placeholder="默认无限制" v-model.number="formData.maxRetrys"/>
-      </d-form-item>
-    </grid-col>
-    <grid-col span="8">
+      </grid-col>
+    </grid-row>
+    <grid-row>
+      <grid-col span="8">
+        <d-form-item label="批量大小" prop="batchSize">
+          <d-input
+            laceholder="请输入批量数，范围1-1000，默认10"
+            v-model.number="formData.batchSize"
+          />
+        </d-form-item>
+      </grid-col>
+      <grid-col span="8">
+        <d-form-item label="重试次数" prop="maxRetrys">
+          <d-input placeholder="默认无限制" v-model.number="formData.maxRetrys"/>
+        </d-form-item>
+      </grid-col>
+      <grid-col span="8">
         <d-form-item label="过期时间" prop="expireTime">
           <d-input placeholder="默认3天" v-model.number="formData.expireTime">
-          <i slot="append">ms</i>
+            <i slot="append">ms</i>
           </d-input>
         </d-form-item>
-    </grid-col>
-  </grid-row>
+      </grid-col>
+    </grid-row>
     <d-form-item label="禁止消费IP" prop="blackList">
       <d-input
         type="textarea"
@@ -143,14 +143,30 @@ export default {
   data () {
     let numberValidator = (rule, value, callback) => {
       if (
-        (rule.min !== undefined && value < rule.min) ||
-        (rule.max !== undefined && value > rule.max)
+        (rule.min && value < rule.min) || (rule.max && value > rule.max)
       ) {
         callback(new Error(rule.hint))
       } else {
         callback()
       }
     }
+
+    let batchSizeValidator = (rule, value, callback) => {
+      if (this.$store.getters.isAdmin) {
+        if ((rule.min && value < rule.min) || (rule.adminMax && value > rule.adminMax)) {
+          callback(new Error(rule.adminHint))
+        } else {
+          callback()
+        }
+      }
+
+      if ((rule.min && value < rule.min) || (rule.max && value > rule.max)) {
+        callback(new Error(rule.hint))
+      } else {
+        callback()
+      }
+    }
+
     let ipPattern = '(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])'
     return {
       formData: {},
@@ -179,11 +195,14 @@ export default {
         ],
         batchSize: [
           {
-            validator: numberValidator,
+            validator: batchSizeValidator,
             type: 'number',
             trigger: 'change',
             min: 1,
-            hint: '普通用户批量大小范围为1~1000',
+            max: 1000,
+            adminMax: 30000,
+            hint: '批量大小范围为1~1000',
+            adminHint: '批量大小范围为1~30000',
             required: false
           }
         ],
@@ -222,7 +241,7 @@ export default {
         ],
         blackList: [
           {
-            pattern: '^'+ipPattern+'(,'+ipPattern+')*$',
+            pattern: '^' + ipPattern + '(,' + ipPattern + ')*$',
             message: '请输入正确格式的ip',
             required: false,
             trigger: 'blur'}
@@ -246,14 +265,6 @@ export default {
       return data
     },
     validate (callback) {
-      if (!this.$store.getters.isAdmin && this.formData.batchSize > 1000) {
-        this.$Message.error('普通用户的批量大小范围为1-1000')
-        return false
-      }
-      if (this.formData.batchSize > 30000) {
-        this.$Message.error('批量大小不能超过30000')
-        return false
-      }
       this.$refs['form'].validate(valid => {
         if (valid) {
           callback && callback()

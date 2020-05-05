@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `application` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键自增id',
   `code` varchar(128) NOT NULL COMMENT '应用 代码',
   `name` varchar(64) NOT NULL COMMENT '应用 名称',
-  `system` varchar(64) DEFAULT NULL COMMENT '所属系统',
+  `system` varchar(128) DEFAULT NULL COMMENT '所属系统',
   `department` varchar(128) DEFAULT NULL COMMENT '所属部门',
   `owner_id` bigint(20)  DEFAULT NULL COMMENT '拥有者id',
   `owner_code` varchar(64) DEFAULT NULL COMMENT '拥有者code',
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `application` (
   `alias_code` varchar(128) DEFAULT NULL COMMENT '别名',
   `description` varchar(1024) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB CHARSET=utf8;
+) ENGINE = InnoDB CHARSET=utf8 COMMENT='应用';
 
 CREATE TABLE IF NOT EXISTS `application_user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增id',
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `application_user` (
   `create_time` datetime NOT NULL COMMENT '记录创建时间',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB CHARSET=utf8;
+) ENGINE = InnoDB CHARSET=utf8 COMMENT='应用用户关联表';
 
 CREATE TABLE IF NOT EXISTS `user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `org_id` varchar(20) DEFAULT NULL COMMENT '组织id',
   `org_name` varchar(128) DEFAULT NULL COMMENT '组织名',
   `email` varchar(50) DEFAULT NULL COMMENT '邮箱',
-  `mobile` varchar(11) DEFAULT NULL COMMENT '手机号码',
+  `mobile` varchar(20) DEFAULT NULL COMMENT '手机号码',
   `role` tinyint(4) NOT NULL DEFAULT '0' COMMENT '权限：0 普通用户，1 管理员',
   `sign` int(11) NOT NULL DEFAULT '0' COMMENT '签名',
   `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
@@ -51,14 +51,14 @@ CREATE TABLE IF NOT EXISTS `user` (
   `update_time` datetime NOT NULL COMMENT '修改时间',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB CHARSET=utf8;
+) ENGINE = InnoDB CHARSET=utf8 COMMENT='用户表';
 
 CREATE TABLE IF NOT EXISTS `oper_log` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `type` int(11) NOT NULL COMMENT '类型',
-  `identity` varchar(64) NOT NULL COMMENT '操作资源ID',
+  `identity` varchar(100) NOT NULL COMMENT '操作资源ID',
   `oper_type` int(11) NOT NULL COMMENT '操作类型',
-  `target` varchar(1500) DEFAULT NULL COMMENT '目标',
+  `target` varchar(1536) DEFAULT NULL COMMENT '目标',
   `result` varchar(1024) DEFAULT NULL COMMENT '操作结果，成功或异常信息',
   `description` varchar(512) DEFAULT NULL COMMENT '操作描述，url或其他',
   `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `oper_log` (
   `update_by` bigint(20) NOT NULL COMMENT '更新人',
   `status` tinyint(4) NOT NULL COMMENT '状态',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB CHARSET=utf8;
+) ENGINE = InnoDB CHARSET=utf8 COMMENT='操作历史';
 
 CREATE TABLE  IF NOT EXISTS `metric` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
@@ -77,14 +77,15 @@ CREATE TABLE  IF NOT EXISTS `metric` (
   `type` tinyint(4) NOT NULL COMMENT '类型：0 atomic, 1 aggregator, 10 others(mdc)',
   `source` varchar(128) DEFAULT NULL COMMENT '来源指标code',
   `provider` varchar(128) DEFAULT NULL COMMENT '指标提供方',
-  `description` varchar(1000) DEFAULT NULL COMMENT '聚合描述',
+  `description` varchar(1024) DEFAULT NULL COMMENT '描述',
+  `user_permission` tinyint(4) NOT NULL DEFAULT '0' COMMENT '普通用户是否权限，0：否，1：是',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `create_by` bigint(20) NOT NULL COMMENT '创建人',
   `update_time` datetime NOT NULL COMMENT '修改时间',
   `update_by` bigint(20) NOT NULL COMMENT '修改人',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB CHARSET=utf8;
+) ENGINE = InnoDB CHARSET=utf8 COMMENT='指标';
 
 CREATE TABLE IF NOT EXISTS `broker_group` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -98,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `broker_group` (
   `update_by` bigint(20) NOT NULL COMMENT '修改人',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB CHARSET=utf8;
+) ENGINE = InnoDB CHARSET=utf8 COMMENT='Broker分组表';
 
 CREATE TABLE IF NOT EXISTS `broker_group_related` (
   `id` bigint(20) unsigned NOT NULL COMMENT 'brokerId',
@@ -110,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `broker_group_related` (
   `update_by` bigint(20) NOT NULL COMMENT '修改人',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态: -1 删除，0 禁用，1 启用',
   PRIMARY KEY (`id`)
-) ENGINE = InnoDB CHARSET=utf8;
+) ENGINE = InnoDB CHARSET=utf8 COMMENT='broker';
 
 CREATE TABLE IF NOT EXISTS `message_retry` (
 	`id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
@@ -131,6 +132,27 @@ CREATE TABLE IF NOT EXISTS `message_retry` (
 	`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态,0:成功,1:失败,-2:过期',
 	PRIMARY KEY (`id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARSET = utf8;
+
+CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
+ `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+ `topic_code` varchar(128) NOT NULL COMMENT '主题代码',
+ `partition` int(11) NOT NULL default -1 COMMENT '分区',
+ `filter` varchar(128) NOT NULL COMMENT '消息过滤条件',
+ `msg_fmt` varchar(64) NOT NULL COMMENT '消息格式',
+ `offset` bigint(20) COMMENT '位点',
+ `start_time` datetime COMMENT 'offset开始时间',
+ `end_time` datetime COMMENT 'offset结束时间',
+ `query_count` int(11) default 1 NOT NULL COMMENT '查询次数',
+ `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态：-1 结束，0 未执行，1 正在执行',
+ `url` varchar(512) COMMENT '任务结束后生成的s3链接,默认有7天有效时间',
+ `obj_key` varchar(128) COMMENT '如果url失效,根据obj_key重新生成url',
+ `create_time` datetime NOT NULL COMMENT '消息过滤任务创建时间',
+ `create_by` int(10) NOT NULL DEFAULT '0' COMMENT '创建人',
+ `update_time` datetime NOT NULL COMMENT '更新时间',
+ `update_by` int(10) NOT NULL DEFAULT '0' COMMENT '更新人',
+ `description` varchar(512) NOT NULL DEFAULT '备注信息' COMMENT '备注信息',
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8 COMMENT='消息查询表';
 
 -- init default admin USER
 MERGE INTO `user`
