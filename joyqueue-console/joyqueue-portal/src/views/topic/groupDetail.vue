@@ -8,7 +8,8 @@
       </d-input>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-              @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-del="del" @on-leader="leader" @on-broker-detail="brokerDetail">
+              @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-del="del"
+              @on-leader="leader" @on-broker-detail="brokerDetail" @on-monitor-charts="goMonitorChart">
     </my-table>
 
   </div>
@@ -40,7 +41,8 @@ export default {
         search: '/partitionGroupReplica/search',
         del: '/partitionGroupReplica/delete',
         leader: '/partitionGroupReplica/leader',
-        findMetadata: '/monitor/broker/metadata'
+        findMetadata: '/monitor/broker/metadata',
+        findCharts: '/monitor/broker/findCharts/'
       },
       searchData: {
         keyword: ''
@@ -130,6 +132,10 @@ export default {
           {
             txt: 'broker详情',
             method: 'on-broker-detail'
+          },
+          {
+            txt: '监控图表',
+            method: 'on-monitor-charts'
           }
         ]
       },
@@ -141,13 +147,22 @@ export default {
       this.multipleSelection = val
       this.$emit('on-choosed-broker', val)
     },
-    brokerDetail(item) {
+    brokerDetail (item) {
       this.$router.push({
         path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
         query: {
-          brokerId: item.id,
-          brokerIp: item.ip,
-          brokerPort: item.port
+          brokerId: item.broker.id,
+          brokerIp: item.broker.ip,
+          brokerPort: item.broker.port
+        }
+      })
+    },
+    goMonitorChart (item) {
+      apiRequest.getBase(this.urls.findCharts + item.broker.id, {}, false).then((data) => {
+        if (data.data) {
+          for (let chart of data.data) {
+            window.open(chart)
+          }
         }
       })
     },
