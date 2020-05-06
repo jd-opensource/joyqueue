@@ -397,15 +397,17 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
      * @param description
      */
     private void updateMsgFilterStatus(TopicMsgFilter msgFilter, TopicMsgFilter.FilterStatus status, String url, String description) {
-        msgFilter.setStatus(status.getStatus());
+        TopicMsgFilter updateMsgFilter = new TopicMsgFilter();
+        updateMsgFilter.setId(msgFilter.getId());
+        updateMsgFilter.setStatus(status.getStatus());
         if (StringUtils.isNoneBlank(url)) {
-            msgFilter.setUrl(url);
+          updateMsgFilter.setUrl(url);
         }
         if (StringUtils.isNoneBlank(description)) {
-            msgFilter.setDescription(description);
+            updateMsgFilter.setDescription(description);
         }
-        msgFilter.setUpdateTime(new Date(SystemClock.now()));
-        repository.update(msgFilter);
+        updateMsgFilter.setUpdateTime(new Date(SystemClock.now()));
+        repository.update(updateMsgFilter);
     }
 
     private void enrichIndexMap(TopicMsgFilter msgFilter, List<QueueMetaData.Partition> partitions, Map<Integer, Long> indexMapper, Map<Integer, Long> maxIndexMapper) {
