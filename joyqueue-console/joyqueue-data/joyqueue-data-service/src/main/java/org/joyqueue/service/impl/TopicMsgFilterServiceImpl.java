@@ -430,8 +430,12 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                     TopicMsgFilter updateMsgFilter = new TopicMsgFilter();
                     updateMsgFilter.setUrl(response.getData().toString());
                     updateMsgFilter.setId(msgFilter.getId());
-                    int lastIdx = updateMsgFilter.getUrl().lastIndexOf('/');
-                    updateMsgFilter.setObjectKey(updateMsgFilter.getUrl().substring(lastIdx + 1));
+                    int conIdx = updateMsgFilter.getUrl().indexOf('?');
+                    if (conIdx > 0) {
+                        String url = updateMsgFilter.getUrl().substring(0, conIdx);
+                        int lastIdx = url.lastIndexOf('/');
+                        updateMsgFilter.setObjectKey(url.substring(lastIdx + 1));
+                    }
                     updateMsgFilter.setStatus(msgFilter.getStatus());
                     repository.update(updateMsgFilter);
                 } catch (Exception e) {

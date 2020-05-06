@@ -1,48 +1,114 @@
 <template>
   <div>
-    <d-form ref="form" label-width="80px">
-      <div class="headLine">
-        <d-button type="primary" class="left" @click="getList">查询状态</d-button>
-        <d-button type="primary" class="left" @click="openCreateFilterDialog">添加任务</d-button>
+    <div>
+      <d-button type="primary" @click="getList">刷新
+        <icon name="refresh-cw"></icon>
+      </d-button>
+      <d-button type="primary" @click="openCreateFilterDialog">添加任务</d-button>
+    </div>
+    <div>
+      <my-table :data="tableData" :showPin="showTablePin" :showPagination="true" :page="page"
+                @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
+                @on-selection-change="handleSelectionChange"></my-table>
+    </div>
+
+    <my-dialog :dialog="createFilterDialog" @on-dialog-confirm="closeCreateFilterDialog"
+               @on-dialog-cancel="closeCreateFilterDialog">
+      <div style="margin-bottom: 20px">
+        <p>提示:</p>
+        <p>1. 同一查询只支持"<b>按位点时间范围</b>"查询或者"<b>位点值</b>+<b>查询条数查询</b>"</p>
+        <p>2. 每个查询<b>最多</b>允许查询<b>100,000</b>条数据,超出查询条数限制,查询条数只显示前<b>100,000</b>条数据</p>
       </div>
-    </d-form>
 
-    <my-table :data="tableData" :showPin="showTablePin" :showPagination="true" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
-              @on-selection-change="handleSelectionChange"></my-table>
-
-    <my-dialog :dialog="createFilterDialog" @on-dialog-confirm="closeCreateFilterDialog" @on-dialog-cancel="closeCreateFilterDialog" >
-      <d-form ref="form" :model="search" label-width="80px">
-        <div class="headLine">
-<!--          <d-select v-model="search.topic" style="width:250px">-->
-<!--            <d-option v-for="item in topics" :value="item.value" :key="item.value">{{ item.value }}</d-option>-->
-<!--            <span slot="prepend">主题</span>-->
-<!--          </d-select>-->
-          <d-tooltip content="如主题有namespace,请加上namespace">
-            <d-input v-model="search.topic" placeholder="请输入主题" class="left" style="width: 280px;margin-top: 5px">
-              <span slot="prepend">主题</span>
-            </d-input>
-          </d-tooltip>
-          <d-select v-model="search.msgFormat" style="width:280px;margin-top: 5px">
-            <d-option v-for="(supportedMessageType, index) in msgFormats" :value="supportedMessageType" :key="index">{{ supportedMessageType }}</d-option>
-            <span slot="prepend">消息格式</span>
-          </d-select><br/>
-          <d-input v-model="search.partition" placeholder="分区为空默认查询所有分区" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">分区</span>
-          </d-input>
-          <d-input v-model="search.offset" placeholder="请输入位点值" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">位点</span>
-          </d-input>
-          <d-input v-model="search.queryCount" placeholder="请输入查询条数" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">查询条数</span>
-          </d-input>
-          <d-input v-model="search.filter" placeholder="请输入消息关键字" class="left" style="width: 280px;margin-top: 5px">
-            <span slot="prepend">消息关键字</span>
-          </d-input>
-          <d-date-picker v-model="search.times" type="datetimerange" range-separator="至" start-placeholder="开始日期" class="left"
-                         style="margin-top: 5px" end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']">
-            <span slot="prepend">位点时间范围</span>
-          </d-date-picker>
-          <d-button type="primary" class="right" style="margin-right: 30px;margin-top: 40px" @click="add">创建</d-button>
+      <d-form ref="search" :model="search" label-width="100px" :rules="rules">
+        <div>
+          <grid>
+            <grid-row>
+              <grid-col span="8">
+                <d-form-item label="主题" prop="topic">
+                  <d-tooltip content="如主题有namespace,请加上namespace">
+                    <d-input v-model="search.topic" placeholder="请输入主题"
+                             style="width: 200px">
+                    </d-input>
+                  </d-tooltip>
+                </d-form-item>
+              </grid-col>
+              <grid-col span="8">
+                <d-form-item label="消息格式" prop="msgFormat">
+                  <d-select v-model="search.msgFormat" style="width:200px">
+                    <d-option v-for="(supportedMessageType, index) in msgFormats" :value="supportedMessageType"
+                              :key="index">{{ supportedMessageType }}
+                    </d-option>
+                  </d-select>
+                </d-form-item>
+              </grid-col>
+              <grid-col span="8">
+                <d-form-item label="分区" style="margin-left: -25px" prop="partition">
+                  <d-input v-model="search.partition" oninput="value=value.replace(/[^\d]/g, '')"
+                           placeholder="分区为空默认查询所有分区"
+                           style="width: 200px">
+                  </d-input>
+                </d-form-item>
+              </grid-col>
+            </grid-row>
+            <grid-row>
+              <grid-col span="8">
+                <d-form-item>
+                  <d-radio-group v-model="search.method" name="radioGroup">
+                    <d-radio label="searchByOffsetTime">
+                      <icon name="offsetTime" size="12"></icon>
+                      按位点时间
+                    </d-radio>
+                    <d-radio label="searchByOffset">
+                      <icon name="offset" size="12"></icon>
+                      按位点值
+                    </d-radio>
+                  </d-radio-group>
+                </d-form-item>
+              </grid-col>
+              <div v-if="search.method === 'searchByOffset'">
+                <grid-col>
+                  <d-form-item label="位点" prop="offset">
+                    <d-input v-model="search.offset" oninput="value=value.replace(/[^\d]/g, '')" placeholder="请输入位点值"
+                             style="width: 200px;">
+                    </d-input>
+                  </d-form-item>
+                </grid-col>
+              </div>
+              <div v-if="search.method === 'searchByOffset'">
+                <grid-col>
+                  <d-form-item label="查询条数" prop="queryCount">
+                    <d-input v-model="search.queryCount" oninput="value=value.replace(/[^\d]/g, '')"
+                             placeholder="请输入查询条数"
+                             style="width: 200px;">
+                    </d-input>
+                  </d-form-item>
+                </grid-col>
+              </div>
+              <div v-else>
+                <grid-col span="22">
+                  <d-form-item label="位点时间范围" prop="times">
+                    <d-date-picker v-model="search.times" type="datetimerange" range-separator="至"
+                                   start-placeholder="开始日期" class="left"
+                                   end-placeholder="结束日期" value-format="timestamp"
+                                   :default-time="['00:00:00', '23:59:59']">
+                    </d-date-picker>
+                  </d-form-item>
+                </grid-col>
+              </div>
+            </grid-row>
+            <grid-row>
+              <grid-col>
+                <d-form-item prop="filter" label="过滤内容">
+                  <d-input v-model="search.filter" placeholder="请输入消息关键字" class="left"
+                           style="width: 280px;margin-top: 5px">
+                  </d-input>
+                </d-form-item>
+              </grid-col>
+            </grid-row>
+          </grid>
+          <d-button type="primary" class="right" style="margin-right: 30px;margin-top: 40px" @click="add('search')">创建
+          </d-button>
         </div>
       </d-form>
     </my-dialog>
@@ -62,7 +128,7 @@ export default {
     myDialog,
     myTable
   },
-  mixins: [ crud ],
+  mixins: [crud],
   props: {
     detailItem: {
       type: Object
@@ -81,22 +147,49 @@ export default {
       default: function () {
         return {
           filter: '',
-          topic: this.topic
+          topic: this.topic,
+          method: 'searchByOffsetTime'
         }
       }
     }
   },
   data () {
+    let timesValidator = (rule, value, callback) => {
+      if (this.search.times && (this.search.offset || this.search.queryCount)) {
+        return callback(new Error('位点时间不能和位点值，查询条数同时输入'))
+      }
+      if (!this.search.times && !this.search.offset) {
+        return callback(new Error('位点时间范围和位点值至少输入一个'))
+      }
+      return callback()
+    }
+    let offsetValidator = (rule, value, callback) => {
+      if (this.search.times && (this.search.offset || this.search.queryCount)) {
+        return callback(new Error('位点时间不能和位点值，查询条数同时输入'))
+      }
+      if (!this.search.times && !this.search.offset) {
+        return callback(new Error('位点时间范围和位点值至少输入一个'))
+      }
+      return callback()
+    }
+    let queryCountValidator = (rule, value, callback) => {
+      if (this.search.offset && !this.search.queryCount) {
+        return callback(new Error('位点值和查询条数必须同时输入'))
+      }
+      if (this.search.queryCount > 100000 || this.search.queryCount < 1) {
+        return callback(new Error('查询条数范围为1-100000'))
+      }
+      return callback()
+    }
     return {
-      msgFormats: [
-      ],
+      msgFormats: [],
       apps: [],
       urls: {
         search: '/topic/findTopicMsgFilters',
         add: '/topic/addTopicMsgFilter',
         msgTypes: '/archive/message-types'
       },
-      showTablePin: false,
+      showTablePin: true,
       filterQueryTableData: {
         rowData: [],
         colData: [
@@ -199,17 +292,20 @@ export default {
             width: '10%',
             formatter (item) {
               switch (item.status) {
+                case 2: {
+                  return '上传中'
+                }
                 case 1 : {
-                  return '正在执行'
+                  return '查询中'
                 }
                 case 0 : {
                   return '等待'
                 }
                 case -1: {
-                  return '结束'
+                  return '查询完成'
                 }
                 case -2: {
-                  return '执行异常'
+                  return '查询异常'
                 }
               }
             }
@@ -226,10 +322,9 @@ export default {
               if (params.item.url) {
                 var p = h('a', {
                   attrs: {
-                    href: params.item.url,
-                    target: '_blank'
+                    href: params.item.url
                   }
-                }, 'download')
+                }, '下载查询结果')
                 html.push(p)
               }
               return h('div', {}, html)
@@ -245,30 +340,66 @@ export default {
       createFilterDialog: {
         visible: false,
         title: '创建消息过滤任务',
-        width: '620',
+        width: '1000',
         showFooter: false
+      },
+      rules: {
+        topic: [
+          {
+            required: true,
+            message: '主题不可为空'
+          }
+        ],
+        msgFormat: [
+          {
+            required: true,
+            message: '消息格式不可为空'
+          }
+        ],
+        filter: [
+          {
+            required: true,
+            message: '查询内容不可为空'
+          }
+        ],
+        offset: [
+          {
+            validator: offsetValidator
+          }
+        ],
+        times: [
+          {
+            validator: timesValidator
+          }
+        ],
+        queryCount: [
+          {
+            validator: queryCountValidator
+          }
+        ]
       }
     }
   },
   methods: {
-    add () {
-      if (!this.validate()) {
-        return
-      }
-      let data = this.search
-      if (this.search.times) {
-        data.offsetStartTime = this.search.times[0]
-        data.offsetEndTime = this.search.times[1]
-      }
-      apiRequest.post(this.urls.add, {}, data).then((data) => {
-        if (data.code === 200) {
-          this.$Message.info('添加成功')
-          this.getList()
-          delete this.search.offsetStartTime
-          delete this.search.offsetEndTime
+    add (formName) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          let data = this.search
+          if (this.search.times) {
+            data.offsetStartTime = this.search.times[0]
+            data.offsetEndTime = this.search.times[1]
+          }
+          apiRequest.post(this.urls.add, {}, data).then((data) => {
+            if (data.code === 200) {
+              this.$Message.info('添加成功')
+              this.getList()
+              delete this.search.offsetStartTime
+              delete this.search.offsetEndTime
+            }
+          })
+          this.createFilterDialog.visible = false
         }
       })
-      this.createFilterDialog.visible = false
     },
     getList () {
       this.showTablePin = true
@@ -299,38 +430,6 @@ export default {
     },
     closeCreateFilterDialog (item) {
       this.createFilterDialog.visible = false
-    },
-    innerValidate (field, name) {
-      if (!this.search[field] || this.search[field].length === 0) {
-        this.$Message.error(name + '项不可为空')
-        return false
-      }
-      return true
-    },
-    validate () {
-      if (this.search.times && (this.search.offset || this.search.queryCount)) {
-        this.$Message.error('位点时间不能和位点值，查询条数同时输入')
-        return false
-      }
-      if (this.search.offset && !this.search.queryCount) {
-        this.$Message.error('位点值和查询条数必须同时输入')
-        return false
-      }
-      if (!this.innerValidate('topic', '主题')) {
-        return false
-      }
-      if (!this.search.msgFormat) {
-        this.$Message.error('消息格式不能为空')
-        return false
-      }
-      if (!this.innerValidate('filter', '过滤内容')) {
-        return false
-      }
-      if (!this.search.times && !this.search.offset) {
-        this.$Message.error('位点时间范围和位点值至少输入一个')
-        return false
-      }
-      return true
     }
   },
   mounted () {
