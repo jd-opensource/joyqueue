@@ -143,7 +143,9 @@ export default {
           },
           {
             txt: '删除',
-            method: 'on-del'
+            method: 'on-del',
+            bindKey: 'status',
+            bindVal: [0, -2, 1]
           }
         ]
       },
@@ -222,6 +224,7 @@ export default {
           this.$Dialog.success({
             content: '批量删除成功'
           })
+          this.getList()
         } else {
           this.$Dialog.error({
             content: data.message
