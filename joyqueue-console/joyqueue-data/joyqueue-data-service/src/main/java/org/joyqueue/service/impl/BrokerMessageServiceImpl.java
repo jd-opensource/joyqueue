@@ -257,7 +257,6 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
 
         String[] messages = sendMessage.getMessage().split("\n");
         KeyValue attributes = OMS.newKeyValue();
-        attributes.put(JoyQueueBuiltinKeys.IO_THREADS, 1);
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, applicationTokens.get(0).getToken());
         attributes.put(JoyQueueBuiltinKeys.IO_THREADS, 1);
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://%s@%s:%s/console", sendMessage.getApp(), broker.getIp(), broker.getPort()), attributes);
