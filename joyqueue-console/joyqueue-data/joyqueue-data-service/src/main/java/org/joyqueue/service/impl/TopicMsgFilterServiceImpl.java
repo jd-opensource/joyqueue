@@ -487,6 +487,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                         int lastIdx = url.lastIndexOf('/');
                         updateMsgFilter.setObjectKey(url.substring(lastIdx + 1));
                     }
+                    updateMsgFilter.setUpdateTime(new Date(SystemClock.now()));
                     updateMsgFilter.setStatus(msgFilter.getStatus());
                     repository.update(updateMsgFilter);
                 } catch (Exception e) {
