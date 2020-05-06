@@ -141,7 +141,9 @@
             <if test="description!=null">
              `description` = #{description},
             </if>
-            `status`=#{status}
+            <if test="status!=null">
+             `status`=#{status}
+            </if>
         WHERE
             id=#{id}
     </update>
