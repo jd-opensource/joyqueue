@@ -11,18 +11,12 @@
     <d-form-item label="值:" prop="value" style="width: 60%">
       <d-input v-model="formData.value"></d-input>
     </d-form-item>
-    <d-form-item label="是否为密码:" prop="password">
-      <d-radio-group v-model="password" name="radiogroup">
-        <d-radio label="true">是</d-radio>
-        <d-radio label="false">否</d-radio>
-      </d-radio-group>
-    </d-form-item>
   </d-form>
 </template>
 
 <script>
 import form from '../../mixins/form.js'
-import {getCodeRule3, getNameRule} from '../../utils/common.js'
+import {getCodeRule3} from '../../utils/common.js'
 
 export default {
   name: 'config-form',
@@ -36,16 +30,13 @@ export default {
           id: '',
           key: '',
           value: '',
-          name: '',
-          group: '',
-          password: 0
+          group: ''
         }
       }
     }
   },
   methods: {
     getFormData () {
-      this.formData.password = (this.password === 'true' ? 1 : 0)
       return this.formData
     }
   },
@@ -55,13 +46,10 @@ export default {
       password: 'false',
       rules: {
         key: getCodeRule3(),
-        name: getNameRule(),
-        value: [{required: true, message: '请填写值', trigger: 'change'}]
+        value: getCodeRule3(),
+        group: getCodeRule3()
       }
     }
-  },
-  mounted () {
-    this.password = this.data.password === 1 ? 'true' : 'false'
   }
 }
 </script>

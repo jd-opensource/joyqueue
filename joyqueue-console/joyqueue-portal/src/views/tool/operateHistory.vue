@@ -42,7 +42,7 @@ export default {
         type: -1,
         beginTime: '',
         endTime: '',
-        erp: ''
+        erp: this.$store.getters.loginUserName
       },
       typeList: [
         {key: -1, value: '请选择类型'},
@@ -163,17 +163,23 @@ export default {
     }
   },
   methods: {
+    validate () {
+      if (!this.$store.getters.isAdmin && this.searchData.erp !== this.$store.getters.loginUserName) {
+        this.$Message.error('用户名不能为空, 且必须为登录用户')
+        return false
+      }
+      return true
+    },
     getListWithDate () {
       this.searchData.beginTime = this.times[0]
       this.searchData.endTime = this.times[1]
-      this.getList()
+      if (this.validate()) {
+        this.getList()
+      }
     }
   },
   mounted () {
-    this.searchData.beginTime = this.times[0]
-    this.searchData.endTime = this.times[1]
-
-    this.getList()
+    this.getListWithDate()
   }
 }
 </script>

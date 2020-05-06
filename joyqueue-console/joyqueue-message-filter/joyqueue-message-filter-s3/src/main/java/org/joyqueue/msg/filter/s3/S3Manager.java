@@ -30,9 +30,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -56,12 +54,11 @@ public class S3Manager {
 
     static {
         S3_CONFIG = new Properties();
-        String configPath = S3Manager.class.getResource("/").getPath() + "application.properties";
         try {
-            InputStream inputStream = new FileInputStream(configPath);
-            S3_CONFIG.load(inputStream);
+            S3_CONFIG.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties"));
+            logger.info("S3 config loaded successfully. ");
         } catch (IOException e) {
-            logger.error("Failed to read S3 config in path: {}, error: {}", configPath, e.getMessage());
+            logger.error("Failed to read S3 config , error: {}", e.getMessage());
         }
     }
 
@@ -71,6 +68,8 @@ public class S3Manager {
         accessKey = S3_CONFIG.getProperty(S3ConfigKey.S3_ACCESS_KEY.getName(), S3ConfigKey.S3_ACCESS_KEY.getValue().toString());
         secretKey = S3_CONFIG.getProperty(S3ConfigKey.S3_SECRET_KEY.getName(), S3ConfigKey.S3_SECRET_KEY.getValue().toString());
         bucketName = S3_CONFIG.getProperty(S3ConfigKey.S3_BUCKET_NAME.getName(), S3ConfigKey.S3_BUCKET_NAME.getValue().toString());
+        logger.info(String.format("S3 config, client region: %s, endpoint: %s, access key: %s, secret key: %s, bucket name: %s ",
+                clientRegion, endpoint, accessKey, secretKey, bucketName));
     }
 
     public String upload(String path) {

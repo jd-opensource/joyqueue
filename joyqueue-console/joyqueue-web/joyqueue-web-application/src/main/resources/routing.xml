@@ -217,6 +217,9 @@
         <route inherit="put"
                path="/v1/brokerGroup/updateBroker/:id" handlers="validateAdmin brokerGroup#updateBroker render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/brokerGroup/mvBatchBrokerGroup" handlers="validateAdmin brokerGroup#mvBatchBrokerGroup render"
+               errors="error"/>
 
         <!--partitionGroup 操作-->
         <route inherit="post"

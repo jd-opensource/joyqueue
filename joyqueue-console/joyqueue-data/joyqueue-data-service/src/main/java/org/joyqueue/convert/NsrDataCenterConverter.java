@@ -18,6 +18,7 @@ package org.joyqueue.convert;
 import org.joyqueue.model.domain.DataCenter;
 import org.joyqueue.toolkit.URL;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.util.NullUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,13 +56,15 @@ public class NsrDataCenterConverter extends Converter<DataCenter, org.joyqueue.d
     protected DataCenter backward(org.joyqueue.domain.DataCenter nsrDataCenter) {
         DataCenter dataCenter = new DataCenter();
         dataCenter.setId(nsrDataCenter.getId());
-        String[] array = nsrDataCenter.getUrl().split(";");
         List<String> ipList = new ArrayList<>();
-        for (String urlStr:array) {
-            URL url = URL.valueOf(urlStr);
-            if (url != null) {
-                dataCenter.setMatchType(url.getProtocol());
-                ipList.add(url.getParameters().get("pattern"));
+        if(NullUtil.isNotEmpty(nsrDataCenter.getUrl())) {
+            String[] array = nsrDataCenter.getUrl().split(";");
+            for (String urlStr : array) {
+                URL url = URL.valueOf(urlStr);
+                if (url != null) {
+                    dataCenter.setMatchType(url.getProtocol());
+                    ipList.add(url.getParameters().get("pattern"));
+                }
             }
         }
         dataCenter.setIps(StringUtils.join(ipList,";"));

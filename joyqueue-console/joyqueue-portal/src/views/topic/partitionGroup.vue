@@ -15,7 +15,7 @@
                   @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
                   @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
                   @on-position="goPosition" @on-replication="goReplicationChart">
-        </my-table>
+    </my-table>
 
     <!--详情-->
     <my-dialog :dialog="groupDetailDialog" @on-dialog-confirm="groupDetailConfirm()" @on-dialog-cancel="groupDetailCancel()">
@@ -345,7 +345,7 @@ export default {
     },
     groupNew () {
       this.groupNewDialogData = {topic: this.searchData.topic, namespace: this.searchData.namespace}
-      if (this.tableData.rowData.length > 0){
+      if (this.tableData.rowData.length > 0) {
         this.groupNewDialogData.ip = this.tableData.rowData[0].ip
       }
       this.groupNewDialog.visible = true
