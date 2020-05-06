@@ -38,8 +38,8 @@ public class TopicMessageFilterSupport {
     List<TopicMsgFilterMatcher> filterMatchers;
 
     public TopicMessageFilterSupport() {
-        this.filterMatchers=loadFilterMatchers();
-        this.filterOutputs=loadFilterOutputs();
+        this.filterMatchers = loadFilterMatchers();
+        this.filterOutputs = loadFilterOutputs();
     }
 
     protected List<TopicMsgFilterOutput> loadFilterOutputs() {

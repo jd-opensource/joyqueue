@@ -25,10 +25,22 @@ import org.joyqueue.msg.filter.TopicMsgFilterOutput;
  **/
 public class TopicMsgFilterS3Output implements TopicMsgFilterOutput {
 
-    private final S3Manager s3Manager =  new S3Manager();
+    private S3Manager s3Manager;
+    private static final Object mutex = new Object();
 
     @Override
     public FilterResponse output(String path) {
-        return new FilterResponse(s3Manager.upload(path), OutputType.S3);
+        return new FilterResponse(getS3Manager().upload(path), OutputType.S3);
+    }
+
+    private S3Manager getS3Manager() {
+        if (s3Manager == null) {
+            synchronized (mutex) {
+                if (s3Manager == null) {
+                    s3Manager = new S3Manager();
+                }
+            }
+        }
+        return s3Manager;
     }
 }

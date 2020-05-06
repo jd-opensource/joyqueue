@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `application` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键自增id',
   `code` varchar(128) NOT NULL COMMENT '应用 代码',
   `name` varchar(64) NOT NULL COMMENT '应用 名称',
-  `system` varchar(64) DEFAULT NULL COMMENT '所属系统',
+  `system` varchar(128) DEFAULT NULL COMMENT '所属系统',
   `department` varchar(128) DEFAULT NULL COMMENT '所属部门',
   `owner_id` bigint(20)  DEFAULT NULL COMMENT '拥有者id',
   `owner_code` varchar(64) DEFAULT NULL COMMENT '拥有者code',
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `org_id` varchar(20) DEFAULT NULL COMMENT '组织id',
   `org_name` varchar(128) DEFAULT NULL COMMENT '组织名',
   `email` varchar(50) DEFAULT NULL COMMENT '邮箱',
-  `mobile` varchar(11) DEFAULT NULL COMMENT '手机号码',
+  `mobile` varchar(20) DEFAULT NULL COMMENT '手机号码',
   `role` tinyint(4) NOT NULL DEFAULT '0' COMMENT '权限：0 普通用户，1 管理员',
   `sign` int(11) NOT NULL DEFAULT '0' COMMENT '签名',
   `create_by` bigint(20) DEFAULT NULL COMMENT '创建人',
@@ -56,9 +56,9 @@ CREATE TABLE IF NOT EXISTS `user` (
 CREATE TABLE IF NOT EXISTS `oper_log` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `type` int(11) NOT NULL COMMENT '类型',
-  `identity` varchar(64) NOT NULL COMMENT '操作资源ID',
+  `identity` varchar(100) NOT NULL COMMENT '操作资源ID',
   `oper_type` int(11) NOT NULL COMMENT '操作类型',
-  `target` varchar(1500) DEFAULT NULL COMMENT '目标',
+  `target` varchar(1536) DEFAULT NULL COMMENT '目标',
   `result` varchar(1024) DEFAULT NULL COMMENT '操作结果，成功或异常信息',
   `description` varchar(512) DEFAULT NULL COMMENT '操作描述，url或其他',
   `create_time` datetime NOT NULL COMMENT '创建时间',
@@ -77,7 +77,8 @@ CREATE TABLE  IF NOT EXISTS `metric` (
   `type` tinyint(4) NOT NULL COMMENT '类型：0 atomic, 1 aggregator, 10 others(mdc)',
   `source` varchar(128) DEFAULT NULL COMMENT '来源指标code',
   `provider` varchar(128) DEFAULT NULL COMMENT '指标提供方',
-  `description` varchar(1000) DEFAULT NULL COMMENT '聚合描述',
+  `description` varchar(1024) DEFAULT NULL COMMENT '描述',
+  `user_permission` tinyint(4) NOT NULL DEFAULT '0' COMMENT '普通用户是否权限，0：否，1：是',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `create_by` bigint(20) NOT NULL COMMENT '创建人',
   `update_time` datetime NOT NULL COMMENT '修改时间',
@@ -130,12 +131,7 @@ CREATE TABLE IF NOT EXISTS `message_retry` (
 	`update_by` int(10) NOT NULL DEFAULT '0' COMMENT '更新人',
 	`status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态,0:成功,1:失败,-2:过期',
 	PRIMARY KEY (`id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARSET = utf8;
-
--- init default admin USER
-MERGE INTO `user`
-(`id`, `code`, `name`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
-VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
+) ENGINE = InnoDB CHARSET = utf8;
 
 CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -156,4 +152,9 @@ CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
  `update_by` int(10) NOT NULL DEFAULT '0' COMMENT '更新人',
  `description` varchar(1024) NOT NULL DEFAULT '备注信息' COMMENT '备注信息',
  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 CHARSET=utf8;
+) ENGINE=InnoDB CHARSET=utf8;
+
+-- init default admin USER
+MERGE INTO `user`
+(`id`, `code`, `name`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
+VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
