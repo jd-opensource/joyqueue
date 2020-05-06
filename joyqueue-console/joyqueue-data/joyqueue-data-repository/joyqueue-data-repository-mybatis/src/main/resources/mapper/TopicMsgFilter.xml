@@ -91,7 +91,9 @@
         <include refid="baseColumn"/>
         FROM
         topic_msg_filter AS a
-        WHERE a.create_by = #{query.userId}
+        <if test="query.admin == false">
+            WHERE a.create_by = #{query.userId}
+        </if>
         ORDER BY a.create_time DESC
     </select>
 
