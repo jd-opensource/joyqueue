@@ -66,6 +66,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.ArrayList;
@@ -90,6 +92,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     private final int maxItemSize = 10_0000;
     private final String urlFormat = "oms:joyqueue://%s@%s/default";
     private final String filePathFormat = "%s_%s_%s_%s_%s.txt";
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     /**
      * 没有消费到任何数据
      */
@@ -325,6 +328,8 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                         String content = messagePreviewService.preview(msgFilter.getMsgFormat(), message.getData());
                         if (topicMessageFilterSupport.match(content, msgFilter.getFilter())) {
                             filterClock = SystemClock.now();
+                            strBuilder.append("bornTime:").append(dateFormat.format(new Date(message.header().getBornTimestamp())))
+                                    .append('\n');
                             strBuilder.append(content).append('\n');
                             appendCount++;
                             // 每1w行追加一次

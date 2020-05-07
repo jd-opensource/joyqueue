@@ -14,7 +14,7 @@
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
                   @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
                   @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
-                  @on-position="goPosition" @on-replication="goReplicationChart">
+                  @on-position="goPosition" @on-replication="goReplicationChart" :showPagination="false">
     </my-table>
 
     <!--详情-->
