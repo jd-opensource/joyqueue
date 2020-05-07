@@ -20,7 +20,8 @@ import org.joyqueue.exception.ValidationException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.routing.command.CommandSupport;
 import org.joyqueue.handler.Constants;
-import org.joyqueue.model.ListQuery;
+import org.joyqueue.model.Pagination;
+import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Broker;
 import org.joyqueue.model.domain.BrokerGroup;
 import org.joyqueue.model.domain.Identity;
@@ -61,10 +62,17 @@ public class BrokerGroupCommand extends CommandSupport<BrokerGroup, BrokerGroupS
     }
 
     @Path("mvBatchBrokerGroup")
-    public Response mvBatchBrokerGroup(@QueryParam("group") String group,@Body List<Broker> brokers) {
+    public Response mvBatchBrokerGroup(@QueryParam("group") String group,@Body List<Broker> brokers) throws Exception {
         QBrokerGroup qBrokerGroup = new QBrokerGroup();
         qBrokerGroup.setCode(group);
-        List<BrokerGroup> brokerGroups = service.findByQuery(new ListQuery<>(qBrokerGroup));
+        QPageQuery<QBrokerGroup> pageQuery = new QPageQuery<>();
+        Pagination pagination = new Pagination();
+        pagination.setSize(1000);
+        pagination.setPage(1);
+        pageQuery.setPagination(pagination);
+        pageQuery.setQuery(qBrokerGroup);
+        Response response = this.pageQuery(pageQuery);
+        List<BrokerGroup> brokerGroups = (List<BrokerGroup>) response.getData();
         BrokerGroup brokerGroup ;
         if (CollectionUtils.isNotEmpty(brokerGroups)) {
             List<BrokerGroup> collect = brokerGroups.stream().filter(bg -> bg.getCode().equals(group)).collect(Collectors.toList());

@@ -436,6 +436,9 @@ export default {
     apiRequest.get(this.urls.msgTypes)
       .then(data => {
         this.msgFormats = data.data
+        if (this.msgFormats.length > 0) {
+          this.search.msgFormat = this.msgFormats[0]
+        }
       })
     this.getList()
   }
