@@ -21,6 +21,7 @@
         <result property="queryCount" column="query_count" jdbcType="INTEGER"/>
         <result property="status" column="status" jdbcType="TINYINT"/>
         <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="objectKey" column="obj_key" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
     </resultMap>
 
@@ -137,6 +138,9 @@
             </if>
             <if test="url!=null">
             `url` = #{url},
+            </if>
+            <if test="objectKey!=null">
+             `obj_key` = #{objectKey},
             </if>
             <if test="description!=null">
              `description` = #{description},
