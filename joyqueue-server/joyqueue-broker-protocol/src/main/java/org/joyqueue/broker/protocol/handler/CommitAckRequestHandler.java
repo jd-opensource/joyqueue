@@ -24,10 +24,12 @@ import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
+import org.joyqueue.broker.consumer.ConsumeConfig;
 import org.joyqueue.broker.consumer.model.PullResult;
 import org.joyqueue.broker.helper.SessionHelper;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.domain.Partition;
+import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.BrokerMessage;
@@ -67,12 +69,14 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
     private Consume consume;
     private MessageRetry retryManager;
     private ClusterManager clusterManager;
+    private ConsumeConfig consumeConfig;
 
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
         this.consume = brokerContext.getConsume();
         this.retryManager = brokerContext.getRetryManager();
         this.clusterManager = brokerContext.getClusterManager();
+        this.consumeConfig = new ConsumeConfig(brokerContext.getPropertySupplier());
     }
 
     @Override
@@ -158,6 +162,20 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
 
         try {
             if (CollectionUtils.isNotEmpty(retryDataList)) {
+                org.joyqueue.domain.Consumer subscribeConsumer = clusterManager.getNameService().getConsumerByTopicAndApp(TopicName.parse(consumer.getTopic()), consumer.getApp());
+                if (subscribeConsumer != null && subscribeConsumer.getConsumerPolicy() != null
+                        && subscribeConsumer.getConsumerPolicy().getRetry() != null && !subscribeConsumer.getConsumerPolicy().getRetry()) {
+
+                    if (consumeConfig.getRetryForceAck(consumer.getTopic(), consumer.getApp())) {
+                        consume.acknowledge(messageLocations, consumer, connection, true);
+                        return JoyQueueCode.SUCCESS;
+                    }
+
+                    logger.warn("consumer retry is disabled, ignore retry, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
+                    consume.releasePartition(topic, app, partition);
+                    return JoyQueueCode.SUCCESS;
+                }
+
                 try {
                     commitRetry(connection, consumer, retryDataList);
                 } catch (JoyQueueException e) {
