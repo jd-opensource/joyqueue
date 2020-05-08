@@ -34,9 +34,9 @@ import org.joyqueue.event.EventType;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
-import org.joyqueue.network.session.Joint;
 import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.monitor.TraceStat;
+import org.joyqueue.network.session.Joint;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.config.TransportConfigSupport;
@@ -195,6 +195,14 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     public void addRetry(List<RetryMessageModel> retryMessageModelList) throws JoyQueueException {
         if (CollectionUtils.isEmpty(retryMessageModelList)) {
             return;
+        }
+        if (CollectionUtils.isNotEmpty(retryMessageModelList)) {
+            String topic = retryMessageModelList.get(0).getTopic();
+            String app = retryMessageModelList.get(0).getApp();
+            Consumer consumer = clusterManager.getNameService().getConsumerByTopicAndApp(TopicName.parse(topic), app);
+            if (consumer != null && consumer.getConsumerPolicy() != null && consumer.getConsumerPolicy().getRetry() != null && !consumer.getConsumerPolicy().getRetry()) {
+                throw new JoyQueueException(JoyQueueCode.RETRY_TOKEN_LIMIT);
+            }
         }
         Set<Joint> consumers= retryConsumers(retryMessageModelList);
         if(retryTokenAvailable(consumers)) {

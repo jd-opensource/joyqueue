@@ -80,6 +80,14 @@ public class ConsumeConfig {
                 ConsumeConfigKey.RETRY_RATE_PREFIX.getType(),ConsumeConfigKey.RETRY_RATE_PREFIX.getValue());
     }
 
+    public boolean getRetryForceAck(String topic, String app) {
+        return (boolean) propertySupplier.getValue(ConsumeConfigKey.RETRY_FORCE_ACK)
+                || (boolean) PropertySupplier.getValue(propertySupplier,
+                ConsumeConfigKey.RETRY_FORCE_ACK_PREFIX.getName() + String.format("%s.%s", topic, app),
+                ConsumeConfigKey.RETRY_FORCE_ACK_PREFIX.getType(),
+                ConsumeConfigKey.RETRY_FORCE_ACK_PREFIX.getValue());
+    }
+
     public void setConsumePositionPath(String consumePositionPath) {
         this.consumePositionPath = consumePositionPath;
     }
