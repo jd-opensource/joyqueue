@@ -196,23 +196,21 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
         if (CollectionUtils.isEmpty(retryMessageModelList)) {
             return;
         }
-        if (CollectionUtils.isNotEmpty(retryMessageModelList)) {
-            String topic = retryMessageModelList.get(0).getTopic();
-            String app = retryMessageModelList.get(0).getApp();
-            Consumer consumer = clusterManager.getNameService().getConsumerByTopicAndApp(TopicName.parse(topic), app);
-            if (consumer != null && consumer.getConsumerPolicy() != null && consumer.getConsumerPolicy().getRetry() != null && !consumer.getConsumerPolicy().getRetry()) {
-                throw new JoyQueueException(JoyQueueCode.RETRY_TOKEN_LIMIT);
-            }
+        String topic = retryMessageModelList.get(0).getTopic();
+        String app = retryMessageModelList.get(0).getApp();
+        Consumer consumer = clusterManager.getNameService().getConsumerByTopicAndApp(TopicName.parse(topic), app);
+        if (consumer != null && consumer.getConsumerPolicy() != null && consumer.getConsumerPolicy().getRetry() != null && !consumer.getConsumerPolicy().getRetry()) {
+            throw new JoyQueueException(JoyQueueCode.RETRY_TOKEN_LIMIT);
         }
+
         Set<Joint> consumers= retryConsumers(retryMessageModelList);
         if(retryTokenAvailable(consumers)) {
-            RetryMessageModel retryMessageModel = retryMessageModelList.get(0);
             TraceStat totalRetryTrace = tracer.begin("BrokerRetryManager.addRetry");
-            TraceStat appRetryTrace = tracer.begin(String.format("BrokerRetryManager.addRetry.%s.%s", retryMessageModel.getApp().replace(".", "_"), retryMessageModel.getTopic()));
+            TraceStat appRetryTrace = tracer.begin(String.format("BrokerRetryManager.addRetry.%s.%s", app.replace(".", "_"), topic));
             try {
                 long startTime = SystemClock.now();
                 delegate.addRetry(retryMessageModelList);
-                brokerMonitor.onAddRetry(retryMessageModel.getTopic(), retryMessageModel.getApp(), retryMessageModelList.size(), SystemClock.now() - startTime);
+                brokerMonitor.onAddRetry(topic, app, retryMessageModelList.size(), SystemClock.now() - startTime);
                 tracer.end(totalRetryTrace);
                 tracer.end(appRetryTrace);
             } catch (Exception e) {
