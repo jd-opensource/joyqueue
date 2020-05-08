@@ -143,7 +143,9 @@ export default {
           },
           {
             txt: '删除',
-            method: 'on-del'
+            method: 'on-del',
+            bindKey: 'status',
+            bindVal: [0, -2, 1]
           }
         ]
       },
@@ -218,10 +220,11 @@ export default {
         data.endTime = ''
       }
       apiRequest.post(this.urlOrigin.batchDelete, {}, data).then((data) => {
-        if (data == 200) {
+        if (data.status === 200) {
           this.$Dialog.success({
             content: '批量删除成功'
           })
+          this.getList()
         } else {
           this.$Dialog.error({
             content: data.message
@@ -235,18 +238,30 @@ export default {
     },
     recovery (item) {
       apiRequest.put(this.urlOrigin.recovery + '?id=' + item.id + 'topic=' + item.topic).then(data => {
-        this.$Dialog.success({
-          content: '恢复成功'
-        })
-        this.getList()
+        if (data.status === 200) {
+          this.$Dialog.success({
+            content: '恢复成功'
+          })
+          this.getList()
+        } else {
+          this.$Dialog.error({
+            content: data.message
+          })
+        }
       })
     },
     del (item) {
       apiRequest.delete(this.urlOrigin.del + '?id=' + item.id + '&topic=' + item.topic).then(data => {
-        this.$Dialog.success({
-          content: '删除成功'
-        })
-        this.getList()
+        if (data.status === 200) {
+          this.$Dialog.success({
+            content: '删除成功'
+          })
+          this.getList()
+        } else {
+          this.$Dialog.error({
+            content: data.message
+          })
+        }
       })
     }
   },

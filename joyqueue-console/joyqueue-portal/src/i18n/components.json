@@ -19,7 +19,8 @@
       "config": "配置管理",
       "brokerGroup": "Broker分组管理",
       "broker": "Broker管理",
-      "namespace": "命名空间管理"
+      "namespace": "命名空间管理",
+      "retryMonitor": "重试监控"
     }
   },
   "en-US" : {
@@ -42,7 +43,8 @@
       "config": "Config Manage",
       "brokerGroup": "Broker Group Manage",
       "broker": "Broker Manage",
-      "namespace": "Namespace Manage"
+      "namespace": "Namespace Manage",
+      "retryMonitor": "Retry Monitor"
     }
   }
 }

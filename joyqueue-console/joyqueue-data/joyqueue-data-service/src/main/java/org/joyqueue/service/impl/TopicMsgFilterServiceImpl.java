@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.domain.Broker;
@@ -46,6 +47,7 @@ import org.joyqueue.msg.filter.FilterResponse;
 import org.joyqueue.msg.filter.OutputType;
 import org.joyqueue.msg.filter.support.TopicMessageFilterSupport;
 import org.joyqueue.repository.TopicMsgFilterRepository;
+import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.ApplicationTokenService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.ConsumeOffsetService;
@@ -84,13 +86,14 @@ import java.util.stream.Collectors;
 public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter, QTopicMsgFilter, TopicMsgFilterRepository> implements TopicMsgFilterService {
 
     private final int maxPoolSize = 3;
-    private final int appendMaxSize = 100;
+    private final int appendMaxSize = 1000;
+    private final int maxItemSize = 10_0000;
     private final String urlFormat = "oms:joyqueue://%s@%s/default";
     private final String filePathFormat = "%s_%s_%s_%s_%s.txt";
     /**
      * 没有消费到任何数据
      */
-    private final long defaultTimeOut = 60_000L;
+    private final long defaultTimeOut = 10_000L;
     /**
      * 消费到数据但没命中filter时，超过{@param defaultFilterTimeOut}则追加文件
      */
@@ -103,6 +106,9 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
 
     @Autowired
     private ApplicationTokenService applicationTokenService;
+
+    @Autowired
+    private ApplicationService applicationService;
 
     @Autowired
     private ConsumerService consumerService;
@@ -130,13 +136,9 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                 for (TopicMsgFilter filter : msgFilters) {
                     try {
                         execute(filter);
-                    } catch (NullPointerException | NotFoundException e) {
-                        // status = -2, message query execute error
-                        updateMsgFilterStatus(filter, -2, "", e.getMessage());
-                        logger.error("topic message filter execute error: {}", e.getMessage());
                     } catch (Exception e) {
-                        // reject by thread pool and reset status to 0 to execute later
-                        updateMsgFilterStatus(filter, 0, "", "");
+                        // status = -2, message query execute error
+                        updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.ERROR, "", e.getMessage());
                         logger.error("topic message filter execute error: {}", e.getMessage());
                     }
                 }
@@ -148,51 +150,73 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
     }
 
+    private void enrichTopicMsgFilter(TopicMsgFilter filter, String app) throws Exception {
+        filter.setApp(app);
+        List<ApplicationToken> appTokens = applicationTokenService.findByApp(filter.getApp());
+        if (CollectionUtils.isNotEmpty(appTokens)) {
+            filter.setToken(appTokens.get(0).getToken());
+        } else {
+            filter.setToken(createToken(app));
+        }
+        List<Broker> brokers = brokerService.findByTopic(filter.getTopic());
+        if (CollectionUtils.isNotEmpty(brokers)) {
+            Broker broker = brokers.get(0);
+            filter.setBrokerAddr(broker.getIp() + ":" + broker.getPort());
+        }
+        User user = userService.findById(filter.getCreateBy().getId());
+        filter.getCreateBy().setCode(user.getCode());
+    }
+
     private void execute(TopicMsgFilter filter) throws Exception {
         List<String> apps;
         try {
             TopicName topicName = TopicName.parse(filter.getTopic());
             apps = consumerService.findByTopic(topicName.getCode(), topicName.getNamespace()).stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
         } catch (NullPointerException e) {
-            throw new NotFoundException("topic not found or has unrelated app");
+            throw new NotFoundException("topic not found or doesn't have related app");
         }
         if (CollectionUtils.isNotEmpty(apps)) {
-            updateMsgFilterStatus(filter, 1, null, "");
-            filter.setApp(apps.get(0));
-            List<ApplicationToken> appTokens = applicationTokenService.findByApp(filter.getApp());
-            if (CollectionUtils.isNotEmpty(appTokens)) {
-                filter.setToken(appTokens.get(0).getToken());
-            } else {
-                filter.setToken(createToken(apps.get(0)));
-            }
-            List<Broker> brokers = brokerService.findByTopic(filter.getTopic());
-            if (CollectionUtils.isNotEmpty(brokers)) {
-                Broker broker = brokers.get(0);
-                filter.setBrokerAddr(broker.getIp() + ":" + broker.getPort());
-            }
+            updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.RUNNING, null, "");
+            enrichTopicMsgFilter(filter, apps.get(0));
             CompletableFuture.supplyAsync(() -> {
                 try {
                     return consume(filter);
                 } catch (Exception e) {
                     logger.error("Message filter cause error", e);
                     // status = -2, message query execute error
-                    updateMsgFilterStatus(filter, -2, "", e.getMessage());
+                    updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.ERROR, "", e.getMessage());
                     return null;
                 }
             }, threadPoolExecutor).whenComplete((result, throwable) -> {
                 if (result != null) {
+                    updateMsgFilterStatus(result, TopicMsgFilter.FilterStatus.UPLOADING, "", "");
                     handleFilterOutputs(topicMessageFilterSupport.output(result.getUrl()), result);
-                    try {
-                        Files.deleteIfExists(Paths.get(result.getUrl()));
-                        logger.info("Delete file: {} success", result.getUrl());
-                    } catch (IOException e) {
-                        logger.error("Failed to delete file: {}, need to delete manually", result.getUrl());
-                    }
+                    updateMsgFilterStatus(result, TopicMsgFilter.FilterStatus.FINISHED, "", "");
+                    deleteFile(result.getUrl());
                 }
             });
         } else {
-            updateMsgFilterStatus(filter, -2, "", "topic not found or has unrelated app");
-            throw new NotFoundException("topic not found or has unrelated app");
+            updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.ERROR, "", "topic not found or doesn't have related app");
+            throw new NotFoundException("topic not found or doesn't have related app");
+        }
+    }
+
+    private File initFile(TopicMsgFilter msgFilter) throws IOException {
+        String filePath = String.format(filePathFormat, msgFilter.getCreateBy().getCode(), msgFilter.getCreateBy().getId(),
+                msgFilter.getTopic(), Thread.currentThread().getId(), SystemClock.now());
+        File file = createFile(filePath);
+        if (file != null) {
+            FileUtils.writeStringToFile(file, buildFileHeader(msgFilter), StandardCharsets.UTF_8, true);
+        }
+        return file;
+    }
+
+    private void deleteFile(String path) {
+        try {
+            Files.deleteIfExists(Paths.get(path));
+            logger.info("Delete file: {} success", path);
+        } catch (IOException e) {
+            logger.error("Failed to delete file: {}, need to delete manually", path);
         }
     }
 
@@ -253,14 +277,15 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         appToken.setEffectiveTime(new Date());
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 7);
-        appToken.setApplication(new Identity(app));
+        Application application = applicationService.findByCode(app);
+        appToken.setApplication(new Identity(application.getId(), app));
         appToken.setExpirationTime(calendar.getTime());
         appToken.setToken(UUID.randomUUID().toString().replaceAll("-", ""));
         applicationTokenService.add(appToken);
         return appToken.getToken();
     }
 
-    private TopicMsgFilter consume(TopicMsgFilter msgFilter) throws IOException {
+    private ExtensionConsumer initConsumer(TopicMsgFilter msgFilter) {
         final String url = String.format(urlFormat, msgFilter.getApp(), msgFilter.getBrokerAddr());
         KeyValue keyValue = OMS.newKeyValue();
         keyValue.put(OMSBuiltinKeys.ACCOUNT_KEY, msgFilter.getToken());
@@ -268,87 +293,96 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(url, keyValue);
         ExtensionConsumer consumer = (ExtensionConsumer) messagingAccessPoint.createConsumer();
         consumer.bindQueue(msgFilter.getTopic());
-        consumer.start();
-        User user = userService.findById(msgFilter.getCreateBy().getId());
-        msgFilter.getCreateBy().setCode(user.getCode());
-        String filePath = String.format(filePathFormat, user.getCode(), msgFilter.getCreateBy().getId(),
-                msgFilter.getTopic(), Thread.currentThread().getId(), SystemClock.now());
-        File file = createFile(filePath);
-        if (file != null) {
-            FileUtils.writeStringToFile(file, buildFileHeader(msgFilter), StandardCharsets.UTF_8, true);
-        }
-        long clock = SystemClock.now();
-        long filterClock = clock;
-        int appendCount = 0;
-        int appendTotalCount = 0;
-        StringBuilder strBuilder = new StringBuilder();
-        List<QueueMetaData.Partition> partitions = partitions(consumer, msgFilter);
-        Map<Integer, Long> indexMapper = Maps.newHashMap();
-        Map<Integer, Long> maxIndexMapper = Maps.newHashMap();
-        if (msgFilter.getOffsetStartTime() != null && msgFilter.getOffsetEndTime() != null) {
-            parseOffsetByTs(msgFilter.getApp(), msgFilter.getTopic(), partitions.size() == 1 ? partitions.get(0).partitionId() : -1,
-                    msgFilter.getOffsetStartTime().getTime(), msgFilter.getOffsetEndTime().getTime(),
-                    indexMapper, maxIndexMapper);
+        return consumer;
+    }
 
-        } else {
-            for (QueueMetaData.Partition partition : partitions) {
-                indexMapper.put(partition.partitionId(), msgFilter.getOffset());
-            }
-        }
-        while (consumerCondition(msgFilter, appendTotalCount, maxIndexMapper)) {
-            for (QueueMetaData.Partition partition : partitions) {
-                if (msgFilter.getOffsetStartTime() != null && maxIndexMapper.size() > 0 && !maxIndexMapper.containsKey(partition.partitionId())) {
-                    continue;
-                }
-                long index = indexMapper.computeIfAbsent(partition.partitionId(), k -> 0L);
-                List<Message> messages = consumer.batchReceive((short) partition.partitionId(), index, 1000 * 10);
-                for (Message message : messages) {
-                    clock = SystemClock.now();
-                    String content = messagePreviewService.preview(msgFilter.getMsgFormat(), message.getData());
-                    if (topicMessageFilterSupport.match(content, msgFilter.getFilter())) {
-                        filterClock = SystemClock.now();
-                        strBuilder.append(content).append('\n');
-                        appendCount++;
-                        appendTotalCount++;
-                        // 每1w行追加一次
-                        if (appendCount >= appendMaxSize) {
-                            appendCount = appendFile(file, strBuilder);
-                        }
+    private TopicMsgFilter consume(TopicMsgFilter msgFilter) throws IOException {
+        ExtensionConsumer consumer = null;
+        StringBuilder strBuilder = new StringBuilder();
+        File file = initFile(msgFilter);
+        try {
+            consumer = initConsumer(msgFilter);
+            consumer.start();
+            long clock = SystemClock.now();
+            long filterClock = clock;
+            int appendCount = 0;
+            int totalCount = 0;
+            boolean hasRest = true;
+            List<QueueMetaData.Partition> partitions = partitions(consumer, msgFilter);
+            Map<Integer, Long> indexMapper = Maps.newHashMap();
+            Map<Integer, Long> maxIndexMapper = Maps.newHashMap();
+            enrichIndexMap(msgFilter, partitions, indexMapper, maxIndexMapper);
+            while (consumerCondition(msgFilter, totalCount, maxIndexMapper)) {
+                for (QueueMetaData.Partition partition : partitions) {
+                    if (msgFilter.getOffsetStartTime() != null && maxIndexMapper.size() > 0 && !maxIndexMapper.containsKey(partition.partitionId())) {
+                        continue;
                     }
-                    if (message.extensionHeader().isPresent()) {
-                        index = message.extensionHeader().get().getOffset() + 1;
-                        indexMapper.put(partition.partitionId(), index);
-                        if (maxIndexMapper.size() > 0 && maxIndexMapper.getOrDefault(partition.partitionId(),-2L) >= 0) {
-                            // endTime < now()
-                            if (indexMapper.get(partition.partitionId()) >= maxIndexMapper.get(partition.partitionId())) {
-                                maxIndexMapper.remove(partition.partitionId());
+                    long index = indexMapper.computeIfAbsent(partition.partitionId(), k -> 0L);
+                    List<Message> messages = consumer.batchReceive((short) partition.partitionId(), index, 1000 * 10);
+                    for (Message message : messages) {
+                        clock = SystemClock.now();
+                        totalCount++;
+                        String content = messagePreviewService.preview(msgFilter.getMsgFormat(), message.getData());
+                        if (topicMessageFilterSupport.match(content, msgFilter.getFilter())) {
+                            filterClock = SystemClock.now();
+                            strBuilder.append(content).append('\n');
+                            appendCount++;
+                            // 每1w行追加一次
+                            if (appendCount >= appendMaxSize) {
+                                appendCount = appendFile(file, strBuilder);
+                            }
+                        }
+                        if (message.extensionHeader().isPresent()) {
+                            index = message.extensionHeader().get().getOffset() + 1;
+                            indexMapper.put(partition.partitionId(), index);
+                            if (maxIndexMapper.size() > 0 && maxIndexMapper.getOrDefault(partition.partitionId(), -2L) >= 0) {
+                                // endTime < now()
+                                if (indexMapper.get(partition.partitionId()) >= maxIndexMapper.get(partition.partitionId())) {
+                                    maxIndexMapper.remove(partition.partitionId());
+                                }
                             }
                         }
                     }
                 }
+                // 如果一直有消费数据，但是一直没有命中filter,则超过filter超时时间且strBuilder不为空，追加文件
+                if (SystemClock.now() - filterClock >= defaultFilterTimeOut) {
+                    appendCount = appendFile(file, strBuilder);
+                    filterClock = SystemClock.now();
+                }
+                if (SystemClock.now() - clock >= defaultTimeOut) {
+                    strBuilder.append("\n\n").append("consume finished, has no rest data.");
+                    hasRest = false;
+                    appendFile(file, strBuilder);
+                    break;
+                }
             }
-            // 如果一直有消费数据，但是一直没有命中filter,则超过filter超时时间且strBuilder不为空，追加文件
-            if (SystemClock.now() - filterClock >= defaultFilterTimeOut) {
-                appendCount = appendFile(file, strBuilder);
-                filterClock = SystemClock.now();
+            if (hasRest) {
+                strBuilder.append("\n\n").append("consume finished, has rest data.");
             }
-            if (SystemClock.now() - clock >= defaultTimeOut) {
-                appendFile(file, strBuilder);
-                break;
+            // status = -1, 消息查询结束
+            updateMsgFilterStatus(msgFilter, TopicMsgFilter.FilterStatus.FINISHED, "", "");
+            logger.info("message filter consume finished.");
+        } catch (Exception e) {
+            updateMsgFilterStatus(msgFilter, TopicMsgFilter.FilterStatus.ERROR, "", e.getMessage());
+            logger.info("message filter consume cause error and interrupted.");
+        } finally {
+            if (file != null) {
+                msgFilter.setUrl(file.getPath());
+                if (strBuilder.length() > 0) {
+                    FileUtils.writeStringToFile(file, strBuilder.toString(), StandardCharsets.UTF_8, true);
+                }
+            }
+            if (consumer != null) {
+                consumer.stop();
             }
         }
-        if (file != null && strBuilder.length() > 0) {
-            FileUtils.writeStringToFile(file, strBuilder.toString(), StandardCharsets.UTF_8, true);
-        }
-        consumer.stop();
-        // status = -1, 消息查询结束
-        updateMsgFilterStatus(msgFilter, -1, "", "");
-        msgFilter.setUrl(filePath);
-        logger.info("message filter consume finished");
         return msgFilter;
     }
 
     private boolean consumerCondition(TopicMsgFilter msgFilter, int totalCount, Map<Integer, Long> maxIndexMap) {
+        if (totalCount >= maxItemSize) {
+            return false;
+        }
         if (msgFilter.getOffsetStartTime() != null) {
             return maxIndexMap.size() > 0;
         } else {
@@ -356,17 +390,36 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
     }
 
-
-    private void updateMsgFilterStatus(TopicMsgFilter msgFilter, int status, String url, String description) {
-        msgFilter.setStatus(status);
+    /**
+     * @param msgFilter
+     * @param status      -2：执行异常，-1：结束，0:等待，1：正在执行，2：正在上传
+     * @param url
+     * @param description
+     */
+    private void updateMsgFilterStatus(TopicMsgFilter msgFilter, TopicMsgFilter.FilterStatus status, String url, String description) {
+        TopicMsgFilter updateMsgFilter = new TopicMsgFilter();
+        updateMsgFilter.setId(msgFilter.getId());
+        updateMsgFilter.setStatus(status.getStatus());
         if (StringUtils.isNoneBlank(url)) {
-            msgFilter.setUrl(url);
+          updateMsgFilter.setUrl(url);
         }
         if (StringUtils.isNoneBlank(description)) {
-            msgFilter.setDescription(description);
+            updateMsgFilter.setDescription(description);
         }
-        msgFilter.setUpdateTime(new Date(SystemClock.now()));
-        repository.update(msgFilter);
+        updateMsgFilter.setUpdateTime(new Date(SystemClock.now()));
+        repository.update(updateMsgFilter);
+    }
+
+    private void enrichIndexMap(TopicMsgFilter msgFilter, List<QueueMetaData.Partition> partitions, Map<Integer, Long> indexMapper, Map<Integer, Long> maxIndexMapper) {
+        if (msgFilter.getOffsetStartTime() != null && msgFilter.getOffsetEndTime() != null) {
+            parseOffsetByTs(msgFilter.getApp(), msgFilter.getTopic(), partitions.size() == 1 ? partitions.get(0).partitionId() : -1,
+                    msgFilter.getOffsetStartTime().getTime(), msgFilter.getOffsetEndTime().getTime(),
+                    indexMapper, maxIndexMapper);
+        } else {
+            for (QueueMetaData.Partition partition : partitions) {
+                indexMapper.put(partition.partitionId(), msgFilter.getOffset());
+            }
+        }
     }
 
     private void parseOffsetByTs(String app, String topicCode, int partition,
@@ -430,8 +483,13 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                     TopicMsgFilter updateMsgFilter = new TopicMsgFilter();
                     updateMsgFilter.setUrl(response.getData().toString());
                     updateMsgFilter.setId(msgFilter.getId());
-                    int lastIdx = updateMsgFilter.getUrl().lastIndexOf('/');
-                    updateMsgFilter.setObjectKey(updateMsgFilter.getUrl().substring(lastIdx + 1));
+                    int conIdx = updateMsgFilter.getUrl().indexOf('?');
+                    if (conIdx > 0) {
+                        String url = updateMsgFilter.getUrl().substring(0, conIdx);
+                        int lastIdx = url.lastIndexOf('/');
+                        updateMsgFilter.setObjectKey(url.substring(lastIdx + 1));
+                    }
+                    updateMsgFilter.setUpdateTime(new Date(SystemClock.now()));
                     updateMsgFilter.setStatus(msgFilter.getStatus());
                     repository.update(updateMsgFilter);
                 } catch (Exception e) {

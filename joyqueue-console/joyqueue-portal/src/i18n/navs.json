@@ -74,6 +74,11 @@
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
+        },
+        {
+          "path": "retryMonitor",
+          "name": "retryMonitor",
+          "component": "setting/retryMonitor.vue"
         }
       ]
     },
@@ -180,6 +185,11 @@
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
+        },
+        {
+          "path": "retryMonitor",
+          "name": "retryMonitor",
+          "component": "setting/retryMonitor.vue"
         }
       ]
     },
