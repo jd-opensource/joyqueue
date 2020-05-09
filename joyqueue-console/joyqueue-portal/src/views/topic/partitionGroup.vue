@@ -63,6 +63,7 @@ import GroupPosition from './groupPosition.vue'
 import groupMerge from './groupMerge.vue'
 import groupNew from './groupNew.vue'
 import crud from '../../mixins/crud.js'
+import mergePartitionGroup from '../../utils/partitionGroupUtils'
 
 export default {
   name: 'partitionGroup',
@@ -110,7 +111,10 @@ export default {
           {
             title: 'partitions',
             width: '15%',
-            key: 'partitions'
+            key: 'partitions',
+            formatter (item) {
+              return mergePartitionGroup(item.partitions)
+            }
           },
           {
             title: '选举类型',

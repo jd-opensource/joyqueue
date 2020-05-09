@@ -23,6 +23,7 @@ import clientConnection from './clientConnection.vue'
 import broker from './broker.vue'
 import partitionExpand from './partitionExpand'
 import bytesToSize from '../../../utils/byteUtils'
+import mergePartitionGroup from '../../../utils/partitionGroupUtils'
 
 export default {
   name: 'producer-detail',
@@ -84,7 +85,10 @@ export default {
           },
           {
             title: '分区',
-            key: 'partitions'
+            key: 'partitions',
+            formatter (item) {
+              return mergePartitionGroup(item.partitions)
+            }
           },
           {
             title: '入队数',

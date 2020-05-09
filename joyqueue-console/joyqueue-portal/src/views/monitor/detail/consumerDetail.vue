@@ -50,6 +50,7 @@ import broker from './broker.vue'
 import detailTable from './detailTable'
 import coordinatorGroupMember from './coordinatorGroupMember.vue'
 import bytesToSize from '../../../utils/byteUtils'
+import mergePartitionGroup from '../../../utils/partitionGroupUtils'
 
 export default {
   name: 'consumerDetail',
@@ -120,7 +121,10 @@ export default {
           },
           {
             title: '分区',
-            key: 'partitions'
+            key: 'partitions',
+            formatter (item) {
+              return mergePartitionGroup(item.partitions)
+            }
           },
           {
             title: '积压数',
