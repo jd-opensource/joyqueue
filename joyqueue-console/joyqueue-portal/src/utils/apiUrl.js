@@ -6,7 +6,7 @@ export default {
     search: '/application/search',
     add: '/application/add',
     del: '/application/delete',
-    getByCode: '/application/getByCode/'
+    getByCode: '/application/getByCode'
   },
   '/application/detail': {
     detail: '/application/get'

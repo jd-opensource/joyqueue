@@ -113,7 +113,7 @@ export default {
             width: '15%',
             key: 'partitions',
             formatter (item) {
-              return mergePartitionGroup(item.partitions)
+              return mergePartitionGroup(JSON.parse(item.partitions))
             }
           },
           {

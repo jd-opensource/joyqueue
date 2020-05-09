@@ -87,7 +87,7 @@ export default {
             title: '分区',
             key: 'partitions',
             formatter (item) {
-              return mergePartitionGroup(item.partitions)
+              return mergePartitionGroup(JSON.parse(item.partitions))
             }
           },
           {

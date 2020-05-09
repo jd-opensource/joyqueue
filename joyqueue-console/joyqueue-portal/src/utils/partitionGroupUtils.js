@@ -1,5 +1,4 @@
-export default function mergePartitionGroup (partitionGroup) {
-  let group = JSON.parse(partitionGroup)
+export default function mergePartitionGroup (group) {
   let groupStr = ''
   let start = 0
   let end = 0

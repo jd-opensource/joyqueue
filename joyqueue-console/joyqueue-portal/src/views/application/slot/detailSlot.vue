@@ -52,7 +52,7 @@ export default {
           this.detail = data.data || {}
         })
       } else if (this.app.code) {
-        apiRequest.get(apiUrl['/application'].getByCode + '/' + this.app.code, {}).then((data) => {
+        apiRequest.get(apiUrl['/application'].getByCode + '?appCode=' + this.app.code, {}).then((data) => {
           this.detail = data.data || {}
         })
       }
