@@ -21,6 +21,7 @@ import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
@@ -40,6 +41,7 @@ import org.joyqueue.service.ProducerService;
 import org.joyqueue.service.TopicPartitionGroupService;
 import org.joyqueue.service.TopicService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -115,6 +117,9 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         try {
             Topic topic = service.findById(model.getId());
             List<Broker> brokers = brokerService.findByTopic(topic.getCode());
+            if (CollectionUtils.isEmpty(brokers)) {
+                brokers = Collections.emptyList();
+            }
             List<String> centers = dataCenterService.findByIps(brokers.stream().map(Broker::getIp).collect(Collectors.toList()))
                     .stream().map(DataCenter::getName).distinct().sorted(String::compareTo).collect(Collectors.toList());
             topic.setDataCenters(centers);
