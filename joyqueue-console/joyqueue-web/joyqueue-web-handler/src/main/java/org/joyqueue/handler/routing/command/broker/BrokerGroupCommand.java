@@ -85,10 +85,9 @@ public class BrokerGroupCommand extends CommandSupport<BrokerGroup, BrokerGroupS
             return Responses.error(404,"can't find the brokerGroup:"+group);
         }
         for (Broker broker: brokers) {
-            broker.setGroup(new Identity(brokerGroup.getCode()));
+            broker.setGroup(new Identity(brokerGroup.getId(), brokerGroup.getCode()));
             service.updateBroker(broker);
         }
         return Responses.success();
-
     }
 }

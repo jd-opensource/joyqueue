@@ -14,7 +14,7 @@
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
                   @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
                   @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
-                  @on-position="goPosition" @on-replication="goReplicationChart">
+                  @on-position="goPosition" @on-replication="goReplicationChart" :showPagination="false">
     </my-table>
 
     <!--详情-->
@@ -63,6 +63,7 @@ import GroupPosition from './groupPosition.vue'
 import groupMerge from './groupMerge.vue'
 import groupNew from './groupNew.vue'
 import crud from '../../mixins/crud.js'
+import mergePartitionGroup from '../../utils/partitionGroupUtils'
 
 export default {
   name: 'partitionGroup',
@@ -110,7 +111,10 @@ export default {
           {
             title: 'partitions',
             width: '15%',
-            key: 'partitions'
+            key: 'partitions',
+            formatter (item) {
+              return mergePartitionGroup(JSON.parse(item.partitions))
+            }
           },
           {
             title: '选举类型',

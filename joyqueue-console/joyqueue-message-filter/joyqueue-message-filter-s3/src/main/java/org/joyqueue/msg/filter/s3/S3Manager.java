@@ -86,6 +86,7 @@ public class S3Manager {
                     .serviceConfiguration(configuration)
                     .build();
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .contentType("application/octet-stream")
                     .bucket(bucketName)
                     .key(path)
                     .build();
