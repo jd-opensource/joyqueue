@@ -16,8 +16,12 @@
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
+import apiRequest from '../utils/apiRequest.js'
+import {brokerRoleTypeRender, brokerPermissionTypeRender, brokerSyncModeTypeRender} from '../../utils/common.js'
+import {timeStampToString} from '../../utils/dateTimeUtils'
+
 export default {
-  name: '',
+  name: 'appBroker',
   components: {
     myTable,
     myDialog
@@ -43,31 +47,69 @@ export default {
             key: 'brokerGroup.code'
           },
           {
-            title: 'IP',
-            key: 'ip'
+            title: 'IP:端口',
+            key: 'broker.ip',
+            width: '14%',
+            render: (h, params) => {
+              console.log(params.item)
+              const ip = params.item.ip
+              const port = params.item.port
+              return h('label', {
+                style: {
+                  color: '#3366FF'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+                      query: {
+                        brokerId: params.item.id,
+                        brokerIp: ip,
+                        brokerPort: port
+                      }
+                    })
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
+                }
+              }, `${ip}:${port}`)
+            }
           },
           {
-            title: '端口',
-            key: 'port'
-          },
-          {
-            title: '数据中心',
-            key: 'dataCenter.name'
+            title: '机房 (编码/名称)',
+            key: 'dataCenter.code',
+            width: '17%',
+            formatter (item) {
+              return item.dataCenter.code + '/' + item.dataCenter.name
+            }
           },
           {
             title: '角色',
             key: 'role',
+            width: '8%',
             render: (h, params) => {
-              let txt = params.item.role === 'SLAVE' ? '从' : '主'
-              return h('label', {}, txt)
+              return brokerRoleTypeRender(h, params.item.role)
             }
           },
           {
             title: '复制方式',
             key: 'syncMode',
             render: (h, params) => {
-              let txt = params.item.syncMode === 'SYNCHRONOUS' ? '同步' : '异步'
-              return h('label', {}, txt)
+              return brokerSyncModeTypeRender(h, params.item.syncMode)
+            }
+          },
+          {
+            title: '版本',
+            key: 'startupInfo.version',
+            width: '12%'
+          },
+          {
+            title: '开机时间',
+            key: 'startupInfo.startupTime',
+            width: '12%',
+            formatter (item) {
+              return timeStampToString(item.startupInfo.startupTime)
             }
           },
           {
@@ -90,22 +132,7 @@ export default {
             title: '权限',
             key: 'permission',
             render: (h, params) => {
-              let label
-              switch (params.item.permission) {
-                case 'NONE':
-                  label = '无权限'
-                  break
-                case 'FULL':
-                  label = '读写'
-                  break
-                case 'READ':
-                  label = '只读'
-                  break
-                case 'WRITE':
-                  label = '只写'
-                  break
-              }
-              return h('label', {}, label)
+              return brokerPermissionTypeRender(h, params.item.broker.permission)
             }
           },
           {
@@ -127,6 +154,38 @@ export default {
   computed: {
   },
   methods: {
+    // 查询
+    getList () {
+      // 1. 查询数据库里的数据
+      this.showTablePin = true
+      let data = {
+        pagination: {
+          page: this.page.page,
+          size: this.page.size
+        },
+        query: {
+          topic: this.partitionGroup.topic,
+          namespace: this.partitionGroup.namespace,
+          groupNo: this.partitionGroup.groupNo
+        }
+      }
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        this.tableData.rowData = data.data
+        this.showTablePin = false
+        for (let i = 0; i < this.tableData.rowData.length; i++) {
+          console.log(222)
+          console.log(this.tableData.rowData[i])
+          this.getDetail(this.tableData.rowData[i], i)
+        }
+      })
+    }
   },
   mounted () {
     this.getList()

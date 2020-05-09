@@ -46,6 +46,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.jd.laf.web.vertx.response.Response.HTTP_NOT_FOUND;
+import static org.joyqueue.handler.error.ErrorCode.NoTipError;
+
 public class BrokerMonitorCommand implements Command<Response>, Poolable {
     private static final Logger logger = LoggerFactory.getLogger(BrokerMonitorCommand.class);
 
@@ -79,7 +82,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
 
     @Override
     public Response execute() throws Exception {
-        return Responses.error(Response.HTTP_NOT_FOUND,Response.HTTP_NOT_FOUND,"Not Found");
+        return Responses.error(HTTP_NOT_FOUND, HTTP_NOT_FOUND,"Not Found");
     }
 
     /**
@@ -93,7 +96,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             record = brokerMonitorService.find(subscribe, true);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
         return Responses.success(record);
     }
@@ -109,7 +112,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(record);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -124,7 +127,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(record);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -139,7 +142,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(record);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -160,11 +163,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             if (records != null) {
                 records.forEach(record -> {
                     try {
-                        String ip = record.getIp();
-                        if (ip != null) {
-
-                        }
-                        record.setDataCenter(dataCenterService.findByIp(ip.split(DATA_CENTER_IP_SEPARATOR)[0]));
+                        record.setDataCenter(dataCenterService.findByIp(record.getIp().split(DATA_CENTER_IP_SEPARATOR)[0]));
                     } catch (Exception e) {
                         logger.error(String.format("find data center by ip error. ip is %s", record.getIp()), e);
                     }
@@ -173,7 +172,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(records);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
 
     }
@@ -189,7 +188,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(record);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -204,7 +203,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return new Response(pageResult.getResult(),pageResult.getPagination());
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -219,7 +218,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return new Response(pageResult.getResult(), pageResult.getPagination());
         } catch (Exception e) {
         logger.error("query broker monitor info error.", e);
-        return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+        return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -234,7 +233,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return new Response(pageResult.getResult(), pageResult.getPagination());
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -250,7 +249,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(record);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -265,7 +264,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(record);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
     /**
@@ -306,7 +305,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(brokerMonitorService.findArchiveState(broker.getIp(),broker.getMonitorPort()));
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -322,7 +321,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(coordinatorMonitorService.findCoordinatorInfo(subscribe));
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -339,7 +338,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(coordinatorMonitorService.findCoordinatorGroupMember(subscribe));
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -356,7 +355,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(coordinatorMonitorService.findExpiredCoordinatorGroupMember(subscribe));
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -376,7 +375,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(brokerMonitorService.findPartitionGroupMetric(subscribe.getNamespace().getCode(),subscribe.getTopic().getCode(),groupNo));
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -386,10 +385,27 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      * @return
      */
     @Path("findBrokerDetail")
-    public Response findBrokerDetail(@QueryParam("brokerId") Long brokerId){
-        BrokerMonitorInfo brokerMonitorInfo = brokerTopicMonitorService.findBrokerMonitor(brokerId);
-        return Responses.success(brokerMonitorInfo);
+    public Response findBrokerDetail(@QueryParam("brokerId") Integer brokerId) throws Exception {
+        BrokerMonitorInfo info = brokerTopicMonitorService.findBrokerMonitor(Long.valueOf(brokerId));
+        if (info == null) {
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), "Not found broker detail monitor info. ");
+        }
+        BrokerMonitorInfoWithDC infoWithDC = new BrokerMonitorInfoWithDC(info);
+        org.joyqueue.model.domain.Broker broker = brokerService.findById(brokerId);
+        if (broker == null || StringUtils.isEmpty(broker.getIp())) {
+            logger.error(String.format("Not Found broker. id is %s. ", brokerId));
+            return Responses.success(info);
+        }
+        try {
+            infoWithDC.setDataCenter(dataCenterService.findByIp(broker.getIp().split(DATA_CENTER_IP_SEPARATOR)[0]));
+        } catch (Exception e) {
+            logger.error(String.format("Found data center error. broker id is %s. ", brokerId), e);
+            return Responses.success(info);
+        }
+
+        return Responses.success(infoWithDC);
     }
+
     /**
      * broker启动信息
      * @param brokerId
@@ -402,7 +418,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(brokerStartupInfo);
         } catch (Exception e) {
             logger.error("query broker start info error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -419,7 +435,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(directory);
         } catch (Exception e) {
             logger.error("query broker store tree view error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -437,7 +453,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(result);
         } catch (Exception e) {
             logger.error("query broker store tree view error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 
@@ -454,7 +470,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
         if (broker == null) {
             String msg = String.format("can not find broker with id %s", brokerId);
             logger.error(msg);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), msg);
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), msg);
         }
 
         try {
@@ -462,7 +478,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
             return Responses.success(brokerMetadata);
         } catch (Exception e) {
             logger.error("query broker metadata error.", e);
-            return Responses.error(ErrorCode.NoTipError.getCode(), ErrorCode.NoTipError.getStatus(), e.getMessage());
+            return Responses.error(NoTipError.getCode(), NoTipError.getStatus(), e.getMessage());
         }
     }
 

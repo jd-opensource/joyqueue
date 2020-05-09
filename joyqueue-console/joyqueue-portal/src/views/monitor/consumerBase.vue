@@ -484,7 +484,8 @@ export default {
           } else if (!url.endsWith('?')) {
             url += '&'
           }
-          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' + item.app.code
+          url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
+            getAppCode(item.app, item.subscribeGroup)
           window.open(url)
         })
       }
