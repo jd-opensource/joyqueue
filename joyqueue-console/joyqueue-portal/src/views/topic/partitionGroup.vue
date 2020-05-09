@@ -138,8 +138,27 @@ export default {
             title: '当前leader',
             width: '15%',
             key: 'ip',
-            formatter (item) {
-              return `${item.leader}:${item.ip}`
+            render: (h, params) => {
+              return h('label', {
+                style: {
+                  color: '#3366FF'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+                      query: {
+                        brokerId: params.item.id,
+                        brokerIp: params.item.ip,
+                        brokerPort: params.item.port
+                      }
+                    })
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
+                }
+              }, `${params.item.leader}:${params.item.ip}`)
             }
           },
           {

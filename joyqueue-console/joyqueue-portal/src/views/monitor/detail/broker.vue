@@ -47,10 +47,10 @@ export default {
             key: 'ip'
           },
           {
-            title: '机房',
+            title: '机房 [编码/名称]',
             key: 'dataCenter',
             formatter (item) {
-              return item.dataCenter.name
+              return item.dataCenter.code + '/' + item.dataCenter.name
             }
           },
           {

@@ -336,6 +336,91 @@ export function subscribeGroupInputRender (h, params, subscribeRef) {
   })
 }
 
+export function brokerPermissionTypeRender (h, value) {
+  return baseBtnRender(h, value, [
+    {
+      value: 'FULL',
+      txt: '读写',
+      color: 'success'
+    },
+    {
+      value: 'READ',
+      txt: '只读',
+      color: 'warning'
+    },
+    {
+      value: 'NONE',
+      txt: '无权限',
+      color: 'danger'
+    },
+    {
+      value: 'WRITE',
+      txt: '只写',
+      color: 'info'
+    }
+  ])
+}
+
+export function brokerRoleTypeRender (h, value) {
+  return baseBtnRender(h, value, [
+    {
+      value: 0,
+      txt: 'Dynamics',
+      color: 'success'
+    },
+    {
+      value: 1,
+      txt: 'Master',
+      color: 'warning'
+    },
+    {
+      value: 2,
+      txt: 'Slave',
+      color: 'warning'
+    },
+    {
+      value: 3,
+      txt: 'Leaner',
+      color: 'info'
+    },
+    {
+      value: 4,
+      txt: 'outsync',
+      color: 'danger'
+    }
+  ])
+}
+
+export function brokerSyncModeTypeRender (h, value) {
+  return baseBtnRender(h, value, [
+    {
+      value: 'SYNCHRONOUS',
+      txt: '同步',
+      color: 'warning'
+    },
+    {
+      value: 'ASYNCHRONOUS',
+      txt: '异步',
+      color: 'info'
+    }
+  ])
+}
+
+export function brokerRetryTypeRender (h, value) {
+  return baseBtnRender(h, value, [
+    {
+      value: 'RemoteRetry',
+      txt: '远程数据库',
+      color: 'warning'
+    },
+    {
+      value: 'DB',
+      txt: '直连数据库',
+      color: 'info'
+    }
+  ])
+}
+
 export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {
   if (!url || url === '') {
     return undefined
