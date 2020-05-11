@@ -17,10 +17,14 @@
           </d-select>
         </d-form-item>
         <d-form-item label="IP/ID搜索:" required style="margin-right: 20px;">
-          <d-input v-model="searchData.keyword" @on-enter="getList" placeholder="请输入IP/ID"  style="width: 150px"></d-input>
+          <d-input v-model="searchData.keyword" @on-enter="getList" placeholder="请输入IP/ID"  style="width: 150px">
+            <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+          </d-input>
         </d-form-item>
         <d-form-item label="Broker分组：" required style="margin-right: 20px;">
-          <d-input v-model="searchData.group" @on-enter="getList" placeholder="请输入Broker分组"  style="width: 150px"></d-input>
+          <d-input v-model="searchData.group" @on-enter="getList" placeholder="请输入Broker分组"  style="width: 150px">
+            <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+          </d-input>
         </d-form-item>
         <d-form-item>
           <d-button type="primary" :disabled="btnDisabled" @click="addNewPartitionGroup">
