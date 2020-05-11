@@ -196,12 +196,17 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                     indexPosition = safeIndexPosition;
                     recoverIndices();
                 } else {
+                    logger.error("recover exception {}", base.getAbsolutePath(), t);
                     throw t;
                 }
             }
             logger.info("Store recovered: {}...", base.getAbsolutePath());
         } catch (IOException e) {
+            logger.error("recover exception {}", base.getAbsolutePath(), e);
             throw new StoreInitializeException(e);
+        } catch (Exception e) {
+            logger.error("recover exception {}", base.getAbsolutePath(), e);
+            throw e;
         }
     }
 

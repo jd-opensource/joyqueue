@@ -46,7 +46,7 @@ export default {
       password: 'false',
       rules: {
         key: getCodeRule3(),
-        value: getCodeRule3(),
+        value: [{required: true, message: '请填写值', trigger: 'change'}],
         group: getCodeRule3()
       }
     }
