@@ -138,9 +138,9 @@ export default {
       previewDialogVisible: false,
       previewQuery: undefined,
       retry: {
-        appList:[],
-        app:'',
-        item:{}
+        appList: [],
+        app: '',
+        item: {}
       },
       consumeData: {
         rowData: [],
@@ -260,7 +260,7 @@ export default {
         this.search.rowKeyStart = oldData[oldData.length - 1].rowKeyStart
       } else {
         this.search.sendTime = this.search.beginTime
-        this.search.rowKeyStart = '';
+        this.search.rowKeyStart = ''
       }
       apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
         this.tableData.rowData = data.data
@@ -272,30 +272,29 @@ export default {
       })
     },
     download (item) {
-      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId+'&messageType='+this.messageType
+      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId + '&messageType=' + this.messageType
       apiRequest.get(this.urlOrigin.download + data).then(data => {
         this.$Message.success('下载成功')
       })
     },
     preview (item) {
       this.previewQuery = {
-        topic: item.topic ,
+        topic: item.topic,
         sendTime: item.sendTime,
         businessId: item.businessId,
         messageId: item.messageId
       }
       this.previewDialogVisible = true
-
     },
-    retryInit(item) {
-      this.retryDialog.visible = true;
-      this.retry.item = item;
+    retryInit (item) {
+      this.retryDialog.visible = true
+      this.retry.item = item
       apiRequest.get(this.urlOrigin.getApps + '?topic=' + item.topic).then((data) => {
         this.retry.appList = data.data
       })
     },
     configConfirm () {
-      this.retry.item.app = this.retry.app;
+      this.retry.item.app = this.retry.app
       apiRequest.post(this.urlOrigin.retry, {}, this.retry.item).then(data => {
         this.$Message.success('操作成功')
       })
@@ -319,7 +318,6 @@ export default {
         } else {
           console.error('Property message-types can not be empty!')
         }
-
       })
   }
 }
