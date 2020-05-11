@@ -16,7 +16,7 @@
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
-import apiRequest from '../utils/apiRequest.js'
+import apiRequest from '../../utils/apiRequest.js'
 import {brokerRoleTypeRender, brokerPermissionTypeRender, brokerSyncModeTypeRender} from '../../utils/common.js'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 
@@ -180,8 +180,6 @@ export default {
         this.tableData.rowData = data.data
         this.showTablePin = false
         for (let i = 0; i < this.tableData.rowData.length; i++) {
-          console.log(222)
-          console.log(this.tableData.rowData[i])
           this.getDetail(this.tableData.rowData[i], i)
         }
       })

@@ -71,9 +71,29 @@ export default {
           key: 'connections',
           width: 100,
           render: (h, params) => {
-            const connections = params.item.connections
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: (params.item.id !== undefined) ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let connections = params.item.connections
+            if (connections === undefined) {
+              return h('div', {}, 'UNKNOWN')
+            }
             const formatNumFilter = Vue.filter('formatNum')
-            return h('label', formatNumFilter(connections))
+            let textSpan = h('label', {
+              style: {
+                position: 'relative',
+                display: (params.item.id === undefined) ? 'none' : 'inline-block'
+              }
+            }, formatNumFilter(connections))
+            html.push(textSpan)
+            return h('div', {}, html)
           }
         },
         {
@@ -81,12 +101,29 @@ export default {
           key: 'pending.count',
           width: 150,
           render: (h, params) => {
-            const pending = params.item.pending
-            if (!pending) {
-              return h('label', '')
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let pending = params.item.pending
+            if (pending === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
-              return h('label', formatNumFilter(pending.count))
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(pending.count))
+              html.push(textSpan)
+              return h('div', {}, html)
             }
           }
         },
@@ -95,12 +132,29 @@ export default {
           key: 'deQuence.count',
           width: 150,
           render: (h, params) => {
-            const deQuence = params.item.deQuence
-            if (!deQuence) {
-              return h('label', '')
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let deQuence = params.item.deQuence
+            if (deQuence === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
-              return h('label', formatNumFilter(deQuence.count))
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(deQuence.count))
+              html.push(textSpan)
+              return h('div', {}, html)
             }
           }
         },
@@ -109,28 +163,46 @@ export default {
           key: 'retry.count',
           width: 100,
           render: (h, params) => {
-            const retry = params.item.retry
-            const formatNumFilter = Vue.filter('formatNum')
-            return h('label', {
-              style: {
-                cursor: 'pointer',
-                color: '#3366FF'
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
               },
-              on: {
-                click: () => {
-                  this.$router.push({
-                    name: `/${this.$i18n.locale}/topic/detail`,
-                    query: {
-                      id: params.item.topic.code,
-                      app: getAppCode(params.item.app, params.item.subscribeGroup),
-                      topic: params.item.topic.code,
-                      namespace: params.item.namespace.code,
-                      tab: 'retry'
-                    }
-                  })
-                }
+              style: {
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
               }
-            }, retry === undefined ? 0 : formatNumFilter(retry.count))
+            })
+            html.push(spin)
+            let retry = params.item.retry
+            if (retry === undefined) {
+              return h('div', {}, 'UNKNOWN')
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              let textSpan = h('label', {
+                style: {
+                  cursor: 'pointer',
+                  color: '#3366FF',
+                  position: 'relative',
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      name: `/${this.$i18n.locale}/topic/detail`,
+                      query: {
+                        id: params.item.topic.code,
+                        app: getAppCode(params.item.app, params.item.subscribeGroup),
+                        topic: params.item.topic.code,
+                        namespace: params.item.namespace.code,
+                        tab: 'retry'
+                      }
+                    })
+                  }
+                }
+              }, formatNumFilter(retry.count))
+              html.push(textSpan)
+              return h('div', {}, html)
+            }
           }
         },
         {

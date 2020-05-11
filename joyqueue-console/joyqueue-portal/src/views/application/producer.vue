@@ -75,9 +75,29 @@ export default {
           key: 'connections',
           width: 100,
           render: (h, params) => {
-            const connections = params.item.connections
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: (params.item.id !== undefined) ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let connections = params.item.connections
+            if (connections === undefined) {
+              return h('div', {}, 'UNKNOWN')
+            }
             const formatNumFilter = Vue.filter('formatNum')
-            return h('label', formatNumFilter(connections))
+            let textSpan = h('label', {
+              style: {
+                position: 'relative',
+                display: (params.item.id === undefined) ? 'none' : 'inline-block'
+              }
+            }, formatNumFilter(connections))
+            html.push(textSpan)
+            return h('div', {}, html)
           }
         },
         {
@@ -85,12 +105,29 @@ export default {
           key: 'enQuence.count',
           width: 150,
           render: (h, params) => {
-            const enQuence = params.item.enQuence
-            if (!enQuence) {
-              return h('label', '')
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let enQuence = params.item.enQuence
+            if (enQuence === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
-              return h('label', formatNumFilter(enQuence.count))
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(enQuence.count))
+              html.push(textSpan)
+              return h('div', {}, html)
             }
           }
         },
