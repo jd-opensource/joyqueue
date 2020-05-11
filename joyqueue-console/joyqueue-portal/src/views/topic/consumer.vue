@@ -77,16 +77,19 @@ export default {
                 size: 'small'
               },
               style: {
-                display: (params.item.connections !== undefined) ? 'none' : 'inline-block'
+                display: (params.item.id !== undefined) ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const connections = params.item.connections
+            let connections = params.item.connections
+            if (connections === undefined) {
+              return h('div', {}, 'UNKNOWN')
+            }
             const formatNumFilter = Vue.filter('formatNum')
             let textSpan = h('label', {
               style: {
                 position: 'relative',
-                display: (params.item.connections === undefined) ? 'none' : 'inline-block'
+                display: (params.item.id === undefined) ? 'none' : 'inline-block'
               }
             }, formatNumFilter(connections))
             html.push(textSpan)
@@ -104,21 +107,19 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.pending !== undefined ? 'none' : 'inline-block'
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const pending = params.item.pending
-            if (!pending) {
-              let label = h('label', '')
-              html.push(label)
-              return h('div', {}, html)
+            let pending = params.item.pending
+            if (pending === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
                 style: {
                   position: 'relative',
-                  display: params.item.pending.count === undefined ? 'none' : 'inline-block'
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
                 }
               }, formatNumFilter(pending.count))
               html.push(textSpan)
@@ -137,21 +138,19 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.deQuence !== undefined ? 'none' : 'inline-block'
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const deQuence = params.item.deQuence
-            if (!deQuence) {
-              let label = h('label', '')
-              html.push(label)
-              return h('div', {}, html)
+            let deQuence = params.item.deQuence
+            if (deQuence === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
                 style: {
                   position: 'relative',
-                  display: params.item.deQuence.count === undefined ? 'none' : 'inline-block'
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
                 }
               }, formatNumFilter(deQuence.count))
               html.push(textSpan)
@@ -170,15 +169,13 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.retry !== undefined ? 'none' : 'inline-block'
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const retry = params.item.retry
-            if (!retry) {
-              let label = h('label', '')
-              html.push(label)
-              return h('div', {}, html)
+            let retry = params.item.retry
+            if (retry === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
@@ -186,7 +183,7 @@ export default {
                   cursor: 'pointer',
                   color: '#3366FF',
                   position: 'relative',
-                  display: params.item.retry.count === undefined ? 'none' : 'inline-block'
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
                 },
                 on: {
                   click: () => {

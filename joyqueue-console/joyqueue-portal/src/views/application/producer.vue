@@ -81,16 +81,19 @@ export default {
                 size: 'small'
               },
               style: {
-                display: (params.item.connections !== undefined) ? 'none' : 'inline-block'
+                display: (params.item.id !== undefined) ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const connections = params.item.connections
+            let connections = params.item.connections
+            if (connections === undefined) {
+              return h('div', {}, 'UNKNOWN')
+            }
             const formatNumFilter = Vue.filter('formatNum')
             let textSpan = h('label', {
               style: {
                 position: 'relative',
-                display: (params.item.connections === undefined) ? 'none' : 'inline-block'
+                display: (params.item.id === undefined) ? 'none' : 'inline-block'
               }
             }, formatNumFilter(connections))
             html.push(textSpan)
@@ -108,21 +111,19 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.enQuence !== undefined ? 'none' : 'inline-block'
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const enQuence = params.item.enQuence
-            if (!enQuence) {
-              let label = h('label', '')
-              html.push(label)
-              return h('div', {}, html)
+            let enQuence = params.item.enQuence
+            if (enQuence === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
                 style: {
                   position: 'relative',
-                  display: params.item.enQuence.count === undefined ? 'none' : 'inline-block'
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
                 }
               }, formatNumFilter(enQuence.count))
               html.push(textSpan)

@@ -78,16 +78,19 @@ export default {
                 size: 'small'
               },
               style: {
-                display: (params.item.connections !== undefined) ? 'none' : 'inline-block'
+                display: (params.item.id !== undefined) ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const connections = params.item.connections
+            let connections = params.item.connections
+            if (connections === undefined) {
+              return h('div', {}, 'UNKNOWN')
+            }
             const formatNumFilter = Vue.filter('formatNum')
             let textSpan = h('label', {
               style: {
                 position: 'relative',
-                display: (params.item.connections === undefined) ? 'none' : 'inline-block'
+                display: (params.item.id === undefined) ? 'none' : 'inline-block'
               }
             }, formatNumFilter(connections))
             html.push(textSpan)
@@ -105,21 +108,19 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.pending !== undefined ? 'none' : 'inline-block'
+                display: params.item.id !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
-            const pending = params.item.pending
-            if (!pending) {
-              let label = h('label', '')
-              html.push(label)
-              return h('div', {}, html)
+            let pending = params.item.pending
+            if (pending === undefined) {
+              return h('div', {}, 'UNKNOWN')
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
                 style: {
                   position: 'relative',
-                  display: params.item.pending.count === undefined ? 'none' : 'inline-block'
+                  display: params.item.id === undefined ? 'none' : 'inline-block'
                 }
               }, formatNumFilter(pending.count))
               html.push(textSpan)
