@@ -15,9 +15,9 @@ export default function mergePartitionGroup (group) {
       Object.assign(list, tmpList)
       allList.push(list)
       tmpList = []
+      tmpList.push(group[i])
     }
     if (i === group.length - 1) {
-      tmpList.push(group[i])
       allList.push(tmpList)
     }
   }
