@@ -65,7 +65,7 @@ import ConsumerDetail from '../monitor/detail/consumerDetail.vue'
 import {generateProducerDetailTabName, generateConsumerDetailTabName} from '../../utils/common.js'
 
 export default {
-  name: 'applicationDetail',
+  name: 'topicDetail',
   components: {
     detailSlot,
     Producer,

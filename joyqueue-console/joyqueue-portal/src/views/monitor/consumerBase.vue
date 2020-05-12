@@ -116,55 +116,10 @@ export default {
       type: String
     },
     btns: {
-      type: Array,
-      default: function () {
-        return [
-          {
-            txt: '消费详情',
-            method: 'on-detail'
-          },
-          {
-            txt: '配置',
-            method: 'on-config'
-          },
-          {
-            txt: '取消订阅',
-            method: 'on-cancel-subscribe'
-          }
-          // ,
-          // {
-          //   txt: '详情监控图表',
-          //   method: 'on-detail-chart'
-          // },
-          // {
-          //   txt: '汇总监控图表',
-          //   method: 'on-summary-chart'
-          // },
-          // {
-          //   txt: '性能监控图表',
-          //   method: 'on-performance-chart'
-          // }
-        ]
-      }
+      type: Array
     },
     operates: {
-      type: Array,
-      default: function () {
-        return [
-          {
-            txt: '消息预览',
-            method: 'on-msg-preview'
-          },
-          {
-            txt: '消息查询',
-            method: 'on-msg-detail'
-          },
-          {
-            txt: '限流',
-            method: 'on-rateLimit'
-          }
-        ]
-      }
+      type: Array
     },
     btnGroups: {
       type: Object

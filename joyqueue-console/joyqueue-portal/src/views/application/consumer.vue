@@ -1,6 +1,7 @@
 <template>
   <div>
-    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName" :colData="colData"
+    <consumer-base ref="consumerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName"
+                   :colData="colData" :operates="operates" :btns="btns"
                    :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
                    :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
@@ -26,11 +27,40 @@ export default {
     return {
       keywordTip: '请输入主题',
       keywordName: '主题',
+      btns: [
+        {
+          txt: '消费详情',
+          method: 'on-detail'
+        },
+        {
+          txt: '配置',
+          method: 'on-config'
+        },
+        {
+          txt: '取消订阅',
+          method: 'on-cancel-subscribe',
+          isAdmin: 1
+        }
+      ],
+      operates: [
+        {
+          txt: '消息预览',
+          method: 'on-msg-preview'
+        },
+        {
+          txt: '消息查询',
+          method: 'on-msg-detail'
+        },
+        {
+          txt: '限流',
+          method: 'on-rateLimit'
+        }
+      ],
       colData: [
         {
           title: '应用',
           key: 'app.code',
-          width: 80,
+          width: '8%',
           formatter (row) {
             return getAppCode(row.app, row.subscribeGroup)
           }
@@ -38,7 +68,7 @@ export default {
         {
           title: '主题',
           key: 'topic.code',
-          width: 100,
+          width: '11%',
           render: (h, params) => {
             const topic = params.item.topic
             const namespace = params.item.namespace
@@ -50,7 +80,7 @@ export default {
               on: {
                 click: () => {
                   this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-                    query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'consumer' }})
+                    query: { id: topicId, topic: topic.code, namespace: topic.namespace.code || namespace.code, tab: 'consumer' }})
                 },
                 mousemove: (event) => {
                   event.target.style.cursor = 'pointer'
@@ -59,10 +89,10 @@ export default {
             }, topic.code)
           }
         },
-        {
-          title: '命名空间',
-          key: 'namespace.code'
-        },
+        // {
+        //   title: '命名空间',
+        //   key: 'namespace.code'
+        // },
         // {
         //   title:'负责人',
         //   key: 'owner.code'
@@ -70,7 +100,7 @@ export default {
         {
           title: '连接数',
           key: 'connections',
-          width: 100,
+          width: '8%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -100,7 +130,7 @@ export default {
         {
           title: '积压数',
           key: 'pending.count',
-          width: 150,
+          width: '10%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -131,7 +161,7 @@ export default {
         {
           title: '出队数',
           key: 'deQuence.count',
-          width: 150,
+          width: '13%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -164,7 +194,7 @@ export default {
         {
           title: '重试数',
           key: 'retry.count',
-          width: 100,
+          width: '10%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -216,40 +246,15 @@ export default {
         {
           title: '消息类型',
           key: 'topicType',
+          width: '5%',
           render: (h, params) => {
             return topicTypeBtnRender(h, params.item.topicType)
           }
         },
         {
-          title: '禁止IP消费',
-          key: 'config.blackList',
-          // formatter (item) {
-          //   return item.config === undefined ? '' : item.config.blackList
-          // },
-          render: (h, params) => {
-            const value = params.item.config ? params.item.config.blackList : '' // '192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3'
-            return h('d-tooltip', {
-              props: {
-                content: value
-              }
-            }, [h('div', {
-              attrs: {
-                style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
-              }
-            }, value)]
-            )
-          }
-        },
-        {
-          title: '过滤规则',
-          key: 'config.filters',
-          formatter (item) {
-            return item.config === undefined ? '' : item.config.filters
-          }
-        },
-        {
           title: '归档',
           key: 'config.archive',
+          width: '4%',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.archive)
           }
@@ -257,6 +262,7 @@ export default {
         {
           title: '消费状态',
           key: 'config.paused',
+          width: '5%',
           render: (h, params) => {
             let options = [
               {
@@ -276,8 +282,27 @@ export default {
         {
           title: '客户端类型',
           key: 'clientType',
+          width: '5%',
           render: (h, params) => {
             return clientTypeBtnRender(h, params.item.clientType)
+          }
+        },
+        {
+          title: '禁止IP消费',
+          key: 'config.blackList',
+          width: '4%',
+          render: (h, params) => {
+            const value = params.item.config ? params.item.config.blackList : ''
+            return h('d-tooltip', {
+              props: {
+                content: value
+              }
+            }, [h('div', {
+              attrs: {
+                style: 'width: 50px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+              }
+            }, value)]
+            )
           }
         }
       ],

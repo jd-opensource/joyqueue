@@ -84,42 +84,10 @@ export default {
       type: String
     },
     btns: {
-      type: Array,
-      default: function () {
-        return [
-          {
-            txt: '生产详情',
-            method: 'on-detail'
-          },
-          {
-            txt: '配置',
-            method: 'on-config'
-          },
-          {
-            txt: '取消订阅',
-            method: 'on-cancel-subscribe'
-          }
-        ]
-      }
+      type: Array
     },
     operates: {
-      type: Array,
-      default: function () {
-        return [
-          {
-            txt: '设置生产权重',
-            method: 'on-weight'
-          },
-          {
-            txt: '发送消息',
-            method: 'on-send-message'
-          },
-          {
-            txt: '限流',
-            method: 'on-rateLimit'
-          }
-        ]
-      }
+      type: Array
     },
     btnGroups: {
       type: Object
