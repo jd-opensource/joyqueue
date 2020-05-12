@@ -10,7 +10,9 @@ export default function mergePartitionGroup (group) {
   }
   for (let i = 1; i < group.length; i++) {
     if (group[i] - group[i - 1] !== 1) {
-      tmpList.push(group[i - 1])
+      if (tmpList.indexOf(group[i - 1]) === -1) {
+        tmpList.push(group[i - 1])
+      }
       let list = []
       Object.assign(list, tmpList)
       allList.push(list)
@@ -18,6 +20,9 @@ export default function mergePartitionGroup (group) {
       tmpList.push(group[i])
     }
     if (i === group.length - 1) {
+      if (tmpList.indexOf(group[i]) === -1) {
+        tmpList.push(group[i])
+      }
       allList.push(tmpList)
     }
   }
