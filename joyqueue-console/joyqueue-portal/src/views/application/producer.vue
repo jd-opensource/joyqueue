@@ -106,9 +106,19 @@ export default {
               }
             })
             html.push(spin)
+            console.log(params)
             let connections = params.item.connections
             if (connections === undefined) {
               return h('div', {}, html)
+            } else if (connections === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
@@ -140,6 +150,15 @@ export default {
             let enQuence = params.item.enQuence
             if (enQuence === undefined) {
               return h('div', {}, html)
+            } else if (enQuence === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {

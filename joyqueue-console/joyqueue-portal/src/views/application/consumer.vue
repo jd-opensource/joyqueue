@@ -115,14 +115,15 @@ export default {
             let connections = params.item.connections
             if (connections === undefined) {
               return h('div', {}, html)
-              // return h('icon', {
-              //   style: {
-              //     color: 'red'
-              //   },
-              //   props: {
-              //     name: 'x-circle'
-              //   }
-              // })
+            } else if (connections === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
@@ -154,6 +155,15 @@ export default {
             let pending = params.item.pending
             if (pending === undefined) {
               return h('div', {}, html)
+            } else if (pending === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
@@ -187,6 +197,15 @@ export default {
               let label = h('label', '')
               html.push(label)
               return h('div', {}, html)
+            } else if (deQuence === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
@@ -220,6 +239,15 @@ export default {
               let label = h('label', '')
               html.push(label)
               return h('div', {}, html)
+            } else if (retry === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
