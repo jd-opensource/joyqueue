@@ -93,8 +93,9 @@ public class RetryCommand implements Command<Response>, Poolable {
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QRetry> qPageQuery) throws Exception {
         if (qPageQuery == null || qPageQuery.getQuery() == null || Strings.isNullOrEmpty(qPageQuery.getQuery().getTopic()) || Strings.isNullOrEmpty(qPageQuery.getQuery().getApp())) {
-            return Responses.error(HTTP_BAD_REQUEST,"app,topic,status 不能为空");
+            return Responses.error(HTTP_BAD_REQUEST, HTTP_BAD_REQUEST, "app,topic,status 不能为空");
         }
+        retryService.validate(qPageQuery.getQuery().getApp());
         PageResult<ConsumeRetry> pageResult = retryService.findByQuery(qPageQuery);
         return Responses.success(pageResult.getPagination(),pageResult.getResult());
     }
@@ -277,8 +278,10 @@ public class RetryCommand implements Command<Response>, Poolable {
     public Response batchDelete(@Body QRetry qRetry) throws Exception {
         if ( qRetry == null || Strings.isNullOrEmpty(qRetry.getTopic()) || Strings.isNullOrEmpty(qRetry.getApp())
                 || qRetry.getBeginTime() == null ||  qRetry.getEndTime() == null || qRetry.getStatus() == null) {
-            return Responses.error(HTTP_BAD_REQUEST,HTTP_BAD_REQUEST,"队列名,消费者,状态,发送开始时间结束时间 不能为空");
+            return Responses.error(HTTP_BAD_REQUEST,HTTP_BAD_REQUEST,"主题,消费者,状态,发送开始时间结束时间 不能为空");
         }
+
+        retryService.validate(qRetry.getApp());
         RetryQueryCondition retryQueryCondition = new RetryQueryCondition();
         retryQueryCondition.setTopic(qRetry.getTopic());
         retryQueryCondition.setApp(qRetry.getApp());

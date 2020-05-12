@@ -15,18 +15,27 @@
  */
 package org.joyqueue.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.ConsumeRetry;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.exception.ServiceException;
+import org.joyqueue.model.ListQuery;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.Application;
+import org.joyqueue.model.domain.User;
+import org.joyqueue.model.query.QApplication;
 import org.joyqueue.model.query.QRetry;
 import org.joyqueue.server.retry.api.ConsoleMessageRetry;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.server.retry.model.RetryMonitorItem;
 import org.joyqueue.server.retry.model.RetryQueryCondition;
 import org.joyqueue.server.retry.model.RetryStatus;
+import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.RetryService;
+import org.joyqueue.util.LocalSession;
+import org.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +54,9 @@ public class RetryServiceImpl implements RetryService {
 
     @Autowired(required = false)
     private ConsoleMessageRetry consoleMessageRetry;
+
+    @Autowired(required = false)
+    private ApplicationService applicationService;
 
     @Value("${retry.enable:false}")
     private Boolean retryEnable;
@@ -79,6 +91,28 @@ public class RetryServiceImpl implements RetryService {
     @Override
     public ConsumeRetry getDataById(Long id,String topic) throws JoyQueueException {
         return consoleMessageRetry.getConsumeRetryById(id,topic);
+    }
+
+    @Override
+    public void validate(String appFullName) {
+        check();
+        if (StringUtils.isEmpty(appFullName)) {
+            throw new ServiceException(ServiceException.BAD_REQUEST, "消费者不能为空");
+        }
+
+        if (LocalSession.getSession().getUser().getRole() == User.UserRole.ADMIN.value()) {
+            return;
+        }
+
+        List<Application> userApps = applicationService.findByQuery(new ListQuery(new QApplication()));
+        if (NullUtil.isEmpty(userApps)) {
+            throw new ServiceException(ServiceException.BAD_REQUEST, "没有该消费者权限，不能操作");
+        }
+
+        String code = CodeConverter.convertAppFullName(appFullName).getCode();
+        if (!userApps.stream().filter(ua -> code.equals(ua.getCode())).findAny().isPresent()) {
+            throw new ServiceException(ServiceException.BAD_REQUEST, "没有该消费者权限，不能操作");
+        }
     }
 
     @Override
