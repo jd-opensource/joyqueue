@@ -96,6 +96,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
                 || qArchive.getEndTime() == null) {
             return Responses.error(HTTP_BAD_REQUEST,"beginTime,endTime,topic 不能为空");
         }
+        archiveService.validate(qArchive);
         return Responses.success(archiveService.findByQuery(qArchive));
     }
 
