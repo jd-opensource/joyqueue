@@ -1,7 +1,7 @@
 <template>
   <div>
     <consumer-base ref="consumerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData"
+                   :subscribeDialogColData="subscribeDialog.colData" :btns="btns" :operates="operates"
                    :search="search" :subscribeUrls="subscribeDialog.urls"  @on-detail="handleDetail"/>
   </div>
 </template>
@@ -31,45 +31,50 @@ export default {
         {
           title: '应用',
           key: 'app.code',
-          width: 80,
+          width: '8%',
           render: (h, params) => {
             const app = params.item.app
             const appFullName = getAppCode(app, params.item.subscribeGroup)
-            return h('label', {
-              style: {
-                color: '#3366FF'
-              },
-              on: {
-                click: () => {
-                  this.$router.push({
-                    name: `/${this.$i18n.locale}/application/detail`,
-                    query: {
-                      id: app.id,
-                      app: app.code,
-                      tab: 'consumer'
-                    }
-                  })
+            console.log(params.item)
+            if (params.item.canOperate) {
+              return h('label', {
+                style: {
+                  color: '#3366FF'
                 },
-                mousemove: (event) => {
-                  event.target.style.cursor = 'pointer'
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      name: `/${this.$i18n.locale}/application/detail`,
+                      query: {
+                        id: app.id,
+                        app: app.code,
+                        tab: 'consumer'
+                      }
+                    })
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
                 }
-              }
-            }, appFullName)
+              }, appFullName)
+            } else {
+              return h('label', appFullName)
+            }
           }
         },
         {
           title: '主题',
           key: 'topic.code',
-          width: 100
+          width: '11%'
         },
-        {
-          title: '命名空间',
-          key: 'namespace.code'
-        },
+        // {
+        //   title: '命名空间',
+        //   key: 'namespace.code'
+        // },
         {
           title: '连接数',
           key: 'connections',
-          width: 100,
+          width: '8%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -99,7 +104,7 @@ export default {
         {
           title: '积压数',
           key: 'pending.count',
-          width: 150,
+          width: '10%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -130,7 +135,7 @@ export default {
         {
           title: '出队数',
           key: 'deQuence.count',
-          width: 150,
+          width: '13%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -161,7 +166,7 @@ export default {
         {
           title: '重试数',
           key: 'retry.count',
-          width: 100,
+          width: '10%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -208,37 +213,15 @@ export default {
         {
           title: '消息类型',
           key: 'topicType',
+          width: '5%',
           render: (h, params) => {
             return topicTypeBtnRender(h, params.item.topicType)
           }
         },
         {
-          title: '禁止IP消费',
-          key: 'config.blackList',
-          render: (h, params) => {
-            const value = params.item.config ? params.item.config.blackList : ''
-            return h('d-tooltip', {
-              props: {
-                content: value
-              }
-            }, [h('div', {
-              attrs: {
-                style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
-              }
-            }, value)]
-            )
-          }
-        },
-        {
-          title: '过滤规则',
-          key: 'config.filters',
-          formatter (item) {
-            return item.config === undefined ? '' : item.config.filters
-          }
-        },
-        {
           title: '归档',
           key: 'config.archive',
+          width: '4%',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.archive)
           }
@@ -246,6 +229,7 @@ export default {
         {
           title: '消费状态',
           key: 'paused',
+          width: '5%',
           render: (h, params) => {
             let options = [
               {
@@ -265,9 +249,96 @@ export default {
         {
           title: '客户端类型',
           key: 'clientType',
+          width: '5%',
           render: (h, params) => {
             return clientTypeBtnRender(h, params.item.clientType)
           }
+        },
+        {
+          title: '禁止IP消费',
+          key: 'config.blackList',
+          width: '4%',
+          render: (h, params) => {
+            const value = params.item.config ? params.item.config.blackList : ''
+            return h('d-tooltip', {
+              props: {
+                content: value
+              }
+            }, [h('div', {
+              attrs: {
+                style: 'width: 50px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+              }
+            }, value)]
+            )
+          }
+        }
+      ],
+      btns: [
+        {
+          txt: '消费详情',
+          method: 'on-detail',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '配置',
+          method: 'on-config',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '监控图表',
+          method: 'on-detail-chart',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '取消订阅',
+          method: 'on-cancel-subscribe',
+          bindKey: 'canOperate',
+          bindVal: true,
+          isAdmin: 1
+        }
+      ],
+      btns: [
+        {
+          txt: '消费详情',
+          method: 'on-detail',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '配置',
+          method: 'on-config',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '取消订阅',
+          method: 'on-cancel-subscribe',
+          bindKey: 'canOperate',
+          bindVal: true,
+          isAdmin: 1
+        }
+      ],
+      operates: [
+        {
+          txt: '消息预览',
+          method: 'on-msg-preview',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '消息查询',
+          method: 'on-msg-detail',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '限流',
+          method: 'on-rateLimit',
+          bindKey: 'canOperate',
+          bindVal: true
         }
       ],
       // 订阅框

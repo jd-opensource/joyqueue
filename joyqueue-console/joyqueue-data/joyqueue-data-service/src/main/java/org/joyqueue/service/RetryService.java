@@ -36,6 +36,8 @@ public interface RetryService {
 
     ConsumeRetry getDataById(Long id,String topic) throws JoyQueueException;
 
+    void validate(String appFullName);
+
     void add(RetryMessageModel retryMessageModel);
 
     /**

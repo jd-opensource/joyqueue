@@ -1,7 +1,8 @@
 <template>
   <div>
-    <producer-base ref="producerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"  @on-enter="getList"
+    <producer-base ref="producerBase" :keywordTip="keywordTip" :showPagination="false" :keywordName="keywordName"
+                   :colData="colData" :btns="btns" :operates="operates" @on-enter="getList"
+                   :subscribeDialogColData="subscribeDialog.colData" :showSummaryChart="true"
                    :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
 </template>
@@ -25,23 +26,40 @@ export default {
     return {
       keywordTip: '请输入主题',
       keywordName: '主题',
-      colData: [
-        // {
-        //   title: 'ID',
-        //   key: 'id'
-        // },
+      btns: [
         {
-          title: '应用',
-          key: 'app.code',
-          width: 80,
-          formatter (row) {
-            return getAppCode(row.app, row.subscribeGroup)
-          }
+          txt: '生产详情',
+          method: 'on-detail'
         },
+        {
+          txt: '配置',
+          method: 'on-config'
+        },
+        {
+          txt: '取消订阅',
+          method: 'on-cancel-subscribe',
+          isAdmin: 1
+        }
+      ],
+      operates: [
+        {
+          txt: '设置生产权重',
+          method: 'on-weight'
+        },
+        {
+          txt: '发送消息',
+          method: 'on-send-message'
+        },
+        {
+          txt: '限流',
+          method: 'on-rateLimit'
+        }
+      ],
+      colData: [
         {
           title: '主题',
           key: 'topic.code',
-          width: 100,
+          width: '15%',
           render: (h, params) => {
             const topic = params.item.topic
             const namespace = params.item.namespace
@@ -52,8 +70,11 @@ export default {
               },
               on: {
                 click: () => {
+                  console.log(123)
+                  console.log(topic)
+                  console.log(namespace)
                   this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
-                    query: { id: topicId, topic: topic.code, namespace: topic.namespace.code, tab: 'producer' }})
+                    query: { id: topicId, topic: topic.code, namespace: topic.namespace.code || namespace.code, tab: 'producer' }})
                 },
                 mousemove: (event) => {
                   event.target.style.cursor = 'pointer'
@@ -62,10 +83,10 @@ export default {
             }, topic.code)
           }
         },
-        {
-          title: '命名空间',
-          key: 'namespace.code'
-        },
+        // {
+        //   title: '命名空间',
+        //   key: 'namespace.code'
+        // },
         // {
         //   title: '负责人',
         //   key: 'owner.code'
@@ -73,7 +94,7 @@ export default {
         {
           title: '连接数',
           key: 'connections',
-          width: 100,
+          width: '10%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -103,7 +124,7 @@ export default {
         {
           title: '入队数',
           key: 'enQuence.count',
-          width: 150,
+          width: '15%',
           render: (h, params) => {
             let html = []
             let spin = h('d-spin', {
@@ -132,14 +153,40 @@ export default {
           }
         },
         {
+          title: '归档',
+          key: 'config.archive',
+          width: '8%',
+          render: (h, params) => {
+            return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.archive)
+          }
+        },
+        {
+          title: '就近发送',
+          key: 'config.nearBy',
+          width: '8%',
+          render: (h, params) => {
+            return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.nearBy)
+          }
+        },
+        {
+          title: '客户端类型',
+          key: 'clientType',
+          width: '8%',
+          render: (h, params) => {
+            return clientTypeBtnRender(h, params.item.clientType)
+          }
+        },
+        {
           title: '生产权重',
-          key: 'config.weight'
+          key: 'config.weight',
+          width: '8%'
         },
         {
           title: '限制IP发送',
           key: 'config.blackList',
+          width: '8%',
           render: (h, params) => {
-            const value = params.item.config ? params.item.config.blackList : '' // '192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3,192.168.0.3'
+            const value = params.item.config ? params.item.config.blackList : ''
             return h('d-tooltip', {
               props: {
                 content: value
@@ -150,27 +197,6 @@ export default {
               }
             }, value)]
             )
-          }
-        },
-        {
-          title: '归档',
-          key: 'config.archive',
-          render: (h, params) => {
-            return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.archive)
-          }
-        },
-        {
-          title: '就近机房发送',
-          key: 'config.nearBy',
-          render: (h, params) => {
-            return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.nearBy)
-          }
-        },
-        {
-          title: '客户端类型',
-          key: 'clientType',
-          render: (h, params) => {
-            return clientTypeBtnRender(h, params.item.clientType)
           }
         }
       ],
