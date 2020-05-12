@@ -44,6 +44,7 @@ import org.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static com.jd.laf.web.vertx.response.Response.HTTP_NOT_FOUND;
@@ -261,6 +262,7 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     public Response findMonitorOnPartitionGroupDetailForTopicApp(@Body QPartitionGroupMonitor partitionGroupMonitor){
         try {
             List<BrokerMonitorRecord> record = brokerMonitorService.findMonitorOnPartitionGroupDetailForTopicApp(partitionGroupMonitor.getSubscribe(), partitionGroupMonitor.getPartitionGroup());
+            record.sort(Comparator.comparingInt(BrokerMonitorRecord::getPartition));
             return Responses.success(record);
         } catch (Exception e) {
             logger.error("query broker monitor info error.", e);

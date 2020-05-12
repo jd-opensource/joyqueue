@@ -1,33 +1,37 @@
 export default function mergePartitionGroup (group) {
-  let groupStr = ''
-  let start = 0
-  let end = 0
-  if (group.length > 0) {
-    start = group[0]
-    groupStr = '[' + start
+  group.sort((v1, v2) => v1 - v2)
+  let allList = []
+  let tmpList = []
+  if (group.length >= 0) {
+    tmpList.push(group[0])
+  }
+  if (group.length === 1) {
+    allList.push(tmpList)
   }
   for (let i = 1; i < group.length; i++) {
-    if (group[i] - group[i - 1] === 1) {
-      end = group[i]
-    } else {
-      if (start < end) {
-        groupStr += ('-' + end + '],[' + group[i])
-      } else {
-        groupStr += '],'
-        if (i !== group.length - 1) {
-          groupStr += ('[' + start)
-        }
-      }
-      start = group[i]
+    if (group[i] - group[i - 1] !== 1) {
+      tmpList.push(group[i - 1])
+      let list = []
+      Object.assign(list, tmpList)
+      allList.push(list)
+      tmpList = []
+    }
+    if (i === group.length - 1) {
+      tmpList.push(group[i])
+      allList.push(tmpList)
     }
   }
-  if (groupStr.endsWith(',[')) {
-    groupStr = groupStr.substring(0, groupStr.length - 2)
-  } else {
-    if (start === end || start > end) {
-      groupStr = groupStr + ']'
-    } else {
-      groupStr = groupStr + '-' + end + ']'
+  let groupStr = ''
+  for (let i in allList) {
+    if (groupStr !== '') {
+      groupStr += ','
+    }
+    if (allList.hasOwnProperty(i)) {
+      if (allList[i].length > 1) {
+        groupStr += '[' + allList[i][0] + '-' + allList[i][allList[i].length - 1] + ']'
+      } else if (allList[i].length === 1) {
+        groupStr += '[' + allList[i][0] + ']'
+      }
     }
   }
   return groupStr
