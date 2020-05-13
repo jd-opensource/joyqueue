@@ -10,7 +10,7 @@
         <div class="stepForm1">
           <d-form ref="form1" :model="formData" :rules="rules.rule1" label-width="110px">
             <d-form-item label="主题英文名：" :error="error.code" prop="code">
-              <d-input v-model="formData.code" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
+              <d-input v-model="formData.code" oninput="value = value.trim()" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="命名空间：" prop="namespace">
               <d-select v-model="formData.namespace.code" style="width: 50%">
@@ -25,7 +25,7 @@
               </d-select>
             </d-form-item>
             <d-form-item label="分区数量：" prop="partitions">
-              <d-input v-model.number="formData.partitions" :disabled="partitionsDisabled" style="width: 70%"></d-input>
+              <d-input v-model.number="formData.partitions" oninput="value = value.trim()" :disabled="partitionsDisabled" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="选举类型：" prop="electType">
               <d-select v-model.number="formData.electType" style="width: 70%">
@@ -42,7 +42,7 @@
               </d-select>
             </d-form-item>
             <d-form-item label="申请描述：" prop="description">
-              <d-input type="textarea" rows="2" v-model="formData.description"
+              <d-input type="textarea" rows="2" v-model="formData.description" oninput="value = value.trim()"
                            placeholder="请输入申请描述，例如用途等" style="width: 70%"/>
             </d-form-item>
           </d-form>

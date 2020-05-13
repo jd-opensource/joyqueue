@@ -6,10 +6,10 @@
                      :default-time="['00:00:00', '23:59:59']" @on-enter="getList">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="主题名" class="input2" @on-enter="getList">
+      <d-input v-model="search.topic" oninput="value = value.trim()" placeholder="主题名" class="input2" @on-enter="getList">
         <span slot="prepend">主题名</span>
       </d-input>
-      <d-input v-model="search.businessId" placeholder="业务ID" class="input2" @on-enter="getList">
+      <d-input v-model="search.businessId" oninput="value = value.trim()" placeholder="业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button class="button2" type="primary" @click="getList">查询

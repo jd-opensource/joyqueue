@@ -1,12 +1,12 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input type="textarea" v-model="searchData.keyword" placeholder="请输入ID/IP" class="left mr10"
+      <d-input type="textarea" v-model="searchData.keyword" oninput="value = value.trim()" placeholder="请输入ID/IP" class="left mr10"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">&nbsp;ID/IP&nbsp;</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-input v-model="searchData.group" placeholder="请输入Broker分组编码" class="left mr10"
+      <d-input v-model="searchData.group" oninput="value = value.trim()" placeholder="请输入Broker分组编码" class="left mr10"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">分组编码</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
@@ -25,13 +25,13 @@
       <grid-row class="mb10">
         <grid-col :span="8" class="label">IP:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="editData.ip"></d-input>
+          <d-input v-model="editData.ip" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="8" class="label">端口:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="editData.port"></d-input>
+          <d-input v-model="editData.port" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
@@ -81,7 +81,7 @@
     <my-dialog :dialog="batchBrokerGroupDialog" @on-dialog-confirm="batchBrokerGroupHandle('batchBrokerGroupSearch')" @on-dialog-cancel="closeBatchBrokerGroupDialog">
       <d-form ref="batchBrokerGroupSearch" :model="batchBrokerGroupSearch" label-width="100px" :rules="batchBrokerGroupDialog.rules">
         <d-form-item label="broker分组" prop="batchBrokerGroup">
-          <d-input placeholder="请输入broker分组" v-model="batchBrokerGroupSearch.batchBrokerGroup"></d-input>
+          <d-input placeholder="请输入broker分组" oninput="value = value.trim()" v-model="batchBrokerGroupSearch.batchBrokerGroup"></d-input>
         </d-form-item>
       </d-form>
     </my-dialog>

@@ -13,6 +13,7 @@
       </grid-col>
       <grid-col span="4">
         <d-input v-model="searchData.keyword" placeholder="请输入英文名"
+                 oninput="value = value.trim()"
                 @on-enter="getList">
           <d-button type="borderless" slot="suffix" @click="getList"><icon name="search" size="14" color="#CACACA" ></icon></d-button>
         </d-input>

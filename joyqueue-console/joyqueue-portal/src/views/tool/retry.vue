@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="headLine2">
-      <d-input v-model="search.topic" placeholder="请输入主题名" class="input2" @on-enter="getList">
+      <d-input v-model="search.topic" oninput="value = value.trim()" placeholder="请输入主题名" class="input2" @on-enter="getList">
         <span slot="prepend">主题名</span>
       </d-input>
-      <d-input v-model="search.app" placeholder="请输入消费者" class="input2" @on-enter="getList">
+      <d-input v-model="search.app" oninput="value = value.trim()" placeholder="请输入消费者" class="input2" @on-enter="getList">
         <span slot="prepend">消费者</span>
       </d-input>
       <d-select v-model="search.status" class="input3" @on-change="getList">
@@ -22,7 +22,7 @@
                      :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="businessId" placeholder="请输入业务ID" class="input2" @on-enter="getList">
+      <d-input v-model="businessId" oninput="value = value.trim()" placeholder="请输入业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button class="button2" type="primary" @click="getList">查询

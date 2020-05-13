@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="headLine">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="input" @on-enter="getList">
+      <d-input v-model="keyword" :placeholder="keywordTip" oninput="value = value.trim()" class="input" @on-enter="getList">
         <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
@@ -415,49 +415,6 @@ export default {
           this.tableData.rowData[index].enQuence = 'unknown'
         }
         this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
-      })
-    },
-    // 查询
-    // 原來的getList方法
-    getList2 () {
-      // 查询数据库里的数据
-      this.showTablePin = true
-      let query = {}
-      if (this.keyword == null || this.keyword === '' || this.keyword === undefined) {
-        query = {
-          keyword: this.keyword
-        }
-      } else {
-        query = {
-          app: this.keyword
-        }
-      }
-      let data = {
-        pagination: {
-          page: this.page.page,
-          size: this.page.size
-        },
-        query: query
-      }
-      for (let i in this.search) {
-        if (this.search.hasOwnProperty(i)) {
-          data.query[i] = this.search[i]
-        }
-      }
-      // this.tableData.rowData = [] // 先清空数据
-      apiRequest.post(this.urls.search, {}, data).then((data) => {
-        data.data = data.data || []
-        data.pagination = data.pagination || {
-          totalRecord: data.data.length
-        }
-        this.page.total = data.pagination.totalRecord
-        this.page.page = data.pagination.page
-        this.page.size = data.pagination.size
-        this.tableData.rowData = data.data
-        this.showTablePin = false
-        for (let i = 0; i < this.tableData.rowData.length; i++) {
-          this.getMonitor(this.tableData.rowData[i], i)
-        }
       })
     },
     // 实现懒加载的getList方法

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.code" placeholder="请输入编码" class="left mr10"
+      <d-input v-model="searchData.code" oninput="value = value.trim()" placeholder="请输入编码" class="left mr10"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">编码</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
@@ -21,19 +21,19 @@
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submitForm('addData')" @on-dialog-cancel="addCancel()">
       <d-form :model="addData" :rules="rules" ref="addData" label-width="120px" class="demo-ruleForm">
         <d-form-item label="区域:" prop="region" style="width: 80%">
-          <d-input v-model="addData.region"></d-input>
+          <d-input v-model="addData.region" oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="编码:" prop="code" style="width: 80%">
-          <d-input v-model="addData.code" ></d-input>
+          <d-input v-model="addData.code" oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="名称:" prop="name" style="width: 80%">
-          <d-input v-model="addData.name"></d-input>
+          <d-input v-model="addData.name" oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="解析类型:" prop="matchType" style="width: 80%">
-          <d-input v-model="addData.matchType" placeholder="如:IPRANGE"></d-input>
+          <d-input v-model="addData.matchType" placeholder="如:IPRANGE" oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="IP段:" prop="ips" style="width: 80%">
-          <d-input v-model="addData.ips" placeholder="多个;分隔" ></d-input>
+          <d-input v-model="addData.ips" placeholder="多个;分隔" oninput="value = value.trim()"></d-input>
         </d-form-item>
       </d-form>
     </my-dialog>
@@ -41,19 +41,19 @@
     <my-dialog :dialog="editDialog" @on-dialog-confirm="submitForm('editData')" @on-dialog-cancel="editCancel()">
       <d-form :model="editData" :rules="rules" ref="editData" label-width="120px" class="demo-ruleForm">
         <d-form-item label="区域:" prop="region" style="width: 60%">
-          <d-input v-model="editData.region" disabled></d-input>
+          <d-input v-model="editData.region" disabled oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="编码:" prop="code" style="width: 60%">
-          <d-input v-model="editData.code" disabled></d-input>
+          <d-input v-model="editData.code" disabled oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="名称:" prop="name" style="width: 60%">
-          <d-input v-model="editData.name"></d-input>
+          <d-input v-model="editData.name" oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="解析类型:" prop="matchType" style="width: 80%">
-          <d-input v-model="editData.matchType"></d-input>
+          <d-input v-model="editData.matchType" oninput="value = value.trim()"></d-input>
         </d-form-item>
         <d-form-item label="IP段:" prop="ips" style="width: 60%">
-          <d-input v-model="editData.ips"></d-input>
+          <d-input v-model="editData.ips" oninput="value = value.trim()"></d-input>
         </d-form-item>
       </d-form>
     </my-dialog>
@@ -62,13 +62,13 @@
       <grid-row class="mb10">
         <grid-col :span="8" class="label">编码:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="addNetData.code"></d-input>
+          <d-input v-model="addNetData.code" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="8" class="label">地址:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="addNetData.cidr"></d-input>
+          <d-input v-model="addNetData.cidr" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
     </my-dialog>

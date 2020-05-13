@@ -2,7 +2,7 @@
   <div>
     <grid-row class="table-query">
       <grid-col span="4">
-      <d-input v-model="searchData.keyword" :placeholder="langConfig.placeholder1" class="left mr10" style="width: 100%"
+      <d-input v-model="searchData.keyword" oninput="value = value.trim()" :placeholder="langConfig.placeholder1" class="left mr10" style="width: 100%"
         @on-enter="getList">
         <d-button type="borderless" slot="suffix" @click="getList"><icon name="search" size="14" color="#CACACA"></icon></d-button>
       </d-input>

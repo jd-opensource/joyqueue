@@ -4,7 +4,7 @@
     <d-select v-model="searchData.status" size="small" style="width:100px">
       <d-option v-for="item in retryStatus" :value="item.value" :key="item.value">{{ item.key }}</d-option>
     </d-select>
-    <d-input v-model="searchData.top" placeholder="请输入查询最大记录数" class="left mr10"
+    <d-input v-model="searchData.top" oninput="value = value.trim()" placeholder="请输入查询最大记录数" class="left mr10"
              style="width:300px" @on-enter="getList">
       <span slot="prepend">最大记录数</span>
       <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
@@ -38,11 +38,11 @@
     <grid-row class="mb10">
       <grid-col :span="6" class="label">主题:</grid-col>
       <grid-col :span="16" class="val">
-        <d-input v-model="cleanup.topic"></d-input>
+        <d-input v-model="cleanup.topic" oninput="value = value.trim()"></d-input>
       </grid-col>
       <grid-col :span="6" class="label">应用:</grid-col>
       <grid-col :span="16" class="val">
-        <d-input v-model="cleanup.appCode"></d-input>
+        <d-input v-model="cleanup.appCode" oninput="value = value.trim()"></d-input>
       </grid-col>
       <grid-col :span="6" class="label">过期时间:</grid-col>
       <grid-col :span="16" class="val">

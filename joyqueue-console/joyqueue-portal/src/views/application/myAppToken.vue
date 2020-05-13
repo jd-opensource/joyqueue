@@ -40,7 +40,7 @@
         <grid-row class="mb10">
           <grid-col :span="4" class="label">token:</grid-col>
           <grid-col :span="1"/>
-          <grid-col :span="16" class="val"><d-input v-model="editData.token" class="change-line-400" placeholder="请输入" disabled/></grid-col>
+          <grid-col :span="16" class="val"><d-input v-model="editData.token" oninput="value = value.trim()" class="change-line-400" placeholder="请输入" disabled/></grid-col>
         </grid-row>
         <grid-row class="mb10">
           <grid-col :span="4" class="label">有效时间:</grid-col>
@@ -141,50 +141,50 @@ export default {
         showFooter: true
       },
       addData: {
-        timeList: [new Date().getTime(),new Date().getTime()+3600*1000*24]
+        timeList: [new Date().getTime(), new Date().getTime() + 3600 * 1000 * 24]
       },
       pickerOptions2: {
         shortcuts: [
           {
             text: '一百年',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              end.setTime(start.getTime() +3600 * 1000 * 24 * 365*100);
-              picker.$emit('pick', [start.getTime(),end.getTime()]);
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 100)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
             }
-          },{
+          }, {
             text: '十年',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              end.setTime(start.getTime() +3600 * 1000 * 24 * 365*10);
-              picker.$emit("pick",[start.getTime(),end.getTime()])
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 10)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
             }
           }, {
             text: '五年',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              end.setTime(start.getTime() +3600 * 1000 * 24 *365*5);
-              picker.$emit('pick', [start.getTime(),end.getTime()]);
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 5)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
             }
           },
           {
             text: '三年',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              end.setTime(start.getTime() +3600 * 1000 * 24 *365*3);
-              picker.$emit('pick', [start.getTime(),end.getTime()]);
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 3)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
             }
-          },{
+          }, {
             text: '一年',
-            onClick(picker) {
-              const end = new Date();
-              const start = new Date();
-              end.setTime(start.getTime() +3600 * 1000 * 24 * 365);
-              picker.$emit('pick', [start.getTime(),end.getTime()]);
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
             }
           }
         ]
