@@ -87,8 +87,20 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
                     if (!producer.getTopic().getCode().contains(qPageQuery.getQuery().getKeyword())) {
                         iterator.remove();
                     }
-                }else {
+                } else {
                     if (!producer.getApp().getCode().contains(qPageQuery.getQuery().getKeyword())) {
+                        iterator.remove();
+                    }
+                }
+            }
+        }
+
+        if (appFlag) {
+            if (CollectionUtils.isNotEmpty(producers) && session.getRole() != User.UserRole.ADMIN.value()) {
+                Iterator<Producer> iterator = producers.iterator();
+                while (iterator.hasNext()) {
+                    Producer producer = iterator.next();
+                    if (applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) == null) {
                         iterator.remove();
                     }
                 }

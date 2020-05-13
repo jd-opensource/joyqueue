@@ -257,10 +257,6 @@ export default {
             content: '删除成功'
           })
           this.getList()
-        } else {
-          this.$Dialog.error({
-            content: data.message
-          })
         }
       })
     }
