@@ -72,19 +72,19 @@
 </template>
 
 <script>
-  import apiRequest from '../../utils/apiRequest.js'
-  import myTable from '../../components/common/myTable.vue'
-  import myDialog from '../../components/common/myDialog.vue'
-  import consumerConfigForm from './consumerConfigForm.vue'
-  import subscribe from './subscribe.vue'
-  import msgPreview from './msgPreview.vue'
-  import {getAppCode, getTopicCode, replaceChartUrl} from '../../utils/common.js'
-  import MsgDetail from './msgDetail'
-  import RateLimit from './rateLimit'
-  import ButtonGroup from '../../components/button/button-group'
-  import apiUrl from '../../utils/apiUrl.js'
+import apiRequest from '../../utils/apiRequest.js'
+import myTable from '../../components/common/myTable.vue'
+import myDialog from '../../components/common/myDialog.vue'
+import consumerConfigForm from './consumerConfigForm.vue'
+import subscribe from './subscribe.vue'
+import msgPreview from './msgPreview.vue'
+import {getAppCode, getTopicCode, replaceChartUrl} from '../../utils/common.js'
+import MsgDetail from './msgDetail'
+import RateLimit from './rateLimit'
+import ButtonGroup from '../../components/button/button-group'
+import apiUrl from '../../utils/apiUrl.js'
 
-  export default {
+export default {
   name: 'consumer-base',
   components: {
     RateLimit,
