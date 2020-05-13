@@ -465,6 +465,18 @@ export default {
 
       apiRequest.postBase(this.urls.getMonitor, {}, data, false).then((data) => {
         this.tableData.rowData[index] = Object.assign(row, data.data || [])
+        if (this.tableData.rowData[index].connections === undefined) {
+          this.tableData.rowData[index].connections = 'unknown'
+        }
+        if (this.tableData.rowData[index].pending === undefined) {
+          this.tableData.rowData[index].pending = 'unknown'
+        }
+        if (this.tableData.rowData[index].deQuence === undefined) {
+          this.tableData.rowData[index].deQuence = 'unknown'
+        }
+        if (this.tableData.rowData[index].retry === undefined) {
+          this.tableData.rowData[index].retry = 'unknown'
+        }
         this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
       })
     },

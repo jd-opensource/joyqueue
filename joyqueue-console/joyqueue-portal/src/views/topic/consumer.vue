@@ -82,23 +82,33 @@ export default {
                 size: 'small'
               },
               style: {
-                display: (params.item.id !== undefined) ? 'none' : 'inline-block'
+                display: (params.item.connections !== undefined) ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
             let connections = params.item.connections
             if (connections === undefined) {
-              return h('div', {}, 'UNKNOWN')
+              return h('div', {}, html)
+            } else if (connections === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: (params.item.connections === undefined) ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(connections))
+              html.push(textSpan)
+              return h('div', {}, html)
             }
-            const formatNumFilter = Vue.filter('formatNum')
-            let textSpan = h('label', {
-              style: {
-                position: 'relative',
-                display: (params.item.id === undefined) ? 'none' : 'inline-block'
-              }
-            }, formatNumFilter(connections))
-            html.push(textSpan)
-            return h('div', {}, html)
           }
         },
         {
@@ -112,19 +122,28 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.id !== undefined ? 'none' : 'inline-block'
+                display: params.item.pending !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
             let pending = params.item.pending
             if (pending === undefined) {
-              return h('div', {}, 'UNKNOWN')
+              return h('div', {}, html)
+            } else if (pending === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
                 style: {
                   position: 'relative',
-                  display: params.item.id === undefined ? 'none' : 'inline-block'
+                  display: params.item.pending.count === undefined ? 'none' : 'inline-block'
                 }
               }, formatNumFilter(pending.count))
               html.push(textSpan)
@@ -143,19 +162,28 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.id !== undefined ? 'none' : 'inline-block'
+                display: params.item.deQuence !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
             let deQuence = params.item.deQuence
             if (deQuence === undefined) {
-              return h('div', {}, 'UNKNOWN')
+              return h('div', {}, html)
+            } else if (deQuence === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
                 style: {
                   position: 'relative',
-                  display: params.item.id === undefined ? 'none' : 'inline-block'
+                  display: params.item.deQuence.count === undefined ? 'none' : 'inline-block'
                 }
               }, formatNumFilter(deQuence.count))
               html.push(textSpan)
@@ -174,13 +202,22 @@ export default {
                 size: 'small'
               },
               style: {
-                display: params.item.id !== undefined ? 'none' : 'inline-block'
+                display: params.item.retry !== undefined ? 'none' : 'inline-block'
               }
             })
             html.push(spin)
             let retry = params.item.retry
             if (retry === undefined) {
-              return h('div', {}, 'UNKNOWN')
+              return h('div', {}, html)
+            } else if (retry === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
               let textSpan = h('label', {
@@ -188,7 +225,7 @@ export default {
                   cursor: 'pointer',
                   color: '#3366FF',
                   position: 'relative',
-                  display: params.item.id === undefined ? 'none' : 'inline-block'
+                  display: params.item.retry.count === undefined ? 'none' : 'inline-block'
                 },
                 on: {
                   click: () => {
@@ -271,33 +308,6 @@ export default {
             }, value)]
             )
           }
-        }
-      ],
-      btns: [
-        {
-          txt: '消费详情',
-          method: 'on-detail',
-          bindKey: 'canOperate',
-          bindVal: true
-        },
-        {
-          txt: '配置',
-          method: 'on-config',
-          bindKey: 'canOperate',
-          bindVal: true
-        },
-        {
-          txt: '监控图表',
-          method: 'on-detail-chart',
-          bindKey: 'canOperate',
-          bindVal: true
-        },
-        {
-          txt: '取消订阅',
-          method: 'on-cancel-subscribe',
-          bindKey: 'canOperate',
-          bindVal: true,
-          isAdmin: 1
         }
       ],
       btns: [

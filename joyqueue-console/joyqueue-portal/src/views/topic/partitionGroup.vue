@@ -12,9 +12,9 @@
       </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-                  @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
-                  @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
-                  @on-position="goPosition" @on-replication="goReplicationChart" :showPagination="false">
+              @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
+              @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
+              @on-position="goPosition" @on-replication="goReplicationChart" :showPagination="false">
     </my-table>
 
     <!--详情-->
@@ -47,9 +47,9 @@
     </my-dialog>
     <!--扩容-->
     <my-dialog :dialog="groupNewDialog" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()">
-          <group-new :data="groupNewDialogData" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()"
-                     @on-partition-group-change="topicUpdate"></group-new>
-        </my-dialog>
+      <group-new :data="groupNewDialogData" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()"
+                 @on-partition-group-change="topicUpdate"></group-new>
+    </my-dialog>
   </div>
 </template>
 
@@ -152,9 +152,9 @@ export default {
                     this.$router.push({
                       path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
                       query: {
-                        brokerId: params.item.id,
-                        brokerIp: params.item.ip,
-                        brokerPort: params.item.port
+                        brokerId: params.item.brokerId,
+                        brokerIp: params.item.brokerIp,
+                        brokerPort: params.item.brokerPort
                       }
                     })
                   },
@@ -313,6 +313,9 @@ export default {
       if (rowData[i].leader && rowData[i].leader !== -1) {
         apiRequest.get(this.urlOrigin.getBroker + '/' + rowData[i].leader).then((data) => {
           this.tableData.rowData[i].ip = data.data.ip
+          this.tableData.rowData[i].brokerId = data.data.id
+          this.tableData.rowData[i].brokerIp = data.data.ip
+          this.tableData.rowData[i].brokerPort = data.data.port
           this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
         })
       }

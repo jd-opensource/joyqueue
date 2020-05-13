@@ -408,6 +408,12 @@ export default {
       }
       apiRequest.postBase(this.urls.getMonitor, {}, data, false).then((data) => {
         this.tableData.rowData[index] = Object.assign(row, data.data || [])
+        if (this.tableData.rowData[index].connections === undefined) {
+          this.tableData.rowData[index].connections = 'unknown'
+        }
+        if (this.tableData.rowData[index].enQuence === undefined) {
+          this.tableData.rowData[index].enQuence = 'unknown'
+        }
         this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
       })
     },
