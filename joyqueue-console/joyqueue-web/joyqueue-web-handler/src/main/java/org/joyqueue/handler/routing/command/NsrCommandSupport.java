@@ -25,20 +25,21 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import io.vertx.core.Vertx;
 import org.joyqueue.exception.ValidationException;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.GenericValue;
 import org.joyqueue.handler.annotation.Operator;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.message.AuditLogMessage;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.message.MessageType;
 import org.joyqueue.model.Query;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.nsr.NsrService;
-import io.vertx.core.Vertx;
+import org.joyqueue.service.ApplicationUserService;
 
 /**
  * Created by wangxiaofei1 on 2019/1/4.
@@ -52,6 +53,8 @@ public abstract class NsrCommandSupport<M, S extends NsrService, Q extends Query
     protected Identity operator;
     @CVertx
     protected Vertx vertx;
+    @Value(nullable = false)
+    protected ApplicationUserService applicationUserService;
 
     @Override
     public Response execute() throws Exception {
@@ -177,5 +180,13 @@ public abstract class NsrCommandSupport<M, S extends NsrService, Q extends Query
                     + JSON.toJSONString(model) + ")", auditType, type + "(" + model.toString() + ")"));
         }
 
+    }
+
+    // 权限约束：普通用户只有该应用下用户才能添加用户
+    public void validatePrivilege(String appCode) {
+        if (session.getRole() != User.UserRole.ADMIN.value() &&
+                applicationUserService.findByUserApp(operator.getCode(), appCode) == null) {
+            throw new ConfigException(ErrorCode.NoPrivilege);
+        }
     }
 }

@@ -39,7 +39,7 @@
         </d-form-item>
       </grid-col>
       <grid-col span="8">
-        <d-form-item label="并行消费" prop="concurrent">
+        <d-form-item label="并行消费" prop="concurrent" :disabled="$store.getters.isAdmin">
           <d-input
             oninput="value = value.trim()"
             :disabled="concurrentDisabled"
