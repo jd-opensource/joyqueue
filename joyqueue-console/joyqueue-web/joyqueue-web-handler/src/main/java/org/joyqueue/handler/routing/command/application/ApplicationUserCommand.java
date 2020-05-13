@@ -21,18 +21,14 @@ import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.routing.command.CommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.domain.Application;
-import org.joyqueue.model.domain.ApplicationUser;
-import org.joyqueue.model.domain.BaseModel;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.User;
+import org.joyqueue.model.domain.*;
 import org.joyqueue.model.query.QUser;
 import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.ApplicationUserService;
@@ -55,6 +51,8 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
     protected ApplicationService applicationService;
     @Value(Constants.APPLICATION)
     protected Application application;
+    @Value(Constants.USER_KEY)
+    protected User session;
 
     @Path("add")
     public Response add(@Body ApplicationUser applicationUser) throws Exception {
@@ -65,10 +63,8 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
         if(null == application) {
             throw new ConfigException(ErrorCode.BadRequest, "找不到此应用!");
         }
-        // 权限约束：只有该应用下用户才能添加用户
-        if (applicationUserService.findByUserApp(operator.getCode(), application.getCode()) == null) {
-            throw new ConfigException(ErrorCode.BadRequest, "没有添加应用用户权限!");
-        }
+        // 权限约束：普通用户只有该应用下用户才能添加用户
+        super.validatePrivilege(application.getCode());
         // 查找/同步用户
         applicationUser.setApplication(application.identity());
         applicationUser.setCreateBy(operator);
@@ -122,6 +118,8 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
 
     @Path("delete")
     public Response delete(@QueryParam(Constants.APP_ID) Long appId, @QueryParam(Constants.USER_ID) Long userId) throws Exception {
+        // 权限约束：普通用户只有该应用下用户才能添加用户
+        super.validatePrivilege(application.getCode());
         ApplicationUser appUser = service.findAppUserByAppIdAndUserId(appId, userId);
         appUser.setStatus(BaseModel.DELETED);
         appUser.setUpdateBy(operator);

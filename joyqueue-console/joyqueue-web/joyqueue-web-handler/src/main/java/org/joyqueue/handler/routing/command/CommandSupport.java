@@ -16,24 +16,6 @@
 package org.joyqueue.handler.routing.command;
 
 import com.alibaba.fastjson.JSON;
-import org.joyqueue.exception.ValidationException;
-import org.joyqueue.handler.annotation.GenericValue;
-import org.joyqueue.handler.annotation.Operator;
-import org.joyqueue.handler.annotation.PageQuery;
-import org.joyqueue.handler.error.ConfigException;
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.handler.message.AuditLogMessage;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.model.PageResult;
-import org.joyqueue.model.QKeyword;
-import org.joyqueue.model.QOperator;
-import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.Query;
-import org.joyqueue.model.domain.BaseModel;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.OperLog;
-import org.joyqueue.model.domain.User;
-import org.joyqueue.service.PageService;
 import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
@@ -46,6 +28,21 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import io.vertx.core.Vertx;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.exception.ValidationException;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.annotation.GenericValue;
+import org.joyqueue.handler.annotation.Operator;
+import org.joyqueue.handler.annotation.PageQuery;
+import org.joyqueue.handler.error.ConfigException;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.handler.message.AuditLogMessage;
+import org.joyqueue.model.*;
+import org.joyqueue.model.domain.BaseModel;
+import org.joyqueue.model.domain.Identity;
+import org.joyqueue.model.domain.OperLog;
+import org.joyqueue.model.domain.User;
+import org.joyqueue.service.ApplicationUserService;
+import org.joyqueue.service.PageService;
 
 import java.util.Date;
 
@@ -66,6 +63,8 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
     protected Identity operator;
     @CVertx
     protected Vertx vertx;
+    @Value(nullable = false)
+    protected ApplicationUserService applicationUserService;
 
     @Override
     public Response execute() throws Exception {
@@ -203,6 +202,14 @@ public abstract class CommandSupport <M extends BaseModel, S extends PageService
                     + model.toString() + ")", auditType, type + "(" + JSON.toJSONString(model) + ")"));
         }
 
+    }
+
+    // 权限约束：普通用户只有该应用下用户才能添加用户
+    public void validatePrivilege(String appCode) {
+        if (session.getRole() != User.UserRole.ADMIN.value() &&
+                applicationUserService.findByUserApp(operator.getCode(), appCode) == null) {
+            throw new ConfigException(ErrorCode.NoPrivilege);
+        }
     }
 
 }
