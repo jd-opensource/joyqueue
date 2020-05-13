@@ -46,7 +46,7 @@ public class NsrProducerConverter extends Converter<Producer, org.joyqueue.domai
                     .blackList(producer.getConfig().getBlackList())
                     .archive(producer.getConfig().isArchive())
                     .weight(producer.getConfig().getWeight())
-                    //.timeout()
+                    .timeout(producer.getConfig().getTimeout())
                     .create());
 
             nsrProducer.setLimitPolicy(new org.joyqueue.domain.Producer.ProducerLimitPolicy(producer.getConfig().getLimitTps(), producer.getConfig().getLimitTraffic()));
@@ -67,6 +67,7 @@ public class NsrProducerConverter extends Converter<Producer, org.joyqueue.domai
         org.joyqueue.domain.Producer.ProducerPolicy producerPolicy = nsrProducer.getProducerPolicy();
         org.joyqueue.domain.Producer.ProducerLimitPolicy limitPolicy = nsrProducer.getLimitPolicy();
         if (producerPolicy != null) {
+            producerConfig.setTimeout(producerPolicy.getTimeOut());
             producerConfig.setNearBy(producerPolicy.getNearby());
             producerConfig.setBlackList(StringUtils.join(producerPolicy.getBlackList(), ","));
             producerConfig.setArchive(producerPolicy.getArchive());

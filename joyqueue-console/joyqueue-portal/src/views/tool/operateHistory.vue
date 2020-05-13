@@ -10,10 +10,10 @@
         <span slot="prepend">操作类型</span>
         <d-option v-for="item in typeList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
-      <d-input v-model="searchData.identity" class="left mr5" placeholder="关联Id" style="width:213px">
+      <d-input v-model="searchData.identity" oninput="value = value.trim()" class="left mr5" placeholder="关联Id" style="width:213px">
         <span slot="prepend">关联Id</span>
       </d-input>
-      <d-input v-model="searchData.erp" placeholder="用户名" class="left mr5" style="width:213px">
+      <d-input v-model="searchData.erp" oninput="value = value.trim()" placeholder="用户名" class="left mr5" style="width:213px">
         <span slot="prepend">用户名</span>
       </d-input>
       <d-button type="primary" color="success" @click="getList">查询</d-button>

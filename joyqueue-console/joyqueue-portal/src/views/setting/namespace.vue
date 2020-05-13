@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入代码/值" class="left mr10"
+      <d-input v-model="searchData.keyword" oninput="value = value.trim()" placeholder="请输入代码/值" class="left mr10"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
@@ -24,7 +24,7 @@
           <grid-col :span="3" class="label">代码:</grid-col>
           <grid-col :span="1"/>
           <grid-col :span="14" class="val">
-            <d-input v-model="addData.code"></d-input>
+            <d-input v-model="addData.code" oninput="value = value.trim()"></d-input>
           </grid-col>
         </grid-row>
     </my-dialog>
@@ -34,7 +34,7 @@
         <grid-col :span="5" class="label">代码:</grid-col>
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
-          <d-input v-model="editData.code" disabled></d-input>
+          <d-input v-model="editData.code" oninput="value = value.trim()" disabled></d-input>
         </grid-col>
       </grid-row>
     </my-dialog>

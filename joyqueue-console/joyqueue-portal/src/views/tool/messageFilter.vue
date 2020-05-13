@@ -28,6 +28,7 @@
                 <d-form-item label="主题" prop="topic">
                   <d-tooltip content="如主题有namespace,请加上namespace">
                     <d-input v-model="search.topic" placeholder="请输入主题"
+                             oninput="value = value.trim()"
                              style="width: 200px">
                     </d-input>
                   </d-tooltip>
@@ -44,7 +45,7 @@
               </grid-col>
               <grid-col span="8">
                 <d-form-item label="分区" style="margin-left: -25px" prop="partition">
-                  <d-input v-model="search.partition" oninput="value=value.replace(/[^\d]/g, '')"
+                  <d-input v-model="search.partition" oninput="value=value.replace(/[^\d]/g, '').trim()"
                            placeholder="分区为空默认查询所有分区"
                            style="width: 200px">
                   </d-input>
@@ -69,7 +70,7 @@
               <div v-if="search.method === 'searchByOffset'">
                 <grid-col>
                   <d-form-item label="位点" prop="offset">
-                    <d-input v-model="search.offset" oninput="value=value.replace(/[^\d]/g, '')" placeholder="请输入位点值"
+                    <d-input v-model="search.offset" oninput="value=value.replace(/[^\d]/g, '').trim()" placeholder="请输入位点值"
                              style="width: 200px;">
                     </d-input>
                   </d-form-item>
@@ -78,7 +79,7 @@
               <div v-if="search.method === 'searchByOffset'">
                 <grid-col>
                   <d-form-item label="查询条数" prop="queryCount">
-                    <d-input v-model="search.queryCount" oninput="value=value.replace(/[^\d]/g, '')"
+                    <d-input v-model="search.queryCount" oninput="value=value.replace(/[^\d]/g, '').trim()"
                              placeholder="请输入查询条数"
                              style="width: 200px;">
                     </d-input>
@@ -101,6 +102,7 @@
               <grid-col>
                 <d-form-item prop="filter" label="过滤内容">
                   <d-input v-model="search.filter" placeholder="请输入消息关键字" class="left"
+                           oninput="value = value.trim()"
                            style="width: 280px;margin-top: 5px">
                   </d-input>
                 </d-form-item>

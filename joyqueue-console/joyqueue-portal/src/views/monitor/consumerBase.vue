@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="headLine">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="input" @on-enter="getList">
+      <d-input v-model="keyword" oninput="value = value.trim()" :placeholder="keywordTip" class="input" @on-enter="getList">
+        <span slot="prepend">{{keywordName}}</span>
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+      </d-input>
+      <d-input v-model="keyword" oninput="value = value.trim()" :placeholder="keywordTip" class="input" @on-enter="getList">
         <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>

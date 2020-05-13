@@ -8,7 +8,7 @@
           </grid-col>
         </grid-row>
         <grid-row style="margin-top: 10px">
-          <d-input v-model="searchData.partition" placeholder="请输入partition" class="left mr5"
+          <d-input v-model="searchData.partition" oninput="value = value.trim()" placeholder="请输入partition" class="left mr5"
                    style="width: 213px" @on-enter="getList">
             <span slot="prepend">分区</span>
           </d-input>
@@ -24,7 +24,7 @@
             @on-enter="getList">
             <span slot="prepend">开始时间</span>
           </d-date-picker>
-          <d-input v-model="searchData.index" placeholder="请输入位点" class="left mr5"
+          <d-input v-model="searchData.index" oninput="value = value.trim()" placeholder="请输入位点" class="left mr5"
                    style="width: 213px" @on-enter="getList">
             <span slot="prepend">位点</span>
           </d-input>

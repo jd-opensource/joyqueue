@@ -16,10 +16,10 @@
     <my-dialog  :dialog="resetDialog" @on-dialog-confirm="onConfirm"  @on-dialog-cancel="onCancel">
       <d-form ref="partitionOffset" :model="partitionInfo"  label-width="100px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
         <d-form-item label="主题:">
-          <d-input v-model="partitionInfo.topic" style="width: 60%" disabled ></d-input>
+          <d-input v-model="partitionInfo.topic" oninput="value = value.trim()" style="width: 60%" disabled ></d-input>
         </d-form-item>
         <d-form-item label="应用:">
-          <d-input v-model="partitionInfo.app" style="width: 60%" disabled ></d-input>
+          <d-input v-model="partitionInfo.app" oninput="value = value.trim()" style="width: 60%" disabled ></d-input>
         </d-form-item>
         <d-form-item label="重置时间:" v-if="!partitionInfo.isPartition">
           <d-date-picker
@@ -31,13 +31,13 @@
           </d-date-picker>
         </d-form-item>
         <d-form-item label="最小值："  v-if="partitionInfo.isPartition">
-          <d-input v-model.number="partitionInfo.partition.leftIndex" style="width: 60%" disabled/>
+          <d-input v-model.number="partitionInfo.partition.leftIndex" oninput="value = value.trim()" style="width: 60%" disabled/>
         </d-form-item>
         <d-form-item label="最大值："  v-if="partitionInfo.isPartition">
-          <d-input v-model.number="partitionInfo.partition.rightIndex" style="width: 60%" disabled/>
+          <d-input v-model.number="partitionInfo.partition.rightIndex" oninput="value = value.trim()" style="width: 60%" disabled/>
         </d-form-item>
         <d-form-item label="重置位置："  v-if="partitionInfo.isPartition" >
-          <d-input v-model.number="partitionInfo.offset" style="width: 60%"/>
+          <d-input v-model.number="partitionInfo.offset" oninput="value = value.trim()" style="width: 60%"/>
         </d-form-item>
       </d-form>
     </my-dialog>
