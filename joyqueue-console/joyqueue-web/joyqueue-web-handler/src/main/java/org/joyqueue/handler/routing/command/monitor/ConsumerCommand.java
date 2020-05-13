@@ -96,16 +96,17 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
             }
         }
 
-        // 不再限制普通用户查询消费者权限
-//        if (CollectionUtils.isNotEmpty(consumers) && session.getRole() != User.UserRole.ADMIN.value()) {
-//            Iterator<Consumer> iterator = consumers.iterator();
-//            while (iterator.hasNext()) {
-//                Consumer consumer = iterator.next();
-//                if (applicationUserService.findByUserApp(session.getCode(), consumer.getApp().getCode().split("\\.")[0]) == null) {
-//                    iterator.remove();
-//                }
-//            }
-//        }
+        if (appFlag) {
+            if (CollectionUtils.isNotEmpty(consumers) && session.getRole() != User.UserRole.ADMIN.value()) {
+                Iterator<Consumer> iterator = consumers.iterator();
+                while (iterator.hasNext()) {
+                    Consumer consumer = iterator.next();
+                    if (applicationUserService.findByUserApp(session.getCode(), consumer.getApp().getCode().split("\\.")[0]) == null) {
+                        iterator.remove();
+                    }
+                }
+            }
+        }
 
         Pagination pagination = qPageQuery.getPagination();
         pagination.setTotalRecord(consumers.size());

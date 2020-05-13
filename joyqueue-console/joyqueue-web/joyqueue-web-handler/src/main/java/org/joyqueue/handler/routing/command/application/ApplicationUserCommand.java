@@ -58,14 +58,18 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
 
     @Path("add")
     public Response add(@Body ApplicationUser applicationUser) throws Exception {
-        //1. 参数检查
+        // 参数检查
         if (applicationUser.getUser() == null) {
             throw new ConfigException(ErrorCode.BadRequest, "没有传入User参数!");
         }
         if(null == application) {
             throw new ConfigException(ErrorCode.BadRequest, "找不到此应用!");
         }
-        //2. 查找/同步用户
+        // 权限约束：只有该应用下用户才能添加用户
+        if (applicationUserService.findByUserApp(operator.getCode(), application.getCode()) == null) {
+            throw new ConfigException(ErrorCode.BadRequest, "没有添加应用用户权限!");
+        }
+        // 查找/同步用户
         applicationUser.setApplication(application.identity());
         applicationUser.setCreateBy(operator);
         applicationUser.setUpdateBy(operator);
@@ -81,7 +85,7 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
 //            user = syncService.addOrUpdateUser(info);
         }
         applicationUser.setUser(user.identity());
-        // 3. 保存appUser
+        // 保存appUser
         int count = applicationUserService.add(applicationUser);
         if (count <= 0) {
             throw new ConfigException(addErrorCode());
