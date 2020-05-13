@@ -59,6 +59,9 @@ public class ApplicationTokenCommand extends NsrCommandSupport<ApplicationToken,
             appTokens = service.findByApp(application.getCode());
         }
 
+        // 权限约束：普通用户只有该应用下用户才能添加用户
+        super.validatePrivilege(application.getCode());
+
         Pagination pagination = qPageQuery.getPagination();
         pagination.setTotalRecord(appTokens.size());
 
@@ -85,6 +88,9 @@ public class ApplicationTokenCommand extends NsrCommandSupport<ApplicationToken,
 
     @Path("add")
     public Response add(@Body ApplicationToken model) throws Exception {
+        // 权限约束：普通用户只有该应用下用户才能添加用户
+        super.validatePrivilege(application.getCode());
+
         int tokenCount = service.countByAppId(application.getId());
         if (tokenCount >= 5) {
             throw new ConfigException(ErrorCode.ExcessiveToken);
@@ -115,6 +121,8 @@ public class ApplicationTokenCommand extends NsrCommandSupport<ApplicationToken,
     @Override
     @Path("update")
     public Response update(@QueryParam(Constants.ID) String id, @Body ApplicationToken model) throws Exception {
+        // 权限约束：普通用户只有该应用下用户才能添加用户
+        super.validatePrivilege(application.getCode());
         model.initializeTime();
         model.setApplication(application.identity());
         return Responses.success(service.update(model));
@@ -122,6 +130,8 @@ public class ApplicationTokenCommand extends NsrCommandSupport<ApplicationToken,
     @Override
     @Path("delete")
     public Response delete(@QueryParam(Constants.ID) String id) throws Exception {
+        // 权限约束：普通用户只有该应用下用户才能添加用户
+        super.validatePrivilege(application.getCode());
         ApplicationToken newModel = service.findById(Long.valueOf(id));
         int count = service.delete(newModel);
         if (count <= 0) {

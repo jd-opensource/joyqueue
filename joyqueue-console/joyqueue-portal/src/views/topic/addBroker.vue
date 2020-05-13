@@ -1,11 +1,13 @@
 <template>
   <div>
     <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/ID/标签" class="left"
+             oninput="value = value.trim()"
               style="width: 300px" @on-enter="getList">
       <span slot="prepend">关键词</span>
       <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
     </d-input>
     <d-input v-model="searchData.group" placeholder="请输入要查询的Broker分组" class="left"
+             oninput="value = value.trim()"
              style="width: 300px" @on-enter="getList">
       <span slot="prepend">Broker分组</span>
       <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>

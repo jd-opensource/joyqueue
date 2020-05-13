@@ -15,6 +15,7 @@
  */
 package org.joyqueue.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.domain.PartitionGroupReplica;
@@ -90,6 +91,20 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             if (topicPartitionGroups == null || topicPartitionGroups.isEmpty()) {
                 return Collections.emptyList();
             }
+            topicPartitionGroups.forEach(item -> {
+                String partitionStr = item.getPartitions();
+                List<Integer> partitions = JSON.parseArray(partitionStr, Integer.class);
+                partitions.sort((Integer o1, Integer o2) -> {
+                    if (o1 > o2) {
+                        return 1;
+                    } else if (o1.equals(o2)) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                });
+                item.setPartitions(JSON.toJSONString(partitions));
+            });
             return topicPartitionGroups;
         } catch (Exception e) {
             String errorMsg = "新添加partitionGroup，同步NameServer失败";

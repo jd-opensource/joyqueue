@@ -2,6 +2,7 @@
   <div>
     <div class="ml20 mt10">
       <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/名称" class="left"
+               oninput="value = value.trim()"
                style="width: 300px" @on-enter="getList">
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>

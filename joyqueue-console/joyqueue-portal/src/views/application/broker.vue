@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.name" placeholder="请输入Broker分组/IP" class="left mr10" style="width:300px" @on-enter="getList">
+      <d-input v-model="searchData.name" oninput="value = value.trim()" placeholder="请输入Broker分组/IP" class="left mr10" style="width:300px" @on-enter="getList">
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
@@ -16,7 +16,7 @@
 import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
-import apiRequest from '../utils/apiRequest.js'
+import apiRequest from '../../utils/apiRequest.js'
 import {brokerRoleTypeRender, brokerPermissionTypeRender, brokerSyncModeTypeRender} from '../../utils/common.js'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 
@@ -180,8 +180,6 @@ export default {
         this.tableData.rowData = data.data
         this.showTablePin = false
         for (let i = 0; i < this.tableData.rowData.length; i++) {
-          console.log(222)
-          console.log(this.tableData.rowData[i])
           this.getDetail(this.tableData.rowData[i], i)
         }
       })

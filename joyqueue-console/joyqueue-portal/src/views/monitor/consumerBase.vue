@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="headLine">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="input" @on-enter="getList">
+      <d-input v-model="subscribeGroup" oninput="value = value.trim()" :placeholder="请输入订阅分组" class="input" @on-enter="getList">
+        <span slot="prepend">订阅分组</span>
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+      </d-input>
+      <d-input v-model="keyword" oninput="value = value.trim()" :placeholder="keywordTip" class="input" @on-enter="getList">
         <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
@@ -23,7 +27,7 @@
               @on-rateLimit="openRateLimitDialog" @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"
               @on-offset="goOffsetChart"/>
 
-    <d-button class="right load-btn" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+    <d-button class="right load-btn" v-if="showRestBtn" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
 
@@ -74,7 +78,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import consumerConfigForm from './consumerConfigForm.vue'
 import subscribe from './subscribe.vue'
 import msgPreview from './msgPreview.vue'
-import {getTopicCode, getAppCode, replaceChartUrl} from '../../utils/common.js'
+import {getAppCode, getTopicCode, replaceChartUrl} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
 import RateLimit from './rateLimit'
 import ButtonGroup from '../../components/button/button-group'
@@ -116,55 +120,10 @@ export default {
       type: String
     },
     btns: {
-      type: Array,
-      default: function () {
-        return [
-          {
-            txt: '消费详情',
-            method: 'on-detail'
-          },
-          {
-            txt: '配置',
-            method: 'on-config'
-          },
-          {
-            txt: '取消订阅',
-            method: 'on-cancel-subscribe'
-          }
-          // ,
-          // {
-          //   txt: '详情监控图表',
-          //   method: 'on-detail-chart'
-          // },
-          // {
-          //   txt: '汇总监控图表',
-          //   method: 'on-summary-chart'
-          // },
-          // {
-          //   txt: '性能监控图表',
-          //   method: 'on-performance-chart'
-          // }
-        ]
-      }
+      type: Array
     },
     operates: {
-      type: Array,
-      default: function () {
-        return [
-          {
-            txt: '消息预览',
-            method: 'on-msg-preview'
-          },
-          {
-            txt: '消息查询',
-            method: 'on-msg-detail'
-          },
-          {
-            txt: '限流',
-            method: 'on-rateLimit'
-          }
-        ]
-      }
+      type: Array
     },
     btnGroups: {
       type: Object
@@ -190,8 +149,10 @@ export default {
   },
   data () {
     return {
+      showRestBtn: true,
       curIndex: 0,
       cacheList: [],
+      subscribeGroup: '',
       urls: {
         search: `/consumer/search`,
         getMonitor: `/monitor/find`,
@@ -510,6 +471,18 @@ export default {
 
       apiRequest.postBase(this.urls.getMonitor, {}, data, false).then((data) => {
         this.tableData.rowData[index] = Object.assign(row, data.data || [])
+        if (this.tableData.rowData[index].connections === undefined) {
+          this.tableData.rowData[index].connections = 'unknown'
+        }
+        if (this.tableData.rowData[index].pending === undefined) {
+          this.tableData.rowData[index].pending = 'unknown'
+        }
+        if (this.tableData.rowData[index].deQuence === undefined) {
+          this.tableData.rowData[index].deQuence = 'unknown'
+        }
+        if (this.tableData.rowData[index].retry === undefined) {
+          this.tableData.rowData[index].retry = 'unknown'
+        }
         this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
       })
     },
@@ -541,50 +514,15 @@ export default {
         this.getList()
       })
     },
-    // 查询
-    // 原来的getList方法
-    getList2 () {
-      // 查询数据库里的数据
-      this.showTablePin = true
-      let query = {}
-      if (this.keyword == null || this.keyword === '' || this.keyword === undefined) {
-        query = {
-          keyword: this.keyword
-        }
+    getList () {
+      if (this.subscribeGroup) {
+        this.findBySubscribeGroup(this.subscribeGroup)
       } else {
-        query = {
-          app: this.keyword
-        }
+        this.getList2()
       }
-      let data = {
-        pagination: {
-          page: this.page.page,
-          size: this.page.size
-        },
-        query: query
-      }
-      for (let i in this.search) {
-        if (this.search.hasOwnProperty(i)) {
-          data.query[i] = this.search[i]
-        }
-      }
-      apiRequest.post(this.urls.search, {}, data).then((data) => {
-        data.data = data.data || []
-        data.pagination = data.pagination || {
-          totalRecord: data.data.length
-        }
-        this.page.total = data.pagination.totalRecord
-        this.page.page = data.pagination.page
-        this.page.size = data.pagination.size
-        this.tableData.rowData = data.data
-        this.showTablePin = false
-        for (let i = 0; i < this.tableData.rowData.length; i++) {
-          this.getMonitor(this.tableData.rowData[i], i)
-        }
-      })
     },
     // 实现懒加载的getList方法
-    getList () {
+    getList2 () {
       this.tableData.rowData = []
       // 查询数据库里的数据
       this.showTablePin = true
@@ -622,6 +560,7 @@ export default {
         }
         this.cacheList = data.data
         this.showTablePin = false
+        this.showRestBtn = this.curIndex < this.cacheList.length - 1
         for (let i = 0; i < this.tableData.rowData.length; i++) {
           this.getMonitor(this.tableData.rowData[i], i)
         }
@@ -630,6 +569,7 @@ export default {
     // 滚动事件触发下拉加载
     getRestList () {
       if (this.curIndex < this.cacheList.length - 1) {
+        this.showRestBtn = true
         for (let i = 0; i < this.page.size; i++) {
           if (this.curIndex < this.cacheList.length - 1) {
             this.curIndex += 1
@@ -641,11 +581,23 @@ export default {
             break
           }
         }
+      } else {
+        this.showRestBtn = false
+      }
+    },
+    findBySubscribeGroup (subscribeGroup) {
+      this.showRestBtn = false
+      this.tableData.rowData = this.cacheList.filter(item => item.subscribeGroup.indexOf(subscribeGroup) !== -1).sort(function (a, b) {
+        return a.topic.code - b.topic.code
+      })
+      for (let i = 0; i < this.tableData.rowData.length; i++) {
+        this.getMonitor(this.tableData.rowData[i], i)
       }
     }
   },
   mounted () {
     // this.getList();
+    this.subscribeGroup = ''
     apiRequest.get(this.urls.messageTypes)
       .then(data => {
         this.messageTypes = data.data

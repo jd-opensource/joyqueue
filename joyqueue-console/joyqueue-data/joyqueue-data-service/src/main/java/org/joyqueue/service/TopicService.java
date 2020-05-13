@@ -27,6 +27,7 @@ import org.joyqueue.model.query.QTopic;
 import org.joyqueue.nsr.NsrService;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 主题服务
@@ -65,6 +66,11 @@ public interface TopicService extends NsrService<Topic ,String> {
      */
     Topic findByCode(String namespaceCode, String code);
 
+    /**
+     * 分页查询
+     * @param query
+     * @return
+     */
     PageResult<Topic> search(QPageQuery<QTopic> query);
 
     /**
@@ -72,7 +78,14 @@ public interface TopicService extends NsrService<Topic ,String> {
      * @param brokerId
      * @return topic full name list
      **/
-
     List<TopicName> findTopic(String brokerId) throws Exception;
+
+    /**
+     * 根据opic查询producer，consumer所有相关app
+     * @param namespace
+     * @param topicCode
+     * @return
+     */
+    Set<String> findAppsByTopic(String namespace, String topicCode);
 
 }

@@ -51,6 +51,8 @@ public class ProducerConfig extends BaseNsrModel {
 
     private int limitTraffic;
 
+    private Integer timeout;
+
     public String getProducerId() {
         return producerId;
     }
@@ -113,6 +115,14 @@ public class ProducerConfig extends BaseNsrModel {
 
     public int getLimitTraffic() {
         return limitTraffic;
+    }
+
+    public Integer getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(Integer timeout) {
+        this.timeout = timeout;
     }
 
     /**

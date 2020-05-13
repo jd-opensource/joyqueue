@@ -137,10 +137,14 @@ public class PreloadBufferPool {
             }
             // 如果设置了百分比，最大可使用堆外内存= 物理内存 * 百分比 - 最大堆内存
             long mms = physicalMemorySize * pct / 100 - reservedHeapMemorySize;
-            if (mms > 0) {
+
+            // 最大堆外内存 * CACHE_RATIO，这是使用堆外内存的上限，超过这个上限会导致频繁的FullGC
+            long mdm = Math.round(VM.maxDirectMemory() * CACHE_RATIO);
+
+            if (mms > 0 && mms < mdm) {
                 return mms;
             } else {
-                return Math.round(VM.maxDirectMemory() * CACHE_RATIO);
+                return mdm;
             }
         }
         return Format.parseSize(System.getProperty(MAX_MEMORY_KEY), Math.round(VM.maxDirectMemory() * CACHE_RATIO));

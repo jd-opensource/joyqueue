@@ -10,14 +10,14 @@
     <!--    </div>-->
     <br>
     <grid-row>
-      <d-input v-model.number="tps" placeholder="请输入">
+      <d-input v-model.number="tps" oninput="value = value.trim()" placeholder="请输入">
         <i slot="prepend" style="width: 50px;">消息条数:</i>
         <i slot="append" style="width: 85px">条 / Broker / S</i>
       </d-input>
     </grid-row>
     <br>
     <grid-row>
-      <d-input v-model.number="traffic" placeholder="请输入">-ci
+      <d-input v-model.number="traffic" oninput="value = value.trim()" placeholder="请输入">-ci
         <i slot="prepend" style="width: 50px">消息流量:</i>
         <i slot="append" style="width: 85px">Byte / Broker / S</i>
       </d-input>

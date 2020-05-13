@@ -3,7 +3,7 @@
     <div style="margin-left: 20px;">
       <d-form :model="addData" inline label-width="850">
         <d-form-item label="分区数量：" required style="margin-right: 20px;">
-          <d-input v-model="addData.partitions" placeholder="请输入数字"  style="width: 150px"></d-input>
+          <d-input v-model="addData.partitions" oninput="value = value.trim()" placeholder="请输入数字"  style="width: 150px"></d-input>
         </d-form-item>
         <d-form-item label="选举类型：" required style="margin-right: 20px;">
           <d-select v-model="addData.electType" value="0" placeholder="请选择" style="width: 100px">
@@ -17,10 +17,14 @@
           </d-select>
         </d-form-item>
         <d-form-item label="IP/ID搜索:" required style="margin-right: 20px;">
-          <d-input v-model="searchData.keyword" @on-enter="getList" placeholder="请输入IP/ID"  style="width: 150px"></d-input>
+          <d-input v-model="searchData.keyword" oninput="value = value.trim()" @on-enter="getList" placeholder="请输入IP/ID"  style="width: 150px">
+            <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+          </d-input>
         </d-form-item>
         <d-form-item label="Broker分组：" required style="margin-right: 20px;">
-          <d-input v-model="searchData.group" @on-enter="getList" placeholder="请输入Broker分组"  style="width: 150px"></d-input>
+          <d-input v-model="searchData.group" oninput="value = value.trim()" @on-enter="getList" placeholder="请输入Broker分组"  style="width: 150px">
+            <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+          </d-input>
         </d-form-item>
         <d-form-item>
           <d-button type="primary" :disabled="btnDisabled" @click="addNewPartitionGroup">

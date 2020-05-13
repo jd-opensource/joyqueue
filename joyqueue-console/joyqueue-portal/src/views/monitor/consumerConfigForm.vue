@@ -33,14 +33,15 @@
     <grid-row>
       <grid-col span="8">
         <d-form-item label="延迟消费" prop="delay">
-          <d-input placeholder="请输入值,最大延迟1小时" v-model.number="formData.delay">
+          <d-input placeholder="请输入值,最大延迟1小时" oninput="value = value.trim()" v-model.number="formData.delay">
             <i slot="append">ms</i>
           </d-input>
         </d-form-item>
       </grid-col>
       <grid-col span="8">
-        <d-form-item label="并行消费" prop="concurrent">
+        <d-form-item label="并行消费" prop="concurrent" :disabled="$store.getters.isAdmin">
           <d-input
+            oninput="value = value.trim()"
             :disabled="concurrentDisabled"
             placeholder="请输入并行数,范围1-50,默认1"
             v-model.number="formData.concurrent"
@@ -50,6 +51,7 @@
       <grid-col span="8">
         <d-form-item label="应答超时" prop="ackTimeout">
           <d-input
+            oninput="value = value.trim()"
             placeholder="请输入值，默认10s"
             v-model.number="formData.ackTimeout"
           >
@@ -61,7 +63,7 @@
     <grid-row>
       <grid-col span="8">
         <d-form-item label="批量大小" prop="batchSize">
-          <d-input
+          <d-input oninput="value = value.trim()"
             laceholder="请输入批量数，范围1-1000，默认10"
             v-model.number="formData.batchSize"
           />
@@ -69,12 +71,12 @@
       </grid-col>
       <grid-col span="8">
         <d-form-item label="重试次数" prop="maxRetrys">
-          <d-input placeholder="默认无限制" v-model.number="formData.maxRetrys"/>
+          <d-input placeholder="默认无限制" oninput="value = value.trim()" v-model.number="formData.maxRetrys"/>
         </d-form-item>
       </grid-col>
       <grid-col span="8">
         <d-form-item label="过期时间" prop="expireTime">
-          <d-input placeholder="默认3天" v-model.number="formData.expireTime">
+          <d-input placeholder="默认3天" oninput="value = value.trim()" v-model.number="formData.expireTime">
             <i slot="append">ms</i>
           </d-input>
         </d-form-item>
@@ -84,6 +86,7 @@
       <d-input
         type="textarea"
         rows="3"
+        oninput="value = value.trim()"
         v-model="formData.blackList"
         placeholder="请输入要限制的IP，多个IP之间请用英文逗号隔开"
       />

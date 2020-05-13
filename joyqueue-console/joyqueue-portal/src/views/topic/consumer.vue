@@ -1,7 +1,7 @@
 <template>
   <div>
     <consumer-base ref="consumerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData"
+                   :subscribeDialogColData="subscribeDialog.colData" :btns="btns" :operates="operates"
                    :search="search" :subscribeUrls="subscribeDialog.urls"  @on-detail="handleDetail"/>
   </div>
 </template>
@@ -31,142 +31,234 @@ export default {
         {
           title: '应用',
           key: 'app.code',
-          width: 80,
+          width: '8%',
           render: (h, params) => {
             const app = params.item.app
             const appFullName = getAppCode(app, params.item.subscribeGroup)
-            return h('label', {
-              style: {
-                color: '#3366FF'
-              },
-              on: {
-                click: () => {
-                  this.$router.push({
-                    name: `/${this.$i18n.locale}/application/detail`,
-                    query: {
-                      id: app.id,
-                      app: app.code,
-                      tab: 'consumer'
-                    }
-                  })
+            console.log(params.item)
+            if (params.item.canOperate) {
+              return h('label', {
+                style: {
+                  color: '#3366FF'
                 },
-                mousemove: (event) => {
-                  event.target.style.cursor = 'pointer'
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      name: `/${this.$i18n.locale}/application/detail`,
+                      query: {
+                        id: app.id,
+                        app: app.code,
+                        tab: 'consumer'
+                      }
+                    })
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
                 }
-              }
-            }, appFullName)
+              }, appFullName)
+            } else {
+              return h('label', appFullName)
+            }
           }
         },
         {
           title: '主题',
           key: 'topic.code',
-          width: 100
+          width: '11%'
         },
-        {
-          title: '命名空间',
-          key: 'namespace.code'
-        },
+        // {
+        //   title: '命名空间',
+        //   key: 'namespace.code'
+        // },
         {
           title: '连接数',
           key: 'connections',
-          width: 100,
+          width: '8%',
           render: (h, params) => {
-            const connections = params.item.connections
-            const formatNumFilter = Vue.filter('formatNum')
-            return h('label', formatNumFilter(connections))
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: (params.item.connections !== undefined) ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let connections = params.item.connections
+            if (connections === undefined) {
+              return h('div', {}, html)
+            } else if (connections === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: (params.item.connections === undefined) ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(connections))
+              html.push(textSpan)
+              return h('div', {}, html)
+            }
           }
         },
         {
           title: '积压数',
           key: 'pending.count',
-          width: 150,
+          width: '10%',
           render: (h, params) => {
-            const pending = params.item.pending
-            if (!pending) {
-              return h('label', '')
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: params.item.pending !== undefined ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let pending = params.item.pending
+            if (pending === undefined) {
+              return h('div', {}, html)
+            } else if (pending === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
-              return h('label', formatNumFilter(pending.count))
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: params.item.pending.count === undefined ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(pending.count))
+              html.push(textSpan)
+              return h('div', {}, html)
             }
           }
         },
         {
           title: '出队数',
           key: 'deQuence.count',
-          width: 150,
+          width: '13%',
           render: (h, params) => {
-            const deQuence = params.item.deQuence
-            if (!deQuence) {
-              return h('label', '')
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: params.item.deQuence !== undefined ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let deQuence = params.item.deQuence
+            if (deQuence === undefined) {
+              return h('div', {}, html)
+            } else if (deQuence === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
-              return h('label', formatNumFilter(deQuence.count))
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: params.item.deQuence.count === undefined ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(deQuence.count))
+              html.push(textSpan)
+              return h('div', {}, html)
             }
           }
         },
         {
           title: '重试数',
           key: 'retry.count',
-          width: 100,
+          width: '10%',
           render: (h, params) => {
-            const retry = params.item.retry
-            const formatNumFilter = Vue.filter('formatNum')
-            return h('label', {
-              style: {
-                cursor: 'pointer',
-                color: '#3366FF'
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
               },
-              on: {
-                click: () => {
-                  this.$router.push({
-                    name: `/${this.$i18n.locale}/topic/detail`,
-                    query: {
-                      id: params.item.topic.code,
-                      app: getAppCode(params.item.app, params.item.subscribeGroup),
-                      topic: params.item.topic.code,
-                      namespace: params.item.namespace.code,
-                      tab: 'retry'
-                    }
-                  })
-                }
+              style: {
+                display: params.item.retry !== undefined ? 'none' : 'inline-block'
               }
-            }, retry === undefined ? 0 : formatNumFilter(retry.count))
+            })
+            html.push(spin)
+            let retry = params.item.retry
+            if (retry === undefined) {
+              return h('div', {}, html)
+            } else if (retry === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              let textSpan = h('label', {
+                style: {
+                  cursor: 'pointer',
+                  color: '#3366FF',
+                  position: 'relative',
+                  display: params.item.retry.count === undefined ? 'none' : 'inline-block'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      name: `/${this.$i18n.locale}/topic/detail`,
+                      query: {
+                        id: params.item.topic.code,
+                        app: getAppCode(params.item.app, params.item.subscribeGroup),
+                        topic: params.item.topic.code,
+                        namespace: params.item.namespace.code,
+                        tab: 'retry'
+                      }
+                    })
+                  }
+                }
+              }, formatNumFilter(retry.count))
+              html.push(textSpan)
+              return h('div', {}, html)
+            }
           }
         },
         {
           title: '消息类型',
           key: 'topicType',
+          width: '5%',
           render: (h, params) => {
             return topicTypeBtnRender(h, params.item.topicType)
           }
         },
         {
-          title: '禁止IP消费',
-          key: 'config.blackList',
-          render: (h, params) => {
-            const value = params.item.config ? params.item.config.blackList : ''
-            return h('d-tooltip', {
-              props: {
-                content: value
-              }
-            }, [h('div', {
-              attrs: {
-                style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
-              }
-            }, value)]
-            )
-          }
-        },
-        {
-          title: '过滤规则',
-          key: 'config.filters',
-          formatter (item) {
-            return item.config === undefined ? '' : item.config.filters
-          }
-        },
-        {
           title: '归档',
           key: 'config.archive',
+          width: '4%',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.archive)
           }
@@ -174,6 +266,7 @@ export default {
         {
           title: '消费状态',
           key: 'paused',
+          width: '5%',
           render: (h, params) => {
             let options = [
               {
@@ -193,9 +286,69 @@ export default {
         {
           title: '客户端类型',
           key: 'clientType',
+          width: '5%',
           render: (h, params) => {
             return clientTypeBtnRender(h, params.item.clientType)
           }
+        },
+        {
+          title: '禁止IP消费',
+          key: 'config.blackList',
+          width: '4%',
+          render: (h, params) => {
+            const value = params.item.config ? params.item.config.blackList : ''
+            return h('d-tooltip', {
+              props: {
+                content: value
+              }
+            }, [h('div', {
+              attrs: {
+                style: 'width: 50px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+              }
+            }, value)]
+            )
+          }
+        }
+      ],
+      btns: [
+        {
+          txt: '消费详情',
+          method: 'on-detail',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '配置',
+          method: 'on-config',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '取消订阅',
+          method: 'on-cancel-subscribe',
+          bindKey: 'canOperate',
+          bindVal: true,
+          isAdmin: 1
+        }
+      ],
+      operates: [
+        {
+          txt: '消息预览',
+          method: 'on-msg-preview',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '消息查询',
+          method: 'on-msg-detail',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '限流',
+          method: 'on-rateLimit',
+          bindKey: 'canOperate',
+          bindVal: true
         }
       ],
       // 订阅框

@@ -17,6 +17,7 @@ package org.joyqueue.service.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.ServiceException;
@@ -49,11 +50,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -309,5 +306,35 @@ public class TopicServiceImpl implements TopicService {
     @Override
     public PageResult<Topic> search(QPageQuery<QTopic> query) {
         return topicNameServerService.search(query);
+    }
+
+    @Override
+    public Set<String> findAppsByTopic(String namespace, String topicCode) {
+        Set<String> apps = new TreeSet<>();
+
+        List<org.joyqueue.model.domain.Producer> producers = null;
+        try {
+            producers = producerNameServerService.findByTopic(topicCode, namespace);
+        } catch (Exception e) {
+            logger.error("find producer by topic error. ", e);
+        }
+
+        if (NullUtil.isNotEmpty(producers)) {
+            producers.forEach(p -> apps.add(p.getApp().getCode()));
+        }
+
+        List<Consumer> consumers;
+        try {
+            consumers = consumerNameServerService.findByTopic(topicCode, namespace);
+        } catch (Exception e) {
+            logger.error("find consumer by topic error. ", e);
+            return apps;
+        }
+
+        if (CollectionUtils.isNotEmpty(consumers)) {
+            consumers.forEach(c -> apps.add(c.getApp().getCode()));
+        }
+
+        return apps;
     }
 }
