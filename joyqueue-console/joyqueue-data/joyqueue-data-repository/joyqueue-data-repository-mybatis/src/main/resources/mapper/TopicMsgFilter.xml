@@ -100,6 +100,9 @@
 
     <select id="findTopicMsgFiltersCountByQuery" parameterType="QPageQuery" resultType="int">
         SELECT COUNT(a.id) FROM topic_msg_filter a
+        <if test="query.admin == false">
+        WHERE a.create_by = #{query.userId}
+        </if>
     </select>
 
     <update id="update" parameterType="topicMsgFilter">
