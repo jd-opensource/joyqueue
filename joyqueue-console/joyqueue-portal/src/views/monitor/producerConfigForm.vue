@@ -20,7 +20,7 @@
       </grid-col>
     </grid-row>
     <d-form-item label="限制IP生产" prop="blackList">
-      <d-input type="textarea" rows="4" oninput="value = value.trim()" v-model="formData.blackList" placeholder="请输入要限制的IP，多个IP之间请用英文逗号隔开"/>
+      <d-input type="textarea" rows="4" v-model="formData.blackList" placeholder="请输入要限制的IP，多个IP之间请用英文逗号隔开"/>
     </d-form-item>
   </d-form>
 </template>
