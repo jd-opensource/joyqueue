@@ -101,7 +101,19 @@ public class HttpUtil {
         return url + uri;
     }
 
+    /**
+     * Use default request config
+     *
+     **/
     public static String request(HttpRequestBase request) {
+       return request(request,requestConfig);
+    }
+
+    /**
+     * @param requestConfig  custom request config
+     * @param request  request, Get/Put
+     **/
+    public static String request(HttpRequestBase request,RequestConfig requestConfig) {
         try {
             request.setConfig(requestConfig);
             try {
