@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input type="textarea" v-model="searchData.keyword" oninput="value = value.trim()" placeholder="请输入ID/IP" class="left mr10"
+      <d-input type="textarea" v-model="searchData.keyword" placeholder="请输入ID/IP" class="left mr10"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">&nbsp;ID/IP&nbsp;</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>

@@ -42,7 +42,7 @@
               </d-select>
             </d-form-item>
             <d-form-item label="申请描述：" prop="description">
-              <d-input type="textarea" rows="2" v-model="formData.description" oninput="value = value.trim()"
+              <d-input type="textarea" rows="2" v-model="formData.description"
                            placeholder="请输入申请描述，例如用途等" style="width: 70%"/>
             </d-form-item>
           </d-form>
