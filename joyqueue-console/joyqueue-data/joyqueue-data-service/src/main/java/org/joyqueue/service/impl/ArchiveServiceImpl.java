@@ -76,11 +76,15 @@ public class ArchiveServiceImpl implements ArchiveService {
             throw new ServiceException(ServiceException.BAD_REQUEST, "主题不能为空");
         }
 
-        if (LocalSession.getSession().getUser().getRole() == User.UserRole.ADMIN.value()) {
+        User user = LocalSession.getSession().getUser();
+        if (user.getRole() == User.UserRole.ADMIN.value()) {
             return;
         }
 
-        List<Application> userApps = applicationService.findByQuery(new ListQuery(new QApplication()));
+        QApplication qApplication = new QApplication();
+        qApplication.setUserId(user.getId());
+        qApplication.setAdmin(false);
+        List<Application> userApps = applicationService.findByQuery(new ListQuery(qApplication));
         if (NullUtil.isEmpty(userApps)) {
             throw new ServiceException(ServiceException.BAD_REQUEST, "尚未订阅主题，没有权限");
         }

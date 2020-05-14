@@ -1,5 +1,11 @@
 export default function bytesToSize (bytes, decimals = 2, isTotal = false) {
-  if (bytes === 0) return '0 Bytes'
+  if (bytes === 0) {
+    if (isTotal) {
+      return '0 Bytes'
+    } else {
+      return '0 Bytes/s'
+    }
+  }
   const k = 1024
   const dm = decimals < 0 ? 0 : decimals
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
