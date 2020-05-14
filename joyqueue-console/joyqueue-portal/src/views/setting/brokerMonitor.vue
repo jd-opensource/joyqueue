@@ -197,7 +197,7 @@ export default {
               var html = []
               if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
-                  var p = h('div', bytesToSize(list[i].totalSize))
+                  var p = h('div', bytesToSize(list[i].totalSize, 2, true))
                   html.push(p)
                 }
               }
