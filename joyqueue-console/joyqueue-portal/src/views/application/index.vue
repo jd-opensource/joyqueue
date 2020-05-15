@@ -179,7 +179,7 @@ export default {
     },
     sortData (data) {
       return data.sort((a, b) => sortByCode(a, b))
-    },
+    }
   },
   mounted () {
     this.getList()
