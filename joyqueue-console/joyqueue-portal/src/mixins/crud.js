@@ -81,6 +81,9 @@ export default {
           return
         }
         data.data = data.data || []
+        if (typeof (this.sortData) === 'function') {
+          data.data = this.sortData(data.data)
+        }
         data.pagination = data.pagination || {
           totalRecord: data.data.length
         }

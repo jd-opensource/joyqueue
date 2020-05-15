@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="headLine">
-      <d-input v-model="subscribeGroup" oninput="value = value.trim()" :placeholder="请输入订阅分组" class="input" @on-enter="getList">
+      <d-input v-model="subscribeGroup" oninput="value = value.trim()" placeholder="请输入订阅分组" class="input" @on-enter="getList">
         <span slot="prepend">订阅分组</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
@@ -78,7 +78,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import consumerConfigForm from './consumerConfigForm.vue'
 import subscribe from './subscribe.vue'
 import msgPreview from './msgPreview.vue'
-import {getAppCode, getTopicCode, replaceChartUrl} from '../../utils/common.js'
+import {getAppCode, getTopicCode, replaceChartUrl, sortByConsumer} from '../../utils/common.js'
 import MsgDetail from './msgDetail'
 import RateLimit from './rateLimit'
 import ButtonGroup from '../../components/button/button-group'
@@ -387,7 +387,7 @@ export default {
               url += '&'
             }
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-              getAppCode(item.app, item.subscribeGroup)
+                getAppCode(item.app, item.subscribeGroup)
             window.open(url)
           }
         })
@@ -427,7 +427,7 @@ export default {
               url += '&'
             }
             url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-              getAppCode(item.app, item.subscribeGroup)
+                getAppCode(item.app, item.subscribeGroup)
             window.open(url)
           }
         })
@@ -446,7 +446,7 @@ export default {
             url += '&'
           }
           url = url + 'var-topic=' + getTopicCode(item.topic, item.topic.namespace) + '&var-app=' +
-            getAppCode(item.app, item.subscribeGroup)
+              getAppCode(item.app, item.subscribeGroup)
           window.open(url)
         })
       }
@@ -505,9 +505,6 @@ export default {
       }).catch(() => {
       })
     },
-    isAdmin (item) {
-      return this.$store.getters.isAdmin
-    },
     addOrUpdateConfig () {
       apiRequest.post(this.configDialog.urls.addOrUpdate, {}, this.configConsumerData).then(() => {
         this.configDialog.visible = false
@@ -541,16 +538,14 @@ export default {
         }
       }
       apiRequest.post(this.urls.search, {}, data).then((data) => {
-        data.data = data.data || []
+        data.data = (data.data || []).sort((a, b) => sortByConsumer(a, b))
         data.pagination = data.pagination || {
           totalRecord: data.data.length
         }
         this.page.total = data.pagination.totalRecord
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
-        data.data.sort(function (a, b) {
-          return a.topic.code - b.topic.code
-        })
+
         if (data.data.length > this.page.size) {
           this.tableData.rowData = data.data.slice(0, this.page.size)
           this.curIndex = this.page.size - 1

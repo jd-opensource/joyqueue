@@ -60,8 +60,7 @@ export default {
       btnGroups: []
     },
     operationColumnWidth: {
-      type: Number,
-      default: undefined
+      type: Number
     },
     page: {
       page: 1,
