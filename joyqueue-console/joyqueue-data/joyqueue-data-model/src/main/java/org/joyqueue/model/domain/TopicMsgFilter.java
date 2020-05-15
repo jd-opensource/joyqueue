@@ -209,6 +209,33 @@ public class TopicMsgFilter extends BaseModel {
         this.objectKey = objectKey;
     }
 
+    @Override
+    public String toString() {
+        return "TopicMsgFilter{" +
+                "app='" + app + '\'' +
+                ", topic='" + topic + '\'' +
+                ", partition=" + partition +
+                ", filter='" + filter + '\'' +
+                ", msgFormat='" + msgFormat + '\'' +
+                ", queryCount=" + queryCount +
+                ", offset=" + offset +
+                ", offsetStartTime=" + offsetStartTime +
+                ", offsetEndTime=" + offsetEndTime +
+                ", objectKey='" + objectKey + '\'' +
+                ", status=" + status +
+                ", description='" + description + '\'' +
+                ", url='" + url + '\'' +
+                ", brokerAddr='" + brokerAddr + '\'' +
+                ", token='" + token + '\'' +
+                ", id=" + id +
+                ", createBy=" + createBy +
+                ", createTime=" + createTime +
+                ", updateBy=" + updateBy +
+                ", updateTime=" + updateTime +
+                ", status=" + status +
+                '}';
+    }
+
     public enum FilterStatus {
         ERROR(-2),
         FINISHED(-1),

@@ -136,6 +136,8 @@ CREATE TABLE IF NOT EXISTS `message_retry` (
 CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
  `topic_code` varchar(128) NOT NULL COMMENT '主题代码',
+ `app` varchar(128) NOT NULL COMMENT '应用',
+ `token` varchar(128) NOT NULL COMMENT 'token',
  `partition` int(11) NOT NULL default -1 COMMENT '分区',
  `filter` varchar(128) NOT NULL COMMENT '消息过滤条件',
  `msg_fmt` varchar(64) NOT NULL COMMENT '消息格式',
