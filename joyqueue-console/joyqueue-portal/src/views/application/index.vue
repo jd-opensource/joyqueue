@@ -30,6 +30,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import appAddForm from './appAddForm.vue'
 import crud from '../../mixins/crud.js'
 import viewLang from '../../i18n/views.json'
+import {sortByCode} from '../../utils/common.js'
 
 export default {
   name: 'application',
@@ -176,9 +177,9 @@ export default {
         name: `/${this.curLang}/application/detail`,
         query: {id: item.id, app: item.code}})
     },
-    isAdmin (item) {
-      return this.$store.getters.isAdmin
-    }
+    sortData (data) {
+      return data.sort((a, b) => sortByCode(a, b))
+    },
   },
   mounted () {
     this.getList()

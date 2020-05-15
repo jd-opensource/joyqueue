@@ -430,3 +430,122 @@ export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {
   }
   return url.replace(/\[namespace\]/g, namespaceCode).replace(/\[topic\]/g, topicCode).replace(/\[app\]/g, appFullName)
 }
+
+export function sortByProducer (p1, p2, desc, topicSortFirst) {
+  return sortBase(p1, p2, desc, (p1, p2) => {
+    let result
+    if (topicSortFirst) {
+      // compare topic code
+      result = sort(p1.topic.code, p2.topic.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      result = sort(p1.namespace.code, p2.namespace.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare app
+      return sort(p1.app.code, p2.app.code)
+    } else {
+      // compare app
+      result = sort(p1.app.code, p2.app.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare topic code
+      result = sort(p1.topic.code, p2.topic.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      return sort(p1.namespace.code, p2.namespace.code)
+    }
+  })
+}
+
+export function sortByConsumer (c1, c2, desc, topicSortFirst) {
+  return sortBase(c1, c2, desc, (c1, c2) => {
+    let result
+    if (topicSortFirst) {
+      // compare topic code
+      result = sort(c1.topic.code, c2.topic.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      result = sort(c1.namespace.code, c2.namespace.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare app
+      result = sort(c1.app.code, c2.app.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare subscribeGroup
+      return sort(c1.subscribeGroup, c2.subscribeGroup)
+    } else {
+      // compare app
+      result = sort(c1.app.code, c2.app.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare subscribeGroup
+      result = sort(c1.subscribeGroup, c2.subscribeGroup)
+      if (result !== 0) {
+        return result
+      }
+      // compare topic code
+      result = sort(c1.topic.code, c2.topic.code)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      return sort(c1.namespace.code, c2.namespace.code)
+    }
+  })
+}
+
+export function sortByTopic (t1, t2, desc) {
+  return sortBase(t1, t2, desc, (t1, t2) => {
+    let result
+    // compare topic code
+    result = sort(t1.code, t2.code)
+    if (result !== 0) {
+      return result
+    }
+    // compare namespace
+    result = sort(t1.namespace.code, t2.namespace.code)
+    if (result !== 0) {
+      return result
+    }
+  })
+}
+
+export function sortByCode (t1, t2, desc) {
+  return sortBase(t1, t2, desc, (t1, t2) => {
+    // compare code
+    return sort(t1.code, t2.code)
+  })
+}
+
+export function sort (a, b, desc) {
+  return sortBase(a, b, desc, (a, b) => {
+    return desc ? ((b > a) ? 1 : (b < a) ? -1 : 0) : ((b > a) ? -1 : (b < a) ? 1 : 0)
+  })
+}
+
+export function sortBase (a, b, desc, sameSortFunc) {
+  if (a && !b) {
+    return desc ? -1 : 1
+  }
+  if (!a && b) {
+    return desc ? 1 : -1
+  }
+  if (!a && !b) {
+    return 0
+  }
+
+  return sameSortFunc(a, b, desc)
+}
