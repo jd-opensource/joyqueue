@@ -136,6 +136,10 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
         } catch (Exception e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
             return JoyQueueCode.CN_UNKNOWN_ERROR;
+        }finally {
+            if(dataList.size()>0){
+                consume.releasePartition(topic,app,partition);
+            }
         }
     }
 
