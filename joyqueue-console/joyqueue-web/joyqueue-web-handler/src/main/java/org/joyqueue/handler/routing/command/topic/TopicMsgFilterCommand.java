@@ -32,6 +32,7 @@ import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.ApplicationToken;
+import org.joyqueue.model.domain.Consumer;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.TopicMsgFilter;
 import org.joyqueue.model.domain.User;
@@ -93,7 +94,6 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
 
     @Path("validateAppToken")
     public Response validateAppToken(@QueryParam("app") String app, @QueryParam("topic") String topic,@QueryParam("token") String token) throws Exception {
-        List<String> apps;
         String subscribeGroup ="";
         if (app.contains(".")) {
             int idx = app.indexOf('.');
@@ -102,17 +102,8 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         }
         try {
             TopicName topicName = TopicName.parse(topic);
-            final String subscribeGp = subscribeGroup;
-            final String appCode = app;
-            apps = consumerService.findByTopic(topicName.getCode(), topicName.getNamespace()).stream()
-                    .filter(consumer -> {
-                        if (StringUtils.isNotBlank(subscribeGp)) {
-                            return subscribeGp.equals(consumer.getSubscribeGroup());
-                        }
-                        return true;
-                    }).filter(consumer -> appCode.equals(consumer.getApp().getCode()))
-                    .map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
-            if (apps.contains(app)) {
+            Consumer consumer = consumerService.findByTopicAppGroup(topicName.getNamespace(), topicName.getCode(), app, subscribeGroup);
+            if (consumer != null) {
                 List<ApplicationToken> appTokens = applicationTokenService.findByApp(app);
                 if (CollectionUtils.isNotEmpty(appTokens)) {
                     Date date = new Date();
