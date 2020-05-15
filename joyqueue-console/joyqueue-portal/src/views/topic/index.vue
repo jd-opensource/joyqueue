@@ -46,7 +46,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import addBrokerGroup from './addBrokerGroup.vue'
 import topicForm from './topicForm.vue'
 import crud from '../../mixins/crud.js'
-import {basePrimaryBtnRender} from '../../utils/common.js'
+import {basePrimaryBtnRender, sortByTopic} from '../../utils/common.js'
 
 export default {
   name: 'topic',
@@ -201,6 +201,9 @@ export default {
     goDetail (item) {
       this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
         query: { id: item.id, topic: item.code, namespace: item.namespace.code }})
+    },
+    sortData (data) {
+      return data.sort((a, b) => sortByTopic(a, b))
     },
     addBrokerGroup (item) {
       this.openDialog('addBrokerGroupDialog')

@@ -58,7 +58,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import subscribe from './subscribe.vue'
 import ProducerConfigForm from './producerConfigForm.vue'
 import ProducerWeightForm from './producerWeightForm.vue'
-import {getTopicCode, replaceChartUrl} from '../../utils/common.js'
+import {getTopicCode, replaceChartUrl, sortByProducer} from '../../utils/common.js'
 import RateLimit from './rateLimit'
 import ProducerSendMessageForm from './producerSendMessageForm'
 import ButtonGroup from '../../components/button/button-group'
@@ -387,9 +387,6 @@ export default {
         })
       }
     },
-    isAdmin (item) {
-      return this.$store.getters.isAdmin
-    },
     getMonitor (row, index) {
       let data = {
         topic: {
@@ -437,16 +434,13 @@ export default {
         }
       }
       apiRequest.post(this.urls.search, {}, data).then((data) => {
-        data.data = data.data || []
+        data.data = (data.data || []).sort((a, b) => sortByProducer(a, b))
         data.pagination = data.pagination || {
           totalRecord: data.data.length
         }
         this.page.total = data.pagination.totalRecord
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
-        data.data.sort(function (a, b) {
-          return a.topic.code - b.topic.code
-        })
         if (data.data.length > this.page.size) {
           this.tableData.rowData = data.data.slice(0, this.page.size)
           this.curIndex = this.page.size - 1
