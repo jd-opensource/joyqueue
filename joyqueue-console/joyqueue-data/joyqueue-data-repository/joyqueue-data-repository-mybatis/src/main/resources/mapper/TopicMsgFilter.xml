@@ -7,6 +7,8 @@
 
     <resultMap id="baseResultMap" type="TopicMsgFilter">
         <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="app" column="app" jdbcType="VARCHAR"/>
+        <result property="token" column="token" jdbcType="VARCHAR"/>
         <result property="topic" column="topic_code" jdbcType="VARCHAR"/>
         <result property="partition" column="partition" jdbcType="INTEGER"/>
         <result property="filter" column="filter" jdbcType="VARCHAR"/>
@@ -27,6 +29,8 @@
 
     <sql id="baseColumn">
         a.`id`,
+        a.`app`,
+        a.`token`,
         a.`topic_code` AS topic,
         a.`partition`,
         a.`filter`,
@@ -46,6 +50,8 @@
 
     <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="TopicMsgFilter">
         INSERT INTO topic_msg_filter(
+            `app`,
+            `token`,
             `topic_code`,
             `filter`,
             `partition`,
@@ -61,6 +67,8 @@
             `status`,
             `url`)
         VALUES(
+            #{app},
+            #{token},
             #{topic},
             #{filter},
             #{partition},
@@ -109,6 +117,12 @@
         UPDATE
             `topic_msg_filter`
         SET
+            <if test="app!=null">
+            `app` = #{app},
+            </if>
+            <if test="token!=null">
+            `token` = #{token},
+            </if>
             <if test="topic!=null">
             `topic_code` = #{topic},
             </if>

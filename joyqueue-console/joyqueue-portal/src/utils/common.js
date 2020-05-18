@@ -431,7 +431,7 @@ export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {
   return url.replace(/\[namespace\]/g, namespaceCode).replace(/\[topic\]/g, topicCode).replace(/\[app\]/g, appFullName)
 }
 
-export function sortByProducer (p1, p2, desc, topicSortFirst) {
+export function consuemrsortByProducer (p1, p2, desc, topicSortFirst) {
   return sortBase(p1, p2, false, desc, (p1, p2) => {
     let result
     if (topicSortFirst) {
