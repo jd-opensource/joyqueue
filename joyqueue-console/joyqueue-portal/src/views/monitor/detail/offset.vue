@@ -49,9 +49,8 @@ import MyTable from '../../../components/common/myTable'
 import apiRequest from '../../../utils/apiRequest.js'
 import crud from '../../../mixins/crud.js'
 import myDialog from '../../../components/common/myDialog.vue'
-import {getTopicCode, getAppCode} from '../../../utils/common.js'
+import {getTopicCode, getAppCode, bytesToSize} from '../../../utils/common.js'
 import {timeStampToString} from '../../../utils/dateTimeUtils'
-import bytesToSize from '../../../utils/byteUtils'
 
 export default {
   name: 'offset',

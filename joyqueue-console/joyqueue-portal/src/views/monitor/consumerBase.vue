@@ -32,7 +32,7 @@
     </d-button>
 
     <!--Consumer subscribe dialog-->
-    <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
+    <my-dialog :dialog="subscribeDialog" class="maxDialogHeight" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
                  :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
                  :keywordName="keywordName" @on-refresh="getList"/>
@@ -614,4 +614,7 @@ export default {
   .label{text-align: right; line-height: 32px;}
   .val{}
   .load-btn { margin-right: 50px;margin-top: -100px;position: relative}
+  .maxDialogHeight /deep/ .dui-dialog__body {
+    height: 650px;
+  }
 </style>

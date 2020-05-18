@@ -431,7 +431,7 @@ export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {
   return url.replace(/\[namespace\]/g, namespaceCode).replace(/\[topic\]/g, topicCode).replace(/\[app\]/g, appFullName)
 }
 
-export function consuemrsortByProducer (p1, p2, desc, topicSortFirst) {
+export function sortByProducer (p1, p2, desc, topicSortFirst) {
   return sortBase(p1, p2, false, desc, (p1, p2) => {
     let result
     if (topicSortFirst) {
@@ -553,4 +553,67 @@ export function sortBase (a, b, ignoreCase, desc, sameSortFunc) {
   }
 
   return sameSortFunc(a, b, desc)
+}
+
+export function bytesToSize (bytes, decimals = 2, isTotal = false) {
+  if (bytes === 0) {
+    if (isTotal) {
+      return '0 Bytes'
+    } else {
+      return '0 Bytes/s'
+    }
+  }
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  let flowRate = parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+  if (!isTotal) {
+    return flowRate + '/s'
+  }
+  return flowRate
+}
+
+export function mergePartitionGroup (group) {
+  group.sort((v1, v2) => v1 - v2)
+  let allList = []
+  let tmpList = []
+  if (group.length >= 0) {
+    tmpList.push(group[0])
+  }
+  if (group.length === 1) {
+    allList.push(tmpList)
+  }
+  for (let i = 1; i < group.length; i++) {
+    if (group[i] - group[i - 1] !== 1) {
+      if (tmpList.indexOf(group[i - 1]) === -1) {
+        tmpList.push(group[i - 1])
+      }
+      let list = []
+      Object.assign(list, tmpList)
+      allList.push(list)
+      tmpList = []
+      tmpList.push(group[i])
+    }
+    if (i === group.length - 1) {
+      if (tmpList.indexOf(group[i]) === -1) {
+        tmpList.push(group[i])
+      }
+      allList.push(tmpList)
+    }
+  }
+  let groupStr = ''
+  for (let i in allList) {
+    if (groupStr !== '') {
+      groupStr += ','
+    }
+    if (allList.hasOwnProperty(i)) {
+      if (allList[i].length > 1) {
+        groupStr += '[' + allList[i][0] + '-' + allList[i][allList[i].length - 1] + ']'
+      } else if (allList[i].length === 1) {
+        groupStr += '[' + allList[i][0] + ']'
+      }
+    }
+  }
+  return groupStr
 }

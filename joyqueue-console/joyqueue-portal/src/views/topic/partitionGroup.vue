@@ -22,11 +22,11 @@
       <group-detail ref='groupDetail' :data="groupDetailDialogData"></group-detail>
     </my-dialog>
     <!--添加节点-->
-    <my-dialog :dialog="groupScaleDialog" @on-dialog-confirm="groupScaleConfirm()" @on-dialog-cancel="groupScaleCancel()" >
+    <my-dialog class="maxDialogHeight" :dialog="groupScaleDialog" @on-dialog-confirm="groupScaleConfirm()" @on-dialog-cancel="groupScaleCancel()" >
       <group-scale ref='groupScale' :data="groupScaleDialogData"></group-scale>
     </my-dialog>
     <!--移除节点-->
-    <my-dialog :dialog="groupMergeDialog" @on-dialog-confirm="groupMergeConfirm()" @on-dialog-cancel="groupMergeCancel()"  >
+    <my-dialog class="maxDialogHeight" :dialog="groupMergeDialog" @on-dialog-confirm="groupMergeConfirm()" @on-dialog-cancel="groupMergeCancel()"  >
       <group-merge ref='groupMerge' :data="groupMergeDialogData"></group-merge>
     </my-dialog>
     <!--主从同步-->
@@ -63,7 +63,7 @@ import GroupPosition from './groupPosition.vue'
 import groupMerge from './groupMerge.vue'
 import groupNew from './groupNew.vue'
 import crud from '../../mixins/crud.js'
-import mergePartitionGroup from '../../utils/partitionGroupUtils'
+import {mergePartitionGroup} from '../../utils/common'
 
 export default {
   name: 'partitionGroup',
@@ -449,4 +449,7 @@ export default {
 <style scoped>
   .label{text-align: right; line-height: 32px;}
   .val{}
+  .maxDialogHeight /deep/ .dui-dialog__body {
+    height: 650px;
+  }
 </style>

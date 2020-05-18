@@ -86,7 +86,7 @@ import BrokerConnectionMonitor from './brokerConnectionMonitor'
 import BrokerPartitionGroupMonitor from './brokerPartitionGroupMonitor'
 import BrokerServerMonitor from './brokerServerMonitor.vue'
 import BrokerStoreTreeViewMonitor from './brokerStoreTreeViewMonitor.vue'
-import bytesToSize from '../../utils/byteUtils'
+import {bytesToSize} from '../../utils/common'
 import GridRow from '../../components/grid/row'
 import GridCol from '../../components/grid/col'
 

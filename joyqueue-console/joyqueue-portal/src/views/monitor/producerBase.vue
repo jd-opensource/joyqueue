@@ -24,7 +24,7 @@
     </d-button>
 
     <!--生产订阅弹出框-->
-    <my-dialog :dialog="subscribeDialog" @on-dialog-cancel="dialogCancel('subscribeDialog')">
+    <my-dialog :dialog="subscribeDialog" class="maxDialogHeight" @on-dialog-cancel="dialogCancel('subscribeDialog')">
       <subscribe ref="subscribe" :search="search" :type="type" :colData="subscribeDialog.colData"
                  :keywordName="keywordName" :searchUrl="subscribeDialog.urls.search" :addUrl="subscribeDialog.urls.add"
                  @on-refresh="getList"/>
@@ -496,4 +496,7 @@ export default {
   .label{text-align: right; line-height: 32px;}
   .val{}
   .load-btn { margin-right: 50px;margin-top: -100px;position: relative}
+  .maxDialogHeight /deep/ .dui-dialog__body {
+    height: 650px;
+  }
 </style>
