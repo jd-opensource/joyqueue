@@ -156,7 +156,7 @@ public class StoreCleanManager extends Service {
                                             LOG.info("Begin store clean topic: <{}>, partition group: <{}>, partition ack map: <{}>",
                                                     topicConfig.getName().getFullName(), partitionGroup.getGroup(), partitionAckMap);
                                         }
-                                        roundDeleteStoreSize = cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
+                                        roundDeleteStoreSize += cleaningStrategy.deleteIfNeeded(storeService.getStore(topicConfig.getName().getFullName(), partitionGroup.getGroup()), partitionAckMap);
                                     }
                                 }
                             } catch (Throwable t) {
