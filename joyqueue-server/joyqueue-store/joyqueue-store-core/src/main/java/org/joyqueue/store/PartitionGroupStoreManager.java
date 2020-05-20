@@ -345,6 +345,30 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         }
         return indexPosition;
     }
+    private long recoverReplicationPosition() {
+        try {
+            File checkpointFile =  new File(base, CHECKPOINT_FILE);
+            if(checkpointFile.isFile()) {
+                byte[] serializedData = new byte[(int) checkpointFile.length()];
+                try (FileInputStream fis = new FileInputStream(checkpointFile)) {
+                    if (serializedData.length != fis.read(serializedData)) {
+                        throw new IOException("File length not match!");
+                    }
+                }
+                String jsonString = new String(serializedData, StandardCharsets.UTF_8);
+                Checkpoint checkpoint = JSON.parseObject(jsonString, Checkpoint.class);
+                if(checkpoint.getVersion() >= Checkpoint.REPLICATION_POSITION_START_VERSION) {
+                    logger.info("Replication position recovered from the Checkpoint file: {}.", checkpoint.getReplicationPosition());
+                    return checkpoint.getReplicationPosition();
+                }
+            } else {
+                logger.info("Checkpoint file is NOT found, continue recover...");
+            }
+        } catch (Throwable t) {
+            logger.warn("Recover checkpoint exception, continue recover...", t);
+        }
+        return indexPosition;
+    }
 
     /**
      * @return 返回需要重建索引的第一条消息偏移量
@@ -1132,7 +1156,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         }
     }
     private void flushCheckpoint() throws IOException {
-        Checkpoint checkpoint = new Checkpoint(indexPosition, partitionMap.entrySet().stream()
+        Checkpoint checkpoint = new Checkpoint(indexPosition, replicationPosition, partitionMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().store.right() / IndexItem.STORAGE_SIZE)));
         byte [] serializedData = JSON.toJSONString(checkpoint,
                 SerializerFeature.PrettyFormat, SerializerFeature.DisableCircularReferenceDetect).getBytes(StandardCharsets.UTF_8);
