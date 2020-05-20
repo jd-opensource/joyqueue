@@ -377,7 +377,9 @@
         <route inherit="post"
                path="/v1/monitor/find/partitionGroupDetailForTopicApp" handlers="brokerMonitor#findMonitorOnPartitionGroupDetailForTopicApp render"
                errors="error"/>
-
+        <route inherit="get"
+               path="/v1/monitor/broker/findBrokerDetail/:brokerId" handlers="brokerMonitor#findBrokerDetail render"
+               errors="error"/>
         <route inherit="post"
                path="/v1/monitor/find/broker" handlers="brokerMonitor#findOnBroker render"
                errors="error"/>
