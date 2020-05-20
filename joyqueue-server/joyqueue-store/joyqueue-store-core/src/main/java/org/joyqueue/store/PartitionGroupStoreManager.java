@@ -126,7 +126,6 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         if (!base.isDirectory()) {
             throw new StoreInitializeException(String.format("Partition group directory: %s not available!", base.getAbsolutePath()));
         }
-        this.replicationPosition = store.flushPosition();
         term = getMaxTerm(store);
 
         this.writeLoopThread = LoopThread.builder()
@@ -176,6 +175,16 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
             logger.info("Recovering message store {}...", base.getAbsolutePath());
             store.recover();
+            long recoveredReplicationPosition = recoverReplicationPosition();
+            if (recoveredReplicationPosition >= 0 && recoveredReplicationPosition < store.right()) {
+               this.replicationPosition = recoveredReplicationPosition;
+                logger.info("Replication recovered: {}, store: {}.", recoveredReplicationPosition,  base.getAbsolutePath());
+            } else {
+                logger.warn("Replication recover failed, using store right position: {} insteaed, store: {}!",
+                        recoveredReplicationPosition,
+                        base.getAbsolutePath());
+                this.replicationPosition = store.right();
+            }
             resetLastEntryTerm();
             logger.info("Recovering index store {}...", base.getAbsolutePath());
             indexPosition = recoverPartitions();
@@ -345,6 +354,12 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         }
         return indexPosition;
     }
+
+    /**
+     * 从CheckPoint文件中恢复提交位置。
+     *
+     * @return 恢复成功返回提交位置，恢复失败返回-1.
+     */
     private long recoverReplicationPosition() {
         try {
             File checkpointFile =  new File(base, CHECKPOINT_FILE);
@@ -367,7 +382,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         } catch (Throwable t) {
             logger.warn("Recover checkpoint exception, continue recover...", t);
         }
-        return indexPosition;
+        return -1L;
     }
 
     /**
