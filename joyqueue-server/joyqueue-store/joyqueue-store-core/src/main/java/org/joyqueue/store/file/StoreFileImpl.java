@@ -197,6 +197,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         try {
             fileChannel.position(0);
             fileChannel.write(timeBuffer);
+        } catch (ClosedByInterruptException ignored) {
         } catch (Exception e) {
             logger.warn("Exception:", e);
         } finally {

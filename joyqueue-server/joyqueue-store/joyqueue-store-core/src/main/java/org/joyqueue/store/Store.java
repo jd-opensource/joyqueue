@@ -47,28 +47,11 @@ import java.util.stream.Collectors;
  * Date: 2018/8/13
  * <p>
  * root                            # 数据文件根目录
- * ├── metadata                    # 元数据，目前只存放brokerId
  * ├── lock                        # 进程锁目录，避免多进程同时操作导致数据损坏
- * │   └── 112334                  # 当前持有锁的进程的PID
  * └── topics                      # 所有topic目录，子目录就是topic名称
- * ├── coupon                  # topic coupon
- * └── order                   # topic order
- * ├── 1                   # topic group
- * │   ├── checkpoint      # 检查点文件
- * │   ├── index           # 索引文件目录，每个子目录为partition，目录名称就是partitionId
- * │   │   ├── 3           # partition 3，目录下的文件为该partition的索引文件
- * │   │   │   ├── 1048576 # 索引文件，固定文件长度，文件名为文件记录的第一条消息索引在Partition中的序号。
- * │   │   │   └── 2097152
- * │   │   ├── 4
- * │   │   └── 5
- * │   ├── 0               # 消息日志文件
- * │   ├── 134217728
- * │   └── 268435456
- * ├── tx                  # 事务消息目录，存放未提交的事务消息
- * │   ├── 0
- * │   ├── 1
- * │   └── 2
- * └── subscription        # 订阅文件，记录所有订阅和消费指针
+ *     ├── coupon                  # topic coupon
+ *     └── order                   # topic order
+ *         └── 1                   # partition group 1
  */
 public class Store extends Service implements StoreService, Closeable, PropertySupplierAware {
 
