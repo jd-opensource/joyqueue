@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.Future;
@@ -65,9 +66,10 @@ public class StoreServiceTest {
     }
 
     @After
-    public void destroyStore() {
+    public void destroyStore() throws IOException {
         if (null != store) {
             store.stop();
+            store.close();
             store.physicalDelete();
         }
     }
