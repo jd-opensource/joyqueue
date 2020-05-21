@@ -792,8 +792,6 @@ public class PartitionGroupStoreManagerTest {
         short partition = 4;
         List<ByteBuffer> messages = MessageUtils.build(count, 1024);
 
-        long length = messages.stream().mapToInt(Buffer::remaining).sum();
-
         final EventFuture<WriteResult> future = new EventFuture<>();
 
         store.asyncWrite(QosLevel.PERSISTENCE, future, messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
