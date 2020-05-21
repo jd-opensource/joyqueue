@@ -22,8 +22,7 @@ import partition from './partition.vue'
 import clientConnection from './clientConnection.vue'
 import broker from './broker.vue'
 import partitionExpand from './partitionExpand'
-import bytesToSize from '../../../utils/byteUtils'
-import mergePartitionGroup from '../../../utils/partitionGroupUtils'
+import {bytesToSize, mergePartitionGroup} from '../../../utils/common'
 
 export default {
   name: 'producer-detail',

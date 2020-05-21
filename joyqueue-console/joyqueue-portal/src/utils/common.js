@@ -430,3 +430,190 @@ export function replaceChartUrl (url, namespaceCode, topicCode, appFullName) {
   }
   return url.replace(/\[namespace\]/g, namespaceCode).replace(/\[topic\]/g, topicCode).replace(/\[app\]/g, appFullName)
 }
+
+export function sortByProducer (p1, p2, desc, topicSortFirst) {
+  return sortBase(p1, p2, false, desc, (p1, p2) => {
+    let result
+    if (topicSortFirst) {
+      // compare topic code
+      result = sort(p1.topic.code, p2.topic.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      result = sort(p1.namespace.code, p2.namespace.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare app
+      return sort(p1.app.code, p2.app.code, true)
+    } else {
+      // compare app
+      result = sort(p1.app.code, p2.app.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare topic code
+      result = sort(p1.topic.code, p2.topic.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      return sort(p1.namespace.code, p2.namespace.code, true)
+    }
+  })
+}
+
+export function sortByConsumer (c1, c2, desc, topicSortFirst) {
+  return sortBase(c1, c2, false, desc, (c1, c2) => {
+    let result
+    if (topicSortFirst) {
+      // compare topic code
+      result = sort(c1.topic.code, c2.topic.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      result = sort(c1.namespace.code, c2.namespace.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare app
+      result = sort(c1.app.code, c2.app.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare subscribeGroup
+      return sort(c1.subscribeGroup, c2.subscribeGroup, true)
+    } else {
+      // compare app
+      result = sort(c1.app.code, c2.app.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare subscribeGroup
+      result = sort(c1.subscribeGroup, c2.subscribeGroup, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare topic code
+      result = sort(c1.topic.code, c2.topic.code, true)
+      if (result !== 0) {
+        return result
+      }
+      // compare namespace
+      return sort(c1.namespace.code, c2.namespace.code, true)
+    }
+  })
+}
+
+export function sortByTopic (t1, t2, desc) {
+  return sortBase(t1, t2, false, desc, (t1, t2) => {
+    let result
+    // compare topic code
+    result = sort(t1.code, t2.code, true)
+    if (result !== 0) {
+      return result
+    }
+    // compare namespace
+    result = sort(t1.namespace.code, t2.namespace.code, true)
+    if (result !== 0) {
+      return result
+    }
+  })
+}
+
+export function sortByCode (t1, t2, desc) {
+  return sortBase(t1, t2, false, desc, (t1, t2) => {
+    // compare code
+    return sort(t1.code, t2.code, true)
+  })
+}
+
+export function sort (a, b, ignoreCase, desc) {
+  return sortBase(a, b, ignoreCase, desc, (a, b) => {
+    return desc ? ((b > a) ? 1 : (b < a) ? -1 : 0) : ((b > a) ? -1 : (b < a) ? 1 : 0)
+  })
+}
+
+export function sortBase (a, b, ignoreCase, desc, sameSortFunc) {
+  if (a && !b) {
+    return desc ? -1 : 1
+  }
+  if (!a && b) {
+    return desc ? 1 : -1
+  }
+  if (!a && !b) {
+    return 0
+  }
+
+  if (ignoreCase) {
+    a = a.toLowerCase()
+    b = b.toLowerCase()
+  }
+
+  return sameSortFunc(a, b, desc)
+}
+
+export function bytesToSize (bytes, decimals = 2, isTotal = false) {
+  if (bytes === 0) {
+    if (isTotal) {
+      return '0 Bytes'
+    } else {
+      return '0 Bytes/s'
+    }
+  }
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  let flowRate = parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+  if (!isTotal) {
+    return flowRate + '/s'
+  }
+  return flowRate
+}
+
+export function mergePartitionGroup (group) {
+  group.sort((v1, v2) => v1 - v2)
+  let allList = []
+  let tmpList = []
+  if (group.length >= 0) {
+    tmpList.push(group[0])
+  }
+  if (group.length === 1) {
+    allList.push(tmpList)
+  }
+  for (let i = 1; i < group.length; i++) {
+    if (group[i] - group[i - 1] !== 1) {
+      if (tmpList.indexOf(group[i - 1]) === -1) {
+        tmpList.push(group[i - 1])
+      }
+      let list = []
+      Object.assign(list, tmpList)
+      allList.push(list)
+      tmpList = []
+      tmpList.push(group[i])
+    }
+    if (i === group.length - 1) {
+      if (tmpList.indexOf(group[i]) === -1) {
+        tmpList.push(group[i])
+      }
+      allList.push(tmpList)
+    }
+  }
+  let groupStr = ''
+  for (let i in allList) {
+    if (groupStr !== '') {
+      groupStr += ','
+    }
+    if (allList.hasOwnProperty(i)) {
+      if (allList[i].length > 1) {
+        groupStr += '[' + allList[i][0] + '-' + allList[i][allList[i].length - 1] + ']'
+      } else if (allList[i].length === 1) {
+        groupStr += '[' + allList[i][0] + ']'
+      }
+    }
+  }
+  return groupStr
+}

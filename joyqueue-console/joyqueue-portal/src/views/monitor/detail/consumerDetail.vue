@@ -49,8 +49,7 @@ import offset from './offset'
 import broker from './broker.vue'
 import detailTable from './detailTable'
 import coordinatorGroupMember from './coordinatorGroupMember.vue'
-import bytesToSize from '../../../utils/byteUtils'
-import mergePartitionGroup from '../../../utils/partitionGroupUtils'
+import {bytesToSize, mergePartitionGroup} from '../../../utils/common'
 
 export default {
   name: 'consumerDetail',

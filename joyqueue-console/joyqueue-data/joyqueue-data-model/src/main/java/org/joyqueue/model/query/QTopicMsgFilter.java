@@ -30,6 +30,10 @@ public class QTopicMsgFilter extends QKeyword {
 
     private Integer partition;
 
+    private String app;
+
+    private String token;
+
     /**
      * 搜索的topic
      */
@@ -138,5 +142,21 @@ public class QTopicMsgFilter extends QKeyword {
 
     public void setOffset(long offset) {
         this.offset = offset;
+    }
+
+    public String getApp() {
+        return app;
+    }
+
+    public void setApp(String app) {
+        this.app = app;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

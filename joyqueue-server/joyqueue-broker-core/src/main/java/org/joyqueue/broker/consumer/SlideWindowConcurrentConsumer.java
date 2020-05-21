@@ -354,7 +354,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                     // 1. 这两批消息在分区上的索引序号必须是连续的，中间不能有间隔；
                     // 2. 第一批消息的第一条消息，索引序号必须等于上面调用readMessages方法参数中的pullIndex
 
-                    if(pullIndex == pullMessageStartIndex) {
+                    if(filteredMessageStartIndex == -1L || pullMessageStartIndex < filteredMessageStartIndex) {
                         int msgCount = count(pullMessages);
 
                         // 检查二段消息是否连续
@@ -366,7 +366,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                                             Format.formatWithComma(pullIndex),
                                             Format.formatWithComma(pullMessageStartIndex),
                                             Format.formatWithComma(filteredMessageStartIndex),
-                                            consumer.getType(),
+                                            consumer.getTopic(),
                                             partition),
                                     CONSUME_POSITION_UPDATE_ERROR.getCode()
                             );
@@ -398,7 +398,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                         if (msgCount > 0) {
                             break;
                         }
-                    } else if (pullIndex == filteredMessageStartIndex) {
+                    } else {
                         int filterMessageCount = count(filteredMessages);
 
                         // 检查二段消息是否连续
@@ -410,7 +410,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                                             Format.formatWithComma(pullIndex),
                                             Format.formatWithComma(pullMessageStartIndex),
                                             Format.formatWithComma(filteredMessageStartIndex),
-                                            consumer.getType(),
+                                            consumer.getTopic(),
                                             partition),
                                     CONSUME_POSITION_UPDATE_ERROR.getCode()
                             );
@@ -444,18 +444,6 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                             break;
                         }
 
-                    } else {
-                        // 不应该走到这儿，除非是Bug了。
-                        throw new JoyQueueException(
-                                String.format("Index not match, pullIndex: %s, pullMessageStartIndex: %s, " +
-                                        "filteredMessageStartIndex: %s, topic: %s, partition: %d!",
-                                        Format.formatWithComma(pullIndex),
-                                        Format.formatWithComma(pullMessageStartIndex),
-                                        Format.formatWithComma(filteredMessageStartIndex),
-                                        consumer.getType(),
-                                        partition),
-                                CONSUME_POSITION_UPDATE_ERROR.getCode()
-                        );
                     }
                 } finally {
                     slideWindow.getAppendLock().unlock();

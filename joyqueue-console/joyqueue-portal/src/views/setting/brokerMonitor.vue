@@ -86,7 +86,7 @@ import BrokerConnectionMonitor from './brokerConnectionMonitor'
 import BrokerPartitionGroupMonitor from './brokerPartitionGroupMonitor'
 import BrokerServerMonitor from './brokerServerMonitor.vue'
 import BrokerStoreTreeViewMonitor from './brokerStoreTreeViewMonitor.vue'
-import bytesToSize from '../../utils/byteUtils'
+import {bytesToSize} from '../../utils/common'
 import GridRow from '../../components/grid/row'
 import GridCol from '../../components/grid/col'
 
@@ -197,7 +197,7 @@ export default {
               var html = []
               if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
-                  var p = h('div', bytesToSize(list[i].totalSize))
+                  var p = h('div', bytesToSize(list[i].totalSize, 2, true))
                   html.push(p)
                 }
               }

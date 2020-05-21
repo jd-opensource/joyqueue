@@ -208,6 +208,10 @@ public class BrokerServiceImpl implements BrokerService {
                 qPageQuery.getQuery().setKeyword("");
             }
             String[] keywords = qPageQuery.getQuery().getKeyword().split("[,\n]");
+            if (keywords.length != 1) {
+                keywords = Arrays.stream(keywords)
+                        .filter(StringUtils::isNotBlank).toArray(String[]::new);
+            }
             Set<Broker> brokers = new HashSet<>();
             PageResult<Broker> pageResult = new PageResult<>();
             for (String keyword : keywords) {

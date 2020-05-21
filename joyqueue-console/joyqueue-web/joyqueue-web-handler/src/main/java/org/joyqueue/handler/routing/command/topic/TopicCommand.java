@@ -116,7 +116,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
     public Response getById(@Body Topic model) {
         try {
             Topic topic = service.findById(model.getId());
-            List<Broker> brokers = brokerService.findByTopic(topic.getCode());
+            List<Broker> brokers = brokerService.findByTopic(topic.getId());
             if (CollectionUtils.isEmpty(brokers)) {
                 brokers = Collections.emptyList();
             }

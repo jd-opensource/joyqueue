@@ -113,6 +113,10 @@ export default {
     // 查询
     getList () {
       // 1. 查询数据库里的数据
+      if (this.searchData.group && this.searchData.keyword) {
+        this.$Message.error('查询关键字和broker分组不能同时输入')
+        return
+      }
       this.showTablePin = true
       let data = {
         pagination: {

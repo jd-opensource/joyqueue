@@ -94,7 +94,7 @@ public interface Identifier {
                         if (!Character.isLetter(ch)) {
                             return false;
                         }
-                    } else if (!Character.isLetterOrDigit(ch) && ch != '_' && ch != '.') {
+                    } else if (!Character.isLetterOrDigit(ch) && ch != '_' && ch != '.' && ch != '-') {
                         return false;
                     }
                 }

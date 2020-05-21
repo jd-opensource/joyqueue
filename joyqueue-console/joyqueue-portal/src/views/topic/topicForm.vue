@@ -13,9 +13,14 @@
               <d-input v-model="formData.code" oninput="value = value.trim()" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="命名空间：" prop="namespace">
-              <d-select v-model="formData.namespace.code" style="width: 50%">
-                <d-option v-for="item in namespaceList" :value="item.code" :key="item.code"></d-option>
-              </d-select>
+              <d-autocomplete
+                class="inline-input"
+                v-model="formData.namespace.code"
+                :fetch-suggestions="searchNamespace"
+                placeholder="请输入内容"
+                style="width: 50%"
+                @select="handleNamespaceSelect"
+              ></d-autocomplete>
             </d-form-item>
             <d-form-item label="主题类型：" prop="type">
               <d-select v-model="formData.type" :value="0" style="width: 70%" @on-change="handlerTypeChange">
@@ -42,7 +47,7 @@
               </d-select>
             </d-form-item>
             <d-form-item label="申请描述：" prop="description">
-              <d-input type="textarea" rows="2" v-model="formData.description" oninput="value = value.trim()"
+              <d-input type="textarea" rows="2" v-model="formData.description"
                            placeholder="请输入申请描述，例如用途等" style="width: 70%"/>
             </d-form-item>
           </d-form>
@@ -201,8 +206,20 @@ export default {
     },
     getNamespaces () {
       apiRequest.get(this.urls.findAllNamespace).then((data) => {
+        data.data.map(namespace => {
+          namespace.value = namespace.code
+          return namespace
+        })
         this.namespaceList = data.data || []
       })
+    },
+    searchNamespace (query, callback) {
+      let list = this.namespaceList.filter(item => item.value.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+      callback(list)
+    },
+    handleNamespaceSelect (item) {
+      this.formData.namespace.code = item.code
+      this.formData.namespace.id = item.code
     },
     getBrokerGroups () {
       apiRequest.get(this.urls.findAllBrokerGroup).then((data) => {
@@ -224,6 +241,9 @@ export default {
     },
     beforeConfirm () {
       let copyData = deepCopy(this.formData || {})
+      if (!copyData.namespace.id && copyData.namespace.code) {
+        copyData.namespace.id = copyData.namespace.code
+      }
       return copyData
     }
   },
