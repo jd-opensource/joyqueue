@@ -15,8 +15,11 @@
  */
 package org.joyqueue.store;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
+import org.joyqueue.store.file.Checkpoint;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.message.MessageParser;
 import org.joyqueue.store.utils.MessageUtils;
@@ -35,10 +38,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -800,6 +805,7 @@ public class PartitionGroupStoreManagerTest {
 
         WriteResult writeResult = future.get();
         Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
+        store.commit(store.rightPosition());
 
         logger.info("Waiting checkpoint saved...");
 
@@ -812,7 +818,6 @@ public class PartitionGroupStoreManagerTest {
 
         destroyStore();
         recoverStore();
-        store.commit(store.rightPosition());
         for (int i = 0; i < messages.size(); i++) {
             ByteBuffer writeBuffer = messages.get(i);
             writeBuffer.clear();
@@ -823,6 +828,58 @@ public class PartitionGroupStoreManagerTest {
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
         }
+
+        // 验证没有CheckPoint文件的情况
+        destroyStore();
+        Assert.assertTrue(checkpointFile.delete());
+        recoverStore();
+        for (int i = 0; i < messages.size(); i++) {
+            ByteBuffer writeBuffer = messages.get(i);
+            writeBuffer.clear();
+
+            ReadResult readResult = store.read(partition, i, 1, 0);
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(1, readResult.getMessages().length);
+            ByteBuffer readBuffer = readResult.getMessages()[0];
+            Assert.assertEquals(writeBuffer, readBuffer);
+        }
+        while (!checkpointFile.isFile()) {
+            Thread.sleep(100L);
+        }
+        // 验证版本号为0的旧版CheckPoint文件的情况
+        destroyStore();
+
+        // 修改CheckPoint文件为旧版本
+        byte[] serializedData = new byte[(int) checkpointFile.length()];
+        try (FileInputStream fis = new FileInputStream(checkpointFile)) {
+            if (serializedData.length != fis.read(serializedData)) {
+                throw new IOException("File length not match!");
+            }
+        }
+        String jsonString = new String(serializedData, StandardCharsets.UTF_8);
+        Checkpoint checkpoint = JSON.parseObject(jsonString, Checkpoint.class);
+
+        checkpoint.setVersion(0);
+        checkpoint.setReplicationPosition(-1L);
+        serializedData = JSON.toJSONString(checkpoint,
+                SerializerFeature.PrettyFormat, SerializerFeature.DisableCircularReferenceDetect).getBytes(StandardCharsets.UTF_8);
+
+        try(FileOutputStream fos = new FileOutputStream(checkpointFile)) {
+            fos.write(serializedData);
+        }
+
+        recoverStore();
+        for (int i = 0; i < messages.size(); i++) {
+            ByteBuffer writeBuffer = messages.get(i);
+            writeBuffer.clear();
+
+            ReadResult readResult = store.read(partition, i, 1, 0);
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(1, readResult.getMessages().length);
+            ByteBuffer readBuffer = readResult.getMessages()[0];
+            Assert.assertEquals(writeBuffer, readBuffer);
+        }
+
 
 
     }
@@ -883,7 +940,6 @@ public class PartitionGroupStoreManagerTest {
         this.store.recover();
         this.store.start();
         this.store.enable();
-        this.store.commit(this.store.rightPosition());
     }
 
     private void destroyStore() {
