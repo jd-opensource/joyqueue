@@ -134,7 +134,6 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         if (!base.isDirectory()) {
             throw new StoreInitializeException(String.format("Partition group directory: %s not available!", base.getAbsolutePath()));
         }
-        this.replicationPosition = store.flushPosition();
         term = getMaxTerm(store);
 
         this.writeLoopThread = LoopThread.builder()
@@ -184,12 +183,16 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
             logger.info("Recovering message store {}...", base.getAbsolutePath());
             store.recover();
+            Checkpoint checkpoint = recoverCheckpoint();
+
+            recoverReplicationPosition(checkpoint);
+
             resetLastEntryTerm();
             logger.info("Recovering index store {}...", base.getAbsolutePath());
             indexPosition = recoverPartitions();
             long safeIndexPosition = indexPosition;
-            logger.info("Recovering the checkpoint {}...", base.getAbsolutePath());
-            indexPosition = recoverCheckpoint();
+            logger.info("Recovering index position from checkpoint {}...", base.getAbsolutePath());
+            indexPosition = recoverIndexPositionFromCheckpoint(checkpoint);
             long checkPointIndexPosition = indexPosition;
             logger.info("Building indices {}...", base.getAbsolutePath());
             try {
@@ -201,7 +204,6 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                                     "Fall back safe index position {} and retry recover indices...",
                             Format.formatWithComma(checkPointIndexPosition),
                             Format.formatWithComma(safeIndexPosition), t);
-                    indexPosition = safeIndexPosition;
                     recoverIndices();
                 } else {
                     logger.error("recover exception {}", base.getAbsolutePath(), t);
@@ -319,7 +321,23 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 //    读取checkpoint文件，检查每个分区的下一条索引序号是否大于等于checkpoint中记录的索引序号；
 //    如果是，使用checkpoint中记录的indexPosition继续恢复索引；
 //    否则，使用目前的逻辑计算出的indexPosition继续恢复索引。
-    private long recoverCheckpoint() {
+    private long recoverIndexPositionFromCheckpoint(Checkpoint checkpoint) {
+        if (null != checkpoint && checkpoint.getIndexPosition() > indexPosition &&
+                checkpoint.getPartitions().entrySet().stream()
+                        .allMatch(entry -> {
+                            short partition = entry.getKey();
+                            long index = entry.getValue();
+                            Partition p = partitionMap.get(partition);
+                            return null != p && p.store.right() >= index * IndexItem.STORAGE_SIZE;
+
+
+                        })) {
+            logger.info("Using indexPosition: {} from the checkpoint file.", checkpoint.getIndexPosition());
+            return checkpoint.getIndexPosition();
+        }
+        return indexPosition;
+    }
+    private Checkpoint recoverCheckpoint() {
         try {
             File checkpointFile =  new File(base, CHECKPOINT_FILE);
             if(checkpointFile.isFile()) {
@@ -331,27 +349,38 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                 }
                 String jsonString = new String(serializedData, StandardCharsets.UTF_8);
                 Checkpoint checkpoint = JSON.parseObject(jsonString, Checkpoint.class);
-
-                if (checkpoint.getIndexPosition() > indexPosition &&
-                        checkpoint.getPartitions().entrySet().stream()
-                                .allMatch(entry -> {
-                                    short partition = entry.getKey();
-                                    long index = entry.getValue();
-                                    Partition p = partitionMap.get(partition);
-                                    return null != p && p.store.right() >= index * IndexItem.STORAGE_SIZE;
-
-
-                                })) {
-                    logger.info("Using indexPosition: {} from the checkpoint file.", checkpoint.getIndexPosition());
-                    return checkpoint.getIndexPosition();
+                if(null != checkpoint) {
+                    logger.info("Checkpoint file recovered: {}.", checkpoint);
                 }
+                return checkpoint;
             } else {
                 logger.info("Checkpoint file is NOT found, continue recover...");
             }
         } catch (Throwable t) {
             logger.warn("Recover checkpoint exception, continue recover...", t);
         }
-        return indexPosition;
+        return null;
+    }
+
+    /**
+     * 从CheckPoint文件中恢复提交位置。
+     *
+     */
+    private void recoverReplicationPosition(Checkpoint checkpoint) {
+        if(null != checkpoint && checkpoint.getVersion() >= Checkpoint.REPLICATION_POSITION_START_VERSION) {
+            logger.info("Replication position recovered from the Checkpoint file: {}.", checkpoint.getReplicationPosition());
+            long recoveredReplicationPosition = checkpoint.getReplicationPosition();
+            if (recoveredReplicationPosition >= 0 && recoveredReplicationPosition <= store.right()) {
+                this.replicationPosition = recoveredReplicationPosition;
+                logger.info("Replication recovered: {}, store: {}.", recoveredReplicationPosition,  base.getAbsolutePath());
+                return;
+            }
+        }
+        this.replicationPosition = store.right();
+
+        logger.warn("Replication recover failed, using store right position: {} insteaed, store: {}!",
+                store.right(),
+                base.getAbsolutePath());
     }
 
     /**
@@ -1140,7 +1169,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         }
     }
     private void flushCheckpoint() throws IOException {
-        Checkpoint checkpoint = new Checkpoint(indexPosition, partitionMap.entrySet().stream()
+        Checkpoint checkpoint = new Checkpoint(indexPosition, replicationPosition, partitionMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().store.right() / IndexItem.STORAGE_SIZE)));
         byte [] serializedData = JSON.toJSONString(checkpoint,
                 SerializerFeature.PrettyFormat, SerializerFeature.DisableCircularReferenceDetect).getBytes(StandardCharsets.UTF_8);
