@@ -68,6 +68,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * root                 Partition group root
+ * ├── 0                Message files
+ * ├── checkpoint.json  Checkpoint file
+ * └── index            Index directory
+ *     ├── 4            Partition 4 directory
+ *     │   └── 0        Index files of partition 4
+ *     ├── 5            Partition 5 directory
+ *     └── 6            Partition 6 directory
  * @author liyue25
  * Date: 2018/8/13
  */
