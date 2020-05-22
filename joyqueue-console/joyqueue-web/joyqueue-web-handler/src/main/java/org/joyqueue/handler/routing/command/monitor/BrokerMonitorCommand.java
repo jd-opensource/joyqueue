@@ -31,7 +31,15 @@ import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.model.BrokerMetadata;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.domain.*;
+import org.joyqueue.model.domain.BrokerClient;
+import org.joyqueue.model.domain.BrokerMonitorInfoWithDC;
+import org.joyqueue.model.domain.BrokerMonitorRecord;
+import org.joyqueue.model.domain.BrokerTopicMonitor;
+import org.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
+import org.joyqueue.model.domain.ProducerSendMessage;
+import org.joyqueue.model.domain.SimplifiedBrokeMessage;
+import org.joyqueue.model.domain.Subscribe;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QMonitor;
 import org.joyqueue.model.query.QPartitionGroupMonitor;
 import org.joyqueue.monitor.BrokerMessageInfo;
@@ -149,7 +157,12 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
 
     @Path("findTopicCount")
     public Response findTopicCount(@QueryParam("brokerId") Long brokerId) throws Exception {
-        List<String> topicList = brokerTopicMonitorService.queryTopicList(brokerId);
+        List<String> topicList;
+        try {
+            topicList = brokerTopicMonitorService.queryTopicList(brokerId);
+        }catch (Exception e) {
+            return Responses.success(0);
+        }
         return Responses.success(topicList.size());
     }
 
