@@ -4,7 +4,7 @@
       <d-input  v-model="formData.code" oninput="value = value.trim()" :disabled="type" placeholder="如app_slice_pending" style="width: 60%" ></d-input>
     </d-form-item>
     <d-form-item label="简称:" prop="aliasCode" :error="error.aliasCode" >
-      <d-input  v-model="formData.aliasCode" oninput="value = value.trim()" :disabled="type" placeholder="如backlog" style="width: 60%" ></d-input>
+      <d-input  v-model="formData.aliasCode" oninput="value = value.trim()" placeholder="如backlog" style="width: 60%" ></d-input>
     </d-form-item>
     <d-form-item label="名称:" prop="name" >
       <d-input  v-model="formData.name" oninput="value = value.trim()" placeholder="如积压"  style="width: 60%"></d-input>
