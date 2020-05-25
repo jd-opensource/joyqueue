@@ -231,11 +231,6 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
     private void recoverIndices() throws IOException {
 
-        // 删除indexPosition之后的所有索引
-        for (Partition partition : partitionMap.values()) {
-            partition.rollbackTo(indexPosition);
-        }
-
         // 从indexPosition到store.right()重新构建索引
         while (indexPosition < store.right()) {
             ByteBuffer byteBuffer = store.read(indexPosition);
@@ -248,45 +243,29 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                 continue;
             }
             PositioningStore<IndexItem> indexStore = partition.store;
+            long indexItemPosition = indexItem.getIndex() * IndexItem.STORAGE_SIZE;
 
-            if (indexStore.right() == 0) {
-                indexStore.setRight(indexItem.getIndex() * IndexItem.STORAGE_SIZE);
-            }
-
-            long storeIndex = indexStore.right() / IndexItem.STORAGE_SIZE;
-
-            if (indexItem.getIndex() == storeIndex) {
-                if (BatchMessageParser.isBatch(byteBuffer)) {
-                    short batchSize = BatchMessageParser.getBatchSize(byteBuffer);
-                    indexItem.setBatchMessage(true);
-                    indexItem.setBatchMessageSize(batchSize);
-                }
-                writeIndex(indexItem, partition.store);
-
-            } else if (indexItem.getIndex() < storeIndex) {
-                IndexItem pi = indexStore.read(indexItem.getIndex() * IndexItem.STORAGE_SIZE);
-                if (pi.getOffset() != indexPosition) {
-                    throw new WriteException(
-                            String.format(
-                                    "Index mismatch, store: %s, partition: %d, next index of the partition: %s，index in log: %s, log position: %s, log: \n%s",
-                                    this.base, indexItem.getPartition(),
-
-                                    Format.formatWithComma(storeIndex),
-                                    Format.formatWithComma(indexItem.getIndex()),
-                                    Format.formatWithComma(indexPosition),
-                                    MessageParser.getString(byteBuffer)));
-                }
-            } else if (indexItem.getIndex() > storeIndex) {
+            if (indexStore.right() == 0 || indexItemPosition < indexStore.right()) {
+                indexStore.setRight(indexItemPosition);
+            } else if ( indexItemPosition > indexStore.right()) {
                 throw new WriteException(
                         String.format(
                                 "Index must be continuous, store: %s, partition: %d, next index of the partition: %s，index in log: %s, log position: %s, log: \n%s",
                                 this.base, indexItem.getPartition(),
 
-                                Format.formatWithComma(storeIndex),
+                                Format.formatWithComma(indexStore.right() / IndexItem.STORAGE_SIZE),
                                 Format.formatWithComma(indexItem.getIndex()),
                                 Format.formatWithComma(indexPosition),
                                 MessageParser.getString(byteBuffer)));
             }
+
+            if (BatchMessageParser.isBatch(byteBuffer)) {
+                short batchSize = BatchMessageParser.getBatchSize(byteBuffer);
+                indexItem.setBatchMessage(true);
+                indexItem.setBatchMessageSize(batchSize);
+            }
+            writeIndex(indexItem, partition.store);
+
 
             if (indexStore.right() - indexStore.flushPosition() >= 10 * 1024 * 1024) {
                 indexStore.flush();
@@ -354,7 +333,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                 }
                 return checkpoint;
             } else {
-                logger.info("Checkpoint file is NOT found, continue recover...");
+                logger.warn("Checkpoint file is NOT found, continue recover...");
             }
         } catch (Throwable t) {
             logger.warn("Recover checkpoint exception, continue recover...", t);
