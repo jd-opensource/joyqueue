@@ -23,6 +23,7 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.handler.Constants;
@@ -31,7 +32,15 @@ import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.model.BrokerMetadata;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.domain.*;
+import org.joyqueue.model.domain.BrokerClient;
+import org.joyqueue.model.domain.BrokerMonitorInfoWithDC;
+import org.joyqueue.model.domain.BrokerMonitorRecord;
+import org.joyqueue.model.domain.BrokerTopicMonitor;
+import org.joyqueue.model.domain.ConnectionMonitorInfoWithIp;
+import org.joyqueue.model.domain.ProducerSendMessage;
+import org.joyqueue.model.domain.SimplifiedBrokeMessage;
+import org.joyqueue.model.domain.Subscribe;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QMonitor;
 import org.joyqueue.model.query.QPartitionGroupMonitor;
 import org.joyqueue.monitor.BrokerMessageInfo;
@@ -149,8 +158,17 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
 
     @Path("findTopicCount")
     public Response findTopicCount(@QueryParam("brokerId") Long brokerId) throws Exception {
-        List<String> topicList = brokerTopicMonitorService.queryTopicList(brokerId);
-        return Responses.success(topicList.size());
+        List<String> topicList;
+        try {
+            topicList = brokerTopicMonitorService.queryTopicList(brokerId);
+            if (CollectionUtils.isEmpty(topicList)) {
+                return Responses.success(0);
+            }
+            return Responses.success(topicList.size());
+        }catch (Exception e) {
+            logger.error("",e);
+            return Responses.error(500, "brokerId: "+brokerId + "find topicCount cause error");
+        }
     }
 
     /**
