@@ -499,7 +499,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
 
     @Override
-    public int size() {
+    public int capacity() {
         return capacity;
     }
 

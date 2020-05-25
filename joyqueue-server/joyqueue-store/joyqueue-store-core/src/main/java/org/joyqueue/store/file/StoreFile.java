@@ -19,9 +19,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * 带缓存页的，存储数据的文件
+ * @param <T> 数据类型
+ */
 public interface StoreFile<T> extends Timed {
     /**
-     * 对应的问题
+     * 对应的文件
      */
     File file();
 
@@ -33,7 +37,7 @@ public interface StoreFile<T> extends Timed {
     /**
      * 卸载文件缓存页
      *
-     * @return 成功返回true，如果文件存在脏数据返回是吧
+     * @return 成功返回true，如果文件存在脏数据返回false。
      */
     boolean unload();
 
@@ -43,7 +47,7 @@ public interface StoreFile<T> extends Timed {
     void forceUnload();
 
     /**
-     * 是否有缓存页
+     * 缓存页是否已加载
      */
     boolean hasPage();
 
@@ -59,7 +63,7 @@ public interface StoreFile<T> extends Timed {
      * 追加写入数据
      *
      * @param t 待写入的数据
-     * @return 写入长度
+     * @return 写入后文件的当前位置
      */
     int append(T t) throws IOException;
 
@@ -73,18 +77,19 @@ public interface StoreFile<T> extends Timed {
 
     /**
      * 写入一段Bytebuffer
+     * @return 写入后文件的当前位置
      */
     int appendByteBuffer(ByteBuffer byteBuffer) throws IOException;
 
     /**
-     * 将内存中的数据写入磁盘中
+     * 将内存中的数据刷盘写入磁盘中
      *
-     * @return 本次写入数据的大小
+     * @return 本次刷盘数据的长度
      */
     int flush() throws IOException;
 
     /**
-     * 回滚到指定位置，未刷盘的数据直接丢弃，已刷盘的数据需要截断。
+     * 回滚到指定位置，未刷盘的数据直接丢弃，已刷盘的数据截断。
      */
     void rollback(int position) throws IOException;
 
@@ -124,5 +129,10 @@ public interface StoreFile<T> extends Timed {
      */
     void closeWrite();
 
-    int size();
+    /**
+     * 文件的最大容量。
+     * 
+     * @return 文件最大容量。
+     */
+    int capacity();
 }

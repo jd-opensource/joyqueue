@@ -52,10 +52,6 @@ public enum StoreConfigKey implements PropertyDef {
     INDEX_FILE_LOAD_ON_READ("store.index.file.load", StoreConfig.DEFAULT_INDEX_FILE_LOAD_ON_READ, Type.BOOLEAN),
 
     /**
-     * 虚拟线程执行器的线程数量
-     */
-    THREAD_COUNT("store.thread.count", StoreConfig.DEFAULT_THREAD_COUNT, Type.INT),
-    /**
      * 预加载DirectBuffer的核心数量
      */
     PRELOAD_BUFFER_CORE_COUNT("store.preload.buffer.core.count", StoreConfig.DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT, Type.INT),
