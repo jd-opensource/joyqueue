@@ -45,6 +45,7 @@ import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Type;
+import org.joyqueue.response.BooleanResponse;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.toolkit.lang.ListUtil;
@@ -144,6 +145,12 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
     }
 
     protected JoyQueueCode doCommitAck(Connection connection, String topic, String app, short partition, List<CommitAckData> dataList) {
+        BooleanResponse checkResponse = clusterManager.checkReadable(TopicName.parse(topic), app, connection.getHost(), partition);
+        if (!checkResponse.isSuccess()) {
+            logger.warn("check commit ack error, topic: {}, app: {}, partition: {}, transport: {}, code: {}", topic, app, partition, connection, checkResponse.getJoyQueueCode());
+            return checkResponse.getJoyQueueCode();
+        }
+
         MessageLocation[] messageLocations = new MessageLocation[dataList.size()];
         List<CommitAckData> retryDataList = null;
         Consumer consumer = new Consumer(connection.getId(), topic, app, Consumer.ConsumeType.JOYQUEUE);

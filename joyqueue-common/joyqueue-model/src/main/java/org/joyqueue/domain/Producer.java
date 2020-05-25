@@ -153,7 +153,7 @@ public class Producer extends Subscription {
             this.nearby = false;
             this.single = false;
             this.archive = false;
-            this.timeOut = 10000;
+            this.timeOut = 1000;
         }
 
         // 就近发送

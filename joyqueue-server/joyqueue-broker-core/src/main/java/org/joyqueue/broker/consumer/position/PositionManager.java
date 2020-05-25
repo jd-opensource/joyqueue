@@ -24,6 +24,7 @@ import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.EventType;
 import org.joyqueue.event.MetaEvent;
@@ -75,7 +76,7 @@ public class PositionManager extends Service {
     // 消费位点快照存储服务
     private PositionStore<ConsumePartition, Position> positionStore;
     // 补偿消费位置线程（10分钟跑一次）
-    private LoopThread thread;
+    private LoopThread checkSubscribeThread;
     // 最近应答时间跟踪器
     private Map<ConsumePartition, /* 最新应答时间 */ AtomicLong> lastAckTimeTrace = new ConcurrentHashMap<>();
     // 刷新线程
@@ -112,14 +113,14 @@ public class PositionManager extends Service {
 
         positionStore.start();
 
-        this.thread = LoopThread.builder()
+        this.checkSubscribeThread = LoopThread.builder()
                 .sleepTime(1000 * 60 * 10, 1000 * 60 * 10)
                 .name("Check-Subscribe-Thread")
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(this::compensationPosition)
                 .build();
 
-        this.thread.start();
+        this.checkSubscribeThread.start();
 
         clusterManager.addListener(new AddConsumeListener());
         clusterManager.addListener(new RemoveConsumeListener());
@@ -138,6 +139,14 @@ public class PositionManager extends Service {
         Iterator<ConsumePartition> iterator = positionStore.iterator();
         while (iterator.hasNext()) {
             ConsumePartition next = iterator.next();
+            TopicConfig topicConfig = clusterManager.getTopicConfig(TopicName.parse(next.getTopic()));
+            if (topicConfig != null) {
+                PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition(next.getPartition());
+                if (partitionGroup != null) {
+                    next.setPartitionGroup(partitionGroup.getGroup());
+                }
+            }
+
             // 检查是否有订阅关系
             Consumer.ConsumerPolicy consumerPolicy = clusterManager.tryGetConsumerPolicy(TopicName.parse(next.getTopic()), next.getApp());
             if (consumerPolicy == null) {

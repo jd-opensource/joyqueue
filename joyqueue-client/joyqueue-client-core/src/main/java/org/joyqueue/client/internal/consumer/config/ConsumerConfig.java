@@ -35,7 +35,7 @@ public class ConsumerConfig {
     private String group;
     private int batchSize = NONE_BATCH_SIZE;
     private long ackTimeout = NONE_ACK_TIMEOUT;
-    private long timeout = 1000 * 10;
+    private long timeout = 1000 * 3;
     private long pollTimeout = 1000 * 10;
     private long longPollTimeout = 1000 * 5;
     private long interval = 0;

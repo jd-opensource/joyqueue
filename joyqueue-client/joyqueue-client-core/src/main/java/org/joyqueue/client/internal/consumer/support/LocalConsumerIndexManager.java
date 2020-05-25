@@ -19,6 +19,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.client.internal.consumer.ConsumerIndexManager;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
@@ -26,7 +27,6 @@ import org.joyqueue.client.internal.consumer.domain.FetchIndexData;
 import org.joyqueue.client.internal.consumer.domain.LocalIndexData;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +111,19 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
     }
 
     @Override
+    public JoyQueueCode commitIndex(String topic, String app, short partition, long index, long timeout) {
+        if (index == ConsumerIndexManager.MAX_INDEX) {
+            FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, config.getTimeout());
+            index = fetchIndexData.getRightIndex();
+        } else if (index == ConsumerIndexManager.MIN_INDEX) {
+            FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, config.getTimeout());
+            index = fetchIndexData.getLeftIndex();
+        }
+        consumerIndexStore.saveIndex(topic, app, partition, index);
+        return JoyQueueCode.SUCCESS;
+    }
+
+    @Override
     public Table<String, Short, FetchIndexData> batchFetchIndex(Map<String, List<Short>> topicMap, String app, long timeout) {
         Table<String, Short, FetchIndexData> result = HashBasedTable.create();
         Map<String, List<Short>> updateTopicMap = null;
@@ -163,6 +176,47 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
             for (ConsumeReply consumeReply : entry.getValue()) {
                 consumerIndexStore.saveIndex(topic, app, consumeReply.getPartition(), consumeReply.getIndex());
             }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<Short, JoyQueueCode> batchCommitIndex(String topic, String app, Map<Short, Long> indexes, long timeout) {
+        Map<Short, JoyQueueCode> result = Maps.newHashMap();
+        Map<Short, FetchIndexData> fetchIndexDataMap = null;
+
+        for (Map.Entry<Short, Long> entry : indexes.entrySet()) {
+            if (entry.getValue().equals(ConsumerIndexManager.MAX_INDEX) || entry.getValue().equals(ConsumerIndexManager.MIN_INDEX)) {
+                Map<String, List<Short>> param = Maps.newHashMap();
+                param.put(topic, Lists.newArrayList(indexes.keySet()));
+
+                fetchIndexDataMap = delegate.batchFetchIndex(param, app, timeout).row(topic);
+                break;
+            }
+        }
+
+        for (Map.Entry<Short, Long> entry : indexes.entrySet()) {
+            short partition = entry.getKey();
+            long index = entry.getValue();
+
+            if (index == ConsumerIndexManager.MAX_INDEX) {
+                if (fetchIndexDataMap == null || fetchIndexDataMap.get(partition) == null) {
+                    result.put(entry.getKey(), JoyQueueCode.CN_UNKNOWN_ERROR);
+                    continue;
+                }
+                FetchIndexData fetchIndexData = fetchIndexDataMap.get(partition);
+                index = fetchIndexData.getRightIndex();
+            } else if (index == ConsumerIndexManager.MIN_INDEX) {
+                if (fetchIndexDataMap == null || fetchIndexDataMap.get(partition) == null) {
+                    result.put(entry.getKey(), JoyQueueCode.CN_UNKNOWN_ERROR);
+                    continue;
+                }
+                FetchIndexData fetchIndexData = fetchIndexDataMap.get(partition);
+                index = fetchIndexData.getLeftIndex();
+            }
+
+            consumerIndexStore.saveIndex(topic, app, partition, index);
+            result.put(entry.getKey(), JoyQueueCode.SUCCESS);
         }
         return result;
     }

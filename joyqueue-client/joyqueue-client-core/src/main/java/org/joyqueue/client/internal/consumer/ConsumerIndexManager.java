@@ -32,15 +32,23 @@ import java.util.Map;
  */
 public interface ConsumerIndexManager extends LifeCycle {
 
+    long MAX_INDEX = -1;
+
+    long MIN_INDEX = -2;
+
     JoyQueueCode resetIndex(String topic, String app, short partition, long timeout);
 
     FetchIndexData fetchIndex(String topic, String app, short partition, long timeout);
 
     JoyQueueCode commitReply(String topic, List<ConsumeReply> replyList, String app, long timeout);
 
+    JoyQueueCode commitIndex(String topic, String app, short partition, long index, long timeout);
+
     // batch
 
     Table<String, Short, FetchIndexData> batchFetchIndex(Map<String, List<Short>> topicMap, String app, long timeout);
 
     Map<String, JoyQueueCode> batchCommitReply(Map<String, List<ConsumeReply>> replyMap, String app, long timeout);
+
+    Map<Short, JoyQueueCode> batchCommitIndex(String topic, String app, Map<Short, Long> indexes, long timeout);
 }

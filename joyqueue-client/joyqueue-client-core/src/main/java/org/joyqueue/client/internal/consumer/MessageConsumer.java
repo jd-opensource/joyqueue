@@ -105,6 +105,17 @@ public interface MessageConsumer extends LifeCycle {
 
     JoyQueueCode replyOnce(ConsumeReply reply);
 
+    // commit
+    JoyQueueCode commitIndex(short partition, long index);
+
+    JoyQueueCode commitMaxIndex(short partition);
+
+    JoyQueueCode commitMaxIndex();
+
+    JoyQueueCode commitMinIndex(short partition);
+
+    JoyQueueCode commitMinIndex();
+
     // index
     FetchIndexData fetchIndex(short partition);
 

@@ -78,6 +78,17 @@ public interface MessagePoller extends LifeCycle {
 
     JoyQueueCode replyOnce(String topic, ConsumeReply reply);
 
+    // commit
+    JoyQueueCode commitIndex(String topic, short partition, long index);
+
+    JoyQueueCode commitMaxIndex(String topic, short partition);
+
+    JoyQueueCode commitMaxIndex(String topic);
+
+    JoyQueueCode commitMinIndex(String topic, short partition);
+
+    JoyQueueCode commitMinIndex(String topic);
+
     // index
     FetchIndexData fetchIndex(String topic, short partition);
 
