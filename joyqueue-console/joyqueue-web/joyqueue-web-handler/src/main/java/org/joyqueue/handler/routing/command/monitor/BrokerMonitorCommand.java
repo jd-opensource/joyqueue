@@ -23,6 +23,7 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.handler.Constants;
@@ -160,10 +161,14 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
         List<String> topicList;
         try {
             topicList = brokerTopicMonitorService.queryTopicList(brokerId);
+            if (CollectionUtils.isEmpty(topicList)) {
+                return Responses.success(0);
+            }
+            return Responses.success(topicList.size());
         }catch (Exception e) {
-            return Responses.success(0);
+            logger.error("",e);
+            return Responses.error(500, "brokerId: "+brokerId + "find topicCount cause error");
         }
-        return Responses.success(topicList.size());
     }
 
     /**
