@@ -157,6 +157,30 @@ CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
 ) ENGINE=InnoDB CHARSET=utf8;
 
 -- init default admin USER
-MERGE INTO `user`
-(`id`, `code`, `name`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
-VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
+INSERT INTO
+ `user`(
+    `id`,
+    `code`,
+    `name`,
+    `org_id`,
+    `org_name`,
+    `email`,
+    `mobile`,
+    `role`,
+    `sign`,
+    `create_by`,
+    `create_time`,
+    `update_by`,
+    `update_time`,
+    `status`)
+SELECT
+  1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, NOW(), -1, NOW(), 1
+FROM
+  Dual
+WHERE
+  NOT EXISTS (SELECT 1 FROM  `user`);
+
+-- init default admin USER
+-- MERGE INTO `user`
+-- (`id`, `code`, `name`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
+-- VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
