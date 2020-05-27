@@ -15,6 +15,7 @@
  */
 package org.joyqueue.toolkit.network;
 
+import org.apache.commons.lang3.StringUtils;
 import sun.net.util.IPAddressUtil;
 
 import java.net.Inet4Address;
@@ -182,9 +183,8 @@ public class IpUtil {
     public static String getLocalIp() {
         // In JD.com IDC, this should be:
         // return getLocalIp(NET_INTERFACE, MANAGE_IP);
-
-        boolean preferHostnameOverIp = Boolean.valueOf(System.getProperty(PREFER_HOSTNAME_OVERIP));
-        if (preferHostnameOverIp) {
+        String preferHostnameOverIp = System.getProperty(PREFER_HOSTNAME_OVERIP);
+        if (StringUtils.isNotBlank(preferHostnameOverIp) && Boolean.valueOf(preferHostnameOverIp.trim())) {
             return getDefaultLocalHost();
         } else {
             return getDefaultLocalIp();
