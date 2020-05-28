@@ -506,7 +506,6 @@ public class ReplicaGroup extends Service {
      * 构造心跳请求
      * @param replica
      * @return
-     * @throws Exception
      */
     private AppendEntriesRequest generateHeartbeatRequest(Replica replica) {
         return AppendEntriesRequest.Build.create()

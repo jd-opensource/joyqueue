@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class Configuration implements PropertySupplier {
     protected static final Logger logger = LoggerFactory.getLogger(Configuration.class);
-    protected static final int DEFAULT_CONFIGURATION_PRIORITY = 1;
+    protected static final int DEFAULT_CONFIGURATION_PRIORITY = 10;
     protected static final long DEFAULT_CONFIGURATION_VERSION = 1;
     protected static final String DEFAULT_CONFIGURATION_NAME = "_BROKER_CONFIG_";
 

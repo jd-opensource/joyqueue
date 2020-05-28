@@ -25,6 +25,7 @@ public class Config {
     protected String group;
     protected String key;
     protected String value;
+    protected int priority;
 
     public String getId(){
         return new StringBuilder(30).append(group).append(".").append(key).toString();
@@ -42,6 +43,13 @@ public class Config {
         this.group = group;
         this.key = key;
         this.value = value;
+    }
+
+    public Config(String group, String key, String value, int priority) {
+        this.group = group;
+        this.key = key;
+        this.value = value;
+        this.priority = priority;
     }
 
     public void setGroup(String group) {
@@ -62,6 +70,14 @@ public class Config {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
     @Override
