@@ -18,13 +18,16 @@
 -->
 <!-- 临时 -->
 <configuration monitorInterval="30">
+    <properties>
+        <property name="log_file" value="${sys:logFilePath:-${sys:user.home}/.joyqueue/logs}" />
+    </properties>
     <appenders>
         <console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%t] [%p] - %l - %m%n"/>
         </console>
 
-        <RollingFile name="defaultRollingFile" fileName="~/.joyqueue/Logs/error.log"
-                     filePattern="~/.joyqueue/Logs/jmq4server/$${date:yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="defaultRollingFile" fileName="${log_file}/error.log"
+                     filePattern="${log_file}/$${date:yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss:SSS}] [%t] [%p] - %l - %m%n"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="2000MB"/>
