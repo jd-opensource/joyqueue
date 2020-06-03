@@ -68,10 +68,10 @@ public class OperLogAspect {
 
     @Around("@annotation(com.jd.laf.web.vertx.annotation.Path)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        Class<?> clazz = joinPoint.getSignature().getDeclaringType();
         Object result = joinPoint.proceed();
         if (result instanceof Response) {
             Response response = (Response) result;
+            Class<?> clazz = joinPoint.getSignature().getDeclaringType();
             if (response.getCode() == 200 && !exceptCommandClasses.contains(clazz)) {
                 MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
                 Path path = methodSignature.getMethod().getAnnotation(Path.class);
