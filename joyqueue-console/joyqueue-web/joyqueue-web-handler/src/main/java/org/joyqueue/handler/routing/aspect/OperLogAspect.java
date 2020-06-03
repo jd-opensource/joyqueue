@@ -127,8 +127,6 @@ public class OperLogAspect {
                     operLog.setCreateBy(new Identity(0L));
                 }
                 operLog.setCreateTime(new Date());
-
-                operLog.setCreateTime(new Date());
                 operLog.setIdentity(className.replace("Command", ""));
                 operLog.setTarget(targetStr);
                 OperLogService operLogService = GlobalApplicationContext.getBean(OperLogService.class);
