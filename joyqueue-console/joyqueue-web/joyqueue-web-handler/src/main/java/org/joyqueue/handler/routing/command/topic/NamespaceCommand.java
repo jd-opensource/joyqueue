@@ -47,12 +47,13 @@ public class NamespaceCommand extends NsrCommandSupport<Namespace, NamespaceServ
                 StringUtils.isNotBlank(qNamespace.getName()) ||
                 StringUtils.isNotBlank(qNamespace.getKeyword())) {
             for (Namespace namespace: namespaces) {
-                if (StringUtils.isNotBlank(qNamespace.getCode()) && namespace.getCode().equalsIgnoreCase(qNamespace.getCode())) {
+                if (StringUtils.isNotBlank(qNamespace.getCode()) && StringUtils.containsIgnoreCase(namespace.getCode(),qNamespace.getCode())) {
                     namespaceList.add(namespace);
-                } else if (StringUtils.isNotBlank(qNamespace.getName()) && namespace.getName().equalsIgnoreCase(qNamespace.getName())) {
+                } else if (StringUtils.isNotBlank(qNamespace.getName()) && StringUtils.containsIgnoreCase(namespace.getName(),qNamespace.getName())) {
                     namespaceList.add(namespace);
                 } else if (StringUtils.isNotBlank(qNamespace.getKeyword())) {
-                    if (StringUtils.equalsAnyIgnoreCase(qNamespace.getKeyword(), namespace.getCode(), namespace.getName())) {
+                    if (StringUtils.containsIgnoreCase(qNamespace.getKeyword(), namespace.getCode()) ||
+                        StringUtils.containsIgnoreCase(qNamespace.getKeyword(), namespace.getName())) {
                         namespaceList.add(namespace);
                     }
                 }
@@ -63,7 +64,7 @@ public class NamespaceCommand extends NsrCommandSupport<Namespace, NamespaceServ
         Pagination pagination = qPageQuery.getPagination();
         pagination.setTotalRecord(namespaceList.size());
 
-        PageResult<Namespace> result = new PageResult();
+        PageResult<Namespace> result = new PageResult<>();
         result.setPagination(pagination);
         result.setResult(namespaceList);
         return Responses.success(result.getPagination(), result.getResult());
