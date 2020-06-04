@@ -55,8 +55,8 @@ public class ConfigCommand extends NsrCommandSupport<Config, ConfigService, QCon
                 } else if (StringUtils.isNotBlank(qConfig.getGroup()) && StringUtils.containsIgnoreCase(config.getGroup(), qConfig.getGroup())) {
                     configs.add(config);
                 } else if (StringUtils.isNotBlank(qConfig.getKeyword())) {
-                    if (StringUtils.containsIgnoreCase(qConfig.getKeyword(), config.getKey()) ||
-                        StringUtils.containsIgnoreCase(qConfig.getKeyword(), config.getGroup())) {
+                    if (StringUtils.containsIgnoreCase(config.getKey(), qConfig.getKeyword()) ||
+                        StringUtils.containsIgnoreCase(config.getGroup(), qConfig.getKeyword())) {
                         configs.add(config);
                     }
                 }

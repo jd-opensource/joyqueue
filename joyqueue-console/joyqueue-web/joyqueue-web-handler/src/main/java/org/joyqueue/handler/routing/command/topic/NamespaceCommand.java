@@ -52,8 +52,8 @@ public class NamespaceCommand extends NsrCommandSupport<Namespace, NamespaceServ
                 } else if (StringUtils.isNotBlank(qNamespace.getName()) && StringUtils.containsIgnoreCase(namespace.getName(),qNamespace.getName())) {
                     namespaceList.add(namespace);
                 } else if (StringUtils.isNotBlank(qNamespace.getKeyword())) {
-                    if (StringUtils.containsIgnoreCase(qNamespace.getKeyword(), namespace.getCode()) ||
-                        StringUtils.containsIgnoreCase(qNamespace.getKeyword(), namespace.getName())) {
+                    if (StringUtils.containsIgnoreCase(namespace.getCode(), qNamespace.getKeyword()) ||
+                        StringUtils.containsIgnoreCase(namespace.getName(), qNamespace.getKeyword())) {
                         namespaceList.add(namespace);
                     }
                 }
