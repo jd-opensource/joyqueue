@@ -81,7 +81,13 @@ public class BrokerServiceImpl implements BrokerService {
         }
         return replicas.stream().map(replica -> {
             try {
-                return this.findById(replica.getBrokerId());
+                Broker broker = this.findById(replica.getBrokerId());
+                BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(replica.getBrokerId());
+                if (brokerRelated != null && brokerRelated.getGroup() != null) {
+                    broker.setGroup(brokerRelated.getGroup());
+                    broker.setStatus(0);
+                }
+                return broker;
             } catch (Exception e) {
                 logger.error(String.format("can not find broker with id %s"), replica.getBrokerId());
                 return null;
@@ -231,9 +237,7 @@ public class BrokerServiceImpl implements BrokerService {
         PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
         if (pageResult != null && pageResult.getResult() != null && pageResult.getResult().size() > 0) {
             List<Broker> brokerList = pageResult.getResult();
-            Iterator<Broker> iterator = brokerList.iterator();
-            while (iterator.hasNext()) {
-                Broker broker = iterator.next();
+            for (Broker broker : brokerList) {
                 BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
                 if (brokerRelated != null && brokerRelated.getGroup() != null) {
                     broker.setGroup(brokerRelated.getGroup());
