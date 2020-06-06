@@ -106,7 +106,7 @@
         <laf-vertx.version>1.0.18</laf-vertx.version>
         <laf-extention.version>1.0.16</laf-extention.version>
         <vertx.version>3.6.3</vertx.version>
-        <ignite.version>2.6.0</ignite.version>
+        <ignite.version>2.8.1</ignite.version>
         <junit.version>4.12</junit.version>
         <mysql-connector-java.version>5.1.41</mysql-connector-java.version>
         <!-- maven properties -->
