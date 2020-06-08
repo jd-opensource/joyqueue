@@ -2,7 +2,7 @@
   <div>
     <d-steps :current='current'>
       <d-step title="步骤1" description="填写主题信息"></d-step>
-      <d-step v-if="formData.brokerGroup.id === 0" title="步骤2" description="选择Broker"></d-step>
+      <d-step v-if="formData.brokerGroup.id <= 0" title="步骤2" description="选择Broker"></d-step>
     </d-steps>
     <div class="steps-content" style="margin-top: 15px; border: 1px solid #e9e9e9; border-radius: 6px;background-color:
     #fafafa; text-align: left; padding: 20px 30px 40px 50px; height: 100%">
@@ -53,7 +53,7 @@
           </d-form>
         </div>
         <div class="step-actions" style="text-align: center">
-          <d-button v-if="formData.brokerGroup.id === 0" type="primary" @click="next">下一步</d-button>
+          <d-button v-if="formData.brokerGroup.id <= 0" type="primary" @click="next">下一步</d-button>
           <d-button v-else type="primary" @click="confirm()">确定</d-button>
         </div>
       </div>
@@ -251,11 +251,8 @@ export default {
     },
     getBrokerGroups () {
       apiRequest.get(this.urls.findAllBrokerGroup).then((data) => {
-        if (data.data === undefined || data.data.length < 1) {
-          this.brokerGroupList = [{id: 0, code: '', name: '全部'}]
-        }
         this.brokerGroupList = []
-        let allItem = {id: 0, code: '', name: '全部'}
+        let allItem = {id: 0, code: '全部', name: '全部'}
         this.brokerGroupList.push(allItem);
         (data.data || []).forEach(item => {
           this.brokerGroupList.push(item)
