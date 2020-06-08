@@ -2,7 +2,7 @@
   <div>
     <d-steps :current='current'>
       <d-step title="步骤1" description="填写主题信息"></d-step>
-      <d-step title="步骤2" description="选择Broker"></d-step>
+      <d-step v-if="formData.brokerGroup.id === 0" title="步骤2" description="选择Broker"></d-step>
     </d-steps>
     <div class="steps-content" style="margin-top: 15px; border: 1px solid #e9e9e9; border-radius: 6px;background-color:
     #fafafa; text-align: left; padding: 20px 30px 40px 50px; height: 100%">
@@ -53,7 +53,8 @@
           </d-form>
         </div>
         <div class="step-actions" style="text-align: center">
-          <d-button type="primary" @click="next">下一步</d-button>
+          <d-button v-if="formData.brokerGroup.id === 0" type="primary" @click="next">下一步</d-button>
+          <d-button v-else type="primary" @click="confirm()">确定</d-button>
         </div>
       </div>
       <div class="step2" v-show="current===1">
@@ -202,7 +203,34 @@ export default {
       }
     },
     handlerBrokerGroupChange (data) {
-      this.$refs.brokers.getListByGroup(data)
+      if (this.formData.brokerGroup.id === 0) {
+        this.$refs.brokers.getListByGroup(data)
+      } else {
+        let brokers = this.brokerGroupList.filter(group => group.id === this.formData.brokerGroup.id)
+        let query = {
+          keyword: ''
+        }
+        if (brokers.length > 0) {
+          query.group = {
+            id: brokers[0].id,
+            code: brokers[0].code,
+            name: brokers[0].name
+          }
+        }
+        let data = {
+          pagination: {
+            page: 0,
+            size: 1000
+          },
+          query: query
+        }
+        apiRequest.post(this.urls.searchBroker, {}, data).then((data) => {
+          if (data === '') {
+            return
+          }
+          this.formData.brokers = data.data || []
+        })
+      }
     },
     getNamespaces () {
       apiRequest.get(this.urls.findAllNamespace).then((data) => {
@@ -245,6 +273,24 @@ export default {
         copyData.namespace.id = copyData.namespace.code
       }
       return copyData
+    },
+    confirm () {
+      // Before
+      let data = this.beforeConfirm()
+      // Validate
+      if (this.formData.brokers.length === 0) {
+        this.$Message.error('请选择有broker的分组')
+        return
+      }
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+          apiRequest.post(this.urls.add, {}, data).then((data) => {
+            if (data.code === this.$store.getters.successCode) {
+              this.$emit('on-dialog-cancel')
+            }
+          })
+        }
+      })
     }
   },
   computed: {
