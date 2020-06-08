@@ -346,6 +346,7 @@ export default {
     }
   },
   mounted () {
+    this.getList()
   },
   computed: {
     curLang () {

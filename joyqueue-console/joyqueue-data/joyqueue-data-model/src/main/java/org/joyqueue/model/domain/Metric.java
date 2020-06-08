@@ -55,6 +55,16 @@ public class Metric extends BaseModel implements Identifier, Cloneable {
      */
     private boolean userPermission;
 
+    /**
+     * metric type: producer, consumer, broker
+     */
+    private String category;
+
+    /**
+     * collect interval, unit seconds
+     */
+    private int collectInterval;
+
     @Override
     public String getCode() {
         return code;
@@ -124,6 +134,22 @@ public class Metric extends BaseModel implements Identifier, Cloneable {
         this.userPermission = userPermission;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public int getCollectInterval() {
+        return collectInterval;
+    }
+
+    public void setCollectInterval(int collectInterval) {
+        this.collectInterval = collectInterval;
+    }
+
     public enum MetricType implements EnumItem{
         OTHERS(0, "others"),
         ATOMIC(1, "atomic"),
@@ -137,10 +163,12 @@ public class Metric extends BaseModel implements Identifier, Cloneable {
             this.description = description;
         }
 
+        @Override
         public int value() {
             return this.value;
         }
 
+        @Override
         public String description() {
             return this.description;
         }
