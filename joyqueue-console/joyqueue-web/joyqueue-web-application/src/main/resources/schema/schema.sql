@@ -84,6 +84,8 @@ CREATE TABLE  IF NOT EXISTS `metric` (
   `update_time` datetime NOT NULL COMMENT '修改时间',
   `update_by` bigint(20) NOT NULL COMMENT '修改人',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
+  `collect_interval` int(11) NOT NULL DEFAULT 1 COMMENT '采集间隔',
+  `category` varchar(128) COMMENT '指标类型: producer,consumer,broker',
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
