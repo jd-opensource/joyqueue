@@ -187,8 +187,14 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         }
     }
 
-    private void onLeaderChange(TopicName topic, PartitionGroup oldPartitionGroup, PartitionGroup newPartitionGroup) {
+    /**
+     * @param topic  topic
+     * @param partitionGroup partition group
+     * @param newPreferredLeader
+     **/
+    private void onLeaderChange(TopicName topic, int partitionGroup, int newPreferredLeader) {
         // TODO
+
     }
 
 

@@ -333,4 +333,9 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
             return Objects.hash(topic, partitionGroup);
         }
     }
+
+    @Override
+    public String name() {
+        return "JournalKeeper";
+    }
 }

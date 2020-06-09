@@ -124,5 +124,17 @@ public interface StoreService {
      */
     BufferPoolMonitorInfo monitorInfo();
 
+    /**
+     * Topic Transaction store
+     * @param topic  topic
+     *
+     **/
     List<TransactionStore> getTransactionStores(String topic);
+
+    /**
+     *
+     * Distinguished store name
+     *
+     **/
+    String name();
 }

@@ -499,4 +499,10 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     public void setBrokerContext(BrokerContext brokerContext) {
         this.brokerContext=brokerContext;
     }
+
+
+    @Override
+    public String name(){
+        return "Joy";
+    }
 }
