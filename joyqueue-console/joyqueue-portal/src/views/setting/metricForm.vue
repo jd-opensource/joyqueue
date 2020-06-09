@@ -24,6 +24,12 @@
     <d-form-item label="用户是否开放权限:"  >
       <d-switch v-model="formData.userPermission"></d-switch>
     </d-form-item>
+    <d-form-item label="种类" prop="category">
+      <d-input v-model="formData.category" style="width: 60%" oninput="value = value.trim()" placeholder="指标所属者种类(producer,consumer,broker...)"/>
+    </d-form-item>
+    <d-form-item label="采集间隔" prop="collectInterval">
+      <d-input v-model="formData.collectInterval" style="width: 60%" oninput="value=value.replace(/[^\d]/g, '')" placeholder="采集间隔"/>
+    </d-form-item>
     <d-form-item label="描述:"  >
       <d-input style="width: 60%" v-model="formData.description" oninput="value = value.trim()" placeholder="描述"></d-input>
     </d-form-item>
@@ -51,7 +57,9 @@ export default {
           groupField: '',
           groupFieldArray: [],
           summaryLevel: '',
-          userPermission: false
+          userPermission: false,
+          collectInterval: 1,
+          category: ''
         }
       }
     }

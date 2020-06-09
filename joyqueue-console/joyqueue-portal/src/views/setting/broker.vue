@@ -1,12 +1,12 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-input type="textarea" v-model="searchData.keyword" placeholder="请输入ID/IP" class="left mr10"
+    <div>
+      <d-input type="textarea" v-model="searchData.keyword" rows="1" placeholder="请输入ID/IP" class="left"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">&nbsp;ID/IP&nbsp;</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
-      <d-input v-model="searchData.group" oninput="value = value.trim()" placeholder="请输入Broker分组编码" class="left mr10"
+      <d-input v-if="searchData.groupVisible" v-model="searchData.group" oninput="value = value.trim()" placeholder="请输入Broker分组编码" class="left mr10"
                style="width:300px" @on-enter="getList">
         <span slot="prepend">分组编码</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
@@ -109,7 +109,8 @@ export default {
       type: Object,
       default: function () {
         return {
-          keyword: ''
+          keyword: '',
+          groupVisible: true
         }
       }
     },
@@ -346,6 +347,7 @@ export default {
     }
   },
   mounted () {
+    this.getList()
   },
   computed: {
     curLang () {

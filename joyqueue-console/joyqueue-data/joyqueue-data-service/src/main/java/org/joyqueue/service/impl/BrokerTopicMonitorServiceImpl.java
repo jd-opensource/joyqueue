@@ -234,6 +234,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                     brokerTopicMonitorRecord.setConnections(producerMonitorInfo.getConnections());
                     brokerTopicMonitorRecord.setCount(producerMonitorInfo.getEnQueue().getCount());
                     brokerTopicMonitorRecord.setTotalSize(producerMonitorInfo.getEnQueue().getTotalSize());
+                    brokerTopicMonitorRecord.setTps(producerMonitorInfo.getEnQueue().getTps());
                 }
             }
             brokerTopicMonitorRecord.setApp(app);
