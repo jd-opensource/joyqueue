@@ -50,7 +50,9 @@ export default {
       },
       brokerSearchData: {
         brokerGroupId: this.$route.query.id,
-        keyword: ''
+        keyword: '',
+        groupVisible: false,
+        group: this.$route.query.code
       },
       brokerUrls: {
         search: `/broker/search`,

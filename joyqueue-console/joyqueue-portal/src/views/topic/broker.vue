@@ -22,7 +22,7 @@
 import MyTable from '../../components/common/myTable'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
-import {brokerRoleTypeRender, brokerPermissionTypeRender, brokerSyncModeTypeRender, brokerRetryTypeRender} from '../../utils/common.js'
+import {brokerPermissionTypeRender, brokerRetryTypeRender} from '../../utils/common.js'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
@@ -91,12 +91,17 @@ export default {
           {
             title: '机房 [编码/名称]',
             key: 'dataCenter.code',
-            width: '20%',
+            width: '15%',
             formatter (item) {
               if (item.dataCenter) {
                 return item.dataCenter.code + '/' + item.dataCenter.name
               }
             }
+          },
+          {
+            title: 'broker分组',
+            key: 'group.code',
+            width: '10%'
           },
           {
             title: '版本',

@@ -52,6 +52,10 @@ public class QMetric extends QKeyword {
      */
     private Boolean userPermission;
 
+    private int collectInterval;
+
+    private String category;
+
     public QMetric() {}
 
     public QMetric(Boolean userPermission) {
@@ -125,5 +129,21 @@ public class QMetric extends QKeyword {
 
     public void setUserPermission(Boolean userPermission) {
         this.userPermission = userPermission;
+    }
+
+    public int getCollectInterval() {
+        return collectInterval;
+    }
+
+    public void setCollectInterval(int collectInterval) {
+        this.collectInterval = collectInterval;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

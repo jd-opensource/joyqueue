@@ -24,6 +24,7 @@ public class BrokerTopicMonitorRecord {
     private long connections;
     private long count;
     private long totalSize;
+    private long tps;
 
     private long retryCount;
     private long retryTps;
@@ -91,5 +92,13 @@ public class BrokerTopicMonitorRecord {
 
     public void setBacklog(long backlog) {
         this.backlog = backlog;
+    }
+
+    public long getTps() {
+        return tps;
+    }
+
+    public void setTps(long tps) {
+        this.tps = tps;
     }
 }
