@@ -57,6 +57,7 @@ public class TopicConfig extends Topic implements Serializable {
         config.setPartitions(topic.getPartitions());
         config.setType(topic.getType());
         config.setPriorityPartitions(topic.getPriorityPartitions());
+        config.setPolicy(topic.getPolicy());
         return config;
     }
 

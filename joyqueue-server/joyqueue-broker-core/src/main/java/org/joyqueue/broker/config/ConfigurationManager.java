@@ -17,6 +17,7 @@ package org.joyqueue.broker.config;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.domain.Config;
 import org.joyqueue.event.EventType;
 import org.joyqueue.event.NameServerEvent;
@@ -158,7 +159,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
         }
         for (Config config : configs) {
             logger.info("received config [{}], corresponding property is [{}]", config,configuration.getProperty(config.getKey()) != null ? configuration.getProperty(config.getKey()) : "null");
-            boolean isLocal = ArrayUtils.contains(config.getGroup().split(GROUP_SPLITTER), IpUtil.getLocalIp());
+            boolean isLocal = ArrayUtils.contains(StringUtils.splitByWholeSeparator(config.getGroup(), GROUP_SPLITTER), IpUtil.getLocalIp());
 
             // 如果group为空或group包含自身ip配置才生效
             if (ALL_GROUP.equals(config.getGroup())

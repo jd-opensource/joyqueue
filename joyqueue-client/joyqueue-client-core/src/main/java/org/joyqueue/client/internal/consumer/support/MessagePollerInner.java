@@ -250,7 +250,6 @@ public class MessagePollerInner extends Service {
             }
             case FW_BROKER_NOT_READABLE: {
                 logger.debug("fetch message error, broker not readable, topic: {}", topic);
-                clusterManager.updateTopicMetadata(topic, app);
                 break;
             }
             default: {

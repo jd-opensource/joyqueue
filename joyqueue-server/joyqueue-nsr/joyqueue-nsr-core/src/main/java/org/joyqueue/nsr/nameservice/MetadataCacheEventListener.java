@@ -51,19 +51,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * NameServiceCacheEventListener
+ * MetadataCacheEventListener
  * author: gaohaoxiang
  * date: 2019/9/4
  */
-public class NameServiceCacheEventListener implements MessageListener<MetaEvent> {
+public class MetadataCacheEventListener implements MessageListener<MetaEvent> {
 
-    protected static final Logger logger = LoggerFactory.getLogger(NameServiceCacheEventListener.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MetadataCacheEventListener.class);
 
     private NameServiceConfig config;
     private EventBus<NameServerEvent> eventBus;
     private MetadataCacheManager metadataCacheManager;
 
-    public NameServiceCacheEventListener(NameServiceConfig config, EventBus<NameServerEvent> eventBus, MetadataCacheManager metadataCacheManager) {
+    public MetadataCacheEventListener(NameServiceConfig config, EventBus<NameServerEvent> eventBus, MetadataCacheManager metadataCacheManager) {
         this.config = config;
         this.eventBus = eventBus;
         this.metadataCacheManager = metadataCacheManager;
@@ -128,6 +128,7 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 oldTopicConfig.setPartitions(newTopic.getPartitions());
                 oldTopicConfig.setPriorityPartitions(newTopic.getPriorityPartitions());
                 oldTopicConfig.setType(newTopic.getType());
+                oldTopicConfig.setPolicy(newTopic.getPolicy());
                 break;
             }
             case REMOVE_TOPIC: {

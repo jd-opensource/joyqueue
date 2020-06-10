@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 
-public class NameServiceCacheDoubleCopy extends DoubleCopy {
+public class MetadataCacheDoubleCopy extends DoubleCopy {
 
-    protected static final Logger logger = LoggerFactory.getLogger(NameServiceCacheDoubleCopy.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MetadataCacheDoubleCopy.class);
 
     private static final int DEFAULT_MAX_LENGTH =  1024 * 1024 * 100;
 
@@ -39,12 +39,12 @@ public class NameServiceCacheDoubleCopy extends DoubleCopy {
 
     protected NameServiceCacheEntry entry;
 
-    public NameServiceCacheDoubleCopy(File file, int maxLength) throws IOException {
+    public MetadataCacheDoubleCopy(File file, int maxLength) throws IOException {
         super(file, maxLength);
         this.file = file;
     }
 
-    public NameServiceCacheDoubleCopy(File file) throws IOException {
+    public MetadataCacheDoubleCopy(File file) throws IOException {
         this(file, DEFAULT_MAX_LENGTH);
     }
 

@@ -24,7 +24,6 @@ import org.joyqueue.store.file.DiskFullException;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.file.RollBackException;
 import org.joyqueue.store.file.StoreMessageSerializer;
-import org.joyqueue.store.file.WriteException;
 import org.joyqueue.store.index.IndexItem;
 import org.joyqueue.store.index.IndexSerializer;
 import org.joyqueue.store.message.BatchMessageParser;
@@ -63,6 +62,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -117,7 +117,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
     static final String CHECKPOINT_FILE= "checkpoint.json";
     private int lastEntryTerm = -1;
     private final CasLock flushLock = new CasLock();
-    private final ReentrantReadWriteLock rollbackLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock rollbackLock = new ReentrantReadWriteLock();
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool) {

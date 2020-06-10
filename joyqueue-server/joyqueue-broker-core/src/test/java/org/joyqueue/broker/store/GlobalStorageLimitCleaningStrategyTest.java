@@ -113,7 +113,7 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
                 for (short p : pgstore.listPartitions()) {
                     consumeAck.put(p, storeService.getManageService().partitionMetric(topic,p).getRightIndex());
                 }
-                totalCleanedSize+=cleaningStrategy.deleteIfNeeded(pgstore, consumeAck);
+                totalCleanedSize+=cleaningStrategy.deleteIfNeeded(pgstore, consumeAck, null);
 
             }
             // 检查是否出现过 cleaning 状态
@@ -137,7 +137,7 @@ public class GlobalStorageLimitCleaningStrategyTest extends StoreBaseTest {
                     consumeAck.put(p, storeService.getManageService().partitionMetric(topic, p).getRightIndex());
                 }
                 hasCleaningState=hasCleaningState|cleaningStrategy.state().ordinal();
-                totalCleanedSize+=cleaningStrategy.deleteIfNeeded(pgstore, consumeAck);
+                totalCleanedSize+=cleaningStrategy.deleteIfNeeded(pgstore, consumeAck, null);
             }
         }
         Assert.assertTrue(hasCleaningState>0);

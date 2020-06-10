@@ -72,7 +72,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
     private Messenger messenger;
     private MetadataCacheManager metadataCacheManager;
     private MetadataCompensator metadataCompensator;
-    private NameServiceCompensateThread nameServiceCompensateThread;
+    private CompensateMetadataThread compensateMetadataThread;
     private int brokerId;
     private AtomicLong nameserverLastAvailableTime = new AtomicLong();
     private AtomicInteger nameserverNotAvailableCounter = new AtomicInteger(0);
@@ -88,7 +88,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
         this.messenger = serviceProviderPoint.get(config.getMessengerType());
         this.metadataCacheManager = new MetadataCacheManager(config);
         this.metadataCompensator = new MetadataCompensator(config, eventBus);
-        this.nameServiceCompensateThread = new NameServiceCompensateThread(config, delegate, metadataCacheManager, metadataCompensator);
+        this.compensateMetadataThread = new CompensateMetadataThread(config, delegate, metadataCacheManager, metadataCompensator);
 
         try {
             enrichIfNecessary(messenger);
@@ -97,7 +97,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
 
             metadataCacheManager.start();
             metadataCompensator.start();
-            nameServiceCompensateThread.doCompensate();
+            compensateMetadataThread.doCompensate();
         } catch (Exception e) {
             throw new NsrException(e);
         }
@@ -106,16 +106,16 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     protected void doStart() throws Exception {
         try {
-            nameServiceCompensateThread.start();
+            compensateMetadataThread.start();
         } catch (Exception e) {
             throw new NsrException(e);
         }
-        messenger.addListener(new NameServiceCacheEventListener(config, eventBus, metadataCacheManager));
+        messenger.addListener(new MetadataCacheEventListener(config, eventBus, metadataCacheManager));
     }
 
     @Override
     protected void doStop() {
-        nameServiceCompensateThread.stop();
+        compensateMetadataThread.stop();
         metadataCompensator.stop();
         metadataCacheManager.stop();
         delegate.stop();

@@ -153,7 +153,7 @@ public class Producer extends Subscription {
             this.nearby = false;
             this.single = false;
             this.archive = false;
-            this.timeOut = 10000;
+            this.timeOut = 2000;
         }
 
         // 就近发送
@@ -169,6 +169,8 @@ public class Producer extends Subscription {
          */
         private Set<String> blackList;
         private Integer timeOut;
+        private Integer qosLevel;
+        private Map<String, String> params;
 
         public ProducerPolicy(Boolean nearby, boolean single, Boolean archive, Map<String, Short> weight, Set<String> blackList, Integer timeOut) {
             this.nearby = nearby;
@@ -228,6 +230,29 @@ public class Producer extends Subscription {
             this.timeOut = timeOut;
         }
 
+        public void setQosLevel(Integer qosLevel) {
+            this.qosLevel = qosLevel;
+        }
+
+        public Integer getQosLevel() {
+            return qosLevel;
+        }
+
+        public void setParams(Map<String, String> params) {
+            this.params = params;
+        }
+
+        public Map<String, String> getParams() {
+            return params;
+        }
+
+        public String getParam(String key) {
+            if (params == null) {
+                return null;
+            }
+            return params.get(key);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -238,13 +263,15 @@ public class Producer extends Subscription {
                     Objects.equals(archive, that.archive) &&
                     Objects.equals(weight, that.weight) &&
                     Objects.equals(blackList, that.blackList) &&
-                    Objects.equals(timeOut, that.timeOut);
+                    Objects.equals(timeOut, that.timeOut) &&
+                    Objects.equals(qosLevel, that.qosLevel) &&
+                    Objects.equals(params, that.params);
         }
 
         @Override
         public int hashCode() {
 
-            return Objects.hash(nearby, single, archive, weight, blackList, timeOut);
+            return Objects.hash(nearby, single, archive, weight, blackList, timeOut, qosLevel, params);
         }
 
         public static class Builder {
