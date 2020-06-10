@@ -51,11 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -157,13 +153,10 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     /**
      * 读取消息
      * <br>
-     * 首先尝试从过期未应答队列读取分区段消费
+     *   首先尝试消费高优先级队列消息
      * <br>
-     * 再消费重试消息
+     *   再轮询消费(普通+重试(optional)）队列
      * <br>
-     * 接着消费高优先级消息
-     * <br>
-     * 最后尝试从分区读
      *
      * @param consumer    消费者信息
      * @param count       消息条数
@@ -173,22 +166,20 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     @Override
     public PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         // 消费普通分区消息
-        List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
-        PullResult pullResult;
-
-        if (partitionManager.isRetry(consumer)) {
-            pullResult = getRetryMessages(consumer, (short) count);
-        } else {
-            List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
-            if (priorityPartitionList.size() > 0) {
-                // 高优先级分区消费
-                pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes, concurrent);
-            } else {
-                pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes, concurrent);
-            }
+        PullResult pullResult=null;
+        List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
+        if (priorityPartitionList.size() > 0) {
+            // 高优先级分区消费
+            pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes, concurrent);
         }
-
-
+        if(Objects.isNull(pullResult)||pullResult.isEmpty()){
+            List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
+            if (partitionManager.isRetry(consumer)) {
+                partitionList = new ArrayList<>(partitionList);
+                partitionList.add(Partition.RETRY_PARTITION_ID);
+            }
+            pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes, concurrent);
+        }
         return pullResult;
     }
 
@@ -279,7 +270,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     }
 
     /**
-     * 从本地磁盘分区消费消息
+     * 从本地磁盘分区并行(不锁队列)消费消息，优先消费超时未ack的消息块
      *
      * @param consumer      消费者信息
      * @param partitionList 分区集合
@@ -299,9 +290,17 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             if (i == retryMax) {
                 break;
             }
-
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex + i, accessTimes);
             short partition = partitionList.get(listIndex);
+            if(partition==Partition.RETRY_PARTITION_ID){
+                // Try read once message from retry queue
+                pullResult = getRetryMessages(consumer, (short) 1);
+                if(!pullResult.isEmpty()){
+                    break;
+                }
+                // 重试队列没有消息，继续轮询剩余队列
+                continue;
+            }
             ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);
             SlideWindow slideWindow = slideWindowMap.computeIfAbsent(consumePartition,
                     k -> {
