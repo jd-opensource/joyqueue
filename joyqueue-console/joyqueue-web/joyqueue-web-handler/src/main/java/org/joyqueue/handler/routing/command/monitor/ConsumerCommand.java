@@ -227,7 +227,8 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
 
     @Path("findAppsByTopic")
     public Response findAppsByTopic(@QueryParam(Constants.TOPIC)String topic) throws Exception {
-        return Responses.success(service.findAppsByTopic(topic));
+            return Responses.success(service.findAppsByTopic(topic));
+
     }
 
 }

@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `update_by` bigint(20) DEFAULT NULL COMMENT '修改人',
   `update_time` datetime NOT NULL COMMENT '修改时间',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
+  `password` varchar(64) DEFAULT '' COMMENT '用户密码',
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
@@ -160,5 +161,5 @@ CREATE TABLE IF NOT EXISTS `topic_msg_filter` (
 
 -- init default admin USER
 MERGE INTO `user`
-(`id`, `code`, `name`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
-VALUES (1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);
+(`id`, `code`, `name`,`password`, `org_id`, `org_name`, `email`, `mobile`, `role`, `sign`, `create_by`, `create_time`, `update_by`, `update_time`, `status`)
+VALUES (1, 'admin', 'Admin','admin12345', NULL, NULL, NULL, NULL, 1, 0, NULL, '2019-01-01 00:00:00', -1, '2019-01-01 00:00:00', 1);

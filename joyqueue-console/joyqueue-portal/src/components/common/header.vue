@@ -30,6 +30,20 @@
                            :command="key">{{ value }}</d-dropdown-item>
         </d-dropdown-menu>
       </d-dropdown>
+      <d-submenu name="6" class="right">
+        <template slot="title">
+          <icon name="user"/>
+          {{loginUserName}}
+        </template>
+        <d-menu-item v-if="loginUserName === '' || loginUserName === undefined" name="6-1" @click.native="login()">
+          <icon name="log-in" />
+          {{ langConfig.login }}
+        </d-menu-item>
+        <d-menu-item v-else name="6-1" @click.native="logout()">
+          <icon name="log-out" />
+          {{ langConfig.logout }}
+        </d-menu-item>
+      </d-submenu>
     </div>
   </d-menu>
 </template>
@@ -75,10 +89,12 @@ export default {
     },
     logout () {
       this.$emit('log-out')
+    },
+    login () {
+      this.$emit('log-in')
     }
   },
   created () {
-    this.$store.dispatch('getUserInfo')
   }
 }
 </script>
