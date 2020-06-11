@@ -50,31 +50,34 @@ public class UserLoginHandler extends RemoteIpHandler {
     public void handle(RoutingContext context) {
         HttpServerRequest request = context.request();
         context.put(REMOTE_IP, getRemoteIP(request));
-        JsonObject requestBody = context.getBodyAsJson();
         Session session = context.session();
         if (session == null) {
             context.fail(new HttpStatusException(HTTP_INTERNAL_ERROR, "No session - did you forget to include a SessionHandler?"));
             return;
         }
-        if (context.request().absoluteURI().endsWith("/user/login")
-                && requestBody != null
-                && requestBody.containsKey("username")
-                && requestBody.containsKey("password")) {
-            String username = requestBody.getString("username");
-            String password = requestBody.getString("password");
-            User user = userService.findUserByNameAndPassword(username, password);
-            if (user != null) {
-                session.put(userSessionKey, user);
-                context.put(USER_KEY, user);
-                context.next();
-                return;
-            } else {
-                session.remove(userSessionKey);
-                context.remove(USER_KEY);
-                context.clearUser();
-                context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Forbidden - Username or Password is wrong"));
-                return;
+        try {
+            JsonObject requestBody = context.getBodyAsJson();
+            if (context.request().absoluteURI().endsWith("/user/login")
+                    && requestBody != null
+                    && requestBody.containsKey("username")
+                    && requestBody.containsKey("password")) {
+                String username = requestBody.getString("username");
+                String password = requestBody.getString("password");
+                User user = userService.findUserByNameAndPassword(username, password);
+                if (user != null) {
+                    session.put(userSessionKey, user);
+                    context.put(USER_KEY, user);
+                    context.next();
+                    return;
+                } else {
+                    session.remove(userSessionKey);
+                    context.remove(USER_KEY);
+                    context.clearUser();
+                    context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Forbidden - Username or Password is wrong"));
+                    return;
+                }
             }
+        } catch (Exception ignore) {
         }
 
         User user = session.get(userSessionKey);
