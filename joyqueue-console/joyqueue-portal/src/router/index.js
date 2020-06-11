@@ -125,7 +125,7 @@ routes = routes.concat([{
 }, {
   path: '/login',
   name: 'login',
-  component: () => import('../views/login/login')
+  redirect: {name: `/${i18n.locale}/login`}
 }])
 
 const router = new Router({

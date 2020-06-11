@@ -2,8 +2,8 @@
     <div>
       <my-dialog :dialog="loginDialog">
         <grid-row>
-          <grid-col offset="3">
-            <d-form ref="form" :model="formData" :rules="rules">
+          <grid-col offset="1">
+            <d-form ref="form" :model="formData" :rules="rules" label-width="100px">
               <d-form-item label="用户名" placeholser="请输入用户名" prop="username" style="width: 85%">
                 <d-input v-model="formData.username" oninput="value = value.trim()"></d-input>
               </d-form-item>
@@ -70,13 +70,15 @@ export default {
               sessionStorage.setItem('username', data.loginUserName)
               sessionStorage.setItem('role', data.loginUserRole)
               this.$router.push({
-                path: '/'
+                path: `/`
               })
             })
           })
         }
       })
     }
+  },
+  mounted () {
   }
 }
 </script>

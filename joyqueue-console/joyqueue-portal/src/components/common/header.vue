@@ -1,5 +1,6 @@
 <template>
-  <d-menu mode="horizontal" :theme="theme1" :active-name="activeName" class="left">
+  <div>
+    <d-menu mode="horizontal" :theme="theme1" :active-name="activeName" class="left">
     <span class="logo">
       <img src="../../assets/images/joyqueue-logo.png"/>
     </span>
@@ -35,7 +36,7 @@
           <icon name="user"/>
           {{loginUserName}}
         </template>
-        <d-menu-item v-if="loginUserName === '' || loginUserName === undefined" name="6-1" @click.native="login()">
+        <d-menu-item v-if="!$store.getters.loginUserName" name="6-1" @click.native="login()">
           <icon name="log-in" />
           {{ langConfig.login }}
         </d-menu-item>
@@ -46,11 +47,16 @@
       </d-submenu>
     </div>
   </d-menu>
+  </div>
 </template>
 <script>
 import { mapGetters } from 'vuex'
 import langs from '../../i18n/langs.json'
 import compoLang from '../../i18n/components.json'
+import cookie from '../../utils/cookie'
+import apiRequest from '../../utils/apiRequest'
+import apiUrl from '../../utils/apiUrl'
+
 export default {
   data () {
     return {
@@ -88,10 +94,24 @@ export default {
       this.$router.push(this.$route.path.replace(oldLang, targetLang))
     },
     logout () {
-      this.$emit('log-out')
+      cookie.del('sso.jd.com', '/', '.jd.com')
+      apiRequest.get(apiUrl.logout).then(data => {
+        this.$store.dispatch('clearUserInfo').then(data => {
+          this.login()
+          sessionStorage.removeItem('username')
+          sessionStorage.removeItem('role')
+        })
+      })
     },
     login () {
-      this.$emit('log-in')
+      let url = `/${this.$i18n.locale}/login`
+      if (this.$route.path.endsWith(url)) {
+        this.$router.go(0)
+      } else {
+        this.$router.push({
+          path: `/${this.$i18n.locale}/login`
+        })
+      }
     }
   },
   created () {
