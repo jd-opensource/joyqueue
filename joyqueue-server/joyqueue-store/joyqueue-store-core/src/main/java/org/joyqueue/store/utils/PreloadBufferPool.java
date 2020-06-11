@@ -171,8 +171,8 @@ public class PreloadBufferPool {
                     Format.formatSize(totalSize));
             return totalSize;
         }).sum();
-        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
-        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
+        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
         logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
                 Format.formatSize(plUsed),
                 Format.formatSize(directUsed),
@@ -289,7 +289,7 @@ public class PreloadBufferPool {
                     }
                 } else {
                     List<LruWrapper<BufferHolder>> outdated = directBufferHolders.stream()
-                            .filter(b -> b.size() == preLoadCache.bufferSize)
+                            .filter(b -> b.capacity() == preLoadCache.bufferSize)
                             .filter(BufferHolder::isFree)
                             .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime(), bufferHolder.writable() ? writePageExtraWeightMs : 0L))
                             .sorted(Comparator.comparing(LruWrapper::getWeight))
@@ -360,12 +360,12 @@ public class PreloadBufferPool {
     }
 
     public void allocateMMap(BufferHolder bufferHolder) {
-        reserveMemory(bufferHolder.size());
+        reserveMemory(bufferHolder.capacity());
         mMapBufferHolders.add(bufferHolder);
     }
 
     public ByteBuffer allocateDirect(BufferHolder bufferHolder) {
-        ByteBuffer buffer = allocateDirect(bufferHolder.size());
+        ByteBuffer buffer = allocateDirect(bufferHolder.capacity());
         directBufferHolders.add(bufferHolder);
         return buffer;
     }
@@ -414,7 +414,7 @@ public class PreloadBufferPool {
 
     public void releaseMMap(BufferHolder bufferHolder) {
         mMapBufferHolders.remove(bufferHolder);
-        usedSize.getAndAdd(-1 * bufferHolder.size());
+        usedSize.getAndAdd(-1 * bufferHolder.capacity());
 
     }
 
@@ -443,8 +443,8 @@ public class PreloadBufferPool {
             plMonitorInfos.add(plMonitorInfo);
             return totalSize;
         }).sum();
-        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
-        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
+        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
 
         bufferPoolMonitorInfo.setPlMonitorInfos(plMonitorInfos);
         bufferPoolMonitorInfo.setPlUsed(Format.formatSize(plUsed));

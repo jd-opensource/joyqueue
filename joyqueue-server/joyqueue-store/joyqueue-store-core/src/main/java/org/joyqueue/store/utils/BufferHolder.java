@@ -25,7 +25,7 @@ public interface BufferHolder extends Timed {
     /**
      * Buffer大小
      */
-    int size();
+    int capacity();
 
     /**
      * 是否可以释放？

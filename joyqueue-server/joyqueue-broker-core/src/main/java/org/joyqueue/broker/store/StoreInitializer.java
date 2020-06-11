@@ -91,7 +91,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         if (CollectionUtils.isEmpty(replicas)) {
             return;
         }
-
+        // 并行恢复所有的PartitionGroup
         ExecutorService executor = Executors.newFixedThreadPool(32, new NamedThreadFactory("Store-recover-threads"));
         try {
             CompletableFuture.allOf(
@@ -119,7 +119,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
     }
 
     protected void doRestore(PartitionGroup group, Replica replica, Broker broker) throws Exception {
-        if (config.getForceRestore()) {
+        if (config.getForceRestore()) { // 强制恢复，如果磁盘上没有这个PartitionGroup，则新建一个
             logger.info("force restore topic {}, group.no {} group {}", replica.getTopic().getFullName(), replica.getGroup(), group);
             if (storeService.partitionGroupExists(group.getTopic().getFullName(), group.getGroup())) {
                 storeService.restorePartitionGroup(group.getTopic().getFullName(), group.getGroup());
