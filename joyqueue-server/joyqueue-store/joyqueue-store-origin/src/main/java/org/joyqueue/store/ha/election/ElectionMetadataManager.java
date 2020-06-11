@@ -51,12 +51,12 @@ public class ElectionMetadataManager {
 
     /**
      * 从文件恢复元数据
-     * @param electionManager election manager
+     *
      */
-    void recover(ElectionManager electionManager) {
+    void recover() {
         try {
             recoverMetadata();
-            restoreLeaderElections(electionManager);
+           // restoreLeaderElections(electionManager);
         } catch (Exception e) {
             logger.info("Recover election metadata fail", e);
         }
@@ -192,6 +192,18 @@ public class ElectionMetadataManager {
             }
         }
     }
+
+//    /**
+//     * Restore partition group election
+//     *
+//     **/
+//    synchronized void restoreLeaderElection(ElectionManager electionManager,TopicPartitionGroup topicPartitionGroup) {
+//        try {
+//            electionManager.restoreLeaderElection(topicPartitionGroup, metadataMap.replicableStore(topicPartitionGroup));
+//        } catch (Exception e) {
+//            logger.warn("Restore leader election fail", e);
+//        }
+//    }
 
     synchronized String describe() {
         return JSON.toJSONString(metadataMap);

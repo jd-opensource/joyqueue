@@ -153,7 +153,6 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
         properties.setProperty("working_dir", groupBase.getAbsolutePath());
         properties.setProperty("disable_logo", "true");
         //TODO: StoreConfig -> properties
-
         return properties;
     }
 

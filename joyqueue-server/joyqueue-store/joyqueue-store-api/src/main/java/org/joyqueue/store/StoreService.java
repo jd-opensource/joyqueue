@@ -17,9 +17,12 @@ package org.joyqueue.store;
 
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.transaction.TransactionStore;
+import org.joyqueue.toolkit.config.PropertySupplier;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 
 /**
@@ -53,10 +56,14 @@ public interface StoreService {
      * @param topic  topic of the partition group
      * @param partitionGroup  partition group id
      * @param partitions  partitions included in the partition group
-     * @param brokers   replicas broker of the partition group
+     * @param brokers   all replicas of the partition group
+     * @param observers replicas without vote right
      * @param thisBrokerId local broker
+     * @param extend  partition group extend properties
+     *
      */
-    PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId);
+    PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers,
+                                                      int thisBrokerId,PropertySupplier extend) throws Exception;
 
     /**
      * 创建PartitionGroup。仅当topic创建或者向topic中添加partitionGroup的时候调用，需要提供节点信息。
@@ -68,7 +75,8 @@ public interface StoreService {
      * @param thisBrokerId 本节点的BrokerId
      * @return See {@link PartitionGroupStore}
      */
-    PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId);
+    PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers,
+                                             int thisBrokerId,PropertySupplier extend) throws Exception;
 
     /**
      * 停止Partition group

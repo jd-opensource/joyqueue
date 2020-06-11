@@ -17,6 +17,8 @@ package org.joyqueue.store.ha.election;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Shorts;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.cluster.ClusterManager;
@@ -24,6 +26,7 @@ import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
+import org.joyqueue.broker.store.StoreUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
@@ -32,7 +35,7 @@ import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.joyqueue.store.StoreService;
+import org.joyqueue.store.Store;
 import org.joyqueue.store.ha.ReplicableStore;
 import org.joyqueue.store.ha.replication.ReplicaGroup;
 import org.joyqueue.store.ha.replication.ReplicationManager;
@@ -54,6 +57,7 @@ import java.util.stream.Collectors;
  * email: zhuduohui@jd.com
  * date: 2018/8/15
  */
+
 public class ElectionManager extends Service implements ElectionService, BrokerContextAware {
     private static Logger logger = LoggerFactory.getLogger(ElectionManager.class);
 
@@ -71,32 +75,14 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     private EventBus<ElectionEvent> electionEventManager;
     private ElectionMetadataManager electionMetadataManager;
     private ReplicationManager replicationManager;
-
-    private StoreService storeService;
+    private Store store;
     private Consume consume;
     private BrokerMonitor brokerMonitor;
     private BrokerContext brokerContext;
     private BrokerConfig brokerConfig;
 
-
-    public ElectionManager() {
-    }
-
-    public ElectionManager(BrokerConfig brokerConfig, ElectionConfig electionConfig, StoreService storeService,
-                           Consume consume, ClusterManager clusterManager, BrokerMonitor brokerMonitor) {
-        this.brokerConfig = brokerConfig;
-        this.electionConfig = electionConfig;
-        this.clusterManager = clusterManager;
-        this.storeService = storeService;
-        this.consume = consume;
-        this.brokerMonitor = brokerMonitor;
-
-    }
-
-    public ElectionManager(ElectionConfig electionConfig, StoreService storeService, Consume consume,
-                           ClusterManager clusterManager, BrokerMonitor brokerMonitor) {
-        this(null,electionConfig, storeService, consume, clusterManager, brokerMonitor);
-
+    public ElectionManager(Store store){
+        this.store=store;
     }
 
     @Override
@@ -107,9 +93,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         }
         if (electionConfig == null) {
             electionConfig = new ElectionConfig(brokerContext == null ? null : brokerContext.getPropertySupplier());
-        }
-        if (storeService == null && brokerContext != null) {
-            storeService = brokerContext.getStoreService();
         }
         if (clusterManager == null && brokerContext != null) {
             clusterManager = brokerContext.getClusterManager();
@@ -126,10 +109,9 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         if (brokerMonitor == null) {
             logger.warn("broker monitor is null.");
         }
-
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(clusterManager != null, "cluster manager is null");
-        Preconditions.checkArgument(storeService != null, "store service is null");
+        Preconditions.checkArgument(store != null, "store service is null");
         Preconditions.checkArgument(consume != null, "consume is null");
     }
 
@@ -154,13 +136,13 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
                 new NamedThreadFactory("Election-sendCommand"));
 
-        replicationManager = new ReplicationManager(electionConfig, brokerConfig, storeService, consume, brokerMonitor);
+        replicationManager = new ReplicationManager(electionConfig, brokerConfig, store, consume, brokerMonitor);
         replicationManager.start();
 
 		Thread.sleep(1000);
 
         electionMetadataManager = new ElectionMetadataManager(electionConfig.getMetadataPath());
-        electionMetadataManager.recover(this);
+        electionMetadataManager.recover();
 
         logger.info("Election manager started.");
     }
@@ -219,6 +201,17 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     }
 
     @Override
+    public void onPartitionGroupRestore(TopicName topic, int partitionGroup) throws ElectionException{
+       TopicPartitionGroup tp=new TopicPartitionGroup(topic.getFullName(),partitionGroup);
+       ElectionMetadata partitionGroupMetadata= electionMetadataManager.getElectionMetadata(tp);
+       if(null!=partitionGroupMetadata){
+           restoreLeaderElection(tp,partitionGroupMetadata);
+       }else{
+           logger.info("Ignore restore,{}/{} election metadata not found",topic.getFullName(),partitionGroup);
+       }
+    }
+
+    @Override
     public void onNodeAdd(TopicName topic, int partitionGroup, PartitionGroup.ElectType electType, List<Broker> brokers,
                           Set<Integer> learners, Broker broker, int localBroker, int leader) throws ElectionException {
 
@@ -244,6 +237,49 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElection.addNode(new DefaultElectionNode(broker.getIp() + ":" + broker.getBackEndPort(), broker.getId()));
+    }
+
+    /**
+     *  理论上不会同时增加和删除节点,且一次只增加/减少一个节点
+     *  副本变更如果不涉及当前节点，相当于只改变当前节点主题 分组的配置；
+     *  如果新增/删除的是本节点，则需要改变相应的存储/选举
+     *  目前没有考虑 learner 的更新
+     **/
+    @Override
+    public void onReplicaChange(TopicName topic, int partitionGroup, List<Integer> newReplicas) throws Exception{
+        Integer local=clusterManager.getBrokerId();
+        PartitionGroup groupOld = clusterManager.getNameService().getTopicConfig(topic).fetchPartitionGroupByGroup(partitionGroup);
+        Set<Integer> replicasNew = new HashSet<>(newReplicas);
+
+        Set<Integer> replicasRemoved=new HashSet<>(groupOld.getReplicas());
+                     replicasRemoved.removeAll(replicasNew);
+
+        Set<Integer> replicasNewAdd= new HashSet<>(replicasNew);
+                     replicasNewAdd.removeAll(groupOld.getReplicas());
+        // process add
+        for(Integer add:replicasNewAdd){
+            // 目前没有learner,暂时忽略learner的更新
+            Broker cur = clusterManager.getBrokerById(add);
+            if (null!=cur) {
+                if (add.equals(local)){
+                    store.createPartitionGroup(topic.getFullName(),partitionGroup, Shorts.toArray(groupOld.getPartitions()),newReplicas,
+                                Lists.newArrayList(groupOld.getLearners()),local, StoreUtils.partitionGroupExtendProperties(groupOld));
+                }else{
+                    onNodeAdd(topic, partitionGroup, groupOld.getElectType(), store.brokers(newReplicas), groupOld.getLearners(), cur,local,groupOld.getLeader());
+                }
+            }else{
+                logger.warn("Ignored,New node {} not found on metadata ",add);
+            }
+            logger.info("topic[{}] update partitionGroup[{}] and add node[{}] ", topic.getFullName(), partitionGroup,add);
+        }
+        for(Integer r:replicasRemoved){
+            if(r.equals(local)){
+                store.removePartitionGroup(topic.getFullName(),partitionGroup);
+            }else {
+                onNodeRemove(topic, partitionGroup, r, local);
+            }
+            logger.info("topic[{}] update partitionGroup[{}] and remove node[{}] ", topic.getFullName(), partitionGroup, r);
+        }
     }
 
     @Override
@@ -330,7 +366,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
      * @param metadata            元数据
      * @throws Exception 异常
      */
-    void restoreLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionMetadata metadata) throws Exception {
+    void restoreLeaderElection(TopicPartitionGroup topicPartitionGroup, ElectionMetadata metadata) throws ElectionException {
         logger.info("Restore election of topic {}, partition group {}, election type is {}" +
                         ", localBroker is {}, leader is {}, all nodes is {}",
                 topicPartitionGroup.getTopic(), topicPartitionGroup.getPartitionGroupId(), metadata.getElectType(),
@@ -359,7 +395,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     }
 
     /**
-     * 根据schema创建election，fixed或者raft
+     * 根据schema创建并启动election，fixed或者raft
      *
      * @param topic          topic
      * @param partitionGroup partition group id
@@ -376,8 +412,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                     topic, partitionGroup);
             removeLeaderElection(topic, partitionGroup);
         }
-
-        ReplicableStore replicableStore = null;//storeService.getReplicableStore(topic, partitionGroup);
+        ReplicableStore replicableStore = store.replicableStore(topic,partitionGroup);
         if (replicableStore == null) {
             throw new ElectionException(String.format("Replicable store of topic %s partition group " +
                     "%d is null", topic, partitionGroup));

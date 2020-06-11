@@ -15,11 +15,13 @@
  */
 package org.joyqueue.broker.store;
 
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.Shorts;
 import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.cluster.event.CompensateEvent;
 import org.joyqueue.broker.config.BrokerStoreConfig;
+import org.joyqueue.broker.config.PartitionGroupConfig;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.Replica;
@@ -35,14 +37,13 @@ import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.concurrent.EventListener;
+import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -126,7 +127,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
     /**
      * Recovery from local
      **/
-    protected PartitionGroupStore doRestore(PartitionGroup group, Replica replica, Broker broker) throws IOException {
+    protected PartitionGroupStore doRestore(PartitionGroup group, Replica replica, Broker broker) throws Exception {
         logger.info("begin restore topic {},group.no {} group {}",replica.getTopic().getFullName(),replica.getGroup(),group);
 
         return storeService.restoreOrCreatePartitionGroup(
@@ -134,8 +135,15 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
                 group.getGroup(),
                 Shorts.toArray(group.getPartitions()),
                 new ArrayList<>(group.getReplicas()),
-                broker.getId());
+                new ArrayList<>(group.getLearners()),
+                broker.getId(),StoreUtils.partitionGroupExtendProperties(group));
     }
+
+    /**
+     * Create partition group properties supplier
+     *
+     **/
+
 
     @Override
     public void onEvent(MetaEvent event) {
@@ -172,7 +180,10 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
                 }
                 case LEADER_CHANGE: {
                     LeaderChangeEvent leaderChangeEvent = (LeaderChangeEvent) event;
-                    onLeaderChange(leaderChangeEvent.getTopic(), leaderChangeEvent.getOldPartitionGroup(), leaderChangeEvent.getNewPartitionGroup());
+                    PartitionGroup oldConfig=leaderChangeEvent.getOldPartitionGroup();
+                    PartitionGroup newConfig=leaderChangeEvent.getNewPartitionGroup();
+                    Preconditions.checkArgument(oldConfig!=null&&newConfig!=null&&oldConfig.getGroup()==newConfig.getGroup(),"Preferred leader change must with same partition group");
+                    onLeaderChange(leaderChangeEvent.getTopic(), newConfig.getGroup(), newConfig.getLeader());
                     break;
                 }
                 case COMPENSATE: {
@@ -190,7 +201,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
     /**
      * @param topic  topic
      * @param partitionGroup partition group
-     * @param newPreferredLeader
+     * @param newPreferredLeader preferred leader
      **/
     private void onLeaderChange(TopicName topic, int partitionGroup, int newPreferredLeader) {
         // TODO
@@ -198,6 +209,10 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
     }
 
 
+    /**
+     * Handle new partition group event
+     *
+     **/
     protected void onAddPartitionGroup(TopicName topicName, PartitionGroup partitionGroup) throws Exception {
         logger.info("OnAddPartitionGroup, topic: {}, partitionGroup: {}", topicName, partitionGroup);
         Set<Integer> replicas = partitionGroup.getReplicas();
@@ -206,8 +221,8 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
                         topicName.getFullName(),
                         partitionGroup.getGroup(),
                         Shorts.toArray(partitionGroup.getPartitions()),
-                        new ArrayList<>(replicas), clusterManager.getBrokerId()
-                );
+                        new ArrayList<>(replicas),new ArrayList<>(partitionGroup.getLearners()), clusterManager.getBrokerId(),
+                        StoreUtils.partitionGroupExtendProperties(partitionGroup));
         if(null != store) {
             CountDownLatch latch = new CountDownLatch(1);
             store.whenClusterReady(WAIT_STORE_READY_TIMEOUT_MS).thenAccept(ready -> latch.countDown());
@@ -220,7 +235,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         logger.info("OnUpdatePartitionGroup, from: [{}] to [{}].", oldPartitionGroup, newPartitionGroup);
         int currentBrokerId = clusterManager.getBrokerId();
         if(oldPartitionGroup.getReplicas().contains(currentBrokerId) || newPartitionGroup.getReplicas().contains(currentBrokerId)) {
-            // 先处理配置变更
+            // 先处理副本变更
             if(!oldPartitionGroup.getReplicas().equals(newPartitionGroup.getReplicas())) {
                 storeService.maybeUpdateReplicas(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getReplicas());
             }

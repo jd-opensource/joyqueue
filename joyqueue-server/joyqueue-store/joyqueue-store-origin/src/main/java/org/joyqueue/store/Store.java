@@ -18,9 +18,16 @@ package org.joyqueue.store;
 import com.google.common.collect.Lists;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
+import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.config.PartitionGroupConfig;
+import org.joyqueue.broker.helper.AwareHelper;
+import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.QosLevel;
+import org.joyqueue.domain.TopicName;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.file.PositioningStore;
+import org.joyqueue.store.ha.ReplicableStore;
+import org.joyqueue.store.ha.election.ElectionManager;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.store.transaction.TransactionStoreManager;
 import org.joyqueue.store.utils.PreloadBufferPool;
@@ -85,6 +92,11 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     private PropertySupplier propertySupplier;
     private BrokerContext brokerContext;
     private StoreLock storeLock;
+    /**
+     * Election module
+     **/
+    private ElectionManager electionManager;
+    private ClusterManager clusterManager;
     public Store() {
         //do nothing
     }
@@ -113,9 +125,19 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         }
         this.bufferPool.addPreLoad(config.getIndexFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());
         this.bufferPool.addPreLoad(config.getMessageFileSize(), config.getPreLoadBufferCoreCount(), config.getPreLoadBufferMaxCount());
-
+        if(clusterManager==null){
+            this.clusterManager=brokerContext.getClusterManager();
+        }
+        // validate election service
+        if(electionManager==null){
+            electionManager=new ElectionManager(this);
+            AwareHelper.enrichIfNecessary(electionManager,brokerContext);
+        }
     }
 
+    /**
+     *  Start storage and election
+     **/
     @Override
     protected void doStart() throws Exception {
         super.doStart();
@@ -125,9 +147,12 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         for (PartitionGroupStoreManager manger : storeMap.values()) {
             if (!manger.isStarted()) manger.start();
         }
-
         started.set(true);
         LOG.info("Store started.");
+        if(!electionManager.isStarted()) {
+            electionManager.start();
+        }
+        LOG.info("Election started.");
     }
 
     @Override
@@ -160,21 +185,32 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     @Override
-    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId) {
-        return createPartitionGroup(topic,partitionGroup,partitions,brokers,thisBrokerId);
+    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers, int thisBrokerId,PropertySupplier extend) throws Exception{
+        if(partitionGroupExists(topic,partitionGroup)){
+            restorePartitionGroup(topic,partitionGroup);
+            electionManager.onPartitionGroupRestore(new TopicName(topic),partitionGroup);
+        }else{
+            createPartitionGroup(topic,partitionGroup,partitions,brokers,observers,thisBrokerId,extend);
+        }
+        return getStore(topic,partitionGroup);
     }
 
     @Override
-    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId) {
+    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers, int thisBrokerId,PropertySupplier extend) throws Exception{
         createPartitionGroup(topic,partitionGroup,partitions);
+        PartitionGroupConfig config=new PartitionGroupConfig(extend);
+        electionManager.onPartitionGroupCreate(config.electionType(),new TopicName(topic),partitionGroup,brokers(brokers),new HashSet(observers),thisBrokerId,config.fixLeader());
         return getStore(topic,partitionGroup);
     }
+
+
 
     @Override
     public void stopPartitionGroup(String topic, int partitionGroup) {
         PartitionGroupStoreManager partitionGroupStoreManager= storeMap.get(partitionGroupStoreKey(topic,partitionGroup));
         if(Objects.nonNull(partitionGroupStoreManager)){
             partitionGroupStoreManager.stop();
+            //electionManager.on
         }
     }
 
@@ -189,6 +225,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         if(LOG.isDebugEnabled()){
             LOG.info("Ignore {}/{} replicas config change,new config {} ",topic,partitionGroup,newReplicaBrokerIds==null?newReplicaBrokerIds:newReplicaBrokerIds.toArray());
         }
+
     }
 
     @Override
@@ -293,14 +330,14 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             }
             delete(topicBase);
         }
-
+        electionManager.onPartitionGroupRemove(new TopicName(topic),partitionGroup);
     }
 
 
     /**
      * Restore partition group local store
      **/
-    public synchronized void restorePartitionGroup(String topic, int partitionGroup){
+    public synchronized void restorePartitionGroup(String topic, int partitionGroup) throws Exception{
         PartitionGroupStoreManager partitionGroupStoreManger = partitionGroupStore(topic, partitionGroup);
         if (null == partitionGroupStoreManger) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
@@ -313,16 +350,21 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             }
             storeMap.put(topic + "/" + partitionGroup, partitionGroupStoreManger);
 
+        }else{
+            LOG.warn("Partition group store manager already loaded");
         }
     }
 
-
-    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) {
+    /**
+     *  Init partition group store file, delete old if already exist
+     *
+     *
+     **/
+    private synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
         if (!storeMap.containsKey(topic + "/" + partitionGroup)) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             if (groupBase.exists()) delete(groupBase);
             PartitionGroupStoreSupport.init(groupBase, partitions);
-
             restorePartitionGroup(topic, partitionGroup);
         }
     }
@@ -388,13 +430,12 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         }
     }
 
-//    /**
-//     * 获取用于选举复制的存储
-//     */
-//    @Override
-//    public ReplicableStore getReplicableStore(String topic, int partitionGroup) {
-//        return partitionGroupStore(topic, partitionGroup);
-//    }
+    /**
+     * 获取用于选举复制的存储
+     */
+    public ReplicableStore replicableStore(String topic, int partitionGroup) {
+        return partitionGroupStore(topic, partitionGroup);
+    }
 
     /**
      * 获取管理接口
@@ -410,6 +451,10 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         return bufferPool.monitorInfo();
     }
 
+    /**
+     * Replace @ char in topic
+     *
+     **/
     private String getPartitionGroupRelPath(String topic, int partitionGroup) {
         return TOPICS_DIR + File.separator + topic.replace('/', '@') + File.separator + partitionGroup;
     }
@@ -504,5 +549,18 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     @Override
     public String name(){
         return "Joy";
+    }
+
+    /**
+     *
+     * Get broker by broker Id
+     *
+     **/
+    public List<Broker> brokers(List<Integer> brokerIds){
+        List<Broker> brokers = new ArrayList<>(brokerIds.size());
+        brokerIds.forEach(brokerId -> {
+            brokers.add(clusterManager.getBrokerById(brokerId));
+        });
+        return brokers;
     }
 }

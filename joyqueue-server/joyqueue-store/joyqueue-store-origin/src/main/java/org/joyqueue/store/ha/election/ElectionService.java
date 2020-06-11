@@ -52,6 +52,14 @@ public interface ElectionService {
     void onPartitionGroupRemove(TopicName topic, int partitionGroup);
 
     /**
+     * This method is called when a partition group restore.
+     * @param topic topic
+     * @param partitionGroup partition group id
+     */
+    void onPartitionGroupRestore(TopicName topic, int partitionGroup) throws ElectionException;
+
+
+    /**
      * This method is called when a node is removed from a partition group.
      * @param topic topic
      * @param partitionGroup partition group id
@@ -70,7 +78,17 @@ public interface ElectionService {
     void onNodeAdd(TopicName topic, int partitionGroup, PartitionGroup.ElectType electType, List<Broker> allNodes,
                    Set<Integer> learners, Broker broker, int localBroker, int leader) throws ElectionException;
 
+
     /**
+     *  Handler partition group replicas add or remove  event
+     * @param topic topic
+     * @param partitionGroup partition group id
+     * @param newReplicas broker will be added
+     *
+     **/
+    void onReplicaChange(TopicName topic, int partitionGroup, List<Integer> newReplicas) throws Exception;
+    /**
+     *
      * This method is called when the election type of a partition group is changed.
      * For example, from raft to fix or from fix to raft.
      * @param topic topic

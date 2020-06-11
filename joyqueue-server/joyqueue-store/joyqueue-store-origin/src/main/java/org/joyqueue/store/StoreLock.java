@@ -41,7 +41,7 @@ public class StoreLock {
     }
 
     public void lock() throws IOException {
-        // Try to get the lock
+        // Try to replicableStore the lock
         channel = new RandomAccessFile(lockFile, "rw").getChannel();
 
         lock = channel.tryLock();

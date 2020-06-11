@@ -449,7 +449,7 @@ public class ReplicaGroup extends Service {
             long oldPosition = startPosition;
             startPosition = getPrevPosition(startPosition);
             replica.nextPosition(startPosition);
-            logger.info("Partition group {}/node {} get prev position of {} return {}, left position is {}",
+            logger.info("Partition group {}/node {} replicableStore prev position of {} return {}, left position is {}",
                     topicPartitionGroup, localReplicaId, oldPosition, startPosition, leftPosition);
             entries = replicableStore.readEntryBuffer(startPosition, electionConfig.getMaxReplicateLength());
         }
@@ -617,7 +617,7 @@ public class ReplicaGroup extends Service {
                     Map<ConsumePartition, Position> consumePositions = consume.getConsumePositionByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
                             topicPartitionGroup.getPartitionGroupId());
                     if (consumePositions == null) {
-                        logger.debug("Partition group {}/node {} get consumer info return null",
+                        logger.debug("Partition group {}/node {} replicableStore consumer info return null",
                                 topicPartitionGroup, localReplicaId);
                         return;
                     }
@@ -817,7 +817,7 @@ public class ReplicaGroup extends Service {
             try {
                 localPrevTerm = replicableStore.getEntryTerm(prevPosition);
             } catch (Exception e) {
-                logger.info("Partition group {}/node {} match position get entry term fail, " +
+                logger.info("Partition group {}/node {} match position replicableStore entry term fail, " +
                                 "start position is {}, prev position is {}, left position is {}, right position is {}",
                         topicPartitionGroup, localReplicaId, startPosition, prevPosition, leftPosition,
                         replicableStore.rightPosition(), e);
@@ -850,7 +850,7 @@ public class ReplicaGroup extends Service {
             return replicableStore.position(position, -1);
         } catch (Throwable t) {
             long leftPosition = replicableStore.leftPosition();
-            logger.warn("Partition group {}/node {} get previous position " +
+            logger.warn("Partition group {}/node {} replicableStore previous position " +
                             "of position {} fail, return left position {}",
                     topicPartitionGroup, localReplicaId, position, leftPosition);
             return leftPosition;

@@ -241,9 +241,20 @@ public class BrokerService extends Service {
     }
 
 
+    /**
+     * Init store service
+     **/
     private StoreService getStoreService(BrokerContext brokerContext) {
-        StoreService storeService = Plugins.STORE.get();
-        Preconditions.checkArgument(storeService != null, "store service not found!");
+        BrokerStoreConfig brokerStoreconfig=new BrokerStoreConfig(brokerContext.getPropertySupplier());
+        Iterable<StoreService> it = Plugins.STORE.extensions();
+        StoreService storeService=null;
+        for(StoreService ss:it) {
+            if (brokerStoreconfig.getStorageEngineName().equals(ss.name())) {
+                 storeService=ss;
+                 break;
+            }
+        }
+        Preconditions.checkArgument(storeService != null, String.format("store service named %s not found!",brokerStoreconfig.getStorageEngineName()));
         enrichIfNecessary(storeService, brokerContext);
         return storeService;
     }

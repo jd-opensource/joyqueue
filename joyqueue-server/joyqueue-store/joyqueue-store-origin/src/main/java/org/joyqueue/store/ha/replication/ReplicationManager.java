@@ -23,7 +23,7 @@ import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.config.ClientConfig;
-import org.joyqueue.store.StoreService;
+import org.joyqueue.store.Store;
 import org.joyqueue.store.ha.ReplicableStore;
 import org.joyqueue.store.ha.election.DefaultElectionNode;
 import org.joyqueue.store.ha.election.ElectionConfig;
@@ -51,8 +51,7 @@ public class ReplicationManager extends Service {
     private ElectionConfig electionConfig;
     private BrokerConfig brokerConfig;
     private final ConcurrentHashMap<String, Transport> sessions = new ConcurrentHashMap<>();
-
-    private StoreService storeService;
+    private Store store;
     private Consume consume;
 
     private TransportClient transportClient;
@@ -60,15 +59,15 @@ public class ReplicationManager extends Service {
     private ScheduledExecutorService replicateTimerExecutor;
     private BlockingDeque replicateQueue;
 
-    public ReplicationManager(ElectionConfig electionConfig, BrokerConfig brokerConfig, StoreService storeService,
+    public ReplicationManager(ElectionConfig electionConfig, BrokerConfig brokerConfig, Store store,
                               Consume consume, BrokerMonitor brokerMonitor) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
-        Preconditions.checkArgument(storeService != null, "store service is null");
+        Preconditions.checkArgument(store != null, "store is null");
         Preconditions.checkArgument(consume != null, "consume is null");
 
         this.electionConfig = electionConfig;
         this.brokerConfig = brokerConfig;
-        this.storeService = storeService;
+        this.store = store;
         this.consume = consume;
     }
 
@@ -125,6 +124,11 @@ public class ReplicationManager extends Service {
         super.doStop();
     }
 
+    /**
+     *  Create and start replica group
+     *
+     *
+     **/
     public synchronized ReplicaGroup createReplicaGroup(String topic, int partitionGroup, List<DefaultElectionNode> allNodes,
                                                         Set<Integer> learners, int localReplicaId, int leaderId, BrokerMonitor brokerMonitor) throws ElectionException {
         TopicPartitionGroup topicPartitionGroup = new TopicPartitionGroup(topic, partitionGroup);
@@ -135,7 +139,7 @@ public class ReplicationManager extends Service {
             removeReplicaGroup(topic, partitionGroup);
         }
 
-        ReplicableStore replicableStore = null;//storeService.getReplicableStore(topic, partitionGroup);
+        ReplicableStore replicableStore =store.replicableStore(topic,partitionGroup) ;//storeService.getReplicableStore(topic, partitionGroup);
         if (replicableStore == null) {
             logger.info("Create replica group for topic {} partition group {} failed, " +
                     "replicable store is null", topic, partitionGroup);
