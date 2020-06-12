@@ -124,7 +124,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
     }
 
     @Override
-    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokerIds, int thisBrokerId) {
+    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokerIds,List<Integer> observers, int thisBrokerId,PropertySupplier extend) {
         return storeMap.computeIfAbsent(new TopicPartitionGroup(topic, partitionGroup), tg -> {
             try {
                 JournalKeeperPartitionGroupStore store =
@@ -157,7 +157,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
     }
 
     @Override
-    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokerIds, int thisBrokerId) {
+    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokerIds,List<Integer> observers, int thisBrokerId,PropertySupplier extend) {
         return storeMap.computeIfAbsent(new TopicPartitionGroup(topic, partitionGroup), tg -> {
             try {
                 JournalKeeperPartitionGroupStore store =
@@ -241,6 +241,11 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
             logger.warn("Update config failed, partition group not exist! Topic: {}, partitionGroup: {}.",
                     topic, partitionGroup);
         }
+    }
+
+    @Override
+    public void updatePreferredLeader(String topic, int partitionGroup, int brokerId) throws Exception {
+
     }
 
     @Override

@@ -239,47 +239,10 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         leaderElection.addNode(new DefaultElectionNode(broker.getIp() + ":" + broker.getBackEndPort(), broker.getId()));
     }
 
-    /**
-     *  理论上不会同时增加和删除节点,且一次只增加/减少一个节点
-     *  副本变更如果不涉及当前节点，相当于只改变当前节点主题 分组的配置；
-     *  如果新增/删除的是本节点，则需要改变相应的存储/选举
-     *  目前没有考虑 learner 的更新
-     **/
+
     @Override
     public void onReplicaChange(TopicName topic, int partitionGroup, List<Integer> newReplicas) throws Exception{
-        Integer local=clusterManager.getBrokerId();
-        PartitionGroup groupOld = clusterManager.getNameService().getTopicConfig(topic).fetchPartitionGroupByGroup(partitionGroup);
-        Set<Integer> replicasNew = new HashSet<>(newReplicas);
 
-        Set<Integer> replicasRemoved=new HashSet<>(groupOld.getReplicas());
-                     replicasRemoved.removeAll(replicasNew);
-
-        Set<Integer> replicasNewAdd= new HashSet<>(replicasNew);
-                     replicasNewAdd.removeAll(groupOld.getReplicas());
-        // process add
-        for(Integer add:replicasNewAdd){
-            // 目前没有learner,暂时忽略learner的更新
-            Broker cur = clusterManager.getBrokerById(add);
-            if (null!=cur) {
-                if (add.equals(local)){
-                    store.createPartitionGroup(topic.getFullName(),partitionGroup, Shorts.toArray(groupOld.getPartitions()),newReplicas,
-                                Lists.newArrayList(groupOld.getLearners()),local, StoreUtils.partitionGroupExtendProperties(groupOld));
-                }else{
-                    onNodeAdd(topic, partitionGroup, groupOld.getElectType(), store.brokers(newReplicas), groupOld.getLearners(), cur,local,groupOld.getLeader());
-                }
-            }else{
-                logger.warn("Ignored,New node {} not found on metadata ",add);
-            }
-            logger.info("topic[{}] update partitionGroup[{}] and add node[{}] ", topic.getFullName(), partitionGroup,add);
-        }
-        for(Integer r:replicasRemoved){
-            if(r.equals(local)){
-                store.removePartitionGroup(topic.getFullName(),partitionGroup);
-            }else {
-                onNodeRemove(topic, partitionGroup, r, local);
-            }
-            logger.info("topic[{}] update partitionGroup[{}] and remove node[{}] ", topic.getFullName(), partitionGroup, r);
-        }
     }
 
     @Override

@@ -88,7 +88,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         }
     }
 
-    protected void restore() throws IOException, InterruptedException {
+    protected void restore() throws Exception {
         Broker broker = clusterManager.getBroker();
         List<Replica> replicas = nameService.getReplicaByBroker(broker.getId());
         if (CollectionUtils.isEmpty(replicas)) {
@@ -124,6 +124,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
             logger.info("All stores are ready!");
         }
     }
+
     /**
      * Recovery from local
      **/
@@ -143,8 +144,6 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
      * Create partition group properties supplier
      *
      **/
-
-
     @Override
     public void onEvent(MetaEvent event) {
         try {
@@ -203,9 +202,8 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
      * @param partitionGroup partition group
      * @param newPreferredLeader preferred leader
      **/
-    private void onLeaderChange(TopicName topic, int partitionGroup, int newPreferredLeader) {
-        // TODO
-
+    private void onLeaderChange(TopicName topic, int partitionGroup, int newPreferredLeader) throws Exception{
+        storeService.updatePreferredLeader(topic.getFullName(),partitionGroup,newPreferredLeader);
     }
 
 

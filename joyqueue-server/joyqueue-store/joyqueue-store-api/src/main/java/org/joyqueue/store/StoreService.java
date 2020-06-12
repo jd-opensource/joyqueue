@@ -57,7 +57,7 @@ public interface StoreService {
      * @param partitionGroup  partition group id
      * @param partitions  partitions included in the partition group
      * @param brokers   all replicas of the partition group
-     * @param observers replicas without vote right
+     * @param observers replicas without vote right,can be null or empty
      * @param thisBrokerId local broker
      * @param extend  partition group extend properties
      *
@@ -73,6 +73,7 @@ public interface StoreService {
      * @param partitions Partition
      * @param brokers 所有副本（包含本节点）的BrokerId
      * @param thisBrokerId 本节点的BrokerId
+     * @param extend  partition group extend properties
      * @return See {@link PartitionGroupStore}
      */
     PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers,
@@ -118,8 +119,16 @@ public interface StoreService {
      * 如果当前节点是Leader，执行副本分布节点变更
      * @param newReplicaBrokerIds 变更后的新配置
      */
-    void maybeUpdateReplicas(String topic, int partitionGroup, Collection<Integer> newReplicaBrokerIds);
+    void maybeUpdateReplicas(String topic, int partitionGroup, Collection<Integer> newReplicaBrokerIds) throws Exception;
 
+    /**
+     * Update preferred leader of the partition group
+     * @param topic  topic full name
+     * @param partitionGroup
+     * @param brokerId  preferred leader broker id
+     *
+     **/
+    void updatePreferredLeader(String topic, int partitionGroup,int brokerId) throws Exception;
     /**
      * 获取管理接口 {@link StoreManagementService} 实例
      * @return {@link StoreManagementService} 实例
