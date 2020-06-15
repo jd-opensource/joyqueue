@@ -27,7 +27,9 @@ import org.joyqueue.domain.*;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.ha.ReplicableStore;
+import org.joyqueue.store.ha.election.DefaultElectionNode;
 import org.joyqueue.store.ha.election.ElectionManager;
+import org.joyqueue.store.ha.election.ElectionMetadata;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.store.transaction.TransactionStoreManager;
 import org.joyqueue.store.utils.PreloadBufferPool;
@@ -185,7 +187,8 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     @Override
-    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers, int thisBrokerId,PropertySupplier extend) throws Exception{
+    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,
+                                                             List<Integer> observers, int thisBrokerId,PropertySupplier extend) throws Exception{
         if(partitionGroupExists(topic,partitionGroup)){
             restorePartitionGroup(topic,partitionGroup);
             electionManager.onPartitionGroupRestore(new TopicName(topic),partitionGroup);
@@ -196,10 +199,14 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     @Override
-    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers, int thisBrokerId,PropertySupplier extend) throws Exception{
+    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,
+                                                    List<Integer> observers, int thisBrokerId,PropertySupplier extend) throws Exception{
         createPartitionGroup(topic,partitionGroup,partitions);
         PartitionGroupConfig config=new PartitionGroupConfig(extend);
         electionManager.onPartitionGroupCreate(config.electionType(),new TopicName(topic),partitionGroup,brokers(brokers),new HashSet(observers),thisBrokerId,config.fixLeader());
+        if(config.electionType()== PartitionGroup.ElectType.raft&&config.recommendLeader()>0){
+            updatePreferredLeader(topic,partitionGroup,config.recommendLeader());
+        }
         return getStore(topic,partitionGroup);
     }
 
@@ -210,7 +217,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         PartitionGroupStoreManager partitionGroupStoreManager= storeMap.get(partitionGroupStoreKey(topic,partitionGroup));
         if(Objects.nonNull(partitionGroupStoreManager)){
             partitionGroupStoreManager.stop();
-            //electionManager.on
+            electionManager.onPartitionGroupStop(TopicName.parse(topic),partitionGroup);
         }
     }
 
@@ -232,7 +239,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         }
 
         Integer local=clusterManager.getBrokerId();
-        PartitionGroup groupOld = clusterManager.getNameService().getTopicConfig(TopicName.parse(topic)).fetchPartitionGroupByGroup(partitionGroup);
+        PartitionGroup groupOld = partitionGroup(topic,partitionGroup);
         Set<Integer> replicasNew = new HashSet<>(newReplicaBrokerIds);
 
         Set<Integer> replicasRemoved=new HashSet<>(groupOld.getReplicas());
@@ -248,7 +255,8 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                     createPartitionGroup(topic,partitionGroup, Shorts.toArray(groupOld.getPartitions()),Lists.newArrayList(newReplicaBrokerIds),
                             Lists.newArrayList(groupOld.getLearners()),local, StoreUtils.partitionGroupExtendProperties(groupOld));
                 }else{
-                    electionManager.onNodeAdd(TopicName.parse(topic), partitionGroup, groupOld.getElectType(), brokers(Lists.newArrayList(newReplicaBrokerIds)), groupOld.getLearners(), cur,local,groupOld.getLeader());
+                    electionManager.onNodeAdd(TopicName.parse(topic), partitionGroup, groupOld.getElectType(),
+                            brokers(Lists.newArrayList(newReplicaBrokerIds)), groupOld.getLearners(), cur,local,groupOld.getLeader());
                 }
             }else{
                 LOG.warn("Ignored,New node {} not found on metadata ",add);
@@ -263,6 +271,27 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             }
             LOG.info("Topic[{}] update partitionGroup[{}] and remove node[{}] ", topic, partitionGroup, r);
         }
+    }
+
+    /**
+     *  Partition group from local
+     *  以当前的配置为准
+     *
+     **/
+    private PartitionGroup partitionGroup(String topic,int partitionGroup){
+      ElectionMetadata electionMetadata= electionManager.getMetadata(TopicName.parse(topic),partitionGroup);
+      PartitionGroup pg=new PartitionGroup();
+      if(electionMetadata!=null){
+          pg.setReplicas(electionMetadata.getAllNodes().stream().map(DefaultElectionNode::getNodeId).collect(Collectors.toSet()));
+          pg.setLearners(electionMetadata.getLearners());
+          pg.setElectType(electionMetadata.getElectType());
+          pg.setLeader(pg.getLeader());
+          pg.setRecLeader(pg.getRecLeader());
+      }else{
+          pg.setReplicas(Collections.EMPTY_SET);
+          pg.setLearners(Collections.EMPTY_SET);
+      }
+      return pg;
     }
 
     @Override
@@ -402,7 +431,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
      *
      *
      **/
-    private synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
+    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
         if (!storeMap.containsKey(topic + "/" + partitionGroup)) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             if (groupBase.exists()) delete(groupBase);
@@ -443,7 +472,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     /**
      *  Qos partition group store
      **/
-    private PartitionGroupStore getStore(String topic, int partitionGroup, QosLevel writeQosLevel) {
+    public PartitionGroupStore getStore(String topic, int partitionGroup, QosLevel writeQosLevel) {
         PartitionGroupStoreManager partitionGroupStoreManager = partitionGroupStore(topic, partitionGroup);
         return partitionGroupStoreManager == null ? null : partitionGroupStoreManager.getQosStore(writeQosLevel);
     }
@@ -506,7 +535,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
 
-    private File base() {
+    protected File base() {
         return base;
     }
 
@@ -540,7 +569,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
 
-    private List<String> topics() {
+    protected List<String> topics() {
         return storeMap.keySet().stream().map(k -> k.split("/")[0]).distinct().collect(Collectors.toList());
     }
 
@@ -548,14 +577,14 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         return new ArrayList<>(storeMap.keySet());
     }
 
-    private List<Integer> partitionGroups(String topic) {
+    protected List<Integer> partitionGroups(String topic) {
         return storeMap.keySet().stream()
                 .filter(k -> k.matches("^" + topic + "/\\d+$"))
                 .map(k -> k.substring(topic.length() + 1))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
     }
-    private PartitionGroupStoreManager partitionGroupStore(String topic, int partitionGroup) {
+    protected PartitionGroupStoreManager partitionGroupStore(String topic, int partitionGroup) {
         return storeMap.get(partitionGroupStoreKey(topic,partitionGroup));
     }
 

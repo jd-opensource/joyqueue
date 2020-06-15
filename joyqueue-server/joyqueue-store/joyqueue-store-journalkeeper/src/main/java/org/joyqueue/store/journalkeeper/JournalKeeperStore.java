@@ -124,7 +124,8 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
     }
 
     @Override
-    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokerIds,List<Integer> observers, int thisBrokerId,PropertySupplier extend) {
+    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokerIds,List<Integer> observers,
+                                                             int thisBrokerId,PropertySupplier extend) {
         return storeMap.computeIfAbsent(new TopicPartitionGroup(topic, partitionGroup), tg -> {
             try {
                 JournalKeeperPartitionGroupStore store =

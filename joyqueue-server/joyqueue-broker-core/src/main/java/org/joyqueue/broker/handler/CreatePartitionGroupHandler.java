@@ -16,9 +16,11 @@
 package org.joyqueue.broker.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Shorts;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.store.StoreUtils;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
@@ -35,8 +37,6 @@ import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -96,24 +96,17 @@ public class CreatePartitionGroupHandler implements CommandHandler, Type {
                     group.getTopic().getFullName(),
                     group.getGroup(),
                     Shorts.toArray(group.getPartitions()),
-                    new ArrayList<>(group.getReplicas()),
-                    clusterManager.getBrokerId());
+                    Lists.newArrayList(group.getReplicas()),
+                    Lists.newArrayList(group.getLearners()),
+                    clusterManager.getBrokerId(), StoreUtils.partitionGroupExtendProperties(group));
             if(null != store) {
                 CountDownLatch latch = new CountDownLatch(1);
                 store.whenClusterReady(1000L).thenAccept(ready -> latch.countDown());
                 latch.await();
             }
-            //}
-//            Set<Integer> replicas = group.getReplicas();
-//            List<Broker> list = new ArrayList<>(replicas.size());
-//            replicas.forEach(brokerId->{
-//                list.add(clusterManager.getBrokerById(brokerId));
-//            });
-//            electionService.onPartitionGroupCreate(group.getElectType(),group.getTopic(),group.getGroup(),list,group.getLearners(),clusterManager.getBrokerId(),group.getLeader());
     }
     private void rollback(PartitionGroup group){
         if(logger.isDebugEnabled())logger.debug("topic[{}] remove partitionGroup[{}]",group.getTopic(),group.getGroup());
             storeService.removePartitionGroup(group.getTopic().getFullName(),group.getGroup());
-//            electionService.onPartitionGroupRemove(group.getTopic(),group.getGroup());
     }
 }

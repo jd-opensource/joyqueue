@@ -472,6 +472,11 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-store-origin</artifactId>
+                <scope>${project.version}</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-client-all</artifactId>
                 <version>${project.version}</version>
             </dependency>

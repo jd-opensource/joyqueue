@@ -78,7 +78,6 @@ public class RemovePartitionGroupHandler implements CommandHandler, Type {
             logger.debug("topic[{}] remove partitionGroup[{}]", group.getTopic(), group.getGroup());
         }
         storeService.removePartitionGroup(group.getTopic().getFullName(), group.getGroup());
-//        electionService.onPartitionGroupRemove(group.getTopic(), group.getGroup());
     }
 
     private void rollback(Transport transport, Command command) {

@@ -99,11 +99,6 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
-    public void updatePreferredLeader(int brokerId) {
-
-    }
-
-    @Override
     public boolean readable() {
         return true;
     }

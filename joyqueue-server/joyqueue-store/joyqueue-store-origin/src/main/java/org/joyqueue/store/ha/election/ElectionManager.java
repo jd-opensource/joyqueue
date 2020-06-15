@@ -17,8 +17,6 @@ package org.joyqueue.store.ha.election;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Shorts;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.cluster.ClusterManager;
@@ -26,7 +24,6 @@ import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
-import org.joyqueue.broker.store.StoreUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
@@ -201,6 +198,16 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
     }
 
     @Override
+    public void onPartitionGroupStop(TopicName topic, int partitionGroup) {
+        LeaderElection leaderElection = getLeaderElection(topic.getFullName(), partitionGroup);
+        if (leaderElection != null) {
+            leaderElection.stop();
+        }else{
+            logger.warn("Try to stop {}/{} election,but not exist",topic.getFullName(),partitionGroup);
+        }
+    }
+
+    @Override
     public void onPartitionGroupRestore(TopicName topic, int partitionGroup) throws ElectionException{
        TopicPartitionGroup tp=new TopicPartitionGroup(topic.getFullName(),partitionGroup);
        ElectionMetadata partitionGroupMetadata= electionMetadataManager.getElectionMetadata(tp);
@@ -237,12 +244,6 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             }
         }
         leaderElection.addNode(new DefaultElectionNode(broker.getIp() + ":" + broker.getBackEndPort(), broker.getId()));
-    }
-
-
-    @Override
-    public void onReplicaChange(TopicName topic, int partitionGroup, List<Integer> newReplicas) throws Exception{
-
     }
 
     @Override
@@ -320,6 +321,11 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
     public LeaderElection getLeaderElection(String topic, int partitionGroup) {
         return leaderElections.get(new TopicPartitionGroup(topic, partitionGroup));
+    }
+
+    @Override
+    public ElectionMetadata getMetadata(TopicName topic, int partitionGroup) {
+        return electionMetadataManager.getElectionMetadata(new TopicPartitionGroup(topic.getFullName(),partitionGroup));
     }
 
     /**

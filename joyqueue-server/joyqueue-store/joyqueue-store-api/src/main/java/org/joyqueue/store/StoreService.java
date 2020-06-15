@@ -18,12 +18,9 @@ package org.joyqueue.store;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.toolkit.config.PropertySupplier;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
-
 
 /**
  * Broker 存储元数据服务
@@ -119,7 +116,7 @@ public interface StoreService {
      * 如果当前节点是Leader，执行副本分布节点变更
      * @param newReplicaBrokerIds 变更后的新配置
      */
-    void maybeUpdateReplicas(String topic, int partitionGroup, Collection<Integer> newReplicaBrokerIds) throws Exception;
+    void maybeUpdateReplicas(String topic, int partitionGroup,Collection<Integer> newReplicaBrokerIds) throws Exception;
 
     /**
      * Update preferred leader of the partition group

@@ -233,7 +233,6 @@ public class BrokerService extends Service {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
         NameService nameService = Plugins.NAMESERVICE.get(property == null ? DEFAULT_NAMESERVICE_NAME : property.getString());
         Preconditions.checkArgument(nameService != null, "nameService not found!");
-
         CompensatedNameService compensatedNameService = new CompensatedNameService(nameService);
         enrichIfNecessary(nameService, brokerContext);
         enrichIfNecessary(compensatedNameService, brokerContext);

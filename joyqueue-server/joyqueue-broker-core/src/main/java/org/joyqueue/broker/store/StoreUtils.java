@@ -16,6 +16,7 @@ public class StoreUtils {
         Map<String,Object> properties=new HashMap();
         properties.put(PartitionGroupConfig.PartitionGroupConfigKey.ELECTION_TYPE.getName(),group.getElectType().type());
         properties.put(PartitionGroupConfig.PartitionGroupConfigKey.FIX_LEADER.getName(),group.getLeader());
+        properties.put(PartitionGroupConfig.PartitionGroupConfigKey.REC_LEADER.getName(),group.getRecLeader());
         return new PropertySupplier.MapSupplier(properties);
     }
 }

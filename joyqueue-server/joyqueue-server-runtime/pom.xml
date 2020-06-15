@@ -109,6 +109,12 @@
         </dependency>
         <dependency>
             <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-store-origin</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-client-all</artifactId>
             <exclusions>
                 <exclusion>

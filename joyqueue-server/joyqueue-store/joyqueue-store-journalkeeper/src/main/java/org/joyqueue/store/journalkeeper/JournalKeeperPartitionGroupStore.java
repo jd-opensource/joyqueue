@@ -301,11 +301,6 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
     }
 
-    @Override
-    public void updatePreferredLeader(int brokerId) {
-
-    }
-
     private void updateConfig(List<URI> newConfigs, ClusterConfiguration clusterConfiguration) {
         adminClient
             .updateVoters(clusterConfiguration.getVoters(), newConfigs)

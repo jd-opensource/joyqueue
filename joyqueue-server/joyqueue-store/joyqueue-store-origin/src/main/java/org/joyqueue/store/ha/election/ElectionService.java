@@ -51,6 +51,13 @@ public interface ElectionService {
      */
     void onPartitionGroupRemove(TopicName topic, int partitionGroup);
 
+
+    /**
+     * This method is called when a partition group is removed.
+     * @param topic topic
+     * @param partitionGroup partition group id
+     */
+    void onPartitionGroupStop(TopicName topic, int partitionGroup);
     /**
      * This method is called when a partition group restore.
      * @param topic topic
@@ -79,14 +86,6 @@ public interface ElectionService {
                    Set<Integer> learners, Broker broker, int localBroker, int leader) throws ElectionException;
 
 
-    /**
-     *  Handler partition group replicas add or remove  event
-     * @param topic topic
-     * @param partitionGroup partition group id
-     * @param newReplicas broker will be added
-     *
-     **/
-    void onReplicaChange(TopicName topic, int partitionGroup, List<Integer> newReplicas) throws Exception;
     /**
      *
      * This method is called when the election type of a partition group is changed.
@@ -137,6 +136,9 @@ public interface ElectionService {
      * @return leader election
      */
     List<LeaderElection> getLeaderElections();
+
+
+    ElectionMetadata getMetadata(TopicName topic, int partitionGroup);
 
     /**
      * Sync election meta data from name service
