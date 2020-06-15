@@ -35,6 +35,11 @@
             <artifactId>joyqueue-web-application</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-portal</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
