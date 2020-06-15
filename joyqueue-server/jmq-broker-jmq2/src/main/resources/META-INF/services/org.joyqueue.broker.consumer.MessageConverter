@@ -1,0 +1,3 @@
+com.jd.joyqueue.broker.jmq2.converter.JoyQueueToJmq2MessageConverter
+com.jd.joyqueue.broker.jmq2.converter.KafkaToJmq2MessageConverter
+com.jd.joyqueue.broker.jmq2.converter.Jmq2ToKafkaMessageConverter
