@@ -52,5 +52,6 @@
     <!-- 日志输出级别 -->
     <root level="info">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>
