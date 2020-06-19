@@ -69,31 +69,31 @@ import java.util.List;
  * BrokerService
  */
 public class BrokerService extends Service {
-    private static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
-    private static final String NAMESERVICE_NAME = "nameserver.nsr.name";
-    private static final String DEFAULT_NAMESERVICE_NAME = "server";
-    private BrokerConfig brokerConfig;
-    private SessionManager sessionManager;
-    private BrokerMonitorService brokerMonitorService;
-    private BrokerManageService brokerManageService;
-    private Authentication authentication;
-    private ProtocolManager protocolManager;
-    private BrokerServer brokerServer;
-    private ClusterManager clusterManager;
-    private Produce produce;
-    private Consume consume;
-    private StoreService storeService;
-    private StoreInitializer storeInitializer;
-    private MessageRetry retryManager;
-    private BrokerContext brokerContext;
-    private ConfigurationManager configurationManager;
-    private NameService nameService;
-    private CoordinatorService coordinatorService;
-    private ArchiveManager archiveManager;
-    private MessageConvertSupport messageConvertSupport;
-    private ExtensionManager extensionManager;
-    private BrokerTransportManager brokerTransportManager;
-    private String[] args;
+    protected static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
+    protected static final String NAMESERVICE_NAME = "nameserver.nsr.name";
+    protected static final String DEFAULT_NAMESERVICE_NAME = "server";
+    protected BrokerConfig brokerConfig;
+    protected SessionManager sessionManager;
+    protected BrokerMonitorService brokerMonitorService;
+    protected BrokerManageService brokerManageService;
+    protected Authentication authentication;
+    protected ProtocolManager protocolManager;
+    protected BrokerServer brokerServer;
+    protected ClusterManager clusterManager;
+    protected Produce produce;
+    protected Consume consume;
+    protected StoreService storeService;
+    protected StoreInitializer storeInitializer;
+    protected MessageRetry retryManager;
+    protected BrokerContext brokerContext;
+    protected ConfigurationManager configurationManager;
+    protected NameService nameService;
+    protected CoordinatorService coordinatorService;
+    protected ArchiveManager archiveManager;
+    protected MessageConvertSupport messageConvertSupport;
+    protected ExtensionManager extensionManager;
+    protected BrokerTransportManager brokerTransportManager;
+    protected String[] args;
 
     public BrokerService() {
     }
