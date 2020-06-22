@@ -32,14 +32,17 @@ public class ExtensionPointLazyExt<T,M> extends ExtensionPointLazy<T,M> {
         return ep;
     }
 
+    /**
+     *
+     * Force close plugin singleton env variable
+     *
+     *
+     **/
     public boolean forceCloseSingleton(){
        String b= System.getenv("force.close.plugin.singleton");
        if(b!=null){
          return   Boolean.valueOf(b);
        }
        return false;
-    }
-
-    public static void main(String[] args){
     }
 }
