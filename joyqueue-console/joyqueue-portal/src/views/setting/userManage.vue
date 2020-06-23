@@ -8,7 +8,6 @@
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">添加用户<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
-
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
               @on-selection-change="handleSelectionChange" @on-edit="edit" @on-del="del">
     </my-table>
@@ -72,7 +71,11 @@ export default {
           },
           {
             title: '中文名',
-            key: 'name'
+            key: 'code'
+          },
+          {
+            title: '密码',
+            key: 'password'
           },
           {
             title: '所属部门',
@@ -115,7 +118,7 @@ export default {
           {
             txt: '角色修改  ',
             method: 'on-edit'
-          }
+          },
           // {
           //   txt: '禁用',
           //   method: 'on-disable',
@@ -128,10 +131,12 @@ export default {
           //   bindKey: 'status',
           //   bindVal: 0
           // }
-          // {
-          //   txt: '删除',
-          //   method: 'on-del'
-          // }
+          {
+            txt: '删除',
+            method: 'on-del',
+            bindKey: 'role',
+            bindVal: 0
+          }
         ]
       },
       multipleSelection: [],

@@ -83,7 +83,7 @@ export default {
         isArchiveEnabled: `/archive/isServerEnabled`,
         isRetryEnabled: `/retry/isServerEnabled`
       },
-      archiveEnabled: false,
+      archiveEnabled: true,
       retryEnabled: true
     }
   },

@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `update_by` bigint(20) DEFAULT NULL COMMENT '修改人',
   `update_time` datetime NOT NULL COMMENT '修改时间',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态：-1 删除，0 禁用，1 启用',
+  `password` varchar(64) DEFAULT '' COMMENT '用户密码',
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
@@ -174,9 +175,10 @@ INSERT INTO
     `create_time`,
     `update_by`,
     `update_time`,
-    `status`)
+    `status`,
+    `password`)
 SELECT
-  1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, NOW(), -1, NOW(), 1
+  1, 'admin', 'Admin', NULL, NULL, NULL, NULL, 1, 0, NULL, NOW(), -1, NOW(), 1, '123456'
 FROM
   Dual
 WHERE

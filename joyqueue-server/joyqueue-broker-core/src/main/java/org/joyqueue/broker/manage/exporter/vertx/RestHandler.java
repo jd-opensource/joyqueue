@@ -16,12 +16,13 @@
 package org.joyqueue.broker.manage.exporter.vertx;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.joyqueue.monitor.RestResponse;
-import org.joyqueue.monitor.StringResponse;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
+import org.joyqueue.monitor.RestResponse;
+import org.joyqueue.monitor.StringResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ public class RestHandler implements Handler<RoutingContext> {
         RestResponse response = null;
         try {
             Object result = handlerInvoker.invoke(context);
+            JSONObject.toJSONString(result);
             if (result instanceof RestResponse) {
                 response = (RestResponse) result;
             } else {
