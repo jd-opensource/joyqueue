@@ -74,7 +74,7 @@
         <commons-logging.version>1.2</commons-logging.version>
         <commons-io.version>2.3</commons-io.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
-        <commons-beanutils.version>1.8.3</commons-beanutils.version>
+        <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-collections4.version>4.1</commons-collections4.version>
         <commons-cli.version>1.4</commons-cli.version>
@@ -82,7 +82,7 @@
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
         <jackson-databind.version>2.9.10.4</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
-        <hibernate-validator.version>5.3.0.Final</hibernate-validator.version>
+        <hibernate-validator.version>5.3.5.Final</hibernate-validator.version>
         <el.version>2.2.4</el.version>
         <guava.version>21.0</guava.version>
         <amq.core.version>5.6.0</amq.core.version>
