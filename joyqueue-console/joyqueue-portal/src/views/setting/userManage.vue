@@ -37,6 +37,13 @@
           <d-radio v-model="editData.role" name="radio" :label="0">用户</d-radio>
         </grid-col>
       </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">密码：</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14">
+          <d-input v-model="editData.password" placeholder="请输入4位密码"></d-input>
+        </grid-col>
+      </grid-row>
     </my-dialog>
   </div>
 </template>
@@ -47,9 +54,11 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import GridCol from '../../components/grid/col'
+import GridRow from '../../components/grid/row'
 export default {
   name: 'userManage',
   components: {
+    GridRow,
     GridCol,
     myTable,
     myDialog
@@ -116,7 +125,7 @@ export default {
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值
         btns: [
           {
-            txt: '角色修改  ',
+            txt: '修改  ',
             method: 'on-edit'
           },
           // {

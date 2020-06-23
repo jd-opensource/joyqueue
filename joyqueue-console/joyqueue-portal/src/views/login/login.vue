@@ -43,7 +43,7 @@ export default {
       rules: {
         username: [
           {
-            required: true, message: '用户名不可以为空,长度范围为[4,20]', min: 4, max: 20, trigger: 'blur'
+            required: true, message: '用户名不可以为空,长度范围为[3,20]', min: 3, max: 20, trigger: 'blur'
           }
         ],
         password: [
