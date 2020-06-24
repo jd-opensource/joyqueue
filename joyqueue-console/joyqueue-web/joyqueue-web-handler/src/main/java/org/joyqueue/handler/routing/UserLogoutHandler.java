@@ -29,13 +29,14 @@ import static com.jd.laf.web.vertx.Environment.USER_KEY;
  **/
 public class UserLogoutHandler extends RemoteIpHandler {
 
+    private String jwtCookieName = "jwt";
+
     @Value(value = "user.session.key", defaultValue = "user")
     protected String userSessionKey;
 
     @Override
     public void handle(RoutingContext context) {
-        Session session = context.session();
-        session.remove(userSessionKey);
+        context.removeCookie(jwtCookieName);
         context.remove(USER_KEY);
         context.clearUser();
         context.next();
