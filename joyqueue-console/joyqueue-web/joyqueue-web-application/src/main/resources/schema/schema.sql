@@ -35,7 +35,6 @@ CREATE TABLE IF NOT EXISTS `application_user` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARSET=utf8;
 
-DROP TABLE `user`;
 CREATE TABLE IF NOT EXISTS `user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `code` varchar(64) NOT NULL COMMENT '用户英文名',
