@@ -65,14 +65,19 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           let data = this.formData
-          apiRequest.post(this.urls.loginUrl, {}, data).then(data => {
-            this.$store.dispatch('getUserInfo').then(data => {
-              sessionStorage.setItem('username', data.loginUserName)
-              sessionStorage.setItem('role', data.loginUserRole)
-              this.$router.push({
-                path: `/`
+          apiRequest.post(this.urls.loginUrl, {}, data).then(result => {
+            console.log(result)
+            if (result.code === 200) {
+              // 生成cookie并保存
+              window.document.cookie = 'login.session=' + data.username + ':' + data.password
+              this.$store.dispatch('getUserInfo').then(result => {
+                sessionStorage.setItem('username', result.loginUserName)
+                sessionStorage.setItem('role', result.loginUserRole)
+                this.$router.push({
+                  path: `/`
+                })
               })
-            })
+            }
           })
         }
       })

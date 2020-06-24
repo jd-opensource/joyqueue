@@ -70,6 +70,10 @@
             <artifactId>laf-vertx-web-springboot-starter</artifactId>
             <groupId>com.jd.joyqueue</groupId>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-datasource-hikaricp</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>

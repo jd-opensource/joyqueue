@@ -20,6 +20,7 @@ import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.handler.RemoteIpHandler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Cookie;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.Session;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
@@ -46,6 +47,9 @@ public class UserLoginHandler extends RemoteIpHandler {
     @Value(value = "user.session.key", defaultValue = "user")
     protected String userSessionKey;
 
+    @Value(value = "login.cookie.key", defaultValue = "login.session")
+    protected String loginCookieName;
+
     @Value
     @NotNull
     protected UserService userService;
@@ -59,41 +63,46 @@ public class UserLoginHandler extends RemoteIpHandler {
             context.fail(new HttpStatusException(HTTP_INTERNAL_ERROR, "No session - did you forget to include a SessionHandler?"));
             return;
         }
-        try {
-            JsonObject requestBody = context.getBodyAsJson();
-            if (context.request().absoluteURI().endsWith("/user/login")
-                    && requestBody != null
-                    && requestBody.containsKey("username")
-                    && requestBody.containsKey("password")) {
-                String username = requestBody.getString("username");
-                String password = requestBody.getString("password");
-                User user = userService.findUserByNameAndPassword(username, password);
-                userService.findByCode("admin");
-                if (user != null) {
-                    session.put(userSessionKey, user);
-                    context.put(USER_KEY, user);
-                    context.next();
-                    return;
-                } else {
-                    session.remove(userSessionKey);
-                    context.remove(USER_KEY);
-                    context.clearUser();
-                    context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Forbidden - Username or Password is wrong"));
-                    return;
+
+        JsonObject requestBody = context.getBodyAsJson();
+        if (requestBody != null && requestBody.containsKey("username") && requestBody.containsKey("password")) {
+            String username = requestBody.getString("username");
+            String password = requestBody.getString("password");
+            User user = userService.findUserByNameAndPassword(username, password);
+            if (user != null) {
+                session.put(userSessionKey, user);
+                context.put(USER_KEY, user);
+                context.next();
+            } else {
+                context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Login Error - username or password incorrect."));
+            }
+        } else {
+            User user = session.get(userSessionKey);
+            if (user != null) {
+                //存放用户上下文信息
+                context.put(USER_KEY, user);
+                context.next();
+                return;
+            }
+
+            Cookie cookie = context.getCookie(loginCookieName);
+            String ticket = cookie == null ? null : cookie.getValue();
+            if (ticket != null && !ticket.isEmpty()) {
+                String[] userPwd = ticket.split(":");
+                if (userPwd.length == 2) {
+                    user = userService.findUserByNameAndPassword(userPwd[0], userPwd[1]);
+                    if (user != null) {
+                        session.put(userSessionKey, user);
+                        context.put(USER_KEY, user);
+                        context.next();
+                        return;
+                    }
                 }
             }
-        } catch (Exception ignore) {
-            logger.error("query user error", ignore);
+            context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Login Error - login cookie empty or invalid."));
         }
 
-        User user = session.get(userSessionKey);
-        if (user != null) {
-            context.put(USER_KEY, user);
-            context.next();
-        } else {
 
-            context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Forbidden - User session is expire"));
-        }
     }
 
 

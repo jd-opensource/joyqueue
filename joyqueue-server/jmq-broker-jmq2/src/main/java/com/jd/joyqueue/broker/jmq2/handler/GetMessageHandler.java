@@ -198,7 +198,8 @@ public class GetMessageHandler implements JMQ2CommandHandler, Type, BrokerContex
         }
     }
 
-    protected PullResult doGetBroadcastMessage(Transport transport, Command command, Consumer consumer, Traffic traffic, GetMessage getMessage, org.joyqueue.domain.Consumer topicConsumer) throws Exception {
+    protected PullResult doGetBroadcastMessage(Transport transport, Command command, Consumer consumer, Traffic traffic,
+                                               GetMessage getMessage, org.joyqueue.domain.Consumer topicConsumer) throws Exception {
         List<PartitionGroup> partitionGroups = clusterManager.getTopicConfig(getMessage.getTopic()).fetchTopicPartitionGroupsByBrokerId(clusterManager.getBrokerId());
         if (partitionGroups.size() > 1) {
             logger.warn("broadcast consumer error, partitionGroup is {}, topic: {}, app: {}", partitionGroups.size(), getMessage.getTopic(), consumer.getApp());
