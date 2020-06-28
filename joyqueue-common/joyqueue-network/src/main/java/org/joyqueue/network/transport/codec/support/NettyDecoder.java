@@ -19,7 +19,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.joyqueue.network.transport.codec.Codec;
-import org.joyqueue.network.transport.exception.TransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -30,6 +31,8 @@ import java.util.List;
  * date: 2018/8/14
  */
 public class NettyDecoder extends ByteToMessageDecoder {
+
+    protected static final Logger logger = LoggerFactory.getLogger(NettyDecoder.class);
 
     private Codec codec;
 
@@ -45,12 +48,8 @@ public class NettyDecoder extends ByteToMessageDecoder {
                 out.add(payload);
             }
         } catch (Exception e) {
+            logger.error("decode exception, ctx: {}", ctx, e);
             ctx.channel().close();
-            if (e instanceof TransportException.CodecException) {
-                throw e;
-            } else {
-                throw new TransportException.CodecException(e);
-            }
         }
     }
 }
