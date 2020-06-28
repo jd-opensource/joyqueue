@@ -16,6 +16,7 @@
 package org.joyqueue.store;
 
 import org.joyqueue.domain.QosLevel;
+import org.joyqueue.toolkit.concurrent.EventFuture;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +91,9 @@ public class QosStore implements PartitionGroupStore {
 
     @Override
     public CompletableFuture<WriteResult> asyncWrite(QosLevel qosLevel, WriteRequest... writeRequests) {
-        throw new UnsupportedOperationException("Unsupported");
+        CompletableFuture<WriteResult> future = new CompletableFuture<>();
+        asyncWrite(event ->{future.complete(event);},qosLevel,writeRequests);
+        return future;
     }
 
     @Override

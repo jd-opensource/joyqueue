@@ -12,6 +12,9 @@ import java.util.Comparator;
 public class ExtensionPointLazyExt<T,M> extends ExtensionPointLazy<T,M> {
 
 
+    public ExtensionPointLazyExt(Class<T> extensible){
+        this(extensible,null,null,null);
+    }
     public ExtensionPointLazyExt(Class<T> extensible, ExtensionLoader loader, Comparator<ExtensionMeta<T, M>> comparator,
                               Classify<T, M> classify) {
         super(extensible,loader,comparator,classify);

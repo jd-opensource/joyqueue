@@ -42,6 +42,7 @@ import org.joyqueue.nsr.service.internal.PartitionGroupReplicaInternalService;
 import org.joyqueue.nsr.service.internal.ProducerInternalService;
 import org.joyqueue.nsr.service.internal.TopicInternalService;
 import org.joyqueue.nsr.service.internal.TransactionInternalService;
+import org.joyqueue.plugin.ExtensionPointLazyExt;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.lang.LifeCycle;
@@ -54,7 +55,7 @@ import org.joyqueue.toolkit.service.Service;
  */
 public class DefaultServiceProvider extends Service implements ServiceProvider, PropertySupplierAware {
 
-    private ExtensionPoint<InternalServiceProvider, String> INTERNAL_SERVICE_PROVIDER_POINT = new ExtensionPointLazy<>(InternalServiceProvider.class);
+    private ExtensionPoint<InternalServiceProvider, String> INTERNAL_SERVICE_PROVIDER_POINT = new ExtensionPointLazyExt<>(InternalServiceProvider.class);
     private ExtensionPoint<Messenger, String> MESSENGER_POINT = new ExtensionPointLazy<>(Messenger.class);
 
     private InternalServiceProvider internalServiceProvider;

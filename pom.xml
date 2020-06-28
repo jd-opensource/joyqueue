@@ -181,6 +181,11 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-server-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-archive-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -40,34 +40,34 @@ public class BrokerServer extends Service {
     public BrokerServer(BrokerContext brokerContext, ProtocolManager protocolManager) {
         Preconditions.checkArgument(brokerContext != null, "broker context can not be null");
         Preconditions.checkArgument(protocolManager != null, "protocol manager can not be null");
-
-        ServerConfig frontendConfig = brokerContext.getBrokerConfig().getFrontendConfig();
-        ServerConfig backendConfig = brokerContext.getBrokerConfig().getBackendConfig();
         SessionManager sessionManager = brokerContext.getSessionManager();
 
+        ServerConfig frontendConfig = brokerContext.getBrokerConfig().getFrontendConfig();
         frontendConfig.setAcceptThreadName("joyqueue-frontend-accept-eventLoop");
         frontendConfig.setIoThreadName("joyqueue-frontend-io-eventLoop");
-        backendConfig.setAcceptThreadName("joyqueue-backend-accept-eventLoop");
-        backendConfig.setIoThreadName("joyqueue-backend-io-eventLoop");
+
+//        ServerConfig backendConfig = brokerContext.getBrokerConfig().getBackendConfig();
+//        backendConfig.setAcceptThreadName("joyqueue-backend-accept-eventLoop");
+//        backendConfig.setIoThreadName("joyqueue-backend-io-eventLoop");
 
         this.transportListener = new BrokerTransportListener(sessionManager);
         this.frontendServer = new FrontendServer(frontendConfig, brokerContext, protocolManager);
-        this.backendServer = new BackendServer(backendConfig, brokerContext);
         this.frontendServer.addListener(transportListener);
-        this.backendServer.addListener(transportListener);
+        //this.backendServer = new BackendServer(backendConfig, brokerContext);
+//       this.backendServer.addListener(transportListener);
     }
 
     @Override
     protected void doStart() throws Exception {
         this.frontendServer.start();
-        this.backendServer.start();
+//      this.backendServer.start();
     }
 
     @Override
     protected void doStop() {
         this.frontendServer.removeListener(transportListener);
-        this.backendServer.removeListener(transportListener);
         this.frontendServer.stop();
-        this.backendServer.stop();
+//        this.backendServer.removeListener(transportListener);
+        //this.backendServer.stop();
     }
 }

@@ -100,5 +100,9 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-server-common</artifactId>
+        </dependency>
     </dependencies>
 </project>

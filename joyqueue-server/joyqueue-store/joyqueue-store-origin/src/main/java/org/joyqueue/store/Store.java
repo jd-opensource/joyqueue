@@ -25,6 +25,8 @@ import org.joyqueue.broker.helper.AwareHelper;
 import org.joyqueue.broker.store.StoreUtils;
 import org.joyqueue.domain.*;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
+import org.joyqueue.network.transport.config.ServerConfig;
+import org.joyqueue.store.backend.BackendServer;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.ha.ReplicableStore;
 import org.joyqueue.store.ha.election.DefaultElectionNode;
@@ -99,6 +101,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
      **/
     private ElectionManager electionManager;
     private ClusterManager clusterManager;
+    private BackendServer backendServer;
     public Store() {
         //do nothing
     }
@@ -150,6 +153,11 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             if (!manger.isStarted()) manger.start();
         }
         started.set(true);
+
+        LOG.info("Store started.");
+        // start backend server
+
+        startBackEndServer();
         LOG.info("Store started.");
         if(!electionManager.isStarted()) {
             electionManager.start();
@@ -157,10 +165,19 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         LOG.info("Election started.");
     }
 
+    public void startBackEndServer() throws Exception{
+        ServerConfig backendConfig = brokerContext.getBrokerConfig().getBackendConfig();
+        backendConfig.setAcceptThreadName("joyqueue-backend-accept-eventLoop");
+        backendConfig.setIoThreadName("joyqueue-backend-io-eventLoop");
+        this.backendServer = new BackendServer(backendConfig, brokerContext,electionManager);
+        backendServer.start();
+    }
+
     @Override
     protected void doStop() {
         super.doStop();
-
+        LOG.info("Stopping backend sever...");
+        backendServer.stop();
         LOG.info("Stopping store {}...", base.getPath());
 
         storeMap.values().forEach(p -> {

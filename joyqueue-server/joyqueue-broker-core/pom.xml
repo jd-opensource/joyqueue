@@ -118,6 +118,10 @@
             <groupId>net.jpountz.lz4</groupId>
             <artifactId>lz4</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-server-common</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

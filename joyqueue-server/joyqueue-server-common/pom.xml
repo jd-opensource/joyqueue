@@ -17,9 +17,5 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.joyqueue</groupId>
-            <artifactId>joyqueue-broker-core</artifactId>
-        </dependency>
     </dependencies>
 </project>
