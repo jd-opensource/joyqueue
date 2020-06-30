@@ -26,7 +26,7 @@ import org.joyqueue.broker.store.StoreUtils;
 import org.joyqueue.domain.*;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.network.transport.config.ServerConfig;
-import org.joyqueue.store.backend.BackendServer;
+import org.joyqueue.store.network.BackendServer;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.ha.ReplicableStore;
 import org.joyqueue.store.ha.election.DefaultElectionNode;

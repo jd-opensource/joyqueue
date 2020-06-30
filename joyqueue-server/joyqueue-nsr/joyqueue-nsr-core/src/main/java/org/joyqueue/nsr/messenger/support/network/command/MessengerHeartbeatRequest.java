@@ -13,14 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message;
+package org.joyqueue.nsr.messenger.support.network.command;
 
-import org.joyqueue.toolkit.concurrent.EventListener;
+import org.joyqueue.network.transport.command.JoyQueuePayload;
+import org.joyqueue.network.transport.command.Type;
+import org.joyqueue.nsr.network.command.NsrCommandType;
 
 /**
- * 消息监听器
- *
- * @param
+ * MessengerHeartbeatRequest
+ * author: gaohaoxiang
+ * date: 2019/8/27
  */
-public interface MessageListener<E> extends EventListener<E>{
+public class MessengerHeartbeatRequest extends JoyQueuePayload implements Type {
+
+    @Override
+    public int type() {
+        return NsrCommandType.NSR_MESSENGER_HEARTBEAT_REQUEST;
+    }
 }

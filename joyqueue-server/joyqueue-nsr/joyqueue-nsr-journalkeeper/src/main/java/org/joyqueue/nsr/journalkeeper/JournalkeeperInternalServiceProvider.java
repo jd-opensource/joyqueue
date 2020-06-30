@@ -119,6 +119,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
 
             this.sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
             this.sqlServer.tryStart();
+            // don't wait for cluster ready
             this.sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
             this.sqlClient = this.sqlServer.getClient();
         } else {

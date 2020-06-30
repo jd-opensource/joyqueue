@@ -17,10 +17,9 @@ package org.joyqueue.nsr.support;
 
 import com.google.common.base.Preconditions;
 import com.jd.laf.extension.ExtensionPoint;
-import com.jd.laf.extension.ExtensionPointLazy;
 import org.joyqueue.nsr.InternalServiceProvider;
 import org.joyqueue.nsr.ServiceProvider;
-import org.joyqueue.nsr.message.Messenger;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.service.AppTokenService;
 import org.joyqueue.nsr.service.BrokerService;
 import org.joyqueue.nsr.service.ConfigService;
@@ -56,7 +55,7 @@ import org.joyqueue.toolkit.service.Service;
 public class DefaultServiceProvider extends Service implements ServiceProvider, PropertySupplierAware {
 
     private ExtensionPoint<InternalServiceProvider, String> INTERNAL_SERVICE_PROVIDER_POINT = new ExtensionPointLazyExt<>(InternalServiceProvider.class);
-    private ExtensionPoint<Messenger, String> MESSENGER_POINT = new ExtensionPointLazy<>(Messenger.class);
+    private ExtensionPoint<Messenger, String> MESSENGER_POINT = new ExtensionPointLazyExt<>(Messenger.class);
 
     private InternalServiceProvider internalServiceProvider;
     private PropertySupplier supplier;
@@ -106,6 +105,11 @@ public class DefaultServiceProvider extends Service implements ServiceProvider, 
                 internalServiceProvider.getService(TransactionInternalService.class), messenger);
         topicService = new DefaultTopicService(messenger, internalServiceProvider.getService(TopicInternalService.class), internalServiceProvider.getService(PartitionGroupInternalService.class),
                 internalServiceProvider.getService(BrokerInternalService.class), internalServiceProvider.getService(TransactionInternalService.class));
+    }
+
+    @Override
+    protected void doStop() {
+        super.doStop();
     }
 
     protected  <T> T enrichIfNecessary(T obj) throws Exception {

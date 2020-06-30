@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support.network.codec;
+package org.joyqueue.nsr.messenger.support.network.codec;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -23,7 +23,7 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
-import org.joyqueue.nsr.message.support.network.command.MessengerPublishRequest;
+import org.joyqueue.nsr.messenger.support.network.command.MessengerPublishRequest;
 import org.joyqueue.nsr.network.command.NsrCommandType;
 
 /**

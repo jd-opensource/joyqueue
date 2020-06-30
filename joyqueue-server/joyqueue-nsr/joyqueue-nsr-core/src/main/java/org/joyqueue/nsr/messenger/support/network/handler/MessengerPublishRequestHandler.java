@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support.network.handler;
+package org.joyqueue.nsr.messenger.support.network.handler;
 
 import com.alibaba.fastjson.JSON;
 import org.joyqueue.event.MetaEvent;
@@ -25,7 +25,7 @@ import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
 import org.joyqueue.network.transport.command.provider.ExecutorServiceProvider;
 import org.joyqueue.nsr.config.MessengerConfig;
-import org.joyqueue.nsr.message.support.network.command.MessengerPublishRequest;
+import org.joyqueue.nsr.messenger.support.network.command.MessengerPublishRequest;
 import org.joyqueue.nsr.network.command.NsrCommandType;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;

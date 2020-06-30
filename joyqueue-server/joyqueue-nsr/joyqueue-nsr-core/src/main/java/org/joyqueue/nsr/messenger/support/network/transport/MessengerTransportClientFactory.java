@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support.network.transport;
+package org.joyqueue.nsr.messenger.support.network.transport;
 
 import org.joyqueue.network.codec.BooleanAckCodec;
 import org.joyqueue.network.transport.TransportClient;
@@ -22,8 +22,8 @@ import org.joyqueue.network.transport.codec.PayloadCodecFactory;
 import org.joyqueue.network.transport.codec.support.JoyQueueCodec;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.network.transport.support.DefaultTransportClientFactory;
-import org.joyqueue.nsr.message.support.network.codec.MessengerHeartbeatRequestCodec;
-import org.joyqueue.nsr.message.support.network.codec.MessengerPublishRequestCodec;
+import org.joyqueue.nsr.messenger.support.network.codec.MessengerHeartbeatRequestCodec;
+import org.joyqueue.nsr.messenger.support.network.codec.MessengerPublishRequestCodec;
 
 /**
  * MessengerTransportClientFactory

@@ -2,6 +2,7 @@ package org.joyqueue.plugin;
 
 import com.jd.laf.extension.*;
 
+import java.lang.reflect.Field;
 import java.util.Comparator;
 
 /**
@@ -30,7 +31,16 @@ public class ExtensionPointLazyExt<T,M> extends ExtensionPointLazy<T,M> {
               it.forEach(e->{
                    e.setSingleton(false);
               });
+               try {
+                   Field field = espi.getClass().getDeclaredField("singleton");
+                   field.setAccessible(true);
+                   field.setBoolean(espi,false);
+                   System.out.println(field);
+               }catch (Exception e){
+                   throw new IllegalStateException("modify singleton field exception");
+               }
            }
+
         }
         return ep;
     }

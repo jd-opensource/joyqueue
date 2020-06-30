@@ -17,8 +17,8 @@ package org.joyqueue.nsr;
 
 import org.joyqueue.domain.Broker;
 import org.joyqueue.event.MetaEvent;
-import org.joyqueue.nsr.message.MessageListener;
-import org.joyqueue.nsr.message.Messenger;
+import org.joyqueue.nsr.messenger.MessageListener;
+import org.joyqueue.nsr.messenger.Messenger;
 
 import java.util.List;
 

@@ -16,12 +16,14 @@
 package org.joyqueue.broker.protocol.network;
 
 import com.google.common.collect.Lists;
-import com.jd.laf.extension.ExtensionManager;
+import com.jd.laf.extension.ExtensionPoint;
+import com.jd.laf.extension.SpiLoader;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.JoyQueueContextAware;
 import org.joyqueue.network.transport.command.support.DefaultCommandHandlerFactory;
+import org.joyqueue.plugin.ExtensionPointLazyExt;
 
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class JoyQueueCommandHandlerFactory extends DefaultCommandHandlerFactory 
 
     private JoyQueueContext joyQueueContext;
     private List<JoyQueueCommandHandler> commandHandlers;
-
+    private static ExtensionPoint<JoyQueueCommandHandler,String> joyqueueCommandHandler =new ExtensionPointLazyExt(JoyQueueCommandHandler.class, SpiLoader.INSTANCE, null, null);
     public JoyQueueCommandHandlerFactory(JoyQueueContext joyQueueContext) {
         this.joyQueueContext = joyQueueContext;
         this.commandHandlers = loadCommandHandlers();
@@ -44,7 +46,7 @@ public class JoyQueueCommandHandlerFactory extends DefaultCommandHandlerFactory 
     }
 
     protected List<JoyQueueCommandHandler> loadCommandHandlers() {
-        return Lists.newArrayList(ExtensionManager.getOrLoadExtensions(JoyQueueCommandHandler.class));
+        return Lists.newArrayList(joyqueueCommandHandler.extensions());
     }
 
     protected void initCommandHandlers(List<JoyQueueCommandHandler> commandHandlers) {

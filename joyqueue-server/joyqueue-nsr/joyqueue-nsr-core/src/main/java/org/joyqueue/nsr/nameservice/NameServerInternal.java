@@ -19,7 +19,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.jd.laf.extension.ExtensionPoint;
-import com.jd.laf.extension.ExtensionPointLazy;
 import org.apache.commons.lang3.RandomUtils;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
@@ -42,6 +41,7 @@ import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.ServiceProvider;
 import org.joyqueue.nsr.config.NameServerConfig;
 import org.joyqueue.nsr.exception.NsrException;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.service.AppTokenService;
 import org.joyqueue.nsr.service.BrokerService;
 import org.joyqueue.nsr.service.ConfigService;
@@ -53,6 +53,7 @@ import org.joyqueue.nsr.service.PartitionGroupService;
 import org.joyqueue.nsr.service.ProducerService;
 import org.joyqueue.nsr.service.TopicService;
 import org.joyqueue.nsr.util.DCWrapper;
+import org.joyqueue.plugin.ExtensionPointLazyExt;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -111,7 +112,7 @@ public class NameServerInternal extends Service implements NameService, Property
     /**
      * service provider
      */
-    public static ExtensionPoint<ServiceProvider, String> serviceProviderPoint = new ExtensionPointLazy<>(ServiceProvider.class);
+    public static ExtensionPoint<ServiceProvider, String> serviceProviderPoint = new ExtensionPointLazyExt<>(ServiceProvider.class);
     private static final Logger logger = LoggerFactory.getLogger(NameServerInternal.class);
 
     public NameServerInternal() {
@@ -652,6 +653,11 @@ public class NameServerInternal extends Service implements NameService, Property
             ((LifeCycle) serviceProvider).start();
         }
         return serviceProvider;
+    }
+
+    @Override
+    public Messenger messenger() {
+        return serviceProvider.getService(Messenger.class);
     }
 
     private String createAppTokenCacheKey(String app, String token) {

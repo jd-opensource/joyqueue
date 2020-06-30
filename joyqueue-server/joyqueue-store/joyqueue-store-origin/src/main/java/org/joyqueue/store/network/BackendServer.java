@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.store.backend;
+package org.joyqueue.store.network;
 
 import org.joyqueue.broker.BrokerContext;
-import org.joyqueue.broker.network.BrokerCommandHandlerFactory;
-import org.joyqueue.broker.network.support.BrokerTransportServerFactory;
 import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.transport.TransportServer;
 import org.joyqueue.network.transport.TransportServerFactory;
@@ -53,7 +51,7 @@ public class BackendServer extends Service {
         this.transportEventBus = new EventBus<>("joyqueue-backend-eventBus");
         this.exceptionHandler = new BrokerExceptionHandler();
         this.commandHandlerFactory = new RaftCommandFactory(brokerContext,electionService);
-        this.transportServerFactory = new RaftTransportServerFactory(commandHandlerFactory, exceptionHandler, transportEventBus);
+        this.transportServerFactory = new RaftServerTransportFactory(commandHandlerFactory, exceptionHandler, transportEventBus);
     }
 
     public void addListener(EventListener<TransportEvent> listener) {

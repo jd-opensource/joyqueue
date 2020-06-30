@@ -13,29 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support.network.handler;
+package org.joyqueue.store.network;
 
-import org.joyqueue.network.command.BooleanAck;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
-import org.joyqueue.network.transport.command.Type;
-import org.joyqueue.network.transport.command.handler.CommandHandler;
-import org.joyqueue.nsr.network.command.NsrCommandType;
+import org.joyqueue.network.transport.command.handler.ExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * MessengerHeartbeatRequestHandler
+ * 异常处理
+ *
  * author: gaohaoxiang
- * date: 2019/8/27
+ * date: 2018/9/17
  */
-public class MessengerHeartbeatRequestHandler implements CommandHandler, Type {
+public class BrokerExceptionHandler implements ExceptionHandler {
+
+    protected static final Logger logger = LoggerFactory.getLogger(BrokerExceptionHandler.class);
 
     @Override
-    public Command handle(Transport transport, Command command) {
-        return BooleanAck.build();
-    }
-
-    @Override
-    public int type() {
-        return NsrCommandType.NSR_MESSENGER_HEARTBEAT_REQUEST;
+    public void handle(Transport transport, Command command, Throwable throwable) {
+        logger.error("broker transport exception, transport: {}, command: {}", transport, command, throwable);
     }
 }

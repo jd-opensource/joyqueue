@@ -37,6 +37,7 @@ import org.joyqueue.store.ha.ReplicableStore;
 import org.joyqueue.store.ha.replication.ReplicaGroup;
 import org.joyqueue.store.ha.replication.ReplicationManager;
 import org.joyqueue.store.ha.replication.TransportSession;
+import org.joyqueue.store.network.RaftClientTransportFactory;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
@@ -125,7 +126,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         clientConfig.setIoThreadName("joyqueue-election-io-eventLoop");
         clientConfig.setConnectionTimeout(300 * 1);
         clientConfig.getRetryPolicy().setRetryDelay(1000 * 60);
-        transportClient = new BrokerTransportClientFactory().create(clientConfig);
+        transportClient = new RaftClientTransportFactory(brokerContext,this).create(clientConfig);
         transportClient.start();
 
         electionTimerExecutor = Executors.newScheduledThreadPool(electionConfig.getTimerScheduleThreadNum(), new NamedThreadFactory("Election-Timer"));
@@ -133,7 +134,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize()),
                 new NamedThreadFactory("Election-sendCommand"));
 
-        replicationManager = new ReplicationManager(electionConfig, brokerConfig, store, consume, brokerMonitor);
+        replicationManager = new ReplicationManager(electionConfig, brokerConfig,brokerContext,this ,store, consume, brokerMonitor);
         replicationManager.start();
 
 		Thread.sleep(1000);

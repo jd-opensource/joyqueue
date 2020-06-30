@@ -26,7 +26,7 @@ import org.joyqueue.nsr.event.AddProducerEvent;
 import org.joyqueue.nsr.event.RemoveProducerEvent;
 import org.joyqueue.nsr.event.UpdateProducerEvent;
 import org.joyqueue.nsr.exception.NsrException;
-import org.joyqueue.nsr.message.Messenger;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.service.ProducerService;
 import org.joyqueue.nsr.service.internal.BrokerInternalService;
 import org.joyqueue.nsr.service.internal.PartitionGroupInternalService;

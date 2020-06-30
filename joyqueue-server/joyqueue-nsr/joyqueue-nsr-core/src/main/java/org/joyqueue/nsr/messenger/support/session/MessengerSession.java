@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support.session;
+package org.joyqueue.nsr.messenger.support.session;
 
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;

@@ -46,7 +46,7 @@ import org.joyqueue.network.transport.command.provider.ExecutorServiceProvider;
 import org.joyqueue.network.transport.support.DefaultTransportAttribute;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.config.NameServiceConfig;
-import org.joyqueue.nsr.message.MessageListener;
+import org.joyqueue.nsr.messenger.MessageListener;
 import org.joyqueue.nsr.network.NsrCommandHandler;
 import org.joyqueue.nsr.network.command.AddTopic;
 import org.joyqueue.nsr.network.command.GetAllBrokersAck;

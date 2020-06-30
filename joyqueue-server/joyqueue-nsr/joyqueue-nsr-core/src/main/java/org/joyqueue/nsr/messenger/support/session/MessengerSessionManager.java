@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support.session;
+package org.joyqueue.nsr.messenger.support.session;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -23,7 +23,7 @@ import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.nsr.config.MessengerConfig;
-import org.joyqueue.nsr.message.support.network.transport.MessengerTransportClientFactory;
+import org.joyqueue.nsr.messenger.support.network.transport.MessengerTransportClientFactory;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;

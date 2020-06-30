@@ -16,6 +16,7 @@
 package org.joyqueue.store.ha.replication;
 
 import com.google.common.base.Preconditions;
+import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.monitor.BrokerMonitor;
@@ -25,10 +26,8 @@ import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.config.ClientConfig;
 import org.joyqueue.store.Store;
 import org.joyqueue.store.ha.ReplicableStore;
-import org.joyqueue.store.ha.election.DefaultElectionNode;
-import org.joyqueue.store.ha.election.ElectionConfig;
-import org.joyqueue.store.ha.election.ElectionException;
-import org.joyqueue.store.ha.election.TopicPartitionGroup;
+import org.joyqueue.store.ha.election.*;
+import org.joyqueue.store.network.RaftClientTransportFactory;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
@@ -53,13 +52,13 @@ public class ReplicationManager extends Service {
     private final ConcurrentHashMap<String, Transport> sessions = new ConcurrentHashMap<>();
     private Store store;
     private Consume consume;
-
     private TransportClient transportClient;
     private ExecutorService replicateExecutor;
     private ScheduledExecutorService replicateTimerExecutor;
     private BlockingDeque replicateQueue;
-
-    public ReplicationManager(ElectionConfig electionConfig, BrokerConfig brokerConfig, Store store,
+    private BrokerContext brokerContext;
+    private ElectionService electionService;
+    public ReplicationManager(ElectionConfig electionConfig, BrokerConfig brokerConfig, BrokerContext brokerContext, ElectionService electionService, Store store,
                               Consume consume, BrokerMonitor brokerMonitor) {
         Preconditions.checkArgument(electionConfig != null, "election config is null");
         Preconditions.checkArgument(store != null, "store is null");
@@ -67,6 +66,8 @@ public class ReplicationManager extends Service {
 
         this.electionConfig = electionConfig;
         this.brokerConfig = brokerConfig;
+        this.brokerContext=brokerContext;
+        this.electionService=electionService;
         this.store = store;
         this.consume = consume;
     }
@@ -84,7 +85,7 @@ public class ReplicationManager extends Service {
         clientConfig.setSocketBufferSize(1024 * 1024 * 1);
         clientConfig.setConnectionTimeout(300 * 1);
         clientConfig.getRetryPolicy().setRetryDelay(1000 * 60);
-        transportClient = new BrokerTransportClientFactory().create(clientConfig);
+        transportClient = new RaftClientTransportFactory(brokerContext,electionService).create(clientConfig);
         transportClient.start();
 
         replicateQueue = new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize());

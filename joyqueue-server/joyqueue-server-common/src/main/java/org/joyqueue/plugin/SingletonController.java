@@ -11,10 +11,10 @@ import java.util.Set;
 public class SingletonController {
     protected static Set<String> forceClosingSingletonClass=new HashSet<>();
 
-    public static  void closeClassSingletion(Class clazz){
+    public static  void closeClassSingleton(Class clazz){
         forceClosingSingletonClass.add(clazz.getName());
     }
-    public static void forceCloseSingletion() throws Exception{
+    public static void forceCloseSingleton() throws Exception{
         Map<String,String> env=System.getenv();
         Field field = env.getClass().getDeclaredField("m");
         field.setAccessible(true);

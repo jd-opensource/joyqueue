@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support;
+package org.joyqueue.nsr.messenger.support;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
@@ -28,11 +28,11 @@ import org.joyqueue.network.transport.command.JoyQueueCommand;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.nsr.config.MessengerConfig;
 import org.joyqueue.nsr.exception.MessengerException;
-import org.joyqueue.nsr.message.MessageListener;
-import org.joyqueue.nsr.message.Messenger;
-import org.joyqueue.nsr.message.support.network.command.MessengerPublishRequest;
-import org.joyqueue.nsr.message.support.network.transport.MessengerTransportServerFactory;
-import org.joyqueue.nsr.message.support.session.MessengerSessionManager;
+import org.joyqueue.nsr.messenger.MessageListener;
+import org.joyqueue.nsr.messenger.Messenger;
+import org.joyqueue.nsr.messenger.support.network.command.MessengerPublishRequest;
+import org.joyqueue.nsr.messenger.support.network.transport.MessengerTransportServerFactory;
+import org.joyqueue.nsr.messenger.support.session.MessengerSessionManager;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
@@ -74,6 +74,7 @@ public class DefaultMessenger extends Service implements Messenger<MetaEvent>, P
         messengerTransportServer.start();
         messengerSessionManager.start();
         eventBus.start();
+        logger.info("Messenger started on port {} ",config.getPort());
     }
 
     @Override

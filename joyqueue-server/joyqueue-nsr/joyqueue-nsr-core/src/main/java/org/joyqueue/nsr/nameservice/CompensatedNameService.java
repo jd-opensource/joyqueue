@@ -15,8 +15,6 @@
  */
 package org.joyqueue.nsr.nameservice;
 
-import com.jd.laf.extension.ExtensionPoint;
-import com.jd.laf.extension.ExtensionPointLazy;
 import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.domain.AppToken;
 import org.joyqueue.domain.Broker;
@@ -35,12 +33,11 @@ import org.joyqueue.event.NameServerEvent;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.exception.NsrException;
-import org.joyqueue.nsr.message.Messenger;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
-import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -61,7 +58,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
     protected static final Logger logger = LoggerFactory.getLogger(CompensatedNameService.class);
 
     private final EventBus<NameServerEvent> eventBus = new EventBus("joyqueue-compensated-nameservice-eventBus");
-    private final ExtensionPoint<Messenger, String> serviceProviderPoint = new ExtensionPointLazy<>(Messenger.class);
+
 
     private NameServiceConfig config;
     private NameService delegate;
@@ -77,22 +74,19 @@ public class CompensatedNameService extends Service implements NameService, Prop
 
     public CompensatedNameService(NameService delegate) {
         this.delegate = delegate;
+
     }
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
         this.supplier = supplier;
         this.config = new NameServiceConfig(supplier);
-        this.messenger = serviceProviderPoint.get(config.getMessengerType());
         this.nameServiceCacheManager = new NameServiceCacheManager(config);
         this.nameServiceCompensator = new NameServiceCompensator(config, eventBus);
         this.nameServiceCompensateThread = new NameServiceCompensateThread(config, delegate, nameServiceCacheManager, nameServiceCompensator);
-
         try {
-            enrichIfNecessary(messenger);
             delegate.start();
             eventBus.start();
-
             nameServiceCacheManager.start();
             nameServiceCompensator.start();
             nameServiceCompensateThread.doCompensate();
@@ -104,6 +98,7 @@ public class CompensatedNameService extends Service implements NameService, Prop
     @Override
     protected void doStart() throws Exception {
         try {
+            this.messenger=delegate.messenger();
             nameServiceCompensateThread.start();
         } catch (Exception e) {
             throw new NsrException(e);
@@ -117,23 +112,8 @@ public class CompensatedNameService extends Service implements NameService, Prop
         nameServiceCompensator.stop();
         nameServiceCacheManager.stop();
         delegate.stop();
-        messenger.stop();
     }
 
-    protected  <T> T enrichIfNecessary(T obj) throws Exception {
-        if (obj instanceof LifeCycle) {
-            if (((LifeCycle) obj).isStarted()) {
-                return obj;
-            }
-        }
-        if (obj instanceof PropertySupplierAware) {
-            ((PropertySupplierAware) obj).setSupplier(supplier);
-        }
-        if (obj instanceof LifeCycle) {
-            ((LifeCycle) obj).start();
-        }
-        return obj;
-    }
 
     @Override
     public TopicConfig subscribe(Subscription subscription, ClientType clientType) {

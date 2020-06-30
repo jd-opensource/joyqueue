@@ -119,6 +119,7 @@ public interface StoreService {
     void maybeUpdateReplicas(String topic, int partitionGroup,Collection<Integer> newReplicaBrokerIds) throws Exception;
 
     /**
+     * Expect leader evenly distributed on all nodes. And predefine leader node of the partition group.
      * Update preferred leader of the partition group
      * @param topic  topic full name
      * @param partitionGroup

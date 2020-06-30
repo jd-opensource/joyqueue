@@ -112,16 +112,14 @@ public class PositionManager extends Service {
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(this::compensationPosition)
                 .build();
-
-        this.replicationThread = LoopThread.builder()
-                .sleepTime(config.getReplicateConsumePosInterval(), config.getBroadcastIndexResetInterval())
-                .name("Consume-Position-Replication-Thread")
-                .onException(e -> logger.error(e.getMessage(), e))
-                .doWork(consumePositionReplicator::replicateConsumePosition)
-                .build();
-
-        this.replicationThread.start();
-
+//        this.replicationThread = LoopThread.builder()
+//                .sleepTime(config.getReplicateConsumePosInterval(), config.getBroadcastIndexResetInterval())
+//                .name("Consume-Position-Replication-Thread")
+//                .onException(e -> logger.error(e.getMessage(), e))
+//                .doWork(consumePositionReplicator::replicateConsumePosition)
+//                .build();
+//
+//        this.replicationThread.start();
         clusterManager.addListener(new AddConsumeListener());
         clusterManager.addListener(new RemoveConsumeListener());
         clusterManager.addListener(new AddPartitionGroupListener());
@@ -156,9 +154,9 @@ public class PositionManager extends Service {
         if(null != this.compensationPositionThread) {
             this.compensationPositionThread.stop();
         }
-        if(null != this.replicationThread) {
-            this.replicationThread.stop();
-        }
+//        if(null != this.replicationThread) {
+//            this.replicationThread.stop();
+//        }
         positionStore.stop();
 
         logger.info("PositionManager is stopped.");
@@ -450,8 +448,7 @@ public class PositionManager extends Service {
      * @param partition 消费分区
      * @return 指定分区已经消费到的消息序号
      */
-    private long getMaxMsgIndex(TopicName topic, short partition) {
-        Integer partitionGroupId = clusterManager.getPartitionGroupId(topic, partition);
+    private long getMaxMsgIndex(TopicName topic, short partition,int partitionGroupId) {
         PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
 
         if (store == null) {
@@ -494,7 +491,7 @@ public class PositionManager extends Service {
             consumePartition.setPartitionGroup(partitionGroupId);
 
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = getMaxMsgIndex(topic, partition);
+            long currentIndex = getMaxMsgIndex(topic, partition,partitionGroupId);
             currentIndex = Math.max(currentIndex, 0);
             // 为新订阅的应用初始化消费位置对象
             Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
@@ -560,7 +557,7 @@ public class PositionManager extends Service {
         AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = 0L;
+            long currentIndex =getMaxMsgIndex(topic, partition, partitionGroup.getGroup());
 
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);

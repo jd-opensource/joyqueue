@@ -781,6 +781,9 @@ public class RaftLeaderElection extends LeaderElection  {
             return replicaGroup.appendEntries(request);
         } else {
             // as heartbeat
+            if(logger.isDebugEnabled()) {
+                logger.debug("{} receive heart beat from {}", localNode.getNodeId(), request.getLeaderId());
+            }
             return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                                new AppendEntriesResponse.Build().success(true).term(currentTerm)
                                        .nextPosition(request.getStartPosition())

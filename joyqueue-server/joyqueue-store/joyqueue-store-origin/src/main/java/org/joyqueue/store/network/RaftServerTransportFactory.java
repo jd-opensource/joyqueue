@@ -1,4 +1,4 @@
-package org.joyqueue.store.backend;
+package org.joyqueue.store.network;
 
 import org.joyqueue.network.event.TransportEvent;
 import org.joyqueue.network.transport.codec.Codec;
@@ -15,9 +15,9 @@ import org.joyqueue.toolkit.concurrent.EventBus;
  * Raft transport sever factory
  *
  **/
-public class RaftTransportServerFactory extends DefaultTransportServerFactory {
+public class RaftServerTransportFactory extends DefaultTransportServerFactory {
 
-    public RaftTransportServerFactory(CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler, EventBus<TransportEvent> eventBus){
+    public RaftServerTransportFactory(CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler, EventBus<TransportEvent> eventBus){
         super(raftCodec(),commandHandlerFactory,exceptionHandler,eventBus);
     }
 
@@ -40,6 +40,11 @@ public class RaftTransportServerFactory extends DefaultTransportServerFactory {
         payloadCodecFactory.register(new AppendEntriesRequestEncoder());
         payloadCodecFactory.register(new AppendEntriesResponseDecoder());
         payloadCodecFactory.register(new AppendEntriesResponseEncoder());
+        payloadCodecFactory.register(new ReplicateConsumePosRequestDecoder());
+        payloadCodecFactory.register(new ReplicateConsumePosRequestEncoder());
+        payloadCodecFactory.register(new ReplicateConsumePosResponseDecoder());
+        payloadCodecFactory.register(new ReplicateConsumePosResponseEncoder());
+
         return new JoyQueueCodec(payloadCodecFactory);
     }
 

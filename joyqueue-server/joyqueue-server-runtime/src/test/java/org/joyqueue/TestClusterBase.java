@@ -7,12 +7,16 @@ import org.joyqueue.broker.config.ConfigDef;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.producer.Produce;
 
+import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.domain.*;
 import org.joyqueue.helper.PortHelper;
 import org.joyqueue.message.BrokerMessage;
+import org.joyqueue.network.protocol.ProtocolService;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.nsr.InternalServiceProvider;
 import org.joyqueue.nsr.NameService;
+import org.joyqueue.nsr.ServiceProvider;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.plugin.SingletonController;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.io.Files;
@@ -25,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -37,42 +42,59 @@ public class TestClusterBase extends Service {
     private List<BrokerService> brokers=new ArrayList<>();
     @Before
     public void setup() throws Exception{
-        SingletonController.forceCloseSingletion();
-        SingletonController.closeClassSingletion(Consume.class);
-        SingletonController.closeClassSingletion(NameService.class);
-        SingletonController.closeClassSingletion(StoreService.class);
-        SingletonController.closeClassSingletion(InternalServiceProvider.class);
+        // important
+        SingletonController.forceCloseSingleton();
+        SingletonController.closeClassSingleton(Consume.class);
+        SingletonController.closeClassSingleton(Produce.class);
+        SingletonController.closeClassSingleton(NameService.class);
+        SingletonController.closeClassSingleton(StoreService.class);
+        SingletonController.closeClassSingleton(JoyQueueCommandHandler.class);
+        SingletonController.closeClassSingleton(Messenger.class);
+        SingletonController.closeClassSingleton(ProtocolService.class);
+        SingletonController.closeClassSingleton(ServiceProvider.class);
+        SingletonController.closeClassSingleton(InternalServiceProvider.class);
     }
+
     /**
      * Launch a N node cluster
      * @param N node num
      * @param port  broker port
      *
      **/
-
-
     public void launch(int N, int port, int timeout, TimeUnit unit) throws Exception{
         String journalKeeperNodes = IpUtil.getLocalIp()+":"+String.valueOf(PortHelper.getJournalkeeperPort(port));
         for(int i=0;i<N;i++) {
             String rootDir=ROOT_DIR+File.separator+String.format("_%d",i);
             BrokerService broker=new BrokerService(args(port+i*portInterval,rootDir,journalKeeperNodes));
-            broker.start();
+            CompletableFuture.runAsync(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                    broker.start();
+                }catch (Exception e){
+                    }
+                }
+            });
             brokers.add(broker);
         }
+        Thread.sleep(5000);
         // wait cluster ready
         BrokerService b= brokers.get(0);
         long start= SystemClock.now();
         do {
-           int cluster= b.getBrokerContext().getNameService().getAllBrokers().size();
-           if(cluster==N){
-               break;
-           }else{
-               if(SystemClock.now()-start<unit.toMillis(timeout)) {
-                   Thread.sleep(1000);
-               }else{
-                   throw new IllegalStateException("Start cluster timeout");
-               }
-           }
+            try {
+                int cluster = b.getBrokerContext().getNameService().getAllBrokers().size();
+                if (cluster >= N) {
+                    break;
+                }
+            }catch (Exception e){
+
+            }
+            if (SystemClock.now() - start < unit.toMillis(timeout)) {
+                Thread.sleep(1000);
+            } else {
+                throw new IllegalStateException("Start cluster timeout");
+            }
         }while(true);
     }
 
@@ -238,7 +260,7 @@ public class TestClusterBase extends Service {
 
     @Test
     public void launchTest() throws Exception{
-        launch(3,40088,5,TimeUnit.SECONDS);
+        launch(2,40088,60,TimeUnit.SECONDS);
         BrokerService broker=brokers.get(0);
         Assert.assertNotNull(broker);
         Thread.sleep(3600*1000);

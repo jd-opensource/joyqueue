@@ -1,13 +1,18 @@
-package org.joyqueue.store.backend;
+package org.joyqueue.store.network;
 
 import org.joyqueue.broker.BrokerContext;
-import org.joyqueue.broker.consumer.handler.ReplicateConsumePosRequestHandler;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.command.support.DefaultCommandHandlerFactory;
 import org.joyqueue.store.ha.election.ElectionService;
 import org.joyqueue.store.ha.election.handler.AppendEntriesRequestHandler;
+import org.joyqueue.store.ha.election.handler.ReplicateConsumePosRequestHandler;
 import org.joyqueue.store.ha.election.handler.TimeoutNowRequestHandler;
 import org.joyqueue.store.ha.election.handler.VoteRequestHandler;
+
+
+/**
+ * Raft command factory
+ **/
 
 public class RaftCommandFactory extends DefaultCommandHandlerFactory {
     private BrokerContext brokerContext;
@@ -28,6 +33,7 @@ public class RaftCommandFactory extends DefaultCommandHandlerFactory {
         register(CommandType.RAFT_APPEND_ENTRIES_REQUEST, new AppendEntriesRequestHandler(electionService));
         register(CommandType.RAFT_TIMEOUT_NOW_REQUEST, new TimeoutNowRequestHandler(electionService));
         register(CommandType.REPLICATE_CONSUME_POS_REQUEST, new ReplicateConsumePosRequestHandler(brokerContext));
+        //register(CommandType.H);
     }
 
 }

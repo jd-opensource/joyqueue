@@ -13,18 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.nsr.message.support.network.command;
+package org.joyqueue.nsr.messenger.support.network.codec;
 
-import org.joyqueue.network.transport.command.JoyQueuePayload;
+import io.netty.buffer.ByteBuf;
+import org.joyqueue.network.transport.codec.JoyQueueHeader;
+import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Type;
+import org.joyqueue.nsr.messenger.support.network.command.MessengerHeartbeatRequest;
 import org.joyqueue.nsr.network.command.NsrCommandType;
 
 /**
- * MessengerHeartbeatRequest
+ * MessengerPublishRequestCodec
  * author: gaohaoxiang
  * date: 2019/8/27
  */
-public class MessengerHeartbeatRequest extends JoyQueuePayload implements Type {
+public class MessengerHeartbeatRequestCodec implements PayloadCodec<JoyQueueHeader, MessengerHeartbeatRequest>, Type {
+
+    @Override
+    public MessengerHeartbeatRequest decode(JoyQueueHeader header, ByteBuf buffer) throws Exception {
+        return new MessengerHeartbeatRequest();
+    }
+
+    @Override
+    public void encode(MessengerHeartbeatRequest payload, ByteBuf buffer) throws Exception {
+    }
 
     @Override
     public int type() {
