@@ -61,9 +61,15 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
                         continue;
                     }
                     allMetadataCache = doGetAllMetadata();
-                    Thread.currentThread().sleep(config.getAllMetadataCacheExpireTime());
+
                 } catch (Exception e) {
                     logger.error("refresh cache exception", e);
+                }finally {
+                    try {
+                        Thread.currentThread().sleep(config.getAllMetadataCacheExpireTime());
+                    }catch (InterruptedException e){
+                        logger.info("refresh cache  thread interrupted");
+                    }
                 }
             }
         }, "joyqueue-allmetadata-cache-refresh");

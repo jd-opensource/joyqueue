@@ -299,13 +299,13 @@ public class BrokerService extends Service {
     protected void doStart() throws Exception {
         startIfNecessary(brokerTransportManager);
         startIfNecessary(clusterManager);
-        startIfNecessary(storeService);
-        startIfNecessary(storeInitializer);
         startIfNecessary(sessionManager);
         startIfNecessary(retryManager);
         startIfNecessary(brokerMonitorService);
         startIfNecessary(produce);
         startIfNecessary(consume);
+        startIfNecessary(storeService);
+        startIfNecessary(storeInitializer);
         //must start after store manager
         startIfNecessary(extensionManager);
         startIfNecessary(protocolManager);

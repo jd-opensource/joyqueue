@@ -35,7 +35,6 @@ public class ExtensionPointLazyExt<T,M> extends ExtensionPointLazy<T,M> {
                    Field field = espi.getClass().getDeclaredField("singleton");
                    field.setAccessible(true);
                    field.setBoolean(espi,false);
-                   System.out.println(field);
                }catch (Exception e){
                    throw new IllegalStateException("modify singleton field exception");
                }

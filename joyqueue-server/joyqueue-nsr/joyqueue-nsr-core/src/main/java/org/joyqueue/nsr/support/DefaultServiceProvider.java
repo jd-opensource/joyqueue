@@ -44,6 +44,7 @@ import org.joyqueue.nsr.service.internal.TransactionInternalService;
 import org.joyqueue.plugin.ExtensionPointLazyExt;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
+import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
 
@@ -110,6 +111,8 @@ public class DefaultServiceProvider extends Service implements ServiceProvider, 
     @Override
     protected void doStop() {
         super.doStop();
+        if (internalServiceProvider instanceof LifeCycle)
+            Close.close((LifeCycle) internalServiceProvider);
     }
 
     protected  <T> T enrichIfNecessary(T obj) throws Exception {

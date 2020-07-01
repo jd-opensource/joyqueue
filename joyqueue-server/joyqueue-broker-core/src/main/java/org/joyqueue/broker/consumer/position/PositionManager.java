@@ -717,6 +717,7 @@ public class PositionManager extends Service {
                         if (StringUtils.equals(next.getTopic(), topic.getFullName()) && /* 不在最新分区集合中 */ !newPartitionSet.contains(next.getPartition())) {
                             // 缓存中的分区位置信息，不在最新的分区集合中，则删除
                             iterator.remove();
+                            logger.warn("{}/{} Consume position removed",topic.getFullName(),next.getPartition());
                         }
                     }
 

@@ -5,13 +5,17 @@ import org.joyqueue.broker.BrokerService;
 import org.joyqueue.broker.config.Args;
 import org.joyqueue.broker.config.ConfigDef;
 import org.joyqueue.broker.consumer.Consume;
+import org.joyqueue.broker.consumer.model.PullResult;
 import org.joyqueue.broker.producer.Produce;
 
+import org.joyqueue.broker.producer.PutResult;
 import org.joyqueue.broker.protocol.JoyQueueCommandHandler;
 import org.joyqueue.domain.*;
+import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.helper.PortHelper;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.network.protocol.ProtocolService;
+import org.joyqueue.network.session.Consumer;
 import org.joyqueue.network.session.Producer;
 import org.joyqueue.nsr.InternalServiceProvider;
 import org.joyqueue.nsr.NameService;
@@ -19,14 +23,13 @@ import org.joyqueue.nsr.ServiceProvider;
 import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.plugin.SingletonController;
 import org.joyqueue.store.StoreService;
+import org.joyqueue.store.WriteResult;
 import org.joyqueue.toolkit.io.Files;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -37,12 +40,18 @@ public class TestClusterBase extends Service {
 
     private String DEFAULT_JOYQUEUE="joyqueue";
     private String ROOT_DIR =System.getProperty("java.io.tmpdir")+ File.separator+DEFAULT_JOYQUEUE;
-    private int brokerPort=50088;
+    private int brokerPort=40088;
     int portInterval=10000;
     private List<BrokerService> brokers=new ArrayList<>();
     @Before
-    public void setup() throws Exception{
-        // important
+    public  void setup() throws Exception{
+        // clean dir ,important
+        Files.deleteDirectory(new File(ROOT_DIR));
+        closeSingleton();
+        launchCluster(2);
+    }
+
+    public  void closeSingleton() throws Exception{
         SingletonController.forceCloseSingleton();
         SingletonController.closeClassSingleton(Consume.class);
         SingletonController.closeClassSingleton(Produce.class);
@@ -61,7 +70,7 @@ public class TestClusterBase extends Service {
      * @param port  broker port
      *
      **/
-    public void launch(int N, int port, int timeout, TimeUnit unit) throws Exception{
+    public boolean launchCluster(int N, int port, int timeout, TimeUnit unit) throws Exception{
         String journalKeeperNodes = IpUtil.getLocalIp()+":"+String.valueOf(PortHelper.getJournalkeeperPort(port));
         for(int i=0;i<N;i++) {
             String rootDir=ROOT_DIR+File.separator+String.format("_%d",i);
@@ -96,13 +105,14 @@ public class TestClusterBase extends Service {
                 throw new IllegalStateException("Start cluster timeout");
             }
         }while(true);
+        return true;
     }
 
     /**
      * Launch multi broker
      **/
-    public void launch(int N) throws Exception{
-        launch(N,brokerPort,5000,TimeUnit.MILLISECONDS);
+    public boolean launchCluster(int N) throws Exception{
+        return launchCluster(N,brokerPort,30000,TimeUnit.MILLISECONDS);
     }
 
 
@@ -125,11 +135,10 @@ public class TestClusterBase extends Service {
         return null;
     }
 
-
+    @Ignore
     @Test
     public void testCreateTopic() throws Exception{
-        launch(3);
-        createTopic("abcxx",(short) 24);
+        createTopic("testCreateTopic",(short) 24);
     }
 
     /**
@@ -153,11 +162,13 @@ public class TestClusterBase extends Service {
        partitionGroup.setPartitions(partitionSet);
        partitionGroup.setReplicas(brokers.stream().map(Broker::getId).collect(Collectors.toSet()));
        ns.addTopic(t, Lists.newArrayList(partitionGroup));
+       // validate topic
+       Assert.assertNotNull(ns.getTopicConfig(new TopicName(topic)));
     }
 
     /**
      *
-     * Consume subscribe
+     * Produce subscribe
      *
      **/
     public void produceSubscribe(String topic,String app) throws Exception{
@@ -167,22 +178,81 @@ public class TestClusterBase extends Service {
         subscription.setApp(app);
         subscription.setType(Subscription.Type.PRODUCTION);
         ns.subscribe(subscription,ClientType.JOYQUEUE);
+        Assert.assertNotNull(ns.getProducerByTopicAndApp(new TopicName(topic),app));
+    }
+
+    /**
+     * Consume subscribe
+     **/
+    public void consumeSubscribe(String topic,String app) throws Exception{
+        NameService ns= nameService();
+        Subscription subscription=new Subscription();
+        subscription.setTopic(new TopicName(topic));
+        subscription.setApp(app);
+        subscription.setType(Subscription.Type.CONSUMPTION);
+        ns.subscribe(subscription,ClientType.JOYQUEUE);
+        Assert.assertNotNull(ns.getConsumerByTopicAndApp(new TopicName(topic),app));
     }
 
 
     /**
      * Test send message
      **/
+    @Ignore
     @Test
     public void testSendMessage() throws Exception{
-        String topic="abc";
+        String topic="testSendMessage";
         String app="aaaaa";
-        launch(3);
         createTopic(topic,(short)24);
         produceSubscribe(topic,app);
-
-        sendMessage(topic,app,"hello,test!",null);
+        BrokerService leader=leader(topic,0);
+        waitMetadataReady(leader,topic);
+        Produce produce=leader.getBrokerContext().getProduce();
+        int messagesCount=100;
+        for(int i=0;i<messagesCount;i++) {
+            sendMessage(produce,topic, app, "hello,test!", null);
+        }
     }
+
+    @Ignore
+    @Test
+    public void testLaunchCluster() throws Exception{
+//        Assert.assertTrue(launchCluster(3));
+          Thread.sleep(3600*1000);
+    }
+
+    @Test
+    public void testProduceAndConsume() throws Exception{
+
+        String topic="testProduceAndConsume";
+        String app="aaaaa";
+        createTopic(topic,(short)24);
+        produceSubscribe(topic,app);
+        BrokerService leader=leader(topic,0);
+        waitMetadataReady(leader,topic);
+        Produce produce=leader.getBrokerContext().getProduce();
+        Consume consume=leader.getBrokerContext().getConsume();
+        consumeSubscribe(topic,app);
+        int messagesCount=100;
+        for(int i=0;i<messagesCount;i++) {
+            sendMessage(produce,topic, app, "hello,test!", null);
+        }
+        leader=leader(topic,0);
+        waitMetadataReady(leader,topic);
+        // consume
+        consume(consume,topic,app);
+    }
+
+    public void consume(Consume consume,String topic,String app) throws Exception{
+        Consumer consumer=new Consumer();
+        consumer.setTopic(topic);
+        consumer.setApp(app);
+        consumer.setId("magic-id");
+        int timeout=60*1000;
+        PullResult pr=consume.getMessage(consumer,10,timeout);
+        Assert.assertTrue(!pr.isEmpty());
+    }
+
 
     /***
      * Wait metadata ready
@@ -198,17 +268,18 @@ public class TestClusterBase extends Service {
         }while(i-->0);
         throw new IllegalStateException(String.format("%s not ready",topic));
     }
-    public void sendMessage(String topic,String app,String msg,String businessId) throws Exception{
-          BrokerService leader=leader(topic,0);
-          waitMetadataReady(leader,topic);
 
-          Produce produce=leader.getBrokerContext().getProduce();
+    public void sendMessage(Produce produce,String topic,String app,String msg,String businessId) throws Exception{
           Producer producer=new Producer();
           producer.setTopic(topic);
           producer.setApp(app);
           //producer.setClientType(Cl);
           BrokerMessage bm= create(topic,app,msg,businessId);
-          produce.putMessage(producer,Lists.newArrayList(bm),QosLevel.REPLICATION);
+          PutResult pr=produce.putMessage(producer,Lists.newArrayList(bm),QosLevel.REPLICATION);
+          Assert.assertTrue(pr.getWriteResults().size()>0);
+          for(WriteResult r:pr.getWriteResults().values()){
+              Assert.assertTrue(r.getCode()== JoyQueueCode.SUCCESS);
+          }
     }
 
     /**
@@ -244,10 +315,10 @@ public class TestClusterBase extends Service {
     }
 
 
-    public BrokerService leader(String topic,int partitionGorup) throws Exception{
+    public BrokerService leader(String topic,int partitionGroup) throws Exception{
         NameService ns=nameService();
         TopicConfig tc=ns.getTopicConfig(new TopicName(topic));
-        PartitionGroup pg=tc.getPartitionGroups().get(partitionGorup);
+        PartitionGroup pg=tc.getPartitionGroups().get(partitionGroup);
         if(pg.getLeader()==null) throw new IllegalStateException("Leader not found");
         for(BrokerService broker:brokers){
             if(broker.getBrokerContext().getBroker().getId().equals(pg.getLeader())){
@@ -258,12 +329,15 @@ public class TestClusterBase extends Service {
     }
 
 
-    @Test
-    public void launchTest() throws Exception{
-        launch(2,40088,60,TimeUnit.SECONDS);
-        BrokerService broker=brokers.get(0);
-        Assert.assertNotNull(broker);
-        Thread.sleep(3600*1000);
+    /**
+     * Cleanup cluster
+     **/
+    public void cleanupCluster(){
+        for(BrokerService b:brokers){
+            b.stop();
+        }
+        brokers.clear();
+        Files.deleteDirectory(new File(ROOT_DIR));
     }
 
     @After

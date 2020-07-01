@@ -100,25 +100,32 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
     protected void doStart() throws Exception {
         Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
         URI currentNode = URI.create(String.format("journalkeeper://%s:%s", config.getLocal(), config.getPort()));
-        List<URI> nodes = parseNodeUris(currentNode, config.getNodes());
-
+        List<URI> nodes = parseNodeUris(config.getNodes());
+        SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
         if (Server.Roll.VOTER.name().equals(config.getRole())
                 || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
-
             Server.Roll role = Server.Roll.valueOf(config.getRole());
-            SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
 
+//            if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
+//                //joinCluster(currentNode, nodes, serverAccessPoint);
+//                nodes.add(currentNode);
+//            } else {
+//                if (CollectionUtils.isEmpty(nodes)) {
+//                    nodes.add(currentNode);
+//                }
+//            }
+            List<URI> servers = Lists.newArrayList(nodes);
             if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
-                joinCluster(currentNode, nodes, serverAccessPoint);
-                nodes.add(currentNode);
-            } else {
-                if (CollectionUtils.isEmpty(nodes)) {
-                    nodes.add(currentNode);
-                }
+                servers.add(currentNode);
             }
-
-            this.sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
+            this.sqlServer = serverAccessPoint.createServer(currentNode,servers, role);
             this.sqlServer.tryStart();
+            // start local and retry to join cluster
+//            if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
+//                List<URI>
+//                joinCluster(currentNode,, serverAccessPoint);
+//                //nodes.add(currentNode);
+//            }
             // don't wait for cluster ready
             this.sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
             this.sqlClient = this.sqlServer.getClient();
@@ -130,7 +137,12 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         BatchOperationContext.init(sqlOperator);
         this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator, this.tracer);
         this.journalkeeperInternalServiceManager.start();
+        if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
+            joinCluster(currentNode, nodes, serverAccessPoint);
+        }
     }
+
+
 
     protected void joinCluster(URI currentNode, List<URI> nodes, SQLServerAccessPoint serverAccessPoint) throws Exception {
         SQLServer remoteServer = serverAccessPoint.createRemoteServer(currentNode, nodes);
@@ -151,7 +163,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         remoteServer.stop();
     }
 
-    protected static List<URI> parseNodeUris(URI currentNode, List<String> nodes) {
+    protected static List<URI> parseNodeUris( List<String> nodes) {
         List<URI> nodesUri = Lists.newArrayList();
         for (String node : nodes) {
             String[] split = node.split(":");
