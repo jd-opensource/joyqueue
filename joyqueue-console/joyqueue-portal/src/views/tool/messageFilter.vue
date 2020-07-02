@@ -20,9 +20,7 @@
         <p>提示:</p>
         <p>1. 同一查询只支持"<b>按位点时间范围</b>"查询或者"<b>位点值</b>+<b>查询条数查询</b>"</p>
         <p>2. 每个查询<b>最多</b>允许查询<b>100,000</b>条数据,超出查询条数限制,查询结果只显示前<b>100,000</b>条数据</p>
-        <p v-for="tip in tips" :key="tip">
-          {{tip}}
-        </p>
+        <p>3. VPN网络下如果下载链接无法访问，请先申请对应的VPN权限</p>
       </div>
 
       <d-form ref="search" :model="search" label-width="80px" :rules="rules">
@@ -146,11 +144,6 @@ export default {
   components: {
     myDialog,
     myTable
-  },
-  props: {
-    tips: {
-      type: Array
-    }
   },
   mixins: [crud],
   data () {
