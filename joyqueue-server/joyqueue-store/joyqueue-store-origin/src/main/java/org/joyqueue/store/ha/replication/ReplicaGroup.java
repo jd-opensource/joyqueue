@@ -616,8 +616,8 @@ public class ReplicaGroup extends Service {
                     long replicateStartTime = SystemClock.now();
                     Map<ConsumePartition, Position> consumePositions = consume.getConsumePositionByGroup(TopicName.parse(topicPartitionGroup.getTopic()),
                             topicPartitionGroup.getPartitionGroupId());
-                    if (consumePositions == null) {
-                        logger.debug("Partition group {}/node {} replicableStore consumer info return null",
+                    if (consumePositions == null||consumePositions.size()<=0) {
+                        logger.debug("Partition group {}/node {} replicableStore consumer info return null or empty",
                                 topicPartitionGroup, localReplicaId);
                         return;
                     }

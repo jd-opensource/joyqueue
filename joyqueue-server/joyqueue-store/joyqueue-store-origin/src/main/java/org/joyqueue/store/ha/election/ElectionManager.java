@@ -406,7 +406,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             throw new ElectionException("Leader election start fail" + e);
         }
         leaderElections.put(topicPartitionGroup, leaderElection);
-
+        logger.info("New leader election {}/{}",topic,partitionGroup);
         return leaderElection;
 
     }

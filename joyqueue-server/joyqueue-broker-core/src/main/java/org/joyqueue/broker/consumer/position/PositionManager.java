@@ -191,7 +191,9 @@ public class PositionManager extends Service {
                                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), element, partition);
                                 consumePartition.setPartitionGroup(partitionGroup);
                                 Position position = positionStore.get(consumePartition);
-                                consumeInfo.put(consumePartition, position);
+                                if(position!=null) {
+                                    consumeInfo.put(consumePartition, position);
+                                }
                             })
                     );
                     break;
@@ -254,7 +256,19 @@ public class PositionManager extends Service {
         Position position = positionStore.get(consumePartition);
         // 消费位置对象为空时，无此位置信息抛出异常
         if (position == null) {
-            throw new JoyQueueException(JoyQueueCode.CONSUME_POSITION_NULL, "topic=" + topic + ",app=" + app + ",partition=" + partition);
+            String infoMsg="topic=" + topic + ",app=" + app + ",partition=" + partition;
+            PartitionGroup pg=clusterManager.getPartitionGroup(topic,partition);
+            if(pg!=null) {
+               Map<ConsumePartition,Position> consumePartitionPositionMap=getConsumePosition(topic, app,pg.getGroup());
+               if(consumePartitionPositionMap!=null){
+                   logger.warn("consume position is for {},contain {}",topic,Arrays.toString(consumePartitionPositionMap.keySet().stream().map(ConsumePartition::getPartition).toArray()));
+               }else {
+                   logger.warn("consume position not init for {}", infoMsg);
+               }
+            }else{
+                logger.warn("Partition group not found for {},partition {}",topic,partition);
+            }
+            throw new JoyQueueException(JoyQueueCode.CONSUME_POSITION_NULL,infoMsg);
         }
         return position.getAckCurIndex();
     }
@@ -553,7 +567,7 @@ public class PositionManager extends Service {
         List<String> appList = clusterManager.getAppByTopic(topic);
         Set<Short> partitions = partitionGroup.getPartitions();
 
-        logger.debug("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
+        logger.info("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
         AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号

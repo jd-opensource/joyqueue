@@ -399,6 +399,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             partitionGroupStoreManger.stop();
             partitionGroupStoreManger.close();
         }
+        electionManager.onPartitionGroupRemove(new TopicName(topic),partitionGroup);
         File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
 
         if (groupBase.exists()) delete(groupBase);
@@ -418,7 +419,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             }
             delete(topicBase);
         }
-        electionManager.onPartitionGroupRemove(new TopicName(topic),partitionGroup);
+        LOG.info("Remove partition group {}/{} store",topic,partitionGroup);
     }
 
 
@@ -437,7 +438,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                 partitionGroupStoreManger.start();
             }
             storeMap.put(topic + "/" + partitionGroup, partitionGroupStoreManger);
-
+            LOG.info("Restored partition group {}/{}",topic,partitionGroup);
         }else{
             LOG.warn("Partition group store manager already loaded");
         }
@@ -454,6 +455,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             if (groupBase.exists()) delete(groupBase);
             PartitionGroupStoreSupport.init(groupBase, partitions);
             restorePartitionGroup(topic, partitionGroup);
+            LOG.info("New partition group {}/{},{}",topic,partitionGroup,Arrays.toString(partitions));
         }
     }
 

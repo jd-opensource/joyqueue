@@ -121,12 +121,6 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
             this.sqlServer = serverAccessPoint.createServer(currentNode,servers, role);
             this.sqlServer.tryStart();
             // start local and retry to join cluster
-//            if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
-//                List<URI>
-//                joinCluster(currentNode,, serverAccessPoint);
-//                //nodes.add(currentNode);
-//            }
-            // don't wait for cluster ready
             this.sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
             this.sqlClient = this.sqlServer.getClient();
         } else {
@@ -137,7 +131,8 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         BatchOperationContext.init(sqlOperator);
         this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator, this.tracer);
         this.journalkeeperInternalServiceManager.start();
-        if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
+        if ((Server.Roll.VOTER.name().equals(config.getRole())|| RaftServer.Roll.OBSERVER.name().equals(config.getRole()))&&
+                CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
             joinCluster(currentNode, nodes, serverAccessPoint);
         }
     }

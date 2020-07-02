@@ -5,7 +5,9 @@ import org.joyqueue.broker.BrokerService;
 import org.joyqueue.broker.config.Args;
 import org.joyqueue.broker.config.ConfigDef;
 import org.joyqueue.broker.consumer.Consume;
+import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.model.PullResult;
+import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.producer.Produce;
 
 import org.joyqueue.broker.producer.PutResult;
@@ -48,7 +50,7 @@ public class TestClusterBase extends Service {
         // clean dir ,important
         Files.deleteDirectory(new File(ROOT_DIR));
         closeSingleton();
-        launchCluster(2);
+        launchCluster(1);
     }
 
     public  void closeSingleton() throws Exception{
@@ -112,7 +114,7 @@ public class TestClusterBase extends Service {
      * Launch multi broker
      **/
     public boolean launchCluster(int N) throws Exception{
-        return launchCluster(N,brokerPort,30000,TimeUnit.MILLISECONDS);
+        return launchCluster(N,brokerPort,60000,TimeUnit.MILLISECONDS);
     }
 
 
@@ -159,6 +161,7 @@ public class TestClusterBase extends Service {
        PartitionGroup partitionGroup=new PartitionGroup();
        partitionGroup.setTopic(new TopicName(topic));
        partitionGroup.setGroup(0);
+       partitionGroup.setElectType(PartitionGroup.ElectType.raft);
        partitionGroup.setPartitions(partitionSet);
        partitionGroup.setReplicas(brokers.stream().map(Broker::getId).collect(Collectors.toSet()));
        ns.addTopic(t, Lists.newArrayList(partitionGroup));
@@ -205,7 +208,7 @@ public class TestClusterBase extends Service {
         String app="aaaaa";
         createTopic(topic,(short)24);
         produceSubscribe(topic,app);
-        BrokerService leader=leader(topic,0);
+        BrokerService leader= waitLeaderReady(topic,0,30,TimeUnit.SECONDS);
         waitMetadataReady(leader,topic);
         Produce produce=leader.getBrokerContext().getProduce();
         int messagesCount=100;
@@ -226,18 +229,22 @@ public class TestClusterBase extends Service {
 
         String topic="testProduceAndConsume";
         String app="aaaaa";
+        System.out.println("creating topic,"+topic);
         createTopic(topic,(short)24);
         produceSubscribe(topic,app);
-        BrokerService leader=leader(topic,0);
+        BrokerService leader= waitLeaderReady(topic,0,60,TimeUnit.SECONDS);
         waitMetadataReady(leader,topic);
         Produce produce=leader.getBrokerContext().getProduce();
         Consume consume=leader.getBrokerContext().getConsume();
+
+        // consume subscribe
         consumeSubscribe(topic,app);
-        int messagesCount=100;
+        waitConsumeSubscribeReady(consume,topic,app,0,24,60,TimeUnit.SECONDS);
+        int messagesCount=1000;
         for(int i=0;i<messagesCount;i++) {
             sendMessage(produce,topic, app, "hello,test!", null);
         }
-        leader=leader(topic,0);
+        leader= waitLeaderReady(topic,0,60,TimeUnit.SECONDS);
         waitMetadataReady(leader,topic);
         // consume
         consume(consume,topic,app);
@@ -249,11 +256,41 @@ public class TestClusterBase extends Service {
         consumer.setApp(app);
         consumer.setId("magic-id");
         int timeout=60*1000;
-        PullResult pr=consume.getMessage(consumer,10,timeout);
-        Assert.assertTrue(!pr.isEmpty());
+        int tries=10;
+        int message=0;
+        while(tries-->0){
+            PullResult pr = consume.getMessage(consumer, 10, timeout);
+            Assert.assertTrue(pr.getCode()==JoyQueueCode.SUCCESS);
+            if(!pr.isEmpty()) {
+                message += pr.getBuffers().size();
+            }
+            Thread.sleep(100);
+        }
+        Assert.assertTrue(message>0);
     }
 
 
+    /**
+     * Waiting consume position ready
+     **/
+    public void waitConsumeSubscribeReady(Consume consume,String topic,String app,int partitionGroup,int partitions,long time,TimeUnit unit) throws Exception{
+        long start=SystemClock.now();
+        long timeout=unit.toMillis(time);
+        while(true) {
+          Map<ConsumePartition, Position> a=consume.getConsumePositionByGroup(new TopicName(topic),app, partitionGroup);
+          if(a!=null&&a.size()==partitions){
+              for(Map.Entry<ConsumePartition,Position>  e:a.entrySet()){
+                  System.out.println("consume position ready:"+e.getKey()+":"+e.getValue());
+              }
+              return;
+          }
+          if(SystemClock.now()-start>timeout){
+              throw new IllegalStateException("consume position not ready!");
+          }
+          System.out.println("waiting consume subscribe ready on leader");
+          Thread.sleep(1000);
+        }
+    }
     /***
      * Wait metadata ready
      **/
@@ -315,11 +352,27 @@ public class TestClusterBase extends Service {
     }
 
 
-    public BrokerService leader(String topic,int partitionGroup) throws Exception{
+    public BrokerService waitLeaderReady(String topic, int partitionGroup, long timeout, TimeUnit unit) throws Exception{
         NameService ns=nameService();
+
+        long start=SystemClock.now();
+        long timeoutMs=unit.toMillis(timeout);
+        while(true){
+            TopicConfig tc=ns.getTopicConfig(new TopicName(topic));
+            if(tc!=null) {
+                Map<Integer, PartitionGroup> pgMap = tc.getPartitionGroups();
+                if (pgMap != null && pgMap.get(partitionGroup) != null) {
+                    if (!pgMap.get(partitionGroup).getLeader().equals(-1)) break;
+                    if (SystemClock.now() - start > timeoutMs) {
+                        throw new IllegalStateException("Leader not found");
+                    }
+                }
+            }
+           Thread.sleep(1000);
+           System.out.println("waiting leader for "+topic+"/"+partitionGroup);
+        }
         TopicConfig tc=ns.getTopicConfig(new TopicName(topic));
         PartitionGroup pg=tc.getPartitionGroups().get(partitionGroup);
-        if(pg.getLeader()==null) throw new IllegalStateException("Leader not found");
         for(BrokerService broker:brokers){
             if(broker.getBrokerContext().getBroker().getId().equals(pg.getLeader())){
                 return broker;
@@ -342,9 +395,11 @@ public class TestClusterBase extends Service {
 
     @After
     public void close() throws Exception{
+        System.out.println("Begin to stop cluster");
         for(BrokerService b:brokers){
             b.stop();
         }
+        Thread.sleep(100);
         Files.deleteDirectory(new File(ROOT_DIR));
     }
 }

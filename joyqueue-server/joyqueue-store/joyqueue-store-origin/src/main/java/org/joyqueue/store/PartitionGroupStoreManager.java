@@ -486,22 +486,23 @@ public class PartitionGroupStoreManager implements ReplicableStore, LifeCycle, C
             File partitionBase = new File(base, "index" + File.separator + partition);
             if (!partitionBase.renameTo(new File(partitionBase.getParent(), partitionBase.getName() + ".d." + SystemClock.now()))) {
                 logger.warn("Rename directory {} failed!", partitionBase.getAbsolutePath());
+            }else{
+                logger.info("Remove partition {} for {}",partition,topic);
             }
         }
-
     }
 
     private void addPartition(short partition) throws IOException {
         if (partitionMap.get(partition) == null) {
             // 如果存在分区目录，先删除
             removePartition(partition);
-
             File partitionBase = new File(base, "index" + File.separator + partition);
             if (partitionBase.mkdirs()) {
                 PositioningStore<IndexItem> indexStore =
                         new PositioningStore<>(partitionBase, config.indexStoreConfig, bufferPool, new IndexSerializer());
                 indexStore.recover();
                 partitionMap.put(partition, new Partition(indexStore));
+                logger.info("New partition {} for {}",partition,topic);
             } else {
                 throw new IOException(String.format("Create directory: %s failed!", partitionBase.getAbsolutePath()));
             }
