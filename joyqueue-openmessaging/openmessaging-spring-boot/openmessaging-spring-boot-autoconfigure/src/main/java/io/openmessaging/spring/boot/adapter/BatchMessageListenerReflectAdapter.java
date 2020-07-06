@@ -18,6 +18,9 @@ package io.openmessaging.spring.boot.adapter;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.exception.OMSRuntimeException;
 import io.openmessaging.message.Message;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -28,15 +31,24 @@ import java.util.List;
  * @version OMS 1.0.0
  * @since OMS 1.0.0
  */
-public class BatchMessageListenerReflectAdapter implements BatchMessageListener {
+public class BatchMessageListenerReflectAdapter implements BatchMessageListener, ApplicationContextAware {
 
-    private Object instance;
+    private String instanceId;
     private Method method;
 
-    public BatchMessageListenerReflectAdapter(Object instance, Method method) {
-        this.instance = instance;
+    private ApplicationContext applicationContext;
+    private Object instance;
+
+    public BatchMessageListenerReflectAdapter(String instanceId, Method method) {
+        this.instanceId = instanceId;
         this.method = method;
         this.method.setAccessible(true);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+        this.instance = applicationContext.getBean(instanceId);
     }
 
     @Override

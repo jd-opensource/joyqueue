@@ -21,14 +21,17 @@
           <grid-col :span="4" class="label">有效时间:</grid-col>
           <grid-col :span="1"></grid-col>
           <grid-col :span="16" class="val">
-            <d-date-picker
-              v-model="addData.timeList"
-              value-format="timestamp"
-              type="datetimerange"
-              range-separator="至"
-              start-placeholder="生效时间"
-              end-placeholder="失效时间">
-            </d-date-picker>
+            <div class="block">
+              <d-date-picker
+                v-model="addData.timeList"
+                value-format="timestamp"
+                :picker-options="pickerOptions2"
+                type="datetimerange"
+                range-separator="至"
+                start-placeholder="生效时间"
+                end-placeholder="失效时间">
+              </d-date-picker>
+            </div>
           </grid-col>
         </grid-row>
     </my-dialog>
@@ -37,7 +40,7 @@
         <grid-row class="mb10">
           <grid-col :span="4" class="label">token:</grid-col>
           <grid-col :span="1"/>
-          <grid-col :span="16" class="val"><d-input v-model="editData.token" class="change-line-400" placeholder="请输入" disabled/></grid-col>
+          <grid-col :span="16" class="val"><d-input v-model="editData.token" oninput="value = value.trim()" class="change-line-400" placeholder="请输入" disabled/></grid-col>
         </grid-row>
         <grid-row class="mb10">
           <grid-col :span="4" class="label">有效时间:</grid-col>
@@ -46,6 +49,7 @@
             <d-date-picker
               v-model="editData.timeList"
               value-format="timestamp"
+              :picker-options="pickerOptions2"
               type="datetimerange"
               range-separator="至"
               start-placeholder="生效时间"
@@ -104,7 +108,7 @@ export default {
   data () {
     return {
       urls: {
-        search: `/application/${this.$route.query.id}/token/search`,
+        search: `/application/${this.$route.query.id}/token/getByApp`,
         add: `/application/${this.$route.query.id}/token/add`,
         edit: `/application/${this.$route.query.id}/token/update`,
         del: `/application/${this.$route.query.id}/token/delete`
@@ -137,7 +141,53 @@ export default {
         showFooter: true
       },
       addData: {
-        timeList: []
+        timeList: [new Date().getTime(), new Date().getTime() + 3600 * 1000 * 24]
+      },
+      pickerOptions2: {
+        shortcuts: [
+          {
+            text: '一百年',
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 100)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
+            }
+          }, {
+            text: '十年',
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 10)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
+            }
+          }, {
+            text: '五年',
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 5)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
+            }
+          },
+          {
+            text: '三年',
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365 * 3)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
+            }
+          }, {
+            text: '一年',
+            onClick (picker) {
+              const end = new Date()
+              const start = new Date()
+              end.setTime(start.getTime() + 3600 * 1000 * 24 * 365)
+              picker.$emit('pick', [start.getTime(), end.getTime()])
+            }
+          }
+        ]
       },
       editDialog: {
         visible: false,

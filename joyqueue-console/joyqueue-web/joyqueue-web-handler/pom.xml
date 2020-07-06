@@ -16,16 +16,14 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>joyqueue-web</artifactId>
-        <groupId>io.chubao</groupId>
-        <version>4.1.1-SNAPSHOT</version>
+        <groupId>org.joyqueue</groupId>
+        <version>4.2.5.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.1.1-SNAPSHOT</version>
+    <version>4.2.5.4-SNAPSHOT</version>
 
     <artifactId>joyqueue-web-handler</artifactId>
     <name>JoyQueue-Web-Handler</name>
@@ -38,8 +36,13 @@
             <version>${laf-vertx.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.chubao</groupId>
+            <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-data-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-broker-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--<dependency>-->
@@ -67,7 +70,36 @@
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-binding-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-message-filter-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.11</version>
+                <configuration>
+                    <complianceLevel>1.8</complianceLevel>
+                    <source>1.8</source>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

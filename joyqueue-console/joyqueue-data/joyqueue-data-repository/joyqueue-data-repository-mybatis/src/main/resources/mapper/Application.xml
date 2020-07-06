@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="io.chubao.joyqueue.repository.ApplicationRepository">
+<mapper namespace="org.joyqueue.repository.ApplicationRepository">
     <resultMap id="baseResultMap" type="Application">
         <result property="id" column="id" jdbcType="BIGINT"/>
         <result property="code" column="code" jdbcType="VARCHAR"/>
@@ -155,7 +155,8 @@
                 <if test="query.keyword != null and query.keyword != '' ">
                   and (a.code like concat('%', #{query.keyword},'%' )
                     or a.alias_code like concat('%', #{query.keyword},'%' )
-                    or a.name like concat('%', #{query.keyword},'%' ))
+                    or a.name like concat('%', #{query.keyword},'%' )
+                    or a.department like concat('%', #{query.keyword},'%' ))
                 </if>
                 <if test="query.admin == false">
                     <if test="query.userId != null">

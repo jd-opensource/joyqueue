@@ -17,8 +17,8 @@ package io.openmessaging.joyqueue.producer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import io.chubao.joyqueue.client.internal.producer.MessageProducer;
-import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
+import org.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import io.openmessaging.Future;
 import io.openmessaging.exception.OMSRuntimeException;
 import io.openmessaging.extension.Extension;
@@ -80,7 +80,7 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             Preconditions.checkArgument(message instanceof MessageAdapter, "message is not supported");
 
             MessageAdapter messageAdapter = (MessageAdapter) message;
-            io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult = messageProducer.send(messageAdapter.getProduceMessage());
+            org.joyqueue.client.internal.producer.domain.SendResult sendResult = messageProducer.send(messageAdapter.getProduceMessage());
             return SendResultConverter.convert(sendResult);
         } catch (Throwable cause) {
             throw handleProduceException(cause);
@@ -98,9 +98,9 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             messageProducer.sendAsync(messageAdapter.getProduceMessage())
                     .whenComplete((result, cause) -> {
                         if (cause == null) {
-                            future.setValue(result);
+                            future.setValue(SendResultConverter.convert(result));
                         } else {
-                            future.setThrowable(cause);
+                            future.setThrowable(handleProduceException(cause));
                         }
                     });
             return future;
@@ -145,9 +145,9 @@ public class ProducerImpl extends AbstractServiceLifecycle implements ExtensionP
             messageProducer.batchSendAsync(produceMessages)
                     .whenComplete((result, cause) -> {
                         if (cause == null) {
-                            future.setValue(result);
+                            future.setValue(SendResultConverter.convert(result.get(0)));
                         } else {
-                            future.setThrowable(cause);
+                            future.setThrowable(handleProduceException(cause));
                         }
                     });
             return future;

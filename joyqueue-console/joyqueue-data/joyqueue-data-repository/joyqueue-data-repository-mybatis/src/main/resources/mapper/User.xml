@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="io.chubao.joyqueue.repository.UserRepository">
+<mapper namespace="org.joyqueue.repository.UserRepository">
     <resultMap id="baseResultMap" type="User">
         <result property="id" column="id" jdbcType="BIGINT"/>
         <result property="code" column="code" jdbcType="VARCHAR"/>
@@ -184,7 +184,7 @@
 
     <select id="findAppUserById" parameterType="long" resultMap="appUserMap">
         SELECT
-          app_id,app_code,user_id,user_code,create_time,create_by,create_by_code,update_time,update_by,update_by_code
+          id,app_id,app_code,user_id,user_code,create_time,create_by,create_by_code,update_time,update_by,update_by_code
         FROM
           `application_user`
         WHERE id=#{id}
@@ -192,7 +192,7 @@
 
     <select id="findAppUserByAppIdAndUserId" resultMap="appUserMap">
         SELECT
-          app_id,app_code,user_id,user_code,create_time,create_by,create_by_code,update_time,update_by,update_by_code
+          id,app_id,app_code,user_id,user_code,create_time,create_by,create_by_code,update_time,update_by,update_by_code
         FROM
           `application_user`
         WHERE app_id=#{appId} AND user_id=#{userId}

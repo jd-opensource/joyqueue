@@ -1,2 +1,0 @@
-io.chubao.joyqueue.broker.store.FixedSizeStoreCleaningStrategy
-io.chubao.joyqueue.broker.store.IntervalTimeStoreCleaningStrategy

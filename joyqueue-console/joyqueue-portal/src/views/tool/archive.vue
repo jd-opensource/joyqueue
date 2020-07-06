@@ -6,10 +6,10 @@
                      :default-time="['00:00:00', '23:59:59']" @on-enter="getList">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="队列名" class="input2" @on-enter="getList">
-        <span slot="prepend">队列名</span>
+      <d-input v-model="search.topic" oninput="value = value.trim()" placeholder="主题名" class="input2" @on-enter="getList">
+        <span slot="prepend">主题名</span>
       </d-input>
-      <d-input v-model="search.businessId" placeholder="业务ID" class="input2" @on-enter="getList">
+      <d-input v-model="search.businessId" oninput="value = value.trim()" placeholder="业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button class="button2" type="primary" @click="getList">查询
@@ -20,7 +20,7 @@
 
     <my-table :showPagination="false" :showPin="showTablePin" :data="tableData" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-consume="consume" @on-download="download" @on-retry="retryInit">
+              @on-consume="consume" @on-download="download" @on-preview="preview" @on-retry="retryInit">
     </my-table>
 
     <div style="text-align: right; margin-right: 50px">
@@ -41,11 +41,18 @@
         <d-option v-for="item in retry.appList" :value="item" :key="item">{{ item }}</d-option>
       </d-select>
     </my-dialog>
+    <d-dialog v-model="previewDialogVisible" title="预览消息" width="600">
+      <preview :message-types="messageTypes" :url="urls.preview" :query="previewQuery" :messageType="messageType" @update:messageType="messageType = $event"></preview>
+      <div slot="footer">
+          <d-button @click="previewDialogVisible = false">关闭</d-button>
+      </div>
+    </d-dialog>
   </div>
 </template>
 
 <script>
 import myTable from '../../components/common/myTable.vue'
+import preview from './preview.vue'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
 import MyDialog from '../../components/common/myDialog'
@@ -55,7 +62,8 @@ export default {
   name: 'archive',
   components: {
     MyDialog,
-    myTable
+    myTable,
+    preview
   },
   mixins: [ crud ],
   props: {
@@ -79,6 +87,10 @@ export default {
       default: function () {
         return [
           {
+            txt: '预览消息',
+            method: 'on-preview'
+          },
+          {
             txt: '下载消息体',
             method: 'on-download'
           },
@@ -101,7 +113,9 @@ export default {
         consume: '/archive/consume',
         download: '/archive/download',
         retry: '/archive/retry',
-        getApps:'/consumer/findAppsByTopic/topic'
+        getApps: '/consumer/findAppsByTopic',
+        preview: '/archive/preview',
+        messageTypes: '/archive/message-types'
       },
       firstDis: true,
       nextDis: true,
@@ -111,16 +125,22 @@ export default {
         showFooter: false,
         width: '1000px'
       },
+      messageTypes: [
+        'UTF8 TEXT'
+      ],
+      messageType: undefined,
       retryDialog: {
         visible: false,
         title: '归档转重试',
         showFooter: true,
         width: '300px'
       },
+      previewDialogVisible: false,
+      previewQuery: undefined,
       retry: {
-        appList:[],
-        app:'',
-        item:{}
+        appList: [],
+        app: '',
+        item: {}
       },
       consumeData: {
         rowData: [],
@@ -131,7 +151,7 @@ export default {
             width: '20%'
           },
           // {
-          //   title:"队列",
+          //   title:"主题",
           //   key: 'topic'
           // },
           {
@@ -198,7 +218,7 @@ export default {
             width: '15%'
           },
           {
-            title: '队列',
+            title: '主题',
             key: 'topic',
             width: '15%'
           }
@@ -229,7 +249,7 @@ export default {
         return
       }
       if (!this.search.topic) {
-        this.$Message.error('队列名不能为空')
+        this.$Message.error('主题名不能为空')
         return
       }
       let oldData = this.tableData.rowData
@@ -240,7 +260,7 @@ export default {
         this.search.rowKeyStart = oldData[oldData.length - 1].rowKeyStart
       } else {
         this.search.sendTime = this.search.beginTime
-        this.search.rowKeyStart = '';
+        this.search.rowKeyStart = ''
       }
       apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
         this.tableData.rowData = data.data
@@ -252,20 +272,29 @@ export default {
       })
     },
     download (item) {
-      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId
+      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId + '&messageType=' + this.messageType
       apiRequest.get(this.urlOrigin.download + data).then(data => {
         this.$Message.success('下载成功')
       })
     },
-    retryInit(item) {
-      this.retryDialog.visible = true;
-      this.retry.item = item;
-      apiRequest.get(this.urlOrigin.getApps + '/' + item.topic).then((data) => {
+    preview (item) {
+      this.previewQuery = {
+        topic: item.topic,
+        sendTime: item.sendTime,
+        businessId: item.businessId,
+        messageId: item.messageId
+      }
+      this.previewDialogVisible = true
+    },
+    retryInit (item) {
+      this.retryDialog.visible = true
+      this.retry.item = item
+      apiRequest.get(this.urlOrigin.getApps + '?topic=' + item.topic).then((data) => {
         this.retry.appList = data.data
       })
     },
     configConfirm () {
-      this.retry.item.app = this.retry.app;
+      this.retry.item.app = this.retry.app
       apiRequest.post(this.urlOrigin.retry, {}, this.retry.item).then(data => {
         this.$Message.success('操作成功')
       })
@@ -278,7 +307,18 @@ export default {
     }
   },
   mounted () {
+    apiRequest.get(this.urls.messageTypes)
+      .then(data => {
+        this.messageTypes = data.data
 
+        if (typeof this.messageTypes !== 'undefined' && this.messageTypes.length > 0) {
+          if (typeof this.messageType === 'undefined') {
+            this.messageType = this.messageTypes[0]
+          }
+        } else {
+          console.error('Property message-types can not be empty!')
+        }
+      })
   }
 }
 </script>

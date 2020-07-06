@@ -56,7 +56,11 @@ export default {
       colData: [],
       inputs: [],
       btns: [],
-      operates: []
+      operates: [],
+      btnGroups: []
+    },
+    operationColumnWidth: {
+      type: Number
     },
     page: {
       page: 1,
@@ -82,6 +86,7 @@ export default {
       let inputsOrigin = this.data.inputs || []
       let btnsOrigin = this.data.btns || []
       let operatesOrigin = this.data.operates || []
+      let btnGroupsOrigin = this.data.btnGroups || {}
       let colOpData = deepCopy(this.data.colData) || []
       // 处理input的
       for (let i = 0; i < inputsOrigin.length; i++) {
@@ -115,15 +120,15 @@ export default {
         })
       }
       // 处理操作的
-      if (!btnsOrigin.length && !operatesOrigin.length) {
+      if (!btnsOrigin.length && !operatesOrigin.length && !btnGroupsOrigin) {
         return this.data.colData
       }
       // 渲染操作
       colOpData.push({
         title: this.langConfig['operate'],
+        width: this.operationColumnWidth,
         render: (h, params) => {
           let btns = []
-          let items = []
           for (let i = 0; i < btnsOrigin.length; i++) {
             let btn = btnsOrigin[i]
             if (btn.bindKey && btn.bindVal) { // 数据权限控制
@@ -211,6 +216,64 @@ export default {
               }
             }, btn.txt))
           }
+
+          for (let key in btnGroupsOrigin) {
+            let group = btnGroupsOrigin[key]
+            let title = group.title
+            let groupBtns = group.btns || []
+            let btnItem = []
+            for (let j = 0; j < groupBtns.length; j++) {
+              let btn = groupBtns[j]
+              if (btn.bindKey && params.item[btn.bindKey] !== btn.bindVal) { // 数据权限控制
+                continue
+              }
+              if (btn.isAdmin) { // 登录用户权限控制,admin:1,user:0
+                continue
+              }
+              btnItem.push(h('DDropdownItem', {
+                nativeOn: {
+                  click: () => {
+                    // this.$emit(operate.method, params.item, params.index)
+                    if (typeof btn.method === 'function') {
+                      btn.method.call(this, params.item, params.index)
+                    } else {
+                      this.$emit(btn.method, params.item, params.index)
+                    }
+                  }
+                }
+              }, btn.txt))
+            }
+            if (btnItem.length) {
+              btns.push(h('DDropdown',
+                {
+                  props: {
+                    trigger: 'click'
+                  }
+                },
+                [
+                  h('a', {
+                    props: {
+                      size: 'small'
+                    }
+                  }, [
+                    title,
+                    h('Icon', {
+                      props: {
+                        name: 'chevron-down',
+                        size: '14',
+                        slot: 'suffix'
+                      }
+                    })
+                  ]),
+                  h('DDropdownMenu', {
+                    slot: 'list'
+                  }, btnItem)
+                ]
+              ))
+            }
+          }
+
+          let items = []
           for (let i = 0; i < operatesOrigin.length; i++) {
             let operate = operatesOrigin[i]
             if (operate.bindKey && params.item[operate.bindKey] !== operate.bindVal) { // 数据权限控制
@@ -260,6 +323,7 @@ export default {
               ]
             ))
           }
+
           return h('div', btns)
         }
       })

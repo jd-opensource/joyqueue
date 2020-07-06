@@ -11,17 +11,17 @@
     </oms:access-point>
 
     <oms:producer id="producer1"></oms:producer>
-    <!--<oms:producer id="producer1" listener="io.chubao.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></oms:producer>-->
-    <!--<bean id="producer1" class="io.chubao.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></bean>-->
+    <!--<oms:producer id="producer1" listener="org.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></oms:producer>-->
+    <!--<bean id="producer1" class="org.joyqueue.client.samples.spring.SimpleTransactionStateCheckListener"></bean>-->
     <!--<oms:producer id="producer1" listener-ref="simpleTransactionStateCheckListener"></oms:producer>-->
 
-    <oms:consumer queue-name="test_topic_0" listener="io.chubao.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
-    <!--<bean id="testTopic0Listener" class="io.chubao.joyqueue.client.samples.spring.SimpleMessageListenertener"></bean>-->
+    <oms:consumer queue-name="test_topic_0" listener="org.joyqueue.client.samples.spring.SimpleMessageListener"></oms:consumer>
+    <!--<bean id="testTopic0Listener" class="org.joyqueue.client.samples.spring.SimpleMessageListenertener"></bean>-->
     <!--<oms:consumer queue-name="test_topic_0" listener-ref="testTopic0Listener"></oms:consumer>-->
 
-    <oms:interceptor class="io.chubao.joyqueue.client.samples.spring.SimpleConsumerInterceptor"></oms:interceptor>
+    <oms:interceptor class="org.joyqueue.client.samples.spring.SimpleConsumerInterceptor"></oms:interceptor>
     <!--<oms:interceptor ref="consumerInterceptor1"></oms:interceptor>-->
 
-    <oms:interceptor class="io.chubao.joyqueue.client.samples.spring.SimpleProducerInterceptor"></oms:interceptor>
+    <oms:interceptor class="org.joyqueue.client.samples.spring.SimpleProducerInterceptor"></oms:interceptor>
     <!--<oms:interceptor ref="producerInterceptor1"></oms:interceptor>-->
 </beans>

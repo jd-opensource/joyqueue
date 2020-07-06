@@ -39,6 +39,7 @@ export default {
         partitions: '',
         archive: false,
         labels: '',
+        dataCenters: [],
         description: ''
       }
     }
@@ -63,7 +64,6 @@ export default {
     },
     handleTabChange (data) {
       let name = data.name
-
       if (name === 'producer' || name === 'consumer') {
         this.$refs[name].search.topic.code = this.topic.code
         this.$refs[name].search.topic.namespace.code = this.namespace.code

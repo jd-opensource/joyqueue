@@ -15,11 +15,8 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import io.chubao.joyqueue.client.internal.consumer.MessageConsumer;
-import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeReply;
-import io.chubao.joyqueue.network.command.RetryType;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.openmessaging.consumer.BatchMessageListener;
 import io.openmessaging.consumer.MessageListener;
 import io.openmessaging.consumer.MessageReceipt;
@@ -28,6 +25,7 @@ import io.openmessaging.extension.Extension;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.interceptor.ConsumerInterceptor;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
+import io.openmessaging.joyqueue.consumer.ConsumerIndex;
 import io.openmessaging.joyqueue.consumer.ExtensionConsumer;
 import io.openmessaging.joyqueue.consumer.extension.ExtensionAdapter;
 import io.openmessaging.joyqueue.consumer.message.MessageConverter;
@@ -36,6 +34,11 @@ import io.openmessaging.joyqueue.support.AbstractServiceLifecycle;
 import io.openmessaging.message.Message;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.client.internal.consumer.MessageConsumer;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import org.joyqueue.client.internal.consumer.domain.FetchIndexData;
+import org.joyqueue.network.command.RetryType;
 
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +76,7 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
         } catch (Throwable cause) {
             throw handleConsumeException(cause);
         }
+
     }
 
     @Override
@@ -300,6 +304,31 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
     @Override
     public QueueMetaData getQueueMetaData(String queueName) {
         return getExtension().get().getQueueMetaData(queueName);
+    }
+
+    @Override
+    public ConsumerIndex getIndex(short partition) {
+        FetchIndexData fetchIndexData = messageConsumer.fetchIndex(partition);
+        return new ConsumerIndex(fetchIndexData.getIndex(), fetchIndexData.getLeftIndex(), fetchIndexData.getRightIndex());
+    }
+
+    @Override
+    public void batchAck(List<MessageReceipt> receiptList) {
+        try {
+            List<ConsumeReply> replyList = Lists.newLinkedList();
+            for (MessageReceipt receipt : receiptList) {
+                Preconditions.checkArgument(receipt instanceof MessageReceiptAdapter, "receipt is not supported");
+
+                MessageReceiptAdapter messageReceiptAdapter = (MessageReceiptAdapter) receipt;
+                ConsumeMessage message = messageReceiptAdapter.getMessage();
+                ConsumeReply consumeReply = new ConsumeReply(message.getPartition(), message.getIndex(), RetryType.NONE);
+                replyList.add(consumeReply);
+            }
+
+            messageConsumer.reply(replyList);
+        } catch (Throwable cause) {
+            throw handleConsumeException(cause);
+        }
     }
 
     protected OMSRuntimeException handleConsumeException(Throwable cause) {

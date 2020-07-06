@@ -1,0 +1,2 @@
+org.joyqueue.broker.protocol.coordinator.assignment.support.NonePartitionAssignor
+org.joyqueue.broker.protocol.coordinator.assignment.support.PartitionGroupBalancePartitionAssignor

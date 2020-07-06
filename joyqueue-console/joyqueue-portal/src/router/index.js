@@ -7,6 +7,11 @@ import NavConfig from '../i18n/navs.json'
 
 Vue.use(Router)
 
+const originalPush = Router.prototype.push
+Router.prototype.push = function (location) {
+  return originalPush.call(this, location).catch(err => err)
+}
+
 // ------- 通过JSON配置动态生成路由 Begin ------- //
 export function registerRoute (...extendConfigs) {
   const routes = []

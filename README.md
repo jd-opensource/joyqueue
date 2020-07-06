@@ -1,8 +1,11 @@
-# JoyQueue | 快乐队列
+# JoyQueue
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.chubao.joyqueue/joyqueue-client?color=brightgreen)](https://search.maven.org/search?q=io.chubao.joyqueue)
-[![GitHub release](https://img.shields.io/badge/release-download-orange.svg)](https://github.com/joyqueue/joyqueue/releases)
-![GitHub](https://img.shields.io/github/license/joyqueue/joyqueue)
+[![License](https://img.shields.io/github/license/chubaostream/joyqueue)](./LICENSE)
+[![Release](https://img.shields.io/github/v/release/chubaostream/joyqueue)](https://github.com/chubaostream/joyqueue/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/org.joyqueue/joyqueue-client?color=brightgreen)](https://search.maven.org/search?q=org.joyqueue)
+[![Last commit](https://img.shields.io/github/last-commit/chubaostream/joyqueue)](https://github.com/chubaostream/joyqueue/commits)
+[![Travis](https://img.shields.io/travis/chubaostream/joyqueue)](https://travis-ci.org/chubaostream/joyqueue)
+[![Coverage Status](https://coveralls.io/repos/github/chubaostream/joyqueue/badge.svg)](https://coveralls.io/github/chubaostream/joyqueue)
 
 [阅读中文版](docs/cn/README.md)
 
@@ -52,9 +55,18 @@ Visit [Quick start](./docs/cn/quickstart.md)。
 
 Visit [Documentation Index](./docs/cn/index.md)。
 
+## Dependency Analysis
+
+The [License Maven Plugin](https://www.mojohaus.org/license-maven-plugin/) manages the license of this project and its dependencies. Use maven goal `license:third-party-report` to generate a report of all third-parties detected in the project.
+
+```bash
+mvn license:aggregate-third-party-report
+```
+
 ## Contributing
 
 We are dedicate to building high-quality messaging platform product. So any thoughts, pull requests, or issues are appreciated.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on submitting patches and the contribution workflow.
 
 ## License
 

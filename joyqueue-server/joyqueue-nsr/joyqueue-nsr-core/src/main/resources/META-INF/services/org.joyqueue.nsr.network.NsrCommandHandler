@@ -1,0 +1,3 @@
+org.joyqueue.nsr.network.handler.NameServiceCommandHandler
+org.joyqueue.nsr.network.handler.PushNameServerEventHandler
+org.joyqueue.nsr.network.handler.GetAllMetadataRequestHandler

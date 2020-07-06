@@ -5,19 +5,22 @@
       "topic": "主题中心",
       "workflow": "流程中心",
       "tool": "系统工具",
-      "setting": "系统管理"
+      "setting": "系统管理",
+      "logout": "退出"
     },
     "tool": {
       "retry": "重试查询",
       "archive": "归档查询",
-      "operateHistory": "操作历史查询"
+      "operateHistory": "操作历史查询",
+      "msgFilter": "消息查询"
     },
     "setting": {
       "dataCenter": "数据中心管理",
       "config": "配置管理",
       "brokerGroup": "Broker分组管理",
       "broker": "Broker管理",
-      "namespace": "命名空间管理"
+      "namespace": "命名空间管理",
+      "retryMonitor": "重试监控"
     }
   },
   "en-US" : {
@@ -26,19 +29,22 @@
       "topic": "Topics",
       "workflow": "Workflow",
       "tool": "Tools",
-      "setting": "Setting"
+      "setting": "Setting",
+      "logout": "Sign Out"
     },
     "tool": {
       "retry": "Retry Query",
       "archive": "Archive Query",
-      "operateHistory": "Operate History"
+      "operateHistory": "Operate History",
+      "msgFilter": "Message Query"
     },
     "setting": {
       "dataCenter": "Data Center Manage",
       "config": "Config Manage",
       "brokerGroup": "Broker Group Manage",
       "broker": "Broker Manage",
-      "namespace": "Namespace Manage"
+      "namespace": "Namespace Manage",
+      "retryMonitor": "Retry Monitor"
     }
   }
 }

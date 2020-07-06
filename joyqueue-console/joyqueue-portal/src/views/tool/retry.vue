@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="headLine2">
-      <d-input v-model="search.topic" placeholder="请输入队列名" class="input2" @on-enter="getList">
-        <span slot="prepend">队列名</span>
+      <d-input v-model="search.topic" oninput="value = value.trim()" placeholder="请输入主题名" class="input2" @on-enter="getList">
+        <span slot="prepend">主题名</span>
       </d-input>
-      <d-input v-model="search.app" placeholder="请输入消费者" class="input2" @on-enter="getList">
+      <d-input v-model="search.app" oninput="value = value.trim()" placeholder="请输入消费者" class="input2" @on-enter="getList">
         <span slot="prepend">消费者</span>
       </d-input>
       <d-select v-model="search.status" class="input3" @on-change="getList">
@@ -22,10 +22,13 @@
                      :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="businessId" placeholder="请输入业务ID" class="input2" @on-enter="getList">
+      <d-input v-model="businessId" oninput="value = value.trim()" placeholder="请输入业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button class="button2" type="primary" @click="getList">查询
+        <icon name="search" style="margin-left: 3px;"></icon>
+      </d-button>
+      <d-button class="button2" type="primary" @click="batchDeleteTip">批量删除
         <icon name="search" style="margin-left: 3px;"></icon>
       </d-button>
     </div>
@@ -67,7 +70,8 @@ export default {
         search: '/retry/search',
         del: '/retry/delete',
         download: '/retry/download',
-        recovery: '/retry/recovery'
+        recovery: '/retry/recovery',
+        batchDelete: '/retry/batchDelete'
       },
       businessId: '',
       statusList: [
@@ -90,7 +94,7 @@ export default {
             key: 'id'
           },
           {
-            title: '队列',
+            title: '主题',
             key: 'topic'
           },
           {
@@ -139,7 +143,9 @@ export default {
           },
           {
             txt: '删除',
-            method: 'on-del'
+            method: 'on-del',
+            bindKey: 'status',
+            bindVal: [0, -2, 1]
           }
         ]
       },
@@ -186,24 +192,72 @@ export default {
         this.showTablePin = false
       })
     },
+    batchDeleteTip(){
+      this.$Dialog.confirm({
+        title: '提示',
+        content: '将按查询条件(所有分页)批量删除重试数据'
+      }).then(() => {
+        this.batchDelete();
+      // this.$Message.info('点击了「确认」按钮')
+    }).catch(() => {
+        // this.$Message.info('点击了「取消」按钮')
+      })
+    },
+    batchDelete(){
+
+      let data = {
+        topic: this.search.topic,
+        app: this.search.app,
+        status: this.search.status,
+        businessId: this.businessId
+      }
+
+      if (this.times && this.times.length === 2) {
+        data.beginTime = this.times[0]
+        data.endTime = this.times[1]
+      } else {
+        data.beginTime = ''
+        data.endTime = ''
+      }
+      apiRequest.post(this.urlOrigin.batchDelete, {}, data).then((data) => {
+        if (data.status === 200) {
+          this.$Dialog.success({
+            content: '批量删除成功'
+          })
+          this.getList()
+        } else {
+          this.$Dialog.error({
+            content: data.message
+          })
+        }
+      })
+    },
     download (item) {
-      document.location.assign("/v1"+this.urls.download+'/' +item.id+'/topic/'+item.topic)
+      document.location.assign('v1' + this.urls.download + '?id=' + item.id + '&topic=' + item.topic)
       // apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
     },
     recovery (item) {
-      apiRequest.put(this.urlOrigin.recovery + '/' + item.id +'/topic/'+item.topic).then(data => {
-        this.$Dialog.success({
-          content: '恢复成功'
-        })
-        this.getList()
+      apiRequest.put(this.urlOrigin.recovery + '?id=' + item.id + 'topic=' + item.topic).then(data => {
+        if (data.status === 200) {
+          this.$Dialog.success({
+            content: '恢复成功'
+          })
+          this.getList()
+        } else {
+          this.$Dialog.error({
+            content: data.message
+          })
+        }
       })
     },
     del (item) {
-      apiRequest.delete(this.urlOrigin.del + '/' + item.id +'/topic/'+item.topic).then(data => {
-        this.$Dialog.success({
-          content: '删除成功'
-        })
-        this.getList()
+      apiRequest.delete(this.urlOrigin.del + '?id=' + item.id + '&topic=' + item.topic).then(data => {
+        if (data.status === 200) {
+          this.$Dialog.success({
+            content: '删除成功'
+          })
+          this.getList()
+        }
       })
     }
   },

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.joyqueue.repository.TopicMsgFilterRepository">
+
+    <resultMap id="baseResultMap" type="TopicMsgFilter">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="app" column="app" jdbcType="VARCHAR"/>
+        <result property="token" column="token" jdbcType="VARCHAR"/>
+        <result property="topic" column="topic_code" jdbcType="VARCHAR"/>
+        <result property="partition" column="partition" jdbcType="INTEGER"/>
+        <result property="filter" column="filter" jdbcType="VARCHAR"/>
+        <result property="msgFormat" column="msg_fmt" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+        <result property="offset" column="offset" jdbcType="BIGINT"/>
+        <result property="offsetStartTime" column="start_time" jdbcType="TIMESTAMP"/>
+        <result property="offsetEndTime" column="end_time" jdbcType="TIMESTAMP"/>
+        <result property="queryCount" column="query_count" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="url" column="url" jdbcType="VARCHAR"/>
+        <result property="objectKey" column="obj_key" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="baseColumn">
+        a.`id`,
+        a.`app`,
+        a.`token`,
+        a.`topic_code` AS topic,
+        a.`partition`,
+        a.`filter`,
+        a.`msg_fmt` AS msgFormat,
+        a.`create_time` AS createTime,
+        a.`create_by` AS `createBy.id`,
+        a.`update_time` AS updateTime,
+        a.`update_by` AS `updateBy.id`,
+        a.`offset`,
+        a.`start_time` AS offsetStartTime,
+        a.`end_time` AS offsetEndTime,
+        a.`query_count` AS queryCount,
+        a.`status`,
+        a.`url`,
+        a.`description`
+    </sql>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="id" parameterType="TopicMsgFilter">
+        INSERT INTO topic_msg_filter(
+            `app`,
+            `token`,
+            `topic_code`,
+            `filter`,
+            `partition`,
+            `msg_fmt`,
+            `create_by`,
+            `create_time`,
+            `update_by`,
+            `update_time`,
+            `offset`,
+            `start_time`,
+            `end_time`,
+            `query_count`,
+            `status`,
+            `url`)
+        VALUES(
+            #{app},
+            #{token},
+            #{topic},
+            #{filter},
+            #{partition},
+            #{msgFormat},
+            #{createBy.id},
+            #{createTime},
+            #{updateBy.id},
+            #{updateTime},
+            #{offset},
+            #{offsetStartTime},
+            #{offsetEndTime},
+            #{queryCount},
+            #{status},
+            #{url})
+    </insert>
+
+    <select id="findByNextOne" parameterType="Integer" resultType="TopicMsgFilter">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        topic_msg_filter AS a
+        WHERE a.status = 0
+        ORDER BY a.create_time ASC
+        limit 0,#{size}
+    </select>
+
+    <select id="findTopicMsgFiltersByQuery" parameterType="QPageQuery" resultType="TopicMsgFilter">
+        SELECT
+        <include refid="baseColumn"/>
+        FROM
+        topic_msg_filter AS a
+        <if test="query.admin == false">
+            WHERE a.create_by = #{query.userId}
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="findTopicMsgFiltersCountByQuery" parameterType="QPageQuery" resultType="int">
+        SELECT COUNT(a.id) FROM topic_msg_filter a
+        <if test="query.admin == false">
+        WHERE a.create_by = #{query.userId}
+        </if>
+    </select>
+
+    <update id="update" parameterType="topicMsgFilter">
+        UPDATE
+            `topic_msg_filter`
+        SET
+            <if test="app!=null">
+            `app` = #{app},
+            </if>
+            <if test="token!=null">
+            `token` = #{token},
+            </if>
+            <if test="topic!=null">
+            `topic_code` = #{topic},
+            </if>
+            <if test="partition!=null">
+            `partition` = #{partition},
+            </if>
+            <if test="filter!=null">
+            `filter` = #{filter},
+            </if>
+            <if test="msgFormat!=null">
+            `msg_fmt` = #{msgFormat},
+            </if>
+            <if test="offset !=0">
+            `offset` = #{offset},
+            </if>
+            <if test="offsetStartTime!=null">
+            `start_time` = #{offsetStartTime},
+            </if>
+            <if test="offsetEndTime!=null">
+            `end_time` = #{offsetEndTime},
+            </if>
+            <if test="queryCount!=0">
+            `query_count` = #{queryCount},
+            </if>
+            <if test="updateTime!=null">
+            `update_time`=#{updateTime},
+            </if>
+            <if test="updateBy!=null">
+            `update_by`=#{updateBy.id},
+            </if>
+            <if test="url!=null">
+            `url` = #{url},
+            </if>
+            <if test="objectKey!=null">
+             `obj_key` = #{objectKey},
+            </if>
+            <if test="description!=null">
+             `description` = #{description},
+            </if>
+            <if test="status!=null">
+             `status`=#{status}
+            </if>
+        WHERE
+            id=#{id}
+    </update>
+
+</mapper>

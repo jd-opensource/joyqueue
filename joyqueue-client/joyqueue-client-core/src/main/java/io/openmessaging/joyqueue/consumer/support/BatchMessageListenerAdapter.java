@@ -15,9 +15,9 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import io.chubao.joyqueue.client.internal.consumer.BatchMessageListener;
-import io.chubao.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import io.chubao.joyqueue.client.internal.consumer.exception.IgnoreAckException;
+import org.joyqueue.client.internal.consumer.BatchMessageListener;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.consumer.exception.IgnoreAckException;
 import io.openmessaging.joyqueue.consumer.message.MessageConverter;
 import io.openmessaging.message.Message;
 

@@ -21,6 +21,7 @@ import io.openmessaging.OMS;
 import io.openmessaging.interceptor.ConsumerInterceptor;
 import io.openmessaging.interceptor.ProducerInterceptor;
 import io.openmessaging.producer.TransactionStateCheckListener;
+import io.openmessaging.spring.config.KeyValueAttribute;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -58,6 +59,16 @@ public class AccessPointContainer implements BeanFactoryAware, InitializingBean 
         this.id = id;
         this.url = url;
         this.attributes = attributes;
+    }
+
+    public AccessPointContainer(String id, String url, List<KeyValueAttribute> attributes) {
+        KeyValue keyValue = OMS.newKeyValue();
+        for (KeyValueAttribute attribute : attributes) {
+            keyValue.put(attribute.getKey(), attribute.getValue());
+        }
+        this.id = id;
+        this.url = url;
+        this.attributes = keyValue;
     }
 
     @Override

@@ -1,14 +1,22 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/Broker分组编码/IP" class="left mr10"
+    <div>
+      <d-input type="textarea" v-model="searchData.keyword" rows="1" placeholder="请输入ID/IP" class="left"
                style="width:300px" @on-enter="getList">
-        <span slot="prepend">关键词</span>
+        <span slot="prepend">&nbsp;ID/IP&nbsp;</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
+      <d-input v-if="searchData.groupVisible" v-model="searchData.group" oninput="value = value.trim()" placeholder="请输入Broker分组编码" class="left mr10"
+               style="width:300px" @on-enter="getList">
+        <span slot="prepend">分组编码</span>
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+      </d-input>
+      <d-button type="primary" @click="getList">搜索</d-button>
+      <d-button type="primary" @click="openBatchBrokerGroupDialog">批量分组调整</d-button>
+
       <slot name="extendBtn"></slot>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+    <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
               @on-edit="edit" @on-del="del" @on-detail="detail" @on-archiveMonitor="archiveMonitor">
     </my-table>
 
@@ -17,13 +25,13 @@
       <grid-row class="mb10">
         <grid-col :span="8" class="label">IP:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="editData.ip"></d-input>
+          <d-input v-model="editData.ip" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="8" class="label">端口:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="editData.port"></d-input>
+          <d-input v-model="editData.port" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
@@ -70,6 +78,13 @@
     <my-dialog :dialog="monitorDetailDialog">
       <broker-monitor :brokerId="brokerId"> </broker-monitor>
     </my-dialog>
+    <my-dialog :dialog="batchBrokerGroupDialog" @on-dialog-confirm="batchBrokerGroupHandle('batchBrokerGroupSearch')" @on-dialog-cancel="closeBatchBrokerGroupDialog">
+      <d-form ref="batchBrokerGroupSearch" :model="batchBrokerGroupSearch" label-width="100px" :rules="batchBrokerGroupDialog.rules">
+        <d-form-item label="broker分组" prop="batchBrokerGroup">
+          <d-input placeholder="请输入broker分组" oninput="value = value.trim()" v-model="batchBrokerGroupSearch.batchBrokerGroup"></d-input>
+        </d-form-item>
+      </d-form>
+    </my-dialog>
   </div>
 </template>
 
@@ -94,7 +109,8 @@ export default {
       type: Object,
       default: function () {
         return {
-          keyword: ''
+          keyword: '',
+          groupVisible: true
         }
       }
     },
@@ -107,7 +123,8 @@ export default {
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
           telnet: '/broker',
-          startInfo: '/monitor/start'
+          startInfo: '/monitor/start',
+          batchBrokerGroupSearch: '/brokerGroup/mvBatchBrokerGroup'
         }
       }
     },
@@ -118,6 +135,10 @@ export default {
           {
             txt: '编辑',
             method: 'on-edit'
+          },
+          {
+            txt: '删除',
+            method: 'on-del'
           },
           {
             txt: '归档监控',
@@ -175,6 +196,10 @@ export default {
   },
   data () {
     return {
+      batchBrokerGroupSearch: {
+        selectedBrokers: [],
+        batchBrokerGroup: ''
+      },
       tableData: {
         rowData: [],
         colData: this.colData,
@@ -199,6 +224,20 @@ export default {
         showFooter: false,
         width: '1200px'
       },
+      batchBrokerGroupDialog: {
+        visible: false,
+        title: '批量分组迁移',
+        showFooter: true,
+        width: '600px',
+        rules: {
+          batchBrokerGroup: [
+            {
+              required: true,
+              message: 'broker分组不可以为空'
+            }
+          ]
+        }
+      },
       retryTypeList: [
         {key: 'DB', value: 'DB'},
         {key: 'RemoteRetry', value: 'RemoteRetry'}
@@ -215,6 +254,10 @@ export default {
   },
   methods: {
     getList () {
+      if (this.searchData.keyword && this.searchData.group) {
+        this.$Message.error('验证不通过，ID/IP搜索和Broker分组编号不能同时搜索')
+        return
+      }
       this.showTablePin = true
       let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
@@ -255,7 +298,14 @@ export default {
     },
     detail (item) {
       this.brokerId = item.id
-      this.monitorDetailDialog.visible = true
+      this.$router.push({
+        path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+        query: {
+          brokerId: item.id,
+          brokerIp: item.ip,
+          brokerPort: item.port
+        }
+      })
     },
     beforeEdit () {
       return new Promise((resolve, reject) => {
@@ -270,10 +320,39 @@ export default {
           // description: this.editData.description
         })
       })
+    },
+    handleSelectionChange (val) {
+      this.batchBrokerGroupSearch.selectedBrokers = val
+    },
+    openBatchBrokerGroupDialog () {
+      this.batchBrokerGroupDialog.visible = true
+    },
+    closeBatchBrokerGroupDialog () {
+      this.batchBrokerGroupDialog.visible = false
+    },
+    batchBrokerGroupHandle (formName) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          apiRequest.post(this.urls.batchBrokerGroupSearch + '?group=' + this.batchBrokerGroupSearch.batchBrokerGroup, {}, this.batchBrokerGroupSearch.selectedBrokers).then((data) => {
+            if (data.code === 200) {
+              this.$Message.info('update success')
+              this.closeBatchBrokerGroupDialog()
+              this.getList()
+            } else {
+              this.$Message.error(data.message)
+            }
+          })
+        }
+      })
     }
   },
   mounted () {
     this.getList()
+  },
+  computed: {
+    curLang () {
+      return this.$i18n.locale
+    }
   }
 }
 </script>

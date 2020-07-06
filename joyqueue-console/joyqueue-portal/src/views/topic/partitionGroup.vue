@@ -12,21 +12,21 @@
       </d-button-group>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
-                  @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
-                  @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
-                  @on-position="goPosition" @on-replication="goReplicationChart">
-        </my-table>
+              @on-current-change="handleCurrentChange" @on-view-detail="goDetail" @on-scale="groupScale"
+              @on-merge="groupMerge" @on-del="del" @on-addPartition="addPartition" @on-removePartition="removePartition"
+              @on-position="goPosition" @on-replication="goReplicationChart" :showPagination="false">
+    </my-table>
 
     <!--详情-->
     <my-dialog :dialog="groupDetailDialog" @on-dialog-confirm="groupDetailConfirm()" @on-dialog-cancel="groupDetailCancel()">
       <group-detail ref='groupDetail' :data="groupDetailDialogData"></group-detail>
     </my-dialog>
     <!--添加节点-->
-    <my-dialog :dialog="groupScaleDialog" @on-dialog-confirm="groupScaleConfirm()" @on-dialog-cancel="groupScaleCancel()" >
+    <my-dialog class="maxDialogHeight" :dialog="groupScaleDialog" @on-dialog-confirm="groupScaleConfirm()" @on-dialog-cancel="groupScaleCancel()" >
       <group-scale ref='groupScale' :data="groupScaleDialogData"></group-scale>
     </my-dialog>
     <!--移除节点-->
-    <my-dialog :dialog="groupMergeDialog" @on-dialog-confirm="groupMergeConfirm()" @on-dialog-cancel="groupMergeCancel()"  >
+    <my-dialog class="maxDialogHeight" :dialog="groupMergeDialog" @on-dialog-confirm="groupMergeConfirm()" @on-dialog-cancel="groupMergeCancel()"  >
       <group-merge ref='groupMerge' :data="groupMergeDialogData"></group-merge>
     </my-dialog>
     <!--主从同步-->
@@ -35,21 +35,21 @@
     </my-dialog>
     <!--增加分区数-->
     <my-dialog :dialog="addPartitionDialog" @on-dialog-confirm="addPartitionConfirm()" @on-dialog-cancel="addPartitionCancel()"  >
-      <d-input v-model="addPartitionDialogData.partitionCount" placeholder="请输入增加分区数" style="width: 400px">
+      <d-input v-model="addPartitionDialogData.partitionCount" oninput="value = value.trim()" placeholder="请输入增加分区数" style="width: 400px">
         <span slot="prepend">增加分区数</span>
       </d-input>
     </my-dialog>
     <!--减少分区数-->
     <my-dialog :dialog="removePartitionDialog" @on-dialog-confirm="removePartitionConfirm()" @on-dialog-cancel="removePartitionCancel()"  >
-      <d-input v-model="removePartitionDialogData.partitionCount" placeholder="请输入减少分区数" style="width: 400px">
+      <d-input v-model="removePartitionDialogData.partitionCount" oninput="value = value.trim()" placeholder="请输入减少分区数" style="width: 400px">
         <span slot="prepend">减少分区数</span>
       </d-input>
     </my-dialog>
     <!--扩容-->
     <my-dialog :dialog="groupNewDialog" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()">
-          <group-new :data="groupNewDialogData" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()"
-                     @on-partition-group-change="topicUpdate"></group-new>
-        </my-dialog>
+      <group-new :data="groupNewDialogData" @on-dialog-confirm="groupNewConfirm()" @on-dialog-cancel="groupNewCancel()"
+                 @on-partition-group-change="topicUpdate"></group-new>
+    </my-dialog>
   </div>
 </template>
 
@@ -63,6 +63,7 @@ import GroupPosition from './groupPosition.vue'
 import groupMerge from './groupMerge.vue'
 import groupNew from './groupNew.vue'
 import crud from '../../mixins/crud.js'
+import {mergePartitionGroup} from '../../utils/common'
 
 export default {
   name: 'partitionGroup',
@@ -110,7 +111,10 @@ export default {
           {
             title: 'partitions',
             width: '15%',
-            key: 'partitions'
+            key: 'partitions',
+            formatter (item) {
+              return mergePartitionGroup(JSON.parse(item.partitions))
+            }
           },
           {
             title: '选举类型',
@@ -138,8 +142,27 @@ export default {
             title: '当前leader',
             width: '15%',
             key: 'ip',
-            formatter (item) {
-              return `${item.leader}:${item.ip}`
+            render: (h, params) => {
+              return h('label', {
+                style: {
+                  color: '#3366FF'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+                      query: {
+                        brokerId: params.item.brokerId,
+                        brokerIp: params.item.brokerIp,
+                        brokerPort: params.item.brokerPort
+                      }
+                    })
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
+                }
+              }, `${params.item.leader}:${params.item.ip}`)
             }
           },
           {
@@ -181,10 +204,6 @@ export default {
           {
             txt: '减少分区',
             method: 'on-removePartition'
-          },
-          {
-            txt: '删除',
-            method: 'on-del'
           },
           {
             txt: '主从同步监控',
@@ -294,6 +313,9 @@ export default {
       if (rowData[i].leader && rowData[i].leader !== -1) {
         apiRequest.get(this.urlOrigin.getBroker + '/' + rowData[i].leader).then((data) => {
           this.tableData.rowData[i].ip = data.data.ip
+          this.tableData.rowData[i].brokerId = data.data.id
+          this.tableData.rowData[i].brokerIp = data.data.ip
+          this.tableData.rowData[i].brokerPort = data.data.port
           this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
         })
       }
@@ -331,7 +353,7 @@ export default {
       this.positionDialog.visible = false
     },
     groupScale (item) {
-      this.groupScaleDialogData = {groupNo: item.groupNo, topic: {id: item.topic.id, code: item.topic.code}, namespace: {id: item.namespace.id, code: item.namespace.code}}
+      this.groupScaleDialogData = {groupNo: item.groupNo, topic: {id: item.topic.id, code: item.topic.code}, namespace: {id: item.namespace.id, code: item.namespace.code}, ip: item.ip}
       this.groupScaleDialog.visible = true
     },
     groupScaleConfirm () {
@@ -349,6 +371,9 @@ export default {
     },
     groupNew () {
       this.groupNewDialogData = {topic: this.searchData.topic, namespace: this.searchData.namespace}
+      if (this.tableData.rowData.length > 0) {
+        this.groupNewDialogData.ip = this.tableData.rowData[0].ip
+      }
       this.groupNewDialog.visible = true
     },
     groupMerge (item) {
@@ -424,4 +449,7 @@ export default {
 <style scoped>
   .label{text-align: right; line-height: 32px;}
   .val{}
+  .maxDialogHeight /deep/ .dui-dialog__body {
+    height: 650px;
+  }
 </style>

@@ -1,27 +1,25 @@
 <template>
   <div>
+    <grid-row>
+      <grid-col span="24">
+      <d-button-group class="right" style="padding-right:50px">
+        <d-button @click="showResetOffset(undefined)" >按时间重置</d-button>
+        <d-button @click="setBound('MIN')" >全量最小</d-button>
+        <d-button @click="setBound('MAX')" >全量最大</d-button>
+      </d-button-group>
+      </grid-col>
+    </grid-row>
     <my-table :data="tableData" :showPin="showTablePin" :showPagination=false :page="page"
               @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-set-offset="showResetOffset"/>
     <label >共：{{page.total}} 条记录</label>
-    <grid-row type="flex" justify="end" >
-      <grid-col span="4">
-        <d-button type="primary" v-if="$store.getters.isAdmin" @click="showResetOffset(undefined)" class="left mr10">按时间重置</d-button>
-      </grid-col>
-      <grid-col span="4">
-        <d-button type="primary" v-if="$store.getters.isAdmin" @click="setBound('MIN')" class="left mr10">全量最小</d-button>
-      </grid-col>
-      <grid-col span="4" offset="2">
-          <d-button type="primary" v-if="$store.getters.isAdmin" @click="setBound('MAX')" class="left mr10" style="margin-right: 100px;">全量最大</d-button>
-      </grid-col>
-    </grid-row>
 
     <my-dialog  :dialog="resetDialog" @on-dialog-confirm="onConfirm"  @on-dialog-cancel="onCancel">
       <d-form ref="partitionOffset" :model="partitionInfo"  label-width="100px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
         <d-form-item label="主题:">
-          <d-input v-model="partitionInfo.topic" style="width: 60%" disabled ></d-input>
+          <d-input v-model="partitionInfo.topic" oninput="value = value.trim()" style="width: 60%" disabled ></d-input>
         </d-form-item>
         <d-form-item label="应用:">
-          <d-input v-model="partitionInfo.app" style="width: 60%" disabled ></d-input>
+          <d-input v-model="partitionInfo.app" oninput="value = value.trim()" style="width: 60%" disabled ></d-input>
         </d-form-item>
         <d-form-item label="重置时间:" v-if="!partitionInfo.isPartition">
           <d-date-picker
@@ -33,13 +31,13 @@
           </d-date-picker>
         </d-form-item>
         <d-form-item label="最小值："  v-if="partitionInfo.isPartition">
-          <d-input v-model.number="partitionInfo.partition.leftIndex" style="width: 60%" disabled/>
+          <d-input v-model.number="partitionInfo.partition.leftIndex" oninput="value = value.trim()" style="width: 60%" disabled/>
         </d-form-item>
         <d-form-item label="最大值："  v-if="partitionInfo.isPartition">
-          <d-input v-model.number="partitionInfo.partition.rightIndex" style="width: 60%" disabled/>
+          <d-input v-model.number="partitionInfo.partition.rightIndex" oninput="value = value.trim()" style="width: 60%" disabled/>
         </d-form-item>
         <d-form-item label="重置位置："  v-if="partitionInfo.isPartition" >
-          <d-input v-model.number="partitionInfo.offset" style="width: 60%"/>
+          <d-input v-model.number="partitionInfo.offset" oninput="value = value.trim()" style="width: 60%"/>
         </d-form-item>
       </d-form>
     </my-dialog>
@@ -51,7 +49,7 @@ import MyTable from '../../../components/common/myTable'
 import apiRequest from '../../../utils/apiRequest.js'
 import crud from '../../../mixins/crud.js'
 import myDialog from '../../../components/common/myDialog.vue'
-import {getTopicCode, getAppCode} from '../../../utils/common.js'
+import {getTopicCode, getAppCode, bytesToSize} from '../../../utils/common.js'
 import {timeStampToString} from '../../../utils/dateTimeUtils'
 
 export default {
@@ -100,6 +98,17 @@ export default {
           {
             title: '应答',
             key: 'offset'
+          },
+          {
+            title: 'TPS',
+            key: 'tps'
+          },
+          {
+            title: '流量',
+            key: 'traffic',
+            formatter (item) {
+              return bytesToSize(item.traffic)
+            }
           }
         ]
       }
@@ -204,6 +213,11 @@ export default {
       this.openDialog('resetDialog')
     },
     resetPartitionOffset () {
+      if (this.partitionInfo.offset > this.partitionInfo.partition.rightIndex ||
+          this.partitionInfo.offset < this.partitionInfo.partition.leftIndex) {
+        this.$Message.error('重置位置必须在最大最小值之间')
+        return
+      }
       let path = this.partitionInfo.partition.partition + '/offset/' + this.partitionInfo.offset
       apiRequest.postBase(this.urls.offsetResetPartition + path, {}, this.search, false).then((data) => {
         data.data = data.data

@@ -16,26 +16,29 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.chubao</groupId>
-    <version>4.1.1-SNAPSHOT</version>
+    <groupId>org.joyqueue</groupId>
+    <version>4.2.5.4-SNAPSHOT</version>
     <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
-    <url>https://github.com/joyqueue/joyqueue</url>
+    <url>http://www.joyqueue.org</url>
     <name>JoyQueue</name>
 
     <description>JoyQueue is a distributed cloud-native message platform with high-throughput and high-availability
         which is compatible with Kafka and MQTT protocol. </description>
     <organization>
-        <name>JD.com, Inc.</name>
-        <url>http://www.jd.com</url>
+        <name>Joyqueue Community</name>
+        <url>http://www.joyqueue.org</url>
     </organization>
     <developers>
         <developer>
             <name>Rudy Steiner</name>
             <email>rudy_steiner@163.com</email>
+        </developer>
+        <developer>
+            <name>Li Yue</name>
+            <email>liyue2008@gmail.com</email>
         </developer>
     </developers>
     <licenses>
@@ -46,9 +49,10 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:git@github.com:joyqueue/joyqueue.git</connection>
-        <developerConnection>scm:git@github.com:joyqueue/joyqueue.git</developerConnection>
-        <url>https://github.com/joyqueue/joyqueue.git</url>
+        <connection>scm:git:git@github.com:chubaostream/joyqueue.git</connection>
+        <developerConnection>scm:git:git@github.com:chubaostream/joyqueue.git</developerConnection>
+        <url>https://github.com/chubaostream/joyqueue.git</url>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
@@ -63,26 +67,27 @@
     </distributionManagement>
 
     <properties>
-        <fastjson.version>1.2.58</fastjson.version>
+        <journalkeeper.version>0.1.7</journalkeeper.version>
+        <fastjson.version>1.2.68</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.9.0</log4j.version>
         <commons-logging.version>1.2</commons-logging.version>
         <commons-io.version>2.3</commons-io.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
-        <commons-beanutils.version>1.8.3</commons-beanutils.version>
+        <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-collections4.version>4.1</commons-collections4.version>
         <commons-cli.version>1.4</commons-cli.version>
-        <httpclient.version>4.5.2</httpclient.version>
+        <httpclient.version>4.5.12</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
-        <jackson-databind.version>2.9.9.1</jackson-databind.version>
+        <jackson-databind.version>2.9.10.4</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
-        <hibernate-validator.version>5.3.0.Final</hibernate-validator.version>
+        <hibernate-validator.version>5.3.5.Final</hibernate-validator.version>
         <el.version>2.2.4</el.version>
         <guava.version>21.0</guava.version>
         <amq.core.version>5.6.0</amq.core.version>
         <amq.client.version>5.1.0</amq.client.version>
-        <snappy-java.version>1.1.2.6</snappy-java.version>
+        <snappy-java.version>1.1.7.3</snappy-java.version>
         <lz4.version>1.3.0</lz4.version>
         <jcommander.version>1.72</jcommander.version>
         <concurrentlinkedhashmap-lru.version>1.4.2</concurrentlinkedhashmap-lru.version>
@@ -103,21 +108,30 @@
         <vertx.version>3.6.3</vertx.version>
         <ignite.version>2.6.0</ignite.version>
         <junit.version>4.12</junit.version>
-        <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+        <mysql-connector-java.version>5.1.41</mysql-connector-java.version>
+        <!-- maven properties -->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-        <maven-jar-plugin.version>3.1.0</maven-jar-plugin.version>
-        <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+        <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven-compiler-plugin.compilerArgument>-parameters</maven-compiler-plugin.compilerArgument>
-        <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
-        <mysql-connector-java.version>5.1.41</mysql-connector-java.version>
+        <maven-assembly-plugin.version>3.2.0</maven-assembly-plugin.version>
+        <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
+        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <maven-scm-provider-gitexe.version>1.9.5</maven-scm-provider-gitexe.version>
+        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        <license-maven-plugin.version>3.0</license-maven-plugin.version>
+        <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+
         <h2database.version>1.4.195</h2database.version>
         <hadoop.version>2.7.6</hadoop.version>
         <hbase.version>1.4.8</hbase.version>
         <mockito2.version>2.8.9</mockito2.version>
         <git-commit-id-pulgin.version>2.1.10</git-commit-id-pulgin.version>
-        <openmessaging-spring.version>0.0.1-SNAPSHOT</openmessaging-spring.version>
         <openmessaging-api.version>1.0.0-alpha</openmessaging-api.version>
         <asm.version>6.2.1</asm.version>
         <jackson-dataformat.version>2.9.9</jackson-dataformat.version>
@@ -125,52 +139,80 @@
         <commons-lang.version>2.6</commons-lang.version>
         <guice.version>4.2.2</guice.version>
         <gson.version>2.8.5</gson.version>
+        <s3.version>2.11.6</s3.version>
+        <stax2.version>4.2</stax2.version>
     </properties>
+
+    <modules>
+        <module>joyqueue-common</module>
+        <module>joyqueue-server</module>
+        <module>joyqueue-console</module>
+        <module>joyqueue-client</module>
+        <module>joyqueue-openmessaging</module>
+        <module>docker</module>
+        <module>joyqueue-distribution</module>
+        <module>toolkit</module>
+    </modules>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-data-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-service-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-toolkit</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-network</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-archive-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-archive-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-data-repository-mybatis</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-message-filter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-message-filter-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-message-filter-s3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-retry-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-retry-db-console</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -180,37 +222,37 @@
                 <version>${metrics.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-token-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-retry-h2</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-retry-remote</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-web-handler</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-portal</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <artifactId>joyqueue-web-springboot-starter</artifactId>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -230,12 +272,12 @@
                 <version>${laf-extention.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-store-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-token-uuid-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -255,67 +297,67 @@
                 <version>${laf-vertx.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-broker-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-broker-protocol</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-broker-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-broker-mqtt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-server-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-client-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-client-core-shaded</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-client-all-shaded</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-client-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-data-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-data-repository-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -401,42 +443,52 @@
             </dependency>
 
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-datasource-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-token-uuid</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-datasource-hikaricp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-nsr-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-nsr-ignite</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-nsr-composition</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-nsr-journalkeeper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-broker-monitor-pth</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-store-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-client-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -584,14 +636,14 @@
                 <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>openmessaging-spring</artifactId>
-                <version>${openmessaging-spring.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.chubao</groupId>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>openmessaging-spring-boot-starter</artifactId>
-                <version>${openmessaging-spring.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.openmessaging</groupId>
@@ -660,9 +712,20 @@
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>s3</artifactId>
+                <version>${s3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.woodstox</groupId>
+                <artifactId>stax2-api</artifactId>
+                <version>${stax2.version}</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
+
 
     <build>
         <resources>
@@ -706,9 +769,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
-                    <configuration>
-                        <skipTests>false</skipTests>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -726,6 +786,19 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <compilerArgs>
@@ -736,13 +809,97 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
-                    <excludes>
-                        <exclude>io.chubao.joyqueue.broker.election.RaftLeaderElectionTest</exclude>
-                        <exclude>io.chubao.joyqueue.broker.election.ElectionMetadataManagerTest</exclude>
-                    </excludes>
+                    <doclint>none</doclint>
                 </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven-release-plugin.version}</version>
+                <configuration>
+                    <localCheckout>true</localCheckout>
+                    <pushChanges>false</pushChanges>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <arguments>-Dgpg.passphrase=${gpg.passphrase}  -Dmaven.test.skipTests=true -Dmaven.test.skip=true</arguments>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.scm</groupId>
+                        <artifactId>maven-scm-provider-gitexe</artifactId>
+                        <version>${maven-scm-provider-gitexe.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>${nexus-staging-maven-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>${coveralls-maven-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -766,38 +923,9 @@
             </plugin>
         </plugins>
     </build>
-
-
-    <modules>
-        <module>joyqueue-common</module>
-        <module>joyqueue-server</module>
-        <module>joyqueue-console</module>
-        <module>joyqueue-client</module>
-        <module>joyqueue-openmessaging</module>
-        <module>docker</module>
-        <module>joyqueue-distribution</module>
-        <module>toolkit</module>
-    </modules>
     <profiles>
         <profile>
-            <id>RaftTest</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <includes>
-                                <include>io.chubao.joyqueue.broker.election.RaftLeaderElectionTest</include>
-                                <include>io.chubao.joyqueue.broker.election.ElectionMetadataManagerTest</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>CheckLicense</id>
+            <id>license</id>
             <build>
                 <plugins>
                     <plugin>
@@ -826,7 +954,7 @@
                         <executions>
                             <execution>
                                 <goals>
-                                    <goal>check</goal>
+                                    <goal>format</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -834,44 +962,21 @@
                 </plugins>
             </build>
         </profile>
-
+        <!-- GPG Signature on release -->
         <profile>
-            <id>release</id>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                <configuration>
-                                    <additionalparam>-Xdoclint:none</additionalparam>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -879,6 +984,12 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

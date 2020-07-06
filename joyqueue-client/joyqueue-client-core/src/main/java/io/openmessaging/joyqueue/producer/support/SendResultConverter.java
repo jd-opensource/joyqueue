@@ -28,15 +28,15 @@ import java.util.List;
  */
 public class SendResultConverter {
 
-    public static List<SendResult> convert(List<io.chubao.joyqueue.client.internal.producer.domain.SendResult> sendResults) {
+    public static List<SendResult> convert(List<org.joyqueue.client.internal.producer.domain.SendResult> sendResults) {
         List<SendResult> result = Lists.newArrayListWithCapacity(sendResults.size());
-        for (io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult : sendResults) {
+        for (org.joyqueue.client.internal.producer.domain.SendResult sendResult : sendResults) {
             result.add(convert(sendResult));
         }
         return result;
     }
 
-    public static SendResult convert(io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult) {
+    public static SendResult convert(org.joyqueue.client.internal.producer.domain.SendResult sendResult) {
         return new SendResultAdapter(sendResult);
     }
 }

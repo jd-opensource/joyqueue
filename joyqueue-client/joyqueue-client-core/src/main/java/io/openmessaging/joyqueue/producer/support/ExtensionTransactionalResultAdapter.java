@@ -16,9 +16,9 @@
 package io.openmessaging.joyqueue.producer.support;
 
 import com.google.common.collect.Lists;
-import io.chubao.joyqueue.client.internal.producer.MessageProducer;
-import io.chubao.joyqueue.client.internal.producer.TransactionMessageProducer;
-import io.chubao.joyqueue.client.internal.producer.domain.ProduceMessage;
+import org.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.producer.TransactionMessageProducer;
+import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 import com.google.common.base.Preconditions;
 import io.openmessaging.joyqueue.config.ExceptionConverter;
 import io.openmessaging.joyqueue.producer.ExtensionTransactionalResult;
@@ -89,7 +89,7 @@ public class ExtensionTransactionalResultAdapter implements ExtensionTransaction
             Preconditions.checkArgument(message instanceof MessageAdapter, "message is not supported");
 
             MessageAdapter messageAdapter = (MessageAdapter) message;
-            io.chubao.joyqueue.client.internal.producer.domain.SendResult sendResult = transactionMessageProducer.send(messageAdapter.getProduceMessage());
+            org.joyqueue.client.internal.producer.domain.SendResult sendResult = transactionMessageProducer.send(messageAdapter.getProduceMessage());
             return SendResultConverter.convert(sendResult);
         } catch (Throwable cause) {
             throw ExceptionConverter.convertProduceException(cause);
@@ -102,7 +102,7 @@ public class ExtensionTransactionalResultAdapter implements ExtensionTransaction
             Preconditions.checkArgument(CollectionUtils.isNotEmpty(messages), "messages can not be null");
 
             List<ProduceMessage> produceMessages = checkAndConvertMessage(messages);
-            List<io.chubao.joyqueue.client.internal.producer.domain.SendResult> sendResults = transactionMessageProducer.batchSend(produceMessages);
+            List<org.joyqueue.client.internal.producer.domain.SendResult> sendResults = transactionMessageProducer.batchSend(produceMessages);
             return SendResultConverter.convert(sendResults);
         } catch (Throwable cause) {
             throw ExceptionConverter.convertProduceException(cause);

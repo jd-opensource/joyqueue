@@ -36,6 +36,11 @@
           "component": "setting/dataCenter.vue"
         },
         {
+          "path": "user",
+          "name": "user",
+          "component": "setting/userManage.vue"
+        },
+        {
           "path": "config",
           "name": "config",
           "component": "setting/config.vue"
@@ -56,6 +61,11 @@
           "component": "setting/broker.vue"
         },
         {
+          "path": "brokerMonitor",
+          "name": "brokerMonitor",
+          "component": "setting/brokerMonitor.vue"
+        },
+        {
           "path": "metric",
           "name": "metric",
           "component": "setting/metric.vue"
@@ -64,6 +74,11 @@
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
+        },
+        {
+          "path": "retryMonitor",
+          "name": "retryMonitor",
+          "component": "setting/retryMonitor.vue"
         }
       ]
     },
@@ -81,6 +96,16 @@
           "path": "operateHistory",
           "name": "operateHistory",
           "component": "tool/operateHistory.vue"
+        },
+        {
+          "path": "msgFilter",
+          "name": "msgFilter",
+          "component": "tool/messageFilter.vue"
+        },
+        {
+          "path": "retry",
+          "name": "retry",
+          "component": "tool/retry.vue"
         }
       ]
     }
@@ -147,6 +172,11 @@
           "component": "setting/broker.vue"
         },
         {
+          "path": "brokerMonitor",
+          "name": "brokerMonitor",
+          "component": "setting/brokerMonitor.vue"
+        },
+        {
           "path": "metric",
           "name": "metric",
           "component": "setting/metric.vue"
@@ -155,6 +185,11 @@
           "path": "namespace",
           "name": "namespace",
           "component": "setting/namespace.vue"
+        },
+        {
+          "path": "retryMonitor",
+          "name": "retryMonitor",
+          "component": "setting/retryMonitor.vue"
         }
       ]
     },
@@ -172,6 +207,16 @@
           "path":"operateHistory",
           "name": "operateHistory",
           "component": "tool/operateHistory.vue"
+        },
+        {
+          "path": "msgFilter",
+          "name": "msgFilter",
+          "component": "tool/messageFilter.vue"
+        },
+        {
+          "path": "retry",
+          "name": "retry",
+          "component": "tool/retry.vue"
         }
       ]
     }
