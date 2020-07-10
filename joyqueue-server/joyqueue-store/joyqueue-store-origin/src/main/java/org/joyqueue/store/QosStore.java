@@ -16,7 +16,6 @@
 package org.joyqueue.store;
 
 import org.joyqueue.domain.QosLevel;
-import org.joyqueue.toolkit.concurrent.EventFuture;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

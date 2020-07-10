@@ -76,8 +76,9 @@ public abstract class TransportServerSupport extends Service implements Transpor
         EventLoopGroup ioEventGroup = newIoEventGroup();
         ChannelHandler channelHandlerPipeline = newChannelHandlerPipeline();
         ServerBootstrap serverBootstrap = newBootstrap(channelHandlerPipeline, acceptEventGroup, ioEventGroup);
+        logger.info("Do bind {} start...",port);
         Channel channel = doBind(serverBootstrap);
-
+        logger.info("Do bind {} started...",port);
         this.acceptEventGroup = acceptEventGroup;
         this.ioEventGroup = ioEventGroup;
         this.serverBootstrap = serverBootstrap;

@@ -40,6 +40,9 @@ class ConsumePositionReplicator {
         this.clusterManager = clusterManager;
     }
 
+    /**
+     * // TODO 优化无用的消费位置复制
+     **/
     void replicateConsumePosition() {
         storeService.getAllStores().stream()
                 .filter(PartitionGroupStore::writable)
@@ -49,9 +52,8 @@ class ConsumePositionReplicator {
                         int group = store.getPartitionGroup();
                         int localReplicaId = clusterManager.getBrokerId();
                         Map<ConsumePartition, Position> consumePositions = consume.getConsumePositionByGroup(TopicName.parse(store.getTopic()), store.getPartitionGroup());
-                        if (consumePositions == null) {
-                            logger.warn("Partition group {}/node {} get consumer info return null",
-                                    store.getTopic(), clusterManager.getBrokerId());
+                        if (consumePositions == null||consumePositions.size()==0) {
+                            logger.debug("Partition group {}/node {} consume partition info empty",store.getTopic(), clusterManager.getBrokerId());
                             return;
                         }
 

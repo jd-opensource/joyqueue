@@ -19,6 +19,9 @@ import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.SpiLoader;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConverter;
+import org.joyqueue.broker.consumer.model.ConsumePartition;
+import org.joyqueue.broker.consumer.position.PositionStore;
+import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.limit.LimitRejectedStrategy;
 import org.joyqueue.broker.producer.Produce;
 import org.joyqueue.monitor.PointTracer;
@@ -35,6 +38,11 @@ public interface Plugins {
      * 消费扩展点
      */
     ExtensionPoint<Consume, String> CONSUME = new ExtensionPointLazyExt<>(Consume.class, SpiLoader.INSTANCE, null, null);
+
+    /**
+     * 消费位置管理扩展点
+     */
+    ExtensionPoint<PositionStore<ConsumePartition,Position>,String> POSITION_STORE = new ExtensionPointLazyExt(PositionStore.class,SpiLoader.INSTANCE, null, null);
     /**
      * 发送扩展点
      */

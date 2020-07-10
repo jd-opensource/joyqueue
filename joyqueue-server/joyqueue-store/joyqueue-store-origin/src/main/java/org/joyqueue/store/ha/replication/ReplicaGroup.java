@@ -337,7 +337,7 @@ public class ReplicaGroup extends Service {
                     }
 
                     replicateMessage(getReplica(command.replicaId()));
-                    maybeReplicateConsumePos(getReplica(command.replicaId()));
+                    //maybeReplicateConsumePos(getReplica(command.replicaId()));
 
                 } catch (InterruptedException ie) {
                     logger.info("Partition group {}/node {} replicate interrupted",

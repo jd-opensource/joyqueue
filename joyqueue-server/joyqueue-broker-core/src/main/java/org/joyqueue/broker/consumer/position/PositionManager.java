@@ -16,8 +16,8 @@
 package org.joyqueue.broker.consumer.position;
 
 import com.google.common.base.Preconditions;
-import com.jd.laf.extension.ExtensionManager;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.ConsumeConfig;
@@ -44,7 +44,6 @@ import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -91,9 +90,8 @@ public class PositionManager extends Service {
     protected void validate() throws Exception {
         super.validate();
         Preconditions.checkArgument(clusterManager != null, "cluster manager can not be null");
-
         if (positionStore == null) {
-            positionStore = ExtensionManager.getOrLoadExtension(PositionStore.class);
+            positionStore= Plugins.POSITION_STORE.get();
             if (positionStore instanceof LocalFileStore) {
                 ((LocalFileStore) positionStore).setBasePath(config.getConsumePositionPath());
             }
@@ -112,14 +110,14 @@ public class PositionManager extends Service {
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(this::compensationPosition)
                 .build();
-//        this.replicationThread = LoopThread.builder()
-//                .sleepTime(config.getReplicateConsumePosInterval(), config.getBroadcastIndexResetInterval())
-//                .name("Consume-Position-Replication-Thread")
-//                .onException(e -> logger.error(e.getMessage(), e))
-//                .doWork(consumePositionReplicator::replicateConsumePosition)
-//                .build();
-//
-//        this.replicationThread.start();
+        // 消费位置的复制
+        this.replicationThread = LoopThread.builder()
+                .sleepTime(config.getReplicateConsumePosInterval(), config.getBroadcastIndexResetInterval())
+                .name("Consume-Position-Replication-Thread")
+                .onException(e -> logger.error(e.getMessage(), e))
+                .doWork(consumePositionReplicator::replicateConsumePosition)
+                .build();
+        this.replicationThread.start();
         clusterManager.addListener(new AddConsumeListener());
         clusterManager.addListener(new RemoveConsumeListener());
         clusterManager.addListener(new AddPartitionGroupListener());
@@ -576,23 +574,23 @@ public class PositionManager extends Service {
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
                 consumePartition.setPartitionGroup(partitionGroup.getGroup());
-
-                // 为新订阅的应用初始化消费位置对象
-                Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
+                long nextAckIndex=Math.max(currentIndex,0);
+                //为新订阅的应用初始化消费位置对象
+                Position position = new Position(nextAckIndex, nextAckIndex, nextAckIndex, nextAckIndex);
 
                 Position previous = positionStore.putIfAbsent(consumePartition, position);
 
                 //如果当前应答位置大于索引的最大位置，则将最大位置设置为应答位置（当移除PartitionGroup事件没有通知到的情况下可能会出现）
                 if (previous != null) {
                     long ackCurIndex = previous.getAckCurIndex();
-                    if (ackCurIndex > currentIndex) {
-                        previous.setAckCurIndex(currentIndex);
+                    if (ackCurIndex > nextAckIndex) {
+                        previous.setAckCurIndex(nextAckIndex);
                         changed.set(true);
-                        logger.warn("Update consume position topic:{}, app:{}, partition:{}, curIndex:{}, ackIndex:{}", topic.getFullName(), app, partition, currentIndex, ackCurIndex);
+                        logger.warn("Update consume position topic:{}, app:{}, partition:{}, new ackCurIndex:{}, old ackCurIndex:{}", topic.getFullName(), app, partition, nextAckIndex, ackCurIndex);
                     }
                 } else {
                     changed.set(true);
-                    logger.info("Add consume partition topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndex);
+                    logger.info("Add consume partition topic:{}, app:{}, partition:{},new ackCurIndex:{}", topic.getFullName(), app, partition, nextAckIndex);
                 }
 
             });

@@ -40,6 +40,7 @@ public class NsrTransportServerFactory extends DefaultTransportServerFactory {
     public NsrTransportServerFactory(NameService nameService, PropertySupplier propertySupplier) {
         this(NsrCodecFactory.getInstance(), nsrCommandHandlerFactory, new NsrExceptionHandler(), eventBus);
         nsrCommandHandlerFactory.register(nameService, propertySupplier);
+
     }
 
     public NsrTransportServerFactory(Codec codec, CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler, EventBus<TransportEvent> eventBus) {

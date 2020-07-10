@@ -72,10 +72,10 @@ public class BrokerPayloadCodecRegistrar {
         payloadCodecFactory.register(new IndexStoreResponseEncoder());
 
         // replication related command
-//        payloadCodecFactory.register(new ReplicateConsumePosRequestDecoder());
-//        payloadCodecFactory.register(new ReplicateConsumePosRequestEncoder());
-//        payloadCodecFactory.register(new ReplicateConsumePosResponseDecoder());
-//        payloadCodecFactory.register(new ReplicateConsumePosResponseEncoder());
+        payloadCodecFactory.register(new ReplicateConsumePosRequestDecoder());
+        payloadCodecFactory.register(new ReplicateConsumePosRequestEncoder());
+        payloadCodecFactory.register(new ReplicateConsumePosResponseDecoder());
+        payloadCodecFactory.register(new ReplicateConsumePosResponseEncoder());
         //nsr
         payloadCodecFactory.register(new OperatePartitionGroupCodec());
 

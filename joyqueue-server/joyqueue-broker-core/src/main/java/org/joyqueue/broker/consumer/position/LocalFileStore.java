@@ -142,19 +142,16 @@ public class LocalFileStore implements PositionStore<ConsumePartition, Position>
 
     @Override
     public void put(ConsumePartition key, Position value) {
-        System.out.println("put"+key+":"+value);
         consumePositionCache.put(key, value);
     }
 
     @Override
     public Position remove(ConsumePartition key) {
-        System.out.println("remove"+key);
         return consumePositionCache.remove(key);
     }
 
     @Override
     public Position putIfAbsent(ConsumePartition key, Position value) {
-        System.out.println("putIfAbsent"+key+":"+value);
         return consumePositionCache.putIfAbsent(key, value);
     }
 

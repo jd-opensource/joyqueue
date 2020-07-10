@@ -23,7 +23,6 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.monitor.BrokerMonitor;
-import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;

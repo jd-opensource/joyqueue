@@ -1,11 +1,16 @@
 package org.joyqueue.store.journalkeeper;
 
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Shorts;
 import io.journalkeeper.core.api.RaftServer;
 import io.journalkeeper.core.strategy.JournalCompactionStrategy;
 import io.journalkeeper.rpc.URIParser;
 import io.journalkeeper.utils.spi.ServiceSupport;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
+import org.joyqueue.broker.store.StoreUtils;
+import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.domain.TopicName;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreManagementService;
@@ -47,6 +52,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
     private Map<TopicPartitionGroup, JournalKeeperPartitionGroupStore> storeMap = new ConcurrentHashMap<>();
     private File base;
     private BrokerContext brokerContext;
+    private int brokerId;
     private final ManagementServiceImpl managementService = new ManagementServiceImpl(Collections.unmodifiableMap(storeMap));
     private ExecutorService asyncExecutor;
     private ScheduledExecutorService scheduledExecutor;
@@ -75,6 +81,8 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
         super.doStart();
         scheduledExecutor = Executors.newScheduledThreadPool(SCHEDULE_EXECUTOR_THREADS, new NamedThreadFactory("Store-Scheduled-Executor"));
         asyncExecutor = Executors.newCachedThreadPool(new NamedThreadFactory("Store-Async-Executor"));
+        brokerId=brokerContext.getBroker().getId();
+        logger.info("JournalKeeperStore {} on {} started ",base.getAbsoluteFile(),brokerId);
     }
 
     @Override
@@ -91,13 +99,30 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Voter change
+     * @param currentVoter  local voter
+     * @param voters  all voter for the partition group
+     **/
+    public void onVoteConfigChange(URI currentVoter,List<URI> voters){
+        int partitionGroup= joyQueueUriParser.getGroup(currentVoter);
+        String topic=joyQueueUriParser.getTopic(currentVoter);
+        JournalKeeperPartitionGroupStore store = storeMap.get(new TopicPartitionGroup(topic, partitionGroup));
+        if(store!=null&&store.getUri().equals(currentVoter)&&!voters.contains(currentVoter)){
+            removePartitionGroup(topic,partitionGroup);
+        }
+        logger.info("On voter config change {},{}",currentVoter,voters);
+    }
     @Override
     public void removePartitionGroup(String topic, int partitionGroup) {
         JournalKeeperPartitionGroupStore store = storeMap.remove(new TopicPartitionGroup(topic, partitionGroup));
         if(null != store) {
             store.stop();
+            // support remove
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             deleteDirectoryRecursively(groupBase);
+            logger.warn("Remove partition group successful! Topic: {}, partitionGroup: {}.",
+                    topic, partitionGroup);
         } else {
             logger.warn("Remove partition group failed, partition group not exist! Topic: {}, partitionGroup: {}.",
                     topic, partitionGroup);
@@ -133,7 +158,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
                                 topic,
                                 partitionGroup,
                                 RaftServer.Roll.VOTER,
-                                new LeaderReportEventWatcher(topic, partitionGroup, brokerContext.getClusterManager()),
+                                new LeaderReportEventWatcher(topic, partitionGroup,this ,brokerContext.getClusterManager()),
                                 asyncExecutor, scheduledExecutor, partitionGroupProperties(tg));
                 if(!store.isInitialized()) {
                     store.init(toURIs(brokerIds, topic, partitionGroup), toURI(thisBrokerId, topic, partitionGroup), partitions);
@@ -145,7 +170,6 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
                 throw new RuntimeException(e);
             }
         });
-
     }
 
     private Properties partitionGroupProperties(TopicPartitionGroup tg) {
@@ -166,7 +190,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
                                 topic,
                                 partitionGroup,
                                 RaftServer.Roll.VOTER,
-                                new LeaderReportEventWatcher(topic, partitionGroup, brokerContext.getClusterManager()),
+                                new LeaderReportEventWatcher(topic, partitionGroup,this, brokerContext.getClusterManager()),
                                 asyncExecutor, scheduledExecutor, partitionGroupProperties(tg));
                 store.init(toURIs(brokerIds, topic, partitionGroup), toURI(thisBrokerId, topic, partitionGroup), partitions);
                 store.restore();
@@ -238,14 +262,41 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
         JournalKeeperPartitionGroupStore store = storeMap.get(new TopicPartitionGroup(topic, partitionGroup));
         if(null != store) {
             store.maybeUpdateConfig(toURIs(new ArrayList<>(newReplicaBrokerIds), topic, partitionGroup));
+            logger.warn("May update replicas config, Topic: {}, partitionGroup: {},new replicas {} on {}",
+                    topic, partitionGroup,newReplicaBrokerIds,brokerId);
         } else {
-            logger.warn("Update config failed, partition group not exist! Topic: {}, partitionGroup: {}.",
-                    topic, partitionGroup);
+            // may create partition group store
+            if(newReplicaBrokerIds.contains(brokerId)){
+                // create topic partition group
+                PartitionGroup pg=brokerContext.getClusterManager().getPartitionGroupByGroup(TopicName.parse(topic),partitionGroup);
+                if(pg!=null) {
+                  PartitionGroupStore partitionGroupStore=  createPartitionGroup(topic, partitionGroup,Shorts.toArray(pg.getPartitions()),Lists.newArrayList(newReplicaBrokerIds),
+                            null,brokerId, StoreUtils.partitionGroupExtendProperties(pg));
+//                  if(partitionGroupStore instanceof JournalKeeperPartitionGroupStore){
+//                      JournalKeeperPartitionGroupStore jks=(JournalKeeperPartitionGroupStore) partitionGroupStore;
+//                      jks.maybeUpdateConfig(toURIs(new ArrayList<>(newReplicaBrokerIds), topic, partitionGroup));
+//                  }
+                    logger.warn("Create Partition group when update Replicas,Topic: {}, partitionGroup: {} on {}.",topic, partitionGroup,brokerId);
+                }else{
+                    logger.warn("Partition group metadata missing ,Topic: {}, partitionGroup: {}.",topic, partitionGroup);
+                }
+            }
         }
     }
 
+    /**
+     * Use rpc to update preferred leader
+     **/
     @Override
     public void updatePreferredLeader(String topic, int partitionGroup, int brokerId) throws Exception {
+      // Internal
+        JournalKeeperPartitionGroupStore store = storeMap.get(new TopicPartitionGroup(topic, partitionGroup));
+        if(null != store) {
+            store.updatePreferredLeader(toURI(brokerId, topic, partitionGroup));
+        } else {
+            logger.warn("Update preferred failed, partition group not exist! Topic: {}, partitionGroup: {}.",
+                    topic, partitionGroup);
+        }
 
     }
 
@@ -295,7 +346,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
     public void setSupplier(PropertySupplier supplier) {
         try {
             Property property = supplier.getProperty(Property.APPLICATION_DATA_PATH);
-            base = new File(property.getString() + File.separator + STORE_PATH);
+            base = new File(property.getString() + File.separator + STORE_PATH+File.separator+name());
             checkOrCreateBase();
         }catch (Exception e) {
             logger.warn("Exception: ", e);

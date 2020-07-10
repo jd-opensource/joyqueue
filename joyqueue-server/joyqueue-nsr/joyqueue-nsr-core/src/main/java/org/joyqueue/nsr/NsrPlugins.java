@@ -23,6 +23,7 @@ import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.nsr.network.NsrCommandHandler;
 import org.joyqueue.nsr.network.NsrPayloadCodec;
 import org.joyqueue.nsr.util.DCMatcher;
+import org.joyqueue.plugin.ExtensionPointLazyExt;
 
 /**
  * @author wylixiaobin
@@ -36,7 +37,7 @@ public interface NsrPlugins {
     /**
      * nameserver nameServiceCommandHandler extensionPoint
      */
-    ExtensionPoint<NsrCommandHandler, String> nsrCommandHandlerPlugins = new ExtensionPointLazy<>(NsrCommandHandler.class, SpiLoader.INSTANCE, null, null);
+    ExtensionPoint<NsrCommandHandler, String> nsrCommandHandlerPlugins = new ExtensionPointLazyExt<>(NsrCommandHandler.class, SpiLoader.INSTANCE, null, null);
     /**
      * DCMatcher extensionPoint
      */

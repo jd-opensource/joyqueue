@@ -25,6 +25,8 @@ import org.joyqueue.broker.coordinator.transaction.TransactionMetadataManager;
 import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.service.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentMap;
 
@@ -35,7 +37,7 @@ import java.util.concurrent.ConcurrentMap;
  * date: 2018/12/4
  */
 public class CoordinatorService extends Service {
-
+    private Logger LOG= LoggerFactory.getLogger(CoordinatorService.class);
     private CoordinatorConfig config;
     private ClusterManager clusterManager;
     private NameService nameService;
@@ -59,6 +61,7 @@ public class CoordinatorService extends Service {
     @Override
     protected void doStart() throws Exception {
         coordinatorInitializer.init();
+        LOG.info("Coordinator service started");
     }
 
     public Coordinator getCoordinator() {

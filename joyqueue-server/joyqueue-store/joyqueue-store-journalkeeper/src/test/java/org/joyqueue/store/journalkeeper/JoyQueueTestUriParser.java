@@ -2,6 +2,8 @@ package org.joyqueue.store.journalkeeper;
 
 import io.journalkeeper.rpc.URIParser;
 import io.journalkeeper.utils.spi.Singleton;
+import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ import java.net.URISyntaxException;
  * Date: 2019/9/30
  */
 @Singleton
+
 public class JoyQueueTestUriParser implements URIParser {
     private static final Logger logger = LoggerFactory.getLogger(JoyQueueTestUriParser.class);
     private static final String SCHEME = "joyqueue-test";
@@ -40,5 +43,17 @@ public class JoyQueueTestUriParser implements URIParser {
 
     public int getBrokerId(URI uri) {
         return Integer.parseInt(uri.getHost());
+    }
+
+    @Test
+    public void testParseTopicAndGroup(){
+        JoyQueueUriParser parser=new JoyQueueUriParser();
+        int brokerId=200000;
+        String topic="topic";
+        int group=3;
+        URI uri=parser.create(topic,group,brokerId);
+        Assert.assertEquals(parser.getBrokerId(uri),brokerId);
+        Assert.assertEquals(parser.getTopic(uri),topic);
+        Assert.assertEquals(parser.getGroup(uri),group);
     }
 }

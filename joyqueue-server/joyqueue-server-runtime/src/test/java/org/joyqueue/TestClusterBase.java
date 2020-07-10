@@ -7,6 +7,7 @@ import org.joyqueue.broker.config.ConfigDef;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.model.PullResult;
+import org.joyqueue.broker.consumer.position.PositionStore;
 import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.producer.Produce;
 
@@ -23,6 +24,7 @@ import org.joyqueue.nsr.InternalServiceProvider;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.ServiceProvider;
 import org.joyqueue.nsr.messenger.Messenger;
+import org.joyqueue.nsr.network.NsrCommandHandler;
 import org.joyqueue.plugin.SingletonController;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.WriteResult;
@@ -50,12 +52,13 @@ public class TestClusterBase extends Service {
         // clean dir ,important
         Files.deleteDirectory(new File(ROOT_DIR));
         closeSingleton();
-        launchCluster(1);
+        launchCluster(3);
     }
 
     public  void closeSingleton() throws Exception{
         SingletonController.forceCloseSingleton();
         SingletonController.closeClassSingleton(Consume.class);
+        SingletonController.closeClassSingleton(PositionStore.class);
         SingletonController.closeClassSingleton(Produce.class);
         SingletonController.closeClassSingleton(NameService.class);
         SingletonController.closeClassSingleton(StoreService.class);
@@ -64,28 +67,32 @@ public class TestClusterBase extends Service {
         SingletonController.closeClassSingleton(ProtocolService.class);
         SingletonController.closeClassSingleton(ServiceProvider.class);
         SingletonController.closeClassSingleton(InternalServiceProvider.class);
+        SingletonController.closeClassSingleton(NsrCommandHandler.class);
+
     }
 
     /**
-     * Launch a N node cluster
+     * Launch a N node cluster,顺序启动集群节点
      * @param N node num
      * @param port  broker port
      *
      **/
-    public boolean launchCluster(int N, int port, int timeout, TimeUnit unit) throws Exception{
+    public boolean launchCluster(int N, int port, int timeout, TimeUnit unit,String engineName) throws Exception{
         String journalKeeperNodes = IpUtil.getLocalIp()+":"+String.valueOf(PortHelper.getJournalkeeperPort(port));
         for(int i=0;i<N;i++) {
             String rootDir=ROOT_DIR+File.separator+String.format("_%d",i);
-            BrokerService broker=new BrokerService(args(port+i*portInterval,rootDir,journalKeeperNodes));
-            CompletableFuture.runAsync(new Runnable() {
+
+            BrokerService broker=new BrokerService(args(port+i*portInterval,rootDir,journalKeeperNodes,engineName));
+            /*CompletableFuture.runAsync(new Runnable() {
                 @Override
                 public void run() {
                     try{
-                    broker.start();
+
                 }catch (Exception e){
                     }
                 }
-            });
+            });*/
+            broker.start();
             brokers.add(broker);
         }
         Thread.sleep(5000);
@@ -107,6 +114,7 @@ public class TestClusterBase extends Service {
                 throw new IllegalStateException("Start cluster timeout");
             }
         }while(true);
+        System.out.println("Started cluster ok!");
         return true;
     }
 
@@ -114,18 +122,21 @@ public class TestClusterBase extends Service {
      * Launch multi broker
      **/
     public boolean launchCluster(int N) throws Exception{
-        return launchCluster(N,brokerPort,60000,TimeUnit.MILLISECONDS);
+        //"JournalKeeper"
+        return launchCluster(N,brokerPort,300000,TimeUnit.MILLISECONDS,"JournalKeeper");
     }
 
 
     /**
-     * Build args
+     * Build args to override default setting
      **/
-    public String[] args(int port,String applicationRoot,String journalKeeperNodes){
+    public String[] args(int port,String applicationRoot,String journalKeeperNodes,String engineName){
         Args args=new Args();
         args.append(ConfigDef.APPLICATION_DATA_PATH.key(),applicationRoot);
         args.append(ConfigDef.TRANSPORT_SERVER_PORT.key(),String.valueOf(port));
         args.append(ConfigDef.NAME_SERVER_JOURNAL_KEEPER_NODES.key(),journalKeeperNodes);
+        if(engineName!=null)
+            args.append(ConfigDef.STORE_ENGINE.key(),engineName);
         return args.build();
     }
 

@@ -117,7 +117,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             config = new StoreConfig(propertySupplier);
         }
         if (base == null) {
-            base = new File(config.getPath());
+            base = new File(config.getPath()+File.separator+name());
         }
         checkOrCreateBase();
         if (storeLock == null) {
@@ -169,15 +169,15 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         ServerConfig backendConfig = brokerContext.getBrokerConfig().getBackendConfig();
         backendConfig.setAcceptThreadName("joyqueue-backend-accept-eventLoop");
         backendConfig.setIoThreadName("joyqueue-backend-io-eventLoop");
-        this.backendServer = new BackendServer(backendConfig, brokerContext,electionManager);
-        backendServer.start();
+//      this.backendServer = new BackendServer(backendConfig, brokerContext,electionManager);
+//      backendServer.start();
     }
 
     @Override
     protected void doStop() {
         super.doStop();
-        LOG.info("Stopping backend sever...");
-        backendServer.stop();
+//      LOG.info("Stopping backend sever...");
+//      backendServer.stop();
         LOG.info("Stopping store {}...", base.getPath());
 
         storeMap.values().forEach(p -> {

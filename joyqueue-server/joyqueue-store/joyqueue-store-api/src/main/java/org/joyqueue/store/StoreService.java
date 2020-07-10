@@ -50,13 +50,14 @@ public interface StoreService {
 
     /**
      * 从磁盘恢复或新建 partition group，系统启动时调用
-     * @param topic  topic of the partition group
-     * @param partitionGroup  partition group id
-     * @param partitions  partitions included in the partition group
-     * @param brokers   all replicas of the partition group
-     * @param observers replicas without vote right,can be null or empty
-     * @param thisBrokerId local broker
+     * @param topic Topic
+     * @param partitionGroup Partition group
+     * @param partitions Partition
+     * @param brokers 所有副本（包含本节点）的BrokerId
+     * @param observers  观察者节点的BrokerId
+     * @param thisBrokerId 本节点的BrokerId
      * @param extend  partition group extend properties
+     * @return See {@link PartitionGroupStore}
      *
      */
     PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers,
@@ -69,6 +70,7 @@ public interface StoreService {
      * @param partitionGroup Partition group
      * @param partitions Partition
      * @param brokers 所有副本（包含本节点）的BrokerId
+     * @param observers  观察者节点的BrokerId
      * @param thisBrokerId 本节点的BrokerId
      * @param extend  partition group extend properties
      * @return See {@link PartitionGroupStore}

@@ -208,7 +208,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
      *
      **/
     protected void onAddPartitionGroup(TopicName topicName, PartitionGroup partitionGroup) throws Exception {
-        logger.info("OnAddPartitionGroup, topic: {}, partitionGroup: {}", topicName, partitionGroup);
+        logger.info("Store init add  topic: {}, partitionGroup: {}", topicName, partitionGroup);
         Set<Integer> replicas = partitionGroup.getReplicas();
         PartitionGroupStore store =
                 storeService.createPartitionGroup(
@@ -226,7 +226,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
     }
 
     protected void onUpdatePartitionGroup(TopicName topicName, PartitionGroup oldPartitionGroup, PartitionGroup newPartitionGroup) throws Exception {
-        logger.info("OnUpdatePartitionGroup, from: [{}] to [{}].", oldPartitionGroup, newPartitionGroup);
+        logger.info("Store init update topic from: [{}] to [{}].", oldPartitionGroup, newPartitionGroup);
         int currentBrokerId = clusterManager.getBrokerId();
         if(oldPartitionGroup.getReplicas().contains(currentBrokerId) || newPartitionGroup.getReplicas().contains(currentBrokerId)) {
             // 先处理副本变更

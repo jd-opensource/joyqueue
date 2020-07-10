@@ -22,7 +22,7 @@ class JoyQueueEntry implements JournalEntry {
         this.serializedBytes = serializedBytes;
         this.serializedBuffer = ByteBuffer.wrap(serializedBytes);
 
-        if(checkCRC) {
+        if(checkCRC&&shouldCheckCRC()) {
             checkCRC(serializedBuffer);
         }
 
@@ -31,6 +31,16 @@ class JoyQueueEntry implements JournalEntry {
         }
 
         checkBatchSize();
+    }
+
+    /**
+     * Ignore crc check for internal partition
+     **/
+    public boolean shouldCheckCRC(){
+        if(getPartition()==Short.MAX_VALUE){
+            return false;
+        }
+        return true;
     }
 
     private void checkBatchSize() {

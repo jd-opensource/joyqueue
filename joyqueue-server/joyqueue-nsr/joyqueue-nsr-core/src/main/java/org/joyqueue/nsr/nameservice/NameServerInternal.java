@@ -139,7 +139,7 @@ public class NameServerInternal extends Service implements NameService, Property
             this.metaManager.start();
             this.eventManager.start();
             this.manageServer.start();
-            logger.info("nameServer is started");
+            logger.info("Meta manager on {} started",nameServerConfig.getManagerPort());
         } catch (Exception e) {
             throw new NsrException(e);
         }

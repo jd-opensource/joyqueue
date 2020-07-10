@@ -28,6 +28,10 @@ public class JoyQueueEntryParser implements JournalEntryParser {
         return new JoyQueueEntry(headerBytes, false, false);
     }
 
+    /**
+     * Use to communicate with journalkeeper internal
+     *
+     **/
     @Override
     public JournalEntry createJournalEntry(byte[] payload) {
         int headerLength = headerLength();
@@ -35,12 +39,12 @@ public class JoyQueueEntryParser implements JournalEntryParser {
         byte [] rawEntry = new byte[headerLength + payload.length];
         System.arraycopy(payload, 0, rawEntry, headerLength, payload.length);
         ByteBuffer buffer = ByteBuffer.wrap(rawEntry);
-        ByteBuffer body = MessageParser.getByteBuffer(buffer, MessageParser.BODY);
-        MessageParser.setInt(buffer, MessageParser.LENGTH, rawEntry.length);
-        MessageParser.setLong(buffer, MessageParser.CRC, CRC.crc(body));
         MessageParser.setShort(buffer, MessageParser.MAGIC, DefaultJournalEntry.MAGIC_CODE);
+        MessageParser.setInt(buffer, MessageParser.LENGTH, rawEntry.length);
+        //ByteBuffer body = MessageParser.getByteBuffer(buffer, MessageParser.BODY);
+        //MessageParser.setLong(buffer, MessageParser.CRC, CRC.crc(body));
         BatchMessageParser.setBatch(buffer, false);
-        return parse(rawEntry);
+        return new JoyQueueEntry(rawEntry,false,false);
     }
 
 

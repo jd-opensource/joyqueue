@@ -20,7 +20,6 @@ import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.monitor.BrokerMonitor;
-import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.config.ClientConfig;

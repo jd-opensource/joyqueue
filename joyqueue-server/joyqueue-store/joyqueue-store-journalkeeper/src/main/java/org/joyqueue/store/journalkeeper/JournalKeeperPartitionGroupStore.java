@@ -72,6 +72,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         this.asyncExecutor = asyncExecutor;
         server = new JournalStoreServer(roll, new JoyQueueEntryParser(),
                 asyncExecutor, scheduledExecutor, asyncExecutor, scheduledExecutor, properties);
+        //server.
     }
 
     @Override
@@ -82,6 +83,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     @Override
     protected void doStart() throws Exception {
         super.doStart();
+        logger.info("JournalKeeper partition group store {} starting",this.getUri());
         server.start();
         this.client = server.createLocalClient();
         this.adminClient = server.getLocalAdminClient();
@@ -89,6 +91,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         if(null != eventWatcher) {
             this.client.watch(eventWatcher);
         }
+        logger.info("JournalKeeper partition group store {} started",this.getUri());
     }
 
     @Override
@@ -272,6 +275,19 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
     }
 
+    /**
+     *
+     * @param id  preferred broker id
+     */
+    void updatePreferredLeader(URI id) throws Exception{
+        try {
+            adminClient.setPreferredLeader(id).get();
+        }catch (Exception e){
+            logger.info("Update preferred leader exception {}",id,e);
+            throw e;
+        }
+    }
+
     private void rePartition(Collection<Short> partitions) {
         adminClient.scalePartitions(partitions.stream().mapToInt(p -> (int) p).boxed().collect(Collectors.toSet()))
                 .whenComplete((aVoid, exception) -> {
@@ -294,8 +310,13 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         adminClient
             .getClusterConfiguration(server.serverUri())
             .thenAccept(clusterConfiguration -> {
-                if(!newConfigs.containsAll(clusterConfiguration.getVoters())) {
-                    updateConfig(newConfigs, clusterConfiguration);
+                if(!(clusterConfiguration.getVoters().containsAll(newConfigs)&&newConfigs.containsAll(clusterConfiguration.getVoters()))) {
+                    if(server.serverUri().equals(clusterConfiguration.getLeader())) {
+                        updateConfig(newConfigs, clusterConfiguration);
+                        logger.info("Current leader {},local {} update cluster config.\n old {}\n new {}", clusterConfiguration.getLeader(), server.serverUri(),
+                                clusterConfiguration.getVoters(), newConfigs);
+                    }
+
                 }
             });
 

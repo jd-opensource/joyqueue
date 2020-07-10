@@ -120,7 +120,7 @@ public class BrokerService extends Service {
 
         // broker transport manager
         this.brokerTransportManager = new BrokerTransportManager(new BrokerTransportConfig(configuration));
-
+        this.brokerContext.brokerTransportManager(this.brokerTransportManager);
         this.extensionManager = new ExtensionManager(brokerContext);
         this.extensionManager.before();
 
@@ -330,7 +330,7 @@ public class BrokerService extends Service {
         }
 
         logger.info(buffer.toString());
-        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServerManager port[{}]," +
+        logger.info("JoyQueue is started, broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServerManager port[{}]," +
                         "nameServer port[{}],messenger port[{}],journalkeeper port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),
