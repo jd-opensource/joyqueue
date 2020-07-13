@@ -205,6 +205,7 @@ public class Consumer extends Subscription {
         private Integer readRetryProbability;
         //过滤规则
         private Map</*类型*/String, /*内容*/String> filters;
+        private String region;
         private Map<String, String> params;
 
         public ConsumerPolicy() {
@@ -352,6 +353,14 @@ public class Consumer extends Subscription {
 
         public Map<String, String> getFilters() {
             return filters;
+        }
+
+        public void setRegion(String region) {
+            this.region = region;
+        }
+
+        public String getRegion() {
+            return region;
         }
 
         public void setParams(Map<String, String> params) {

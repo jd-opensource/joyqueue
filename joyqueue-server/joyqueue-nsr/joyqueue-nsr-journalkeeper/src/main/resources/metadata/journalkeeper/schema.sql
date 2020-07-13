@@ -5,10 +5,10 @@ CREATE TABLE IF NOT EXISTS `topic` (
 	`partitions` int(11),
 	`priority_partitions` varchar(255),
 	`type` tinyint(1),
-	`policy` varchar(1024),
 	PRIMARY KEY (`id`)
 );
 CREATE INDEX IF NOT EXISTS idx_code_namespace ON topic(`code`, `namespace`);
+ALTER TABLE `topic` ADD COLUMN IF NOT EXISTS `policy` varchar(1024) AFTER `type`;
 
 CREATE TABLE IF NOT EXISTS `partition_group` (
 	`id` varchar(255) NOT NULL,

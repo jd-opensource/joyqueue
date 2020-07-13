@@ -153,7 +153,7 @@ public class Producer extends Subscription {
             this.nearby = false;
             this.single = false;
             this.archive = false;
-            this.timeOut = 2000;
+            this.timeOut = 1000;
         }
 
         // 就近发送
@@ -170,6 +170,7 @@ public class Producer extends Subscription {
         private Set<String> blackList;
         private Integer timeOut;
         private Integer qosLevel;
+        private String region;
         private Map<String, String> params;
 
         public ProducerPolicy(Boolean nearby, boolean single, Boolean archive, Map<String, Short> weight, Set<String> blackList, Integer timeOut) {
@@ -236,6 +237,14 @@ public class Producer extends Subscription {
 
         public Integer getQosLevel() {
             return qosLevel;
+        }
+
+        public void setRegion(String region) {
+            this.region = region;
+        }
+
+        public String getRegion() {
+            return region;
         }
 
         public void setParams(Map<String, String> params) {
