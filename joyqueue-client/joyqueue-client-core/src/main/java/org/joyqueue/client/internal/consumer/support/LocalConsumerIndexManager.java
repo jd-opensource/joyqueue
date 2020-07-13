@@ -89,16 +89,24 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
     @Override
     public FetchIndexData fetchIndex(String topic, String app, short partition, long timeout) {
         LocalIndexData localIndexData = consumerIndexStore.fetchIndex(topic, app, partition);
-        FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, timeout);
         if (localIndexData != null && !isExpired(localIndexData)) {
-            return new FetchIndexData(localIndexData.getIndex(), fetchIndexData.getLeftIndex(), fetchIndexData.getRightIndex(), JoyQueueCode.SUCCESS);
+            return new FetchIndexData(localIndexData.getIndex(), 0, 0, JoyQueueCode.SUCCESS);
         } else {
+            FetchIndexData fetchIndexData = delegate.fetchIndex(topic, app, partition, timeout);
             if (!fetchIndexData.getCode().equals(JoyQueueCode.SUCCESS)) {
                 logger.error("batchFetch index error, topic: {}, partition: {}, error: {}", topic, partition, fetchIndexData.getCode());
-            } else {
-                consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getIndex());
+                return new FetchIndexData(-1, 0, 0, JoyQueueCode.SUCCESS);
             }
-            return fetchIndexData;
+            long index = 0;
+            if (config.getBroadcastIndexAutoReset() == ConsumerConfig.BROADCAST_AUTO_RESET_CURRENT_INDEX) {
+                index = fetchIndexData.getIndex();
+            } else if (config.getBroadcastIndexAutoReset() == ConsumerConfig.BROADCAST_AUTO_RESET_LEFT_INDEX) {
+                index = fetchIndexData.getLeftIndex();
+            } else if (config.getBroadcastIndexAutoReset() == ConsumerConfig.BROADCAST_AUTO_RESET_RIGHT_INDEX) {
+                index = fetchIndexData.getRightIndex();
+            }
+            consumerIndexStore.saveIndex(topic, app, partition, index);
+            return new FetchIndexData(index, 0, 0, JoyQueueCode.SUCCESS);
         }
     }
 

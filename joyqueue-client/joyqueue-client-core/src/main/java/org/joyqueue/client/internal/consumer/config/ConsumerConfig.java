@@ -29,13 +29,16 @@ public class ConsumerConfig {
     public static final int NONE_BATCH_SIZE = -1;
     public static final long NONE_ACK_TIMEOUT = -1;
     public static final int NONE_BROADCAST_INDEX_EXPIRE_TIME = -1;
+    public static final int BROADCAST_AUTO_RESET_LEFT_INDEX = 0;
+    public static final int BROADCAST_AUTO_RESET_RIGHT_INDEX = 1;
+    public static final int BROADCAST_AUTO_RESET_CURRENT_INDEX = 2;
     public static final int NONE_THREAD = -1;
 
     private String app;
     private String group;
     private int batchSize = NONE_BATCH_SIZE;
     private long ackTimeout = NONE_ACK_TIMEOUT;
-    private long timeout = 1000 * 3;
+    private long timeout = 1000 * 10;
     private long pollTimeout = 1000 * 10;
     private long longPollTimeout = 1000 * 5;
     private long interval = 0;
@@ -51,6 +54,7 @@ public class ConsumerConfig {
     private String broadcastLocalPath;
     private int broadcastPersistInterval = 1000 * 10;
     private int broadcastIndexExpireTime = NONE_BROADCAST_INDEX_EXPIRE_TIME;
+    private int broadcastIndexAutoReset = BROADCAST_AUTO_RESET_RIGHT_INDEX;
 
     private volatile String appFullName;
 
@@ -74,6 +78,7 @@ public class ConsumerConfig {
         consumerConfig.setBroadcastLocalPath(broadcastLocalPath);
         consumerConfig.setBroadcastPersistInterval(broadcastPersistInterval);
         consumerConfig.setBroadcastIndexExpireTime(broadcastIndexExpireTime);
+        consumerConfig.setBroadcastIndexAutoReset(broadcastIndexAutoReset);
         return consumerConfig;
     }
 
@@ -234,5 +239,13 @@ public class ConsumerConfig {
 
     public void setBroadcastIndexExpireTime(int broadcastIndexExpireTime) {
         this.broadcastIndexExpireTime = broadcastIndexExpireTime;
+    }
+
+    public void setBroadcastIndexAutoReset(int broadcastIndexAutoReset) {
+        this.broadcastIndexAutoReset = broadcastIndexAutoReset;
+    }
+
+    public int getBroadcastIndexAutoReset() {
+        return broadcastIndexAutoReset;
     }
 }
