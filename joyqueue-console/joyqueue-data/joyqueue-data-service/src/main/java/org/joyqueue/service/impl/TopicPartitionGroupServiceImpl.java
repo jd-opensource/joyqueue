@@ -107,7 +107,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             });
             return topicPartitionGroups;
         } catch (Exception e) {
-            String errorMsg = "新添加partitionGroup，同步NameServer失败";
+            String errorMsg = "查询partitionGroup失败";
             logger.error(errorMsg, e);
             throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);
         }
