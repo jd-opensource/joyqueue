@@ -82,7 +82,7 @@ public class PositionManager extends Service {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.config = consumeConfig;
-        this.consumePositionReplicator = new ConsumePositionReplicator(storeService, consume, brokerTransportManager, clusterManager);
+        this.consumePositionReplicator = new ConsumePositionReplicator(storeService, consume, brokerTransportManager, clusterManager,consumeConfig);
         Preconditions.checkArgument(this.config != null, "config can not be null");
     }
 
@@ -112,7 +112,7 @@ public class PositionManager extends Service {
                 .build();
         // 消费位置的复制
         this.replicationThread = LoopThread.builder()
-                .sleepTime(config.getReplicateConsumePosInterval(), config.getBroadcastIndexResetInterval())
+                .sleepTime(config.getReplicateConsumePosInterval(), config.getReplicateConsumePosInterval())
                 .name("Consume-Position-Replication-Thread")
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(consumePositionReplicator::replicateConsumePosition)

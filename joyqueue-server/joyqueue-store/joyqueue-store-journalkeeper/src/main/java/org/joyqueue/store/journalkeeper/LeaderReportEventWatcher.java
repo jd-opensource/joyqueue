@@ -48,12 +48,12 @@ public class LeaderReportEventWatcher implements EventWatcher {
                 break;
             case EventType.ON_VOTERS_CHANGE:
                 //Map<String, String> eventData = event.getEventData();
-                String voters = eventData.get("voters");
-                String currentVoter = eventData.get("currentVoter");
-                logger.info("On voters change {},{}",currentVoter,voters);
-                if(voters!=null&&currentVoter!=null) {
-                    store.onVoteConfigChange(URI.create(currentVoter), parseVoters(voters));
-                }
+//                String voters = eventData.get("voters");
+//                String currentVoter = eventData.get("currentVoter");
+//                logger.info("On voters change {},{}",currentVoter,voters);
+//                if(voters!=null&&currentVoter!=null) {
+//                    store.onVoteConfigChange(URI.create(currentVoter), parseVoters(voters));
+//                }
                 break;
             default:
 //                StringBuilder sb=new StringBuilder();

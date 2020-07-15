@@ -121,11 +121,11 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
             // support remove
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             deleteDirectoryRecursively(groupBase);
-            logger.warn("Remove partition group successful! Topic: {}, partitionGroup: {}.",
-                    topic, partitionGroup);
+            logger.warn("Remove partition group successful! Topic: {}, partitionGroup: {} on {}.",
+                    topic, partitionGroup,brokerId);
         } else {
-            logger.warn("Remove partition group failed, partition group not exist! Topic: {}, partitionGroup: {}.",
-                    topic, partitionGroup);
+            logger.warn("Remove partition group failed, partition group not exist! Topic: {}, partitionGroup: {} on .",
+                    topic, partitionGroup,brokerId);
         }
     }
 
@@ -154,7 +154,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
         return storeMap.computeIfAbsent(new TopicPartitionGroup(topic, partitionGroup), tg -> {
             try {
                 JournalKeeperPartitionGroupStore store =
-                        new JournalKeeperPartitionGroupStore(
+                        new JournalKeeperPartitionGroupStore(this,
                                 topic,
                                 partitionGroup,
                                 RaftServer.Roll.VOTER,
@@ -186,7 +186,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
         return storeMap.computeIfAbsent(new TopicPartitionGroup(topic, partitionGroup), tg -> {
             try {
                 JournalKeeperPartitionGroupStore store =
-                        new JournalKeeperPartitionGroupStore(
+                        new JournalKeeperPartitionGroupStore(this,
                                 topic,
                                 partitionGroup,
                                 RaftServer.Roll.VOTER,
@@ -270,16 +270,14 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
                 // create topic partition group
                 PartitionGroup pg=brokerContext.getClusterManager().getPartitionGroupByGroup(TopicName.parse(topic),partitionGroup);
                 if(pg!=null) {
-                  PartitionGroupStore partitionGroupStore=  createPartitionGroup(topic, partitionGroup,Shorts.toArray(pg.getPartitions()),Lists.newArrayList(newReplicaBrokerIds),
+                 createPartitionGroup(topic, partitionGroup,Shorts.toArray(pg.getPartitions()),Lists.newArrayList(newReplicaBrokerIds),
                             null,brokerId, StoreUtils.partitionGroupExtendProperties(pg));
-//                  if(partitionGroupStore instanceof JournalKeeperPartitionGroupStore){
-//                      JournalKeeperPartitionGroupStore jks=(JournalKeeperPartitionGroupStore) partitionGroupStore;
-//                      jks.maybeUpdateConfig(toURIs(new ArrayList<>(newReplicaBrokerIds), topic, partitionGroup));
-//                  }
                     logger.warn("Create Partition group when update Replicas,Topic: {}, partitionGroup: {} on {}.",topic, partitionGroup,brokerId);
                 }else{
                     logger.warn("Partition group metadata missing ,Topic: {}, partitionGroup: {}.",topic, partitionGroup);
                 }
+            }else{
+                logger.warn("Never should go there!");
             }
         }
     }

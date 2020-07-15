@@ -1,5 +1,7 @@
 package org.joyqueue.store.journalkeeper;
 
+import com.google.common.collect.Lists;
+import io.journalkeeper.core.BootStrap;
 import io.journalkeeper.core.api.AdminClient;
 import io.journalkeeper.core.api.ClusterConfiguration;
 import io.journalkeeper.core.api.JournalEntry;
@@ -23,6 +25,7 @@ import org.joyqueue.store.message.MessageParser;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -57,8 +56,8 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     private AdminClient adminClient;
     private TransactionStore transactionStore = null;
     private final ExecutorService asyncExecutor;
-
-    JournalKeeperPartitionGroupStore(
+    private final JournalKeeperStore store;
+    JournalKeeperPartitionGroupStore(JournalKeeperStore store,
             String topic,
             int group,
             RaftServer.Roll roll,
@@ -66,6 +65,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
             ExecutorService asyncExecutor,
             ScheduledExecutorService scheduledExecutor,
             Properties properties){
+        this.store=store;
         this.topic = topic;
         this.group = group;
         this.eventWatcher = eventWatcher;
@@ -310,21 +310,76 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         adminClient
             .getClusterConfiguration(server.serverUri())
             .thenAccept(clusterConfiguration -> {
-                if(!(clusterConfiguration.getVoters().containsAll(newConfigs)&&newConfigs.containsAll(clusterConfiguration.getVoters()))) {
+                List<URI> voters= Lists.newArrayList(clusterConfiguration.getVoters());
+                if(!(voters.containsAll(newConfigs)&&newConfigs.containsAll(voters))) {
                     if(server.serverUri().equals(clusterConfiguration.getLeader())) {
-                        updateConfig(newConfigs, clusterConfiguration);
+                        // leader
+                        updateConfig(newConfigs,voters);
                         logger.info("Current leader {},local {} update cluster config.\n old {}\n new {}", clusterConfiguration.getLeader(), server.serverUri(),
                                 clusterConfiguration.getVoters(), newConfigs);
                     }
-
+                }else{
+                    logger.warn("No difference,ignore new configs{}, old configs {} on {}",newConfigs,voters,server.serverUri());
                 }
+                mayWaitNewConfigReady(newConfigs,30,TimeUnit.SECONDS);
             });
 
     }
 
-    private void updateConfig(List<URI> newConfigs, ClusterConfiguration clusterConfiguration) {
+    /**
+     *
+     * 等待新的集群配置生效,目前只检查Leader节点是否已变更为最新配置
+     * 如果等待失败需要补偿
+     **/
+    public CompletableFuture<Boolean> mayWaitNewConfigReady(List<URI> newConfigs, long timeout, TimeUnit unit){
+        // 本节点被删除
+        logger.info("Start to waiting for new config {} on {}",newConfigs,server.serverUri());
+        CompletableFuture<Boolean> result=new CompletableFuture();
+        CompletableFuture.runAsync(()-> {
+            if (!newConfigs.contains(server.serverUri())) {
+                logger.info("Start to waiting for new config {} on {}",newConfigs,server.serverUri());
+                if(newConfigs.size()>0) {
+                    AdminClient newAdminClient = new BootStrap(newConfigs, new Properties()).getAdminClient();
+                    //轮询新集群的配置
+                    Set<URI> newConfigSet = new HashSet<>(newConfigs);
+                    long startMs = SystemClock.now();
+                    long finalTimeout = startMs + unit.toMillis(timeout);
+                    do {
+                        try {
+                            ClusterConfiguration clusterConfiguration = newAdminClient.getClusterConfiguration().get(100, TimeUnit.MILLISECONDS);
+                            Set<URI> leaderVoterSet = new HashSet<>(clusterConfiguration.getVoters());
+                            if (leaderVoterSet.size() == newConfigSet.size() && newConfigSet.containsAll(leaderVoterSet)) {
+                                store.removePartitionGroup(topic, group);
+                                result.complete(true);
+                                newAdminClient.stop();
+                                break;
+                            }
+                            if (SystemClock.now() > finalTimeout) {
+                                logger.warn("Failed to wait new config on {}", server.serverUri());
+                                result.complete(false);
+                                newAdminClient.stop();
+                                break;
+                            }
+                            Thread.sleep(100);
+                        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                            logger.warn("Wait new config exception ", e);
+                        }
+                    } while (true);
+                }else{
+                    logger.info("New config is empty,remove {}/{} right now!",topic,group);
+                    store.removePartitionGroup(topic, group);
+                }
+            }else{
+                logger.info("New config contain me {}",server.serverUri());
+            }
+        });
+        return result;
+    }
+
+
+    private void updateConfig(List<URI> newConfigs, List<URI> oldConfigs) {
         adminClient
-            .updateVoters(clusterConfiguration.getVoters(), newConfigs)
+            .updateVoters(oldConfigs, newConfigs)
             .whenComplete((success, exception) -> {
                 if(null != exception) {
                     if(exception instanceof NotLeaderException) {
