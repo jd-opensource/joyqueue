@@ -1082,7 +1082,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
             return index;
         } finally {
-            rollbackLock.readLock().lock();
+            rollbackLock.readLock().unlock();
         }
     }
 

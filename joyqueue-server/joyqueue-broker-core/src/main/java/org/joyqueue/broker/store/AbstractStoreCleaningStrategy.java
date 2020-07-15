@@ -14,18 +14,26 @@ public abstract class AbstractStoreCleaningStrategy implements StoreCleaningStra
     private BrokerStoreConfig brokerStoreConfig;
     @Override
     public long storeLogMaxTime(TopicConfig topicConfig) {
-        if (topicConfig != null && topicConfig.getPolicy() != null && topicConfig.getPolicy().getStoreMaxTime() != null) {
-            return topicConfig.getPolicy().getStoreMaxTime();
+        if (topicConfig != null) {
+            if (topicConfig.getPolicy() != null && topicConfig.getPolicy().getStoreMaxTime() != null) {
+                return topicConfig.getPolicy().getStoreMaxTime();
+            } else {
+                return brokerStoreConfig.getMaxStoreTime(topicConfig.getName().getFullName());
+            }
         }
-        return brokerStoreConfig.getMaxStoreTime(topicConfig.getName().getFullName());
+        return brokerStoreConfig.getMaxStoreTime();
     }
 
     @Override
     public boolean keepUnconsumed(TopicConfig topicConfig) {
-        if (topicConfig != null && topicConfig.getPolicy() != null && topicConfig.getPolicy().getStoreCleanKeepUnconsumed() != null) {
-            return topicConfig.getPolicy().getStoreCleanKeepUnconsumed();
+        if (topicConfig != null) {
+            if (topicConfig.getPolicy() != null && topicConfig.getPolicy().getStoreCleanKeepUnconsumed() != null) {
+                return topicConfig.getPolicy().getStoreCleanKeepUnconsumed();
+            } else {
+                return brokerStoreConfig.keepUnconsumed(topicConfig.getName().getFullName());
+            }
         }
-        return brokerStoreConfig.keepUnconsumed(topicConfig.getName().getFullName());
+        return brokerStoreConfig.keepUnconsumed();
     }
 
     @Override
