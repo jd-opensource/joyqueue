@@ -37,7 +37,7 @@ public class JoyQueueCommandHandlerFactory extends DefaultCommandHandlerFactory 
 
     private JoyQueueContext joyQueueContext;
     private List<JoyQueueCommandHandler> commandHandlers;
-    private static ExtensionPoint<JoyQueueCommandHandler,String> joyqueueCommandHandler =new ExtensionPointLazyExt(JoyQueueCommandHandler.class, SpiLoader.INSTANCE, null, null);
+    private static ExtensionPoint<JoyQueueCommandHandler,String> joyQueueCommandHandler =new ExtensionPointLazyExt(JoyQueueCommandHandler.class, SpiLoader.INSTANCE, null, null);
     public JoyQueueCommandHandlerFactory(JoyQueueContext joyQueueContext) {
         this.joyQueueContext = joyQueueContext;
         this.commandHandlers = loadCommandHandlers();
@@ -46,7 +46,7 @@ public class JoyQueueCommandHandlerFactory extends DefaultCommandHandlerFactory 
     }
 
     protected List<JoyQueueCommandHandler> loadCommandHandlers() {
-        return Lists.newArrayList(joyqueueCommandHandler.extensions());
+        return Lists.newArrayList(joyQueueCommandHandler.extensions());
     }
 
     protected void initCommandHandlers(List<JoyQueueCommandHandler> commandHandlers) {

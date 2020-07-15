@@ -117,7 +117,9 @@ public class PositionManager extends Service {
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(consumePositionReplicator::replicateConsumePosition)
                 .build();
+
         this.replicationThread.start();
+
         clusterManager.addListener(new AddConsumeListener());
         clusterManager.addListener(new RemoveConsumeListener());
         clusterManager.addListener(new AddPartitionGroupListener());
@@ -152,9 +154,9 @@ public class PositionManager extends Service {
         if(null != this.compensationPositionThread) {
             this.compensationPositionThread.stop();
         }
-//        if(null != this.replicationThread) {
-//            this.replicationThread.stop();
-//        }
+        if(null != this.replicationThread) {
+            this.replicationThread.stop();
+        }
         positionStore.stop();
 
         logger.info("PositionManager is stopped.");
@@ -565,7 +567,7 @@ public class PositionManager extends Service {
         List<String> appList = clusterManager.getAppByTopic(topic);
         Set<Short> partitions = partitionGroup.getPartitions();
 
-        logger.info("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
+        logger.debug("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
         AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号

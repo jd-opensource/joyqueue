@@ -140,6 +140,7 @@ public class ThinNameService extends Service implements NameService, PropertySup
     protected EventBus<NameServerEvent> eventBus = new EventBus<>("joyqueue-thin-nameservice-eventBus");
 
     private Cache<TopicName, TopicConfig> topicCache;
+
     public ThinNameService() {
         //do nothing
     }
@@ -639,7 +640,6 @@ public class ThinNameService extends Service implements NameService, PropertySup
             return started.get();
         }
     }
-
 
 
 }

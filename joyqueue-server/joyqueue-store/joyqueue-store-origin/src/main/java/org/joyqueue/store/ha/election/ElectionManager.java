@@ -26,6 +26,7 @@ import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.helper.PortHelper;
 import org.joyqueue.network.transport.TransportClient;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
@@ -179,7 +180,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                 topic, partitionGroup, electType, localBroker, leader, JSON.toJSONString(brokers));
 
         List<DefaultElectionNode> allNodes = brokers.stream().map(b ->
-                new DefaultElectionNode(b.getIp() + ":" + b.getBackEndPort(), b.getId()))
+                new DefaultElectionNode( storageAddress(b), b.getId()))
                 .collect(Collectors.toList());
         ReplicaGroup replicaGroup = replicationManager.createReplicaGroup(topic.getFullName(), partitionGroup,
                 allNodes, learners, localBroker, leader, brokerMonitor);
@@ -187,6 +188,13 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                 allNodes, learners, localBroker, leader, replicaGroup);
         replicaGroup.setLeaderElection(leaderElection);
 
+    }
+
+    /**
+     * Storage level port
+     **/
+    public String storageAddress(Broker broker){
+        return broker.getIp()+":"+PortHelper.getStorePortOffset(broker.getPort());
     }
 
     @Override
@@ -233,7 +241,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                         "group %d, leader election is null", topic, partitionGroup));
             } else {
                 List<DefaultElectionNode> allNodes = brokers.stream().map(b ->
-                        new DefaultElectionNode(b.getIp() + ":" + b.getBackEndPort(), b.getId()))
+                        new DefaultElectionNode(storageAddress(b), b.getId()))
                         .collect(Collectors.toList());
                 ReplicaGroup replicaGroup = replicationManager.createReplicaGroup(topic.getFullName(),
                         partitionGroup, allNodes, learners, localBroker, leader, brokerMonitor);
@@ -243,7 +251,33 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
                 return;
             }
         }
-        leaderElection.addNode(new DefaultElectionNode(broker.getIp() + ":" + broker.getBackEndPort(), broker.getId()));
+        // election service address, use storage port
+        leaderElection.addNode(new DefaultElectionNode(storageAddress(broker), broker.getId()));
+    }
+
+    @Override
+    public void onNodeChange(TopicName topic, int partitionGroup, List<Broker> newNodes,int localBroker) throws ElectionException {
+        LeaderElection leaderElection = getLeaderElection(topic, partitionGroup);
+        if(leaderElection!=null){
+            Set<Integer> newReplicaIds=newNodes.stream().map(Broker::getId).collect(Collectors.toSet());
+            Set<Integer> oldReplicaIds=leaderElection.getAllNodes().stream().map(DefaultElectionNode::getNodeId).collect(Collectors.toSet());
+            for(Broker b:newNodes){
+               DefaultElectionNode newNode= new DefaultElectionNode(storageAddress(b), b.getId());
+               if(!oldReplicaIds.contains(newNode.getNodeId())){
+                   leaderElection.addNode(newNode);
+                   logger.info("Add election node {} on {}",newNode.getNodeId(),clusterManager.getBrokerId());
+               }
+            }
+            // compute remove
+            for(Integer oldReplicaId: oldReplicaIds){
+                 if(!newReplicaIds.contains(oldReplicaId)){
+                     onNodeRemove(topic,partitionGroup,oldReplicaId,localBroker);
+                     logger.info("Remove election node {} on {}",oldReplicaId,clusterManager.getBrokerId());
+                 }
+            }
+        }else{
+            logger.info("Leader election missing ");
+        }
     }
 
     @Override
@@ -277,7 +311,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
         removeLeaderElection(topic.getFullName(), partitionGroup);
         try {
             List<DefaultElectionNode> allNodes = brokers.stream()
-                    .map(b -> new DefaultElectionNode(b.getIp() + ":" + b.getBackEndPort(), b.getId()))
+                    .map(b -> new DefaultElectionNode(storageAddress(b), b.getId()))
                     .collect(Collectors.toList());
             LeaderElection leaderElectionNew = createLeaderElection(electType, topic.getFullName(), partitionGroup, allNodes, learners,
                     localBroker, leader, replicaGroup);
@@ -405,7 +439,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
             throw new ElectionException("Leader election start fail" + e);
         }
         leaderElections.put(topicPartitionGroup, leaderElection);
-        logger.info("New leader election {}/{}",topic,partitionGroup);
+        logger.info("New leader election {}/{} on {}",topic,partitionGroup,clusterManager.getBrokerId());
         return leaderElection;
 
     }
@@ -430,7 +464,7 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
             leaderElection.stop();
             leaderElections.remove(topicPartitionGroup);
-
+            logger.info("Remove {}/{} leader election on {}",topic,partitionGroupId,clusterManager.getBrokerId());
         }
     }
 

@@ -56,11 +56,6 @@ public class LeaderReportEventWatcher implements EventWatcher {
 //                }
                 break;
             default:
-//                StringBuilder sb=new StringBuilder();
-//                for(Map.Entry<String,String> e:eventData.entrySet()){
-//                    sb.append(e.getKey()).append(":").append(e.getValue()).append("\n");
-//                }
-//                logger.info("On event {}",sb.toString());
                 break;
         }
     }

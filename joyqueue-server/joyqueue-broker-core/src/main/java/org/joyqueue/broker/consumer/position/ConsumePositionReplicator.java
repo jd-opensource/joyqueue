@@ -157,7 +157,7 @@ class ConsumePositionReplicator {
         private int forceReplicateRound=0;
 
         private Map<String/*topic-partition group-replicaId*/,Map<ConsumePartition, Position>> lastReplicatedConsumePosition=new ConcurrentHashMap<>();
-        public DefaultConsumePositionReplicationManager(long forceIntervalMs){
+        DefaultConsumePositionReplicationManager(long forceIntervalMs){
             this.forceIntervalMs=forceIntervalMs;
         }
         @Override
@@ -167,7 +167,7 @@ class ConsumePositionReplicator {
                Map<ConsumePartition,Position> last=lastReplicatedConsumePosition.get(key);
                // 有上次复制的缓存，且partition数一致
                if(last!=null&&last.size()==positionMap.size()&&!mayUpdate(last,positionMap)){
-                   logger.info("{} Partition group {} consume position not change",topic,partitionGroup);
+                   logger.debug("{} Partition group {} consume position not change",topic,partitionGroup);
                    return false;
                }
             }

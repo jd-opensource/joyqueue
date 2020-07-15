@@ -94,31 +94,16 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
 
     @Override
     public List<TransactionStore> getAllTransactionStores() {
-        return storeMap.values().stream()
+        return storeMap.values().stream().filter(JournalKeeperPartitionGroupStore::writable)
                 .map(JournalKeeperPartitionGroupStore::getTransactionStore)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Voter change
-     * @param currentVoter  local voter
-     * @param voters  all voter for the partition group
-     **/
-    public void onVoteConfigChange(URI currentVoter,List<URI> voters){
-        int partitionGroup= joyQueueUriParser.getGroup(currentVoter);
-        String topic=joyQueueUriParser.getTopic(currentVoter);
-        JournalKeeperPartitionGroupStore store = storeMap.get(new TopicPartitionGroup(topic, partitionGroup));
-        if(store!=null&&store.getUri().equals(currentVoter)&&!voters.contains(currentVoter)){
-            removePartitionGroup(topic,partitionGroup);
-        }
-        logger.info("On voter config change {},{}",currentVoter,voters);
-    }
     @Override
     public void removePartitionGroup(String topic, int partitionGroup) {
         JournalKeeperPartitionGroupStore store = storeMap.remove(new TopicPartitionGroup(topic, partitionGroup));
         if(null != store) {
             store.stop();
-            // support remove
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             deleteDirectoryRecursively(groupBase);
             logger.warn("Remove partition group successful! Topic: {}, partitionGroup: {} on {}.",
@@ -264,9 +249,7 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
             store.maybeUpdateConfig(toURIs(new ArrayList<>(newReplicaBrokerIds), topic, partitionGroup));
             logger.warn("May update replicas config, Topic: {}, partitionGroup: {},new replicas {} on {}",
                     topic, partitionGroup,newReplicaBrokerIds,brokerId);
-        } else {
-            // may create partition group store
-            if(newReplicaBrokerIds.contains(brokerId)){
+        } else if(newReplicaBrokerIds.contains(brokerId)){
                 // create topic partition group
                 PartitionGroup pg=brokerContext.getClusterManager().getPartitionGroupByGroup(TopicName.parse(topic),partitionGroup);
                 if(pg!=null) {
@@ -276,9 +259,8 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
                 }else{
                     logger.warn("Partition group metadata missing ,Topic: {}, partitionGroup: {}.",topic, partitionGroup);
                 }
-            }else{
-                logger.warn("Never should go there!");
-            }
+        }else{
+            logger.warn("Never should go there!");
         }
     }
 

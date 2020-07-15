@@ -28,13 +28,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * BrokerServer
+ * Broker to broker communication
  *
  * author: gaohaoxiang
  * date: 2018/8/14
  */
 public class BrokerServer extends Service {
-    private Logger LOG= LoggerFactory.getLogger(BrokerServer.class);
+    private static final Logger LOG= LoggerFactory.getLogger(BrokerServer.class);
     private FrontendServer frontendServer;
     private BackendServer backendServer;
     private BrokerTransportListener transportListener;
@@ -64,9 +64,8 @@ public class BrokerServer extends Service {
     @Override
     protected void doStart() throws Exception {
         this.frontendServer.start();
-        LOG.info("Broker server on {} started ",frontendConfig.getPort());
         this.backendServer.start();
-        LOG.info("Broker server on {} started ",backendConfig.getPort());
+        LOG.info("Broker front/backend server on {}/{} started ",frontendConfig.getPort(),backendConfig.getPort());
     }
 
     @Override

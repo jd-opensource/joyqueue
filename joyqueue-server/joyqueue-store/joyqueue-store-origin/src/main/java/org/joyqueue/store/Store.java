@@ -24,8 +24,10 @@ import org.joyqueue.broker.config.PartitionGroupConfig;
 import org.joyqueue.broker.helper.AwareHelper;
 import org.joyqueue.broker.store.StoreUtils;
 import org.joyqueue.domain.*;
+import org.joyqueue.helper.PortHelper;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.network.transport.config.ServerConfig;
+import org.joyqueue.network.transport.config.TransportConfigSupport;
 import org.joyqueue.store.network.BackendServer;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.ha.ReplicableStore;
@@ -166,18 +168,20 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     public void startBackEndServer() throws Exception{
-        ServerConfig backendConfig = brokerContext.getBrokerConfig().getBackendConfig();
+        // 使用存储层端口
+        ServerConfig backendConfig = TransportConfigSupport.buildServerConfig(propertySupplier,"store.");
         backendConfig.setAcceptThreadName("joyqueue-backend-accept-eventLoop");
         backendConfig.setIoThreadName("joyqueue-backend-io-eventLoop");
-//      this.backendServer = new BackendServer(backendConfig, brokerContext,electionManager);
-//      backendServer.start();
+        backendConfig.setPort(PortHelper.getStorePortOffset(brokerContext.getBroker().getPort()));
+        this.backendServer = new BackendServer(backendConfig, brokerContext,electionManager);
+        backendServer.start();
     }
 
     @Override
     protected void doStop() {
         super.doStop();
-//      LOG.info("Stopping backend sever...");
-//      backendServer.stop();
+        LOG.info("Stopping backend sever...");
+        backendServer.stop();
         LOG.info("Stopping store {}...", base.getPath());
 
         storeMap.values().forEach(p -> {
@@ -252,11 +256,35 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     @Override
     public void maybeUpdateReplicas(String topic, int partitionGroup, Collection<Integer> newReplicaBrokerIds) throws Exception{
         if(LOG.isDebugEnabled()){
-            LOG.info("{}/{} replicas config change,new config {} ",topic,partitionGroup,newReplicaBrokerIds==null?"":newReplicaBrokerIds.toArray());
+            LOG.info("{}/{} replicas config change,new config {} on {}",topic,partitionGroup,newReplicaBrokerIds==null?"":newReplicaBrokerIds.toArray(),
+                    clusterManager.getBrokerId());
         }
-
         Integer local=clusterManager.getBrokerId();
-        PartitionGroup groupOld = partitionGroup(topic,partitionGroup);
+        if(newReplicaBrokerIds.contains(local)) {
+            PartitionGroupStoreManager pgm = storeMap.get(partitionGroupStoreKey(topic, partitionGroup));
+            PartitionGroup groupOld= clusterManager.getPartitionGroupByGroup(TopicName.parse(topic),partitionGroup);
+            if (pgm == null) {
+                  if(groupOld!=null){
+                      createPartitionGroup(topic,partitionGroup, Shorts.toArray(groupOld.getPartitions()),Lists.newArrayList(newReplicaBrokerIds),
+                              Lists.newArrayList(groupOld.getLearners()),local, StoreUtils.partitionGroupExtendProperties(groupOld));
+                      LOG.info("Create partition group {}/{} new replica by scale up on {} ",topic,partitionGroup,local);
+                  }else{
+                      LOG.warn("Partition group {}/{} metadata  missing on {}",topic,partitionGroup,local);
+                  }
+            }else {
+                electionManager.onNodeChange(TopicName.parse(topic), partitionGroup,brokers(Lists.newArrayList(newReplicaBrokerIds)),local);
+                LOG.info("Partition group exist on {}, may update replicas",local);
+            }
+        }else{
+            // local 被移除
+            PartitionGroupStoreManager pgm = storeMap.get(partitionGroupStoreKey(topic, partitionGroup));
+            if(pgm!=null){
+                removePartitionGroup(topic,partitionGroup);
+                LOG.info("Partition group {}/{} remove by scale down on {} ",topic,partitionGroup,local);
+            }
+        }
+        /*if(newReplicaBrokerIds.con)
+
         Set<Integer> replicasNew = new HashSet<>(newReplicaBrokerIds);
 
         Set<Integer> replicasRemoved=new HashSet<>(groupOld.getReplicas());
@@ -269,8 +297,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             Broker cur = clusterManager.getBrokerById(add);
             if (null!=cur) {
                 if (add.equals(local)){
-                    createPartitionGroup(topic,partitionGroup, Shorts.toArray(groupOld.getPartitions()),Lists.newArrayList(newReplicaBrokerIds),
-                            Lists.newArrayList(groupOld.getLearners()),local, StoreUtils.partitionGroupExtendProperties(groupOld));
                 }else{
                     electionManager.onNodeAdd(TopicName.parse(topic), partitionGroup, groupOld.getElectType(),
                             brokers(Lists.newArrayList(newReplicaBrokerIds)), groupOld.getLearners(), cur,local,groupOld.getLeader());
@@ -287,7 +313,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                 electionManager.onNodeRemove(TopicName.parse(topic), partitionGroup, r, local);
             }
             LOG.info("Topic[{}] update partitionGroup[{}] and remove node[{}] ", topic, partitionGroup, r);
-        }
+        }*/
     }
 
     /**
@@ -638,7 +664,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
     @Override
     public String name(){
-        return "Joy";
+        return "JoyQueue";
     }
 
     /**

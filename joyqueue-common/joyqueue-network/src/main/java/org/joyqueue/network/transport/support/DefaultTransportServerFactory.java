@@ -28,8 +28,6 @@ import org.joyqueue.network.transport.command.support.RequestHandler;
 import org.joyqueue.network.transport.command.support.ResponseHandler;
 import org.joyqueue.network.transport.config.ServerConfig;
 import org.joyqueue.toolkit.concurrent.EventBus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * DefaultTransportServerFactory
@@ -38,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * date: 2018/8/22
  */
 public class DefaultTransportServerFactory implements TransportServerFactory {
-    protected static final Logger logger = LoggerFactory.getLogger(DefaultTransportServerFactory.class);
+
     private Codec codec;
     private CommandHandlerFactory commandHandlerFactory;
     private ExceptionHandler exceptionHandler;
@@ -57,8 +55,6 @@ public class DefaultTransportServerFactory implements TransportServerFactory {
         this.commandHandlerFactory = commandHandlerFactory;
         this.exceptionHandler = exceptionHandler;
         this.eventBus = eventBus;
-        logger.info("New DefaultTransportServerFactory");
-
     }
 
     @Override

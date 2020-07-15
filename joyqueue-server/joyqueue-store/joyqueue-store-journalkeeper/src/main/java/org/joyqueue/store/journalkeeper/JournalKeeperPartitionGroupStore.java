@@ -72,7 +72,6 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         this.asyncExecutor = asyncExecutor;
         server = new JournalStoreServer(roll, new JoyQueueEntryParser(),
                 asyncExecutor, scheduledExecutor, asyncExecutor, scheduledExecutor, properties);
-        //server.
     }
 
     @Override
@@ -83,7 +82,6 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     @Override
     protected void doStart() throws Exception {
         super.doStart();
-        logger.info("JournalKeeper partition group store {} starting",this.getUri());
         server.start();
         this.client = server.createLocalClient();
         this.adminClient = server.getLocalAdminClient();

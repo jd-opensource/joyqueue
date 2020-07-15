@@ -35,7 +35,7 @@ public class BrokerStoreConfig {
      * Storage service may have different implementation,a default implementation called Joy
      *
      **/
-    public static final String DEFAULT_STORE_ENGINE="Joy";
+    public static final String DEFAULT_STORE_ENGINE="JoyQueue";
     private PropertySupplier propertySupplier;
 
 

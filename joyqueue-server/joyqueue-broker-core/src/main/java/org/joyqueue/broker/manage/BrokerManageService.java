@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * date: 2018/10/15
  */
 public class BrokerManageService extends Service {
-    private Logger LOG= LoggerFactory.getLogger(BrokerManageService.class);
+    private static final Logger LOG= LoggerFactory.getLogger(BrokerManageService.class);
     private BrokerManageConfig config;
     private BrokerManageServiceManager brokerManageServiceManager;
     private BrokerManageExporter brokerManageExporter;

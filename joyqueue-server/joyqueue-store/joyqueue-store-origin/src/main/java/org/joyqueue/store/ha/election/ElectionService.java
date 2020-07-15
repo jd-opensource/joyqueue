@@ -85,6 +85,14 @@ public interface ElectionService {
     void onNodeAdd(TopicName topic, int partitionGroup, PartitionGroup.ElectType electType, List<Broker> allNodes,
                    Set<Integer> learners, Broker broker, int localBroker, int leader) throws ElectionException;
 
+    /**
+     * This method is called when a node is added to a partition group.
+     * @param topic topic
+     * @param partitionGroup partition group id
+     * @throws ElectionException
+     */
+    void onNodeChange(TopicName topic, int partitionGroup,List<Broker> allNodes,int localBroker) throws ElectionException;
+
 
     /**
      *

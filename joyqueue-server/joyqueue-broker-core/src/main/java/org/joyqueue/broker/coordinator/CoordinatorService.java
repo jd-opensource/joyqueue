@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentMap;
  * date: 2018/12/4
  */
 public class CoordinatorService extends Service {
-    private Logger LOG= LoggerFactory.getLogger(CoordinatorService.class);
+    private static final Logger LOG= LoggerFactory.getLogger(CoordinatorService.class);
     private CoordinatorConfig config;
     private ClusterManager clusterManager;
     private NameService nameService;

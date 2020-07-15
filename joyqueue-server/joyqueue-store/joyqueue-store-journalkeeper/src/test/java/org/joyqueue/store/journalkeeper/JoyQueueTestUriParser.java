@@ -16,7 +16,6 @@ import java.net.URISyntaxException;
  * Date: 2019/9/30
  */
 @Singleton
-
 public class JoyQueueTestUriParser implements URIParser {
     private static final Logger logger = LoggerFactory.getLogger(JoyQueueTestUriParser.class);
     private static final String SCHEME = "joyqueue-test";

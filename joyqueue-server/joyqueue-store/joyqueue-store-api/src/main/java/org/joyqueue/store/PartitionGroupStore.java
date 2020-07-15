@@ -103,8 +103,6 @@ public interface PartitionGroupStore {
      */
     ReadResult read(short partition, long index, int count, long maxSize) throws IOException;
 
-
-
     /**
      * 是否可读
      * @return true： 可读， false： 不可读

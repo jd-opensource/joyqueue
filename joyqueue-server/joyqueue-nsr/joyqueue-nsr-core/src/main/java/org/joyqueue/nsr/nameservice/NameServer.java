@@ -82,7 +82,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
 
     public NameServer() {
         this.delegate = new NameServerInternal();
-        logger.info("Name Server started");
     }
 
     @Override
@@ -478,19 +477,13 @@ public class NameServer extends Service implements NameService, PropertySupplier
     @Override
     public void setSupplier(PropertySupplier propertySupplier) {
         delegate.setSupplier(propertySupplier);
-        logger.info("Name Server on {} started",1);
         tracer = NsrPlugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
-        logger.info("Name Server on {} started",2);
         nameServerConfig = new NameServerConfig(propertySupplier);
-        logger.info("Name Server on {} started",6);
         transportServerFactory = new NsrTransportServerFactory(this, propertySupplier);
-        logger.info("Name Server on {} started",3);
         transportServer = buildTransportServer();
-        logger.info("Name Server on {} started",4);
         topicCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(nameServerConfig.getTopicCacheExpireTime(), TimeUnit.MILLISECONDS)
                 .build();
-        logger.info("Name Server on {} started",5);
         appTopicCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(nameServerConfig.getTopicCacheExpireTime(), TimeUnit.MILLISECONDS)
                 .build();
