@@ -274,6 +274,7 @@ public class Producer extends Subscription {
                     Objects.equals(blackList, that.blackList) &&
                     Objects.equals(timeOut, that.timeOut) &&
                     Objects.equals(qosLevel, that.qosLevel) &&
+                    Objects.equals(region, that.region) &&
                     Objects.equals(params, that.params);
         }
 

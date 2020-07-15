@@ -69,7 +69,7 @@ public class MetadataCacheDoubleCopy extends DoubleCopy {
             json = ZipUtil.compress(json);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("save nameservice cache, value: {}, file: {}", new String(json), file);
+                logger.debug("save metadata cache, value: {}, file: {}", new String(json), file);
             }
 
             return json;
@@ -83,20 +83,20 @@ public class MetadataCacheDoubleCopy extends DoubleCopy {
     protected void parse(byte[] data) {
         try {
             if (logger.isDebugEnabled()) {
-                logger.debug("load nameservice cache, value: {}, file: {}", new String(data), file);
+                logger.debug("load metadata cache, value: {}, file: {}", new String(data), file);
             }
 
             data = ZipUtil.decompress(data).getBytes();
             NameServiceCacheEntry entry = JSON.parseObject(data, NameServiceCacheEntry.class);
 
             if (entry != null && entry.getVersion() != CURRENT_VERSION) {
-                logger.warn("nameservice cache check version failed, current: {}, required: {}", entry.getVersion(), CURRENT_VERSION);
+                logger.warn("metadata cache check version failed, current: {}, required: {}", entry.getVersion(), CURRENT_VERSION);
                 throw new NsrException("check version failed");
             }
 
             this.entry = entry;
         } catch (Exception e) {
-            logger.error("load nameservice cache exception, file: {}", file, e);
+            logger.error("load metadata cache exception, file: {}", file, e);
             if (e instanceof NsrException) {
                 throw (NsrException) e;
             } else {

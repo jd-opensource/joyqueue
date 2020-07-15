@@ -397,6 +397,7 @@ public class Consumer extends Subscription {
                     Objects.equals(maxPartitionNum, that.maxPartitionNum) &&
                     Objects.equals(readRetryProbability, that.readRetryProbability) &&
                     Objects.equals(filters, that.filters) &&
+                    Objects.equals(region, that.region) &&
                     Objects.equals(params, that.params);
         }
 
