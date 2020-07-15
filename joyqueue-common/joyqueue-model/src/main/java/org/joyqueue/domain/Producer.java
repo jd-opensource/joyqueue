@@ -298,7 +298,7 @@ public class Producer extends Subscription {
              */
             private Set<String> blackList;
             // 默认生产超时时间 5秒钟
-            private Integer timeOut = 1000 * 5;
+            private Integer timeOut = 1000 * 1;
 
             public static Builder build() {
                 return new Builder();
