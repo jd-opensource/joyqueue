@@ -331,6 +331,51 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
         }
     }
 
+    @Override
+    public void commitIndex(short partition, long index) {
+        try {
+            messageConsumer.commitIndex(partition, index);
+        } catch (Throwable cause) {
+            throw handleConsumeException(cause);
+        }
+    }
+
+    @Override
+    public void commitMaxIndex(short partition) {
+        try {
+            messageConsumer.commitMaxIndex(partition);
+        } catch (Throwable cause) {
+            throw handleConsumeException(cause);
+        }
+    }
+
+    @Override
+    public void commitMaxIndex() {
+        try {
+            messageConsumer.commitMaxIndex();
+        } catch (Throwable cause) {
+            throw handleConsumeException(cause);
+        }
+    }
+
+    @Override
+    public void commitMinIndex(short partition) {
+        try {
+            messageConsumer.commitMinIndex(partition);
+        } catch (Throwable cause) {
+            throw handleConsumeException(cause);
+        }
+    }
+
+    @Override
+    public void commitMinIndex() {
+        try {
+            messageConsumer.commitMinIndex();
+        } catch (Throwable cause) {
+            throw handleConsumeException(cause);
+        }
+    }
+
     protected OMSRuntimeException handleConsumeException(Throwable cause) {
         throw ExceptionConverter.convertConsumeException(cause);
     }

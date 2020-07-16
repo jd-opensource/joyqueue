@@ -19,6 +19,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.consumer.ConsumerIndexManager;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
@@ -30,11 +31,11 @@ import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.command.CommitAckData;
 import org.joyqueue.network.command.CommitAckResponse;
+import org.joyqueue.network.command.CommitIndexResponse;
 import org.joyqueue.network.command.FetchIndexData;
 import org.joyqueue.network.command.FetchIndexResponse;
 import org.joyqueue.network.domain.BrokerNode;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +80,14 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
         topicMap.put(topic, replyList);
         Map<String, JoyQueueCode> batchCommitReplyResult = batchCommitReply(topicMap, app, timeout);
         return batchCommitReplyResult.get(topic);
+    }
+
+    @Override
+    public JoyQueueCode commitIndex(String topic, String app, short partition, long index, long timeout) {
+        Map<Short, Long> partitionMap = Maps.newHashMap();
+        partitionMap.put(partition, index);
+        Map<Short, JoyQueueCode> batchCommitIndexResult = batchCommitIndex(topic, app, partitionMap, timeout);
+        return batchCommitIndexResult.get(partition);
     }
 
     @Override
@@ -233,6 +242,74 @@ public class DefaultConsumerIndexManager extends Service implements ConsumerInde
 
                 commitAckList.add(new CommitAckData(consumeReply.getPartition(), consumeReply.getIndex(), consumeReply.getRetryType()));
             }
+        }
+
+        return result;
+    }
+
+    @Override
+    public Map<Short, JoyQueueCode> batchCommitIndex(String topic, String app, Map<Short, Long> indexes, long timeout) {
+        Table<String, Short, Long> topicTable = HashBasedTable.create();
+        for (Map.Entry<Short, Long> entry : indexes.entrySet()) {
+            topicTable.put(topic, entry.getKey(), entry.getValue());
+        }
+
+        Map<Short, JoyQueueCode> result = Maps.newHashMap();
+        Map<BrokerNode, Table<String, Short, Long>> brokerCommitMap = buildCommitIndexRequest(topic, app, indexes);
+
+        for (Map.Entry<BrokerNode, Table<String, Short, Long>> entry : brokerCommitMap.entrySet()) {
+            try {
+                ConsumerClient client = consumerClientManager.getOrCreateClient(entry.getKey());
+                CommitIndexResponse commitIndexResponse = client.commitIndex(entry.getValue(), app, timeout);
+
+                for (Map.Entry<String, Map<Short, JoyQueueCode>> resultEntry : commitIndexResponse.getResult().rowMap().entrySet()) {
+                    for (Map.Entry<Short, JoyQueueCode> ackEntry : resultEntry.getValue().entrySet()) {
+                        result.put(ackEntry.getKey(), ackEntry.getValue());
+                    }
+                }
+            } catch (ClientException e) {
+                logger.error("commit index exception, commitMap: {}, app: {}", entry.getValue(), app, e);
+                for (Map.Entry<String, Map<Short, Long>> topicEntry : entry.getValue().rowMap().entrySet()) {
+                    for (Map.Entry<Short, Long> partitionEntry : topicEntry.getValue().entrySet()) {
+                        result.put(partitionEntry.getKey(), JoyQueueCode.valueOf(e.getCode()));
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<Short, JoyQueueCode> entry : result.entrySet()) {
+            if (result.containsKey(entry.getKey())) {
+                continue;
+            }
+            result.put(entry.getKey(), JoyQueueCode.CN_UNKNOWN_ERROR);
+        }
+        return result;
+    }
+
+    protected Map<BrokerNode, Table<String, Short, Long>> buildCommitIndexRequest(String topic, String app, Map<Short, Long> indexes) {
+        Map<BrokerNode, Table<String, Short, Long>> result = Maps.newHashMap();
+        TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topic, app);
+        if (topicMetadata == null) {
+            logger.warn("topic {} metadata is null", topic);
+            return null;
+        }
+
+        for (Map.Entry<Short, Long> entry : indexes.entrySet()) {
+            short partition = entry.getKey();
+            long index = entry.getValue();
+
+            PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
+            if (partitionMetadata == null || partitionMetadata.getLeader() == null) {
+                continue;
+            }
+
+            Table<String, Short, Long> topicTable = result.get(partitionMetadata.getLeader());
+            if (topicTable == null) {
+                topicTable = HashBasedTable.create();
+                result.put(partitionMetadata.getLeader(), topicTable);
+            }
+
+            topicTable.put(topic, partition, index);
         }
 
         return result;

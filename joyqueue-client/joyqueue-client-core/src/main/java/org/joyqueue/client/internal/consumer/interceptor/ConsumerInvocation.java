@@ -61,7 +61,7 @@ public class ConsumerInvocation {
         for (ConsumerInterceptor interceptor : interceptors) {
             if (!interceptor.preConsume(context)) {
                 isRejected = true;
-                continue;
+                break;
             }
         }
 

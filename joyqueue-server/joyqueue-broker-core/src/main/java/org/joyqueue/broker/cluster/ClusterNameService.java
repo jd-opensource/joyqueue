@@ -117,7 +117,7 @@ public class ClusterNameService extends Service {
         TraceStat begin = tracer.begin("ClusterNameService.getTopicConfigByApp");
         try {
             CountDownLatch latch = new CountDownLatch(topicConfigMap.size());
-            Map<TopicName, TopicConfig> result = Maps.newHashMap();
+            Map<TopicName, TopicConfig> result = Maps.newConcurrentMap();
             for (Map.Entry<TopicName, TopicConfig> entry : topicConfigMap.entrySet()) {
                 if (config.getTopicDynamicMetadataBatchParallelEnable()) {
                     result.put(entry.getKey(), entry.getValue());
@@ -161,7 +161,7 @@ public class ClusterNameService extends Service {
         TraceStat begin = tracer.begin("ClusterNameService.getTopicConfigs");
         try {
             CountDownLatch latch = new CountDownLatch(topicConfigMap.size());
-            Map<String, TopicConfig> result = Maps.newHashMap();
+            Map<String, TopicConfig> result = Maps.newConcurrentMap();
             for (Map.Entry<String, TopicConfig> entry : topicConfigMap.entrySet()) {
                 if (config.getTopicDynamicMetadataBatchParallelEnable()) {
                     result.put(entry.getKey(), entry.getValue());
@@ -229,7 +229,7 @@ public class ClusterNameService extends Service {
         }
     }
 
-    protected TopicConfig  doGetDynamicTopicConfig(TopicConfig topicConfig, SplittedCluster splittedCluster) {
+    protected TopicConfig doGetDynamicTopicConfig(TopicConfig topicConfig, SplittedCluster splittedCluster) {
         TraceStat begin = tracer.begin("ClusterNameService.doGetDynamicTopicConfig");
         try {
             // 如果全部broker小于阈值，全量获取
@@ -267,7 +267,7 @@ public class ClusterNameService extends Service {
         try {
             Map<Integer, Broker> brokerMap = topicConfig.fetchAllBroker();
             CountDownLatch latch = new CountDownLatch(splittedByGroup.size());
-            Map<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster> partitionGroupClusterMap = Maps.newHashMap();
+            Map<Integer, GetPartitionGroupClusterResponse.PartitionGroupCluster> partitionGroupClusterMap = Maps.newConcurrentMap();
             boolean[] isSuccess = {true};
 
             for (Map.Entry<Integer, List<Integer>> entry : splittedByGroup.entrySet()) {
