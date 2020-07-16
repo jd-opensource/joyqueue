@@ -109,6 +109,7 @@ import java.util.concurrent.TimeUnit;
  * @author wylixiaobin
  * Date: 2019/3/14
  */
+@Deprecated
 public class NameServiceCommandHandler implements NsrCommandHandler, Types, com.jd.laf.extension.Type<String>, EventListener<TransportEvent>, PropertySupplierAware, ExecutorServiceProvider {
     private static final Logger logger = LoggerFactory.getLogger(NameServiceCommandHandler.class);
 

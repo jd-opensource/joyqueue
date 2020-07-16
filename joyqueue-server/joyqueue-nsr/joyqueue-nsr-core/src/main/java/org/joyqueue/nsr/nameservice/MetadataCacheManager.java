@@ -58,7 +58,7 @@ public class MetadataCacheManager extends Service {
 
     private NameServiceConfig config;
 
-    private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
+    private MetadataCacheDoubleCopy metadataCacheDoubleCopy;
     private volatile AllMetadataCache cache;
     private ReentrantLock lock = new ReentrantLock();
     private volatile long timestamp = 0;
@@ -69,13 +69,13 @@ public class MetadataCacheManager extends Service {
 
     @Override
     protected void validate() throws Exception {
-        nameServiceCacheDoubleCopy = new NameServiceCacheDoubleCopy(new File(config.getAllMetadataCacheFile()));
+        metadataCacheDoubleCopy = new MetadataCacheDoubleCopy(new File(config.getAllMetadataCacheFile()));
     }
 
     @Override
     protected void doStart() throws Exception {
-        nameServiceCacheDoubleCopy.recover();
-        this.cache = nameServiceCacheDoubleCopy.getCache();
+        metadataCacheDoubleCopy.recover();
+        this.cache = metadataCacheDoubleCopy.getCache();
     }
 
     public AllMetadataCache buildCache(AllMetadata allMetadata) {
@@ -222,7 +222,7 @@ public class MetadataCacheManager extends Service {
     }
 
     public void flushCache() {
-        nameServiceCacheDoubleCopy.flush(cache);
+        metadataCacheDoubleCopy.flush(cache);
     }
 
     public Broker getBroker(int brokerId) {

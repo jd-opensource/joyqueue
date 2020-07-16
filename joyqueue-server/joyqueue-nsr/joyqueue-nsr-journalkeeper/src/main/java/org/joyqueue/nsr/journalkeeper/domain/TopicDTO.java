@@ -31,6 +31,7 @@ public class TopicDTO extends BaseDTO {
     @Column(alias = "priority_partitions")
     private String priorityPartitions;
     private Byte type;
+    private String policy;
 
     public String getId() {
         return id;
@@ -78,5 +79,13 @@ public class TopicDTO extends BaseDTO {
 
     public void setType(Byte type) {
         this.type = type;
+    }
+
+    public void setPolicy(String policy) {
+        this.policy = policy;
+    }
+
+    public String getPolicy() {
+        return policy;
     }
 }

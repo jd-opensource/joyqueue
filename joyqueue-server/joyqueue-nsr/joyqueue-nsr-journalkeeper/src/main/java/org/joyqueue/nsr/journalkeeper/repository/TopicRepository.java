@@ -32,13 +32,13 @@ import java.util.List;
 public class TopicRepository {
 
     private static final String TABLE = "topic";
-    private static final String COLUMNS = "id, code, namespace, partitions, priority_partitions, type";
-    private static final String UPDATE_COLUMNS = "code = ?, namespace = ?, partitions = ?, priority_partitions = ?, type = ?";
+    private static final String COLUMNS = "id, code, namespace, partitions, priority_partitions, type, policy";
+    private static final String UPDATE_COLUMNS = "code = ?, namespace = ?, partitions = ?, priority_partitions = ?, type = ?, policy = ?";
 
     private static final String GET_ALL = String.format("SELECT %s FROM %s ORDER BY code", COLUMNS, TABLE);
     private static final String GET_BY_CODE = String.format("SELECT %s FROM %s WHERE code = ? AND namespace = ?", COLUMNS, TABLE);
     private static final String GET_BY_ID = String.format("SELECT %s FROM %s WHERE id = ?", COLUMNS, TABLE);
-    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?)", TABLE, COLUMNS);
+    private static final String ADD = String.format("INSERT INTO %s(%s) VALUES(?,?,?,?,?,?,?)", TABLE, COLUMNS);
     private static final String UPDATE_BY_ID = String.format("UPDATE %s SET %s WHERE id = ?", TABLE, UPDATE_COLUMNS);
     private static final String UPDATE_INCR_PARTITION_BY_ID = String.format("UPDATE %s SET partitions = partitions + ? WHERE id = ?", TABLE);
     private static final String UPDATE_DECR_PARTITION_BY_ID = String.format("UPDATE %s SET partitions = partitions - ? WHERE id = ?", TABLE);
@@ -108,13 +108,13 @@ public class TopicRepository {
 
     public TopicDTO add(TopicDTO topicDTO) {
         baseRepository.insert(ADD, topicDTO.getId(), topicDTO.getCode(), topicDTO.getNamespace(), topicDTO.getPartitions(),
-                topicDTO.getPriorityPartitions(), topicDTO.getType());
+                topicDTO.getPriorityPartitions(), topicDTO.getType(), topicDTO.getPolicy());
         return topicDTO;
     }
 
     public TopicDTO update(TopicDTO topicDTO) {
         baseRepository.update(UPDATE_BY_ID, topicDTO.getCode(), topicDTO.getNamespace(), topicDTO.getPartitions(),
-                topicDTO.getPriorityPartitions(), topicDTO.getType(), topicDTO.getId());
+                topicDTO.getPriorityPartitions(), topicDTO.getType(), topicDTO.getPolicy(), topicDTO.getId());
         return topicDTO;
     }
 

@@ -288,7 +288,6 @@ public class MessageProducerInner extends Service {
             }
             case FW_BROKER_NOT_WRITABLE: {
                 logger.debug("send message error, broker not writable, topic: {}", topic);
-                clusterManager.updateTopicMetadata(topic, app);
                 break;
             }
             default: {

@@ -17,6 +17,7 @@ package org.joyqueue.store.file;
 
 import org.joyqueue.store.PositionOverflowException;
 import org.joyqueue.store.PositionUnderflowException;
+import org.joyqueue.store.WriteException;
 import org.joyqueue.store.utils.PreloadBufferPool;
 import org.joyqueue.toolkit.format.Format;
 import org.joyqueue.toolkit.time.SystemClock;

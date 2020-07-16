@@ -16,11 +16,12 @@
 package org.joyqueue.nsr.journalkeeper.converter;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Topic;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.nsr.journalkeeper.domain.TopicDTO;
 import org.joyqueue.nsr.journalkeeper.helper.ArrayHelper;
-import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.nsr.journalkeeper.helper.JsonHelper;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +45,7 @@ public class TopicConverter {
         topicDTO.setPartitions(topic.getPartitions());
         topicDTO.setType(topic.getType().code());
         topicDTO.setPriorityPartitions(ArrayHelper.toString(topic.getPriorityPartitions()));
+        topicDTO.setPolicy(JsonHelper.toJson(topic.getPolicy()));
         return topicDTO;
     }
 
@@ -57,6 +59,7 @@ public class TopicConverter {
         topic.setPartitions(topicDTO.getPartitions());
         topic.setType(Topic.Type.valueOf(topicDTO.getType()));
         topic.setPriorityPartitions(ArrayHelper.toShortSet(topicDTO.getPriorityPartitions()));
+        topic.setPolicy(JsonHelper.parseJson(Topic.TopicPolicy.class, topicDTO.getPolicy()));
         return topic;
     }
 

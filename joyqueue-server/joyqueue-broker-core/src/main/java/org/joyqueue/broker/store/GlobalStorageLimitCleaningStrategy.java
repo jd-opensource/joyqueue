@@ -1,6 +1,7 @@
 package org.joyqueue.broker.store;
 
 import org.joyqueue.broker.config.BrokerStoreConfig;
+import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.time.SystemClock;
@@ -29,14 +30,14 @@ public class GlobalStorageLimitCleaningStrategy extends  AbstractStoreCleaningSt
     private Map<String,Boolean> partitionGroupForcibleCleanWal=new HashMap();
     private StorageState storageState=StorageState.SAFETY;
     @Override
-    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap) throws IOException {
+    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap, TopicConfig topicConfig) throws IOException {
         if(partitionGroupStore==null){
             return -1;
         }
         long now = SystemClock.now();
         long used=0L;
-        long maxStoreTime= storeLogMaxTime(partitionGroupStore.getTopic());
-        boolean keepUnconsumed=keepUnconsumed(partitionGroupStore.getTopic());
+        long maxStoreTime= storeLogMaxTime(topicConfig);
+        boolean keepUnconsumed=keepUnconsumed(topicConfig);
         if(LOG.isDebugEnabled()){
             LOG.info("topic {},Dynamic max store time {} ms,keep unconsumed {}",partitionGroupStore.getTopic(),maxStoreTime,keepUnconsumed);
         }
