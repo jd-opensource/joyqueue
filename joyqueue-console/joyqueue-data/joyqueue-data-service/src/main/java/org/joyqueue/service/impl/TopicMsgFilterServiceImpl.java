@@ -208,7 +208,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             apps = consumerService.findByTopic(topicName.getCode(), topicName.getNamespace()).stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
         } catch (NullPointerException e) {
             logger.error("topic not found or doesn't have related app");
-            throw new NotFoundException("topic not found or doesn't have related app");
+            throw new NotFoundException("topic not found or doesn't have related app", e);
         }
         if (CollectionUtils.isNotEmpty(apps)) {
             updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.RUNNING, null, "");

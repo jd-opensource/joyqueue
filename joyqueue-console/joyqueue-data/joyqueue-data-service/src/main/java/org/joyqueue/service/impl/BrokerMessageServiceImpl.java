@@ -138,7 +138,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
             }
         }catch (Exception e){
             logger.error("parse broker message error", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,"Message can't be parse");
+            throw new ServiceException(INTERNAL_SERVER_ERROR,"Message can't be parse", e);
         }
         return simplifiedBrokeMessages;
     }
