@@ -38,7 +38,7 @@ import java.util.Map;
 public class PageQueryBinder<Q extends Query> implements Binder {
     private static final String pagination = "pagination";
     private static final String query = "query";
-    private final static Logger logger = LoggerFactory.getLogger(PageQueryBinder.class);
+    private static final Logger logger = LoggerFactory.getLogger(PageQueryBinder.class);
     @Override
     public boolean bind(final Context context) throws ReflectionException {
         if (context == null) {
