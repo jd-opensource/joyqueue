@@ -445,7 +445,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             }
             delete(topicBase);
         }
-        LOG.info("Remove partition group {}/{} store",topic,partitionGroup);
+        LOG.info("Remove partition group {}/{} storage",topic,partitionGroup);
     }
 
 
