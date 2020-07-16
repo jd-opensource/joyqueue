@@ -18,6 +18,7 @@ package org.joyqueue.store.utils;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.toolkit.concurrent.LoopThread;
 import org.joyqueue.toolkit.format.Format;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Cleaner;
@@ -28,6 +29,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -62,13 +64,16 @@ public class PreloadBufferPool {
     private static final long DEFAULT_WRITE_PAGE_EXTRA_WEIGHT_MS = 60000L;
     public static final String PRINT_METRIC_INTERVAL_MS_KEY = "PreloadBufferPool.PrintMetricIntervalMs";
     public static final String MAX_MEMORY_KEY = "PreloadBufferPool.MaxMemory";
-    private static final String WRITE_PAGE_EXTRA_WEIGHT_MS_KEY="PreloadBufferPool.WritePageExtraWeightMs";
+    private static final String WRITE_PAGE_EXTRA_WEIGHT_MS_KEY = "PreloadBufferPool.WritePageExtraWeightMs";
+    private static final String MAX_PAGE_AGE = "PreloadBufferPool.MaxPageAge";
+    private static final int DEFAULT_MAX_PAGE_AGE = 1000 * 60 * 5;
     private final LoopThread preloadThread;
     private final LoopThread metricThread;
     private final LoopThread evictThread;
     private final long maxMemorySize;
     private final long coreMemorySize;
     private final long evictMemorySize;
+    private final int maxPageAge;
 
     // 正在写入的页在置换时有额外的权重，这个权重用时间Ms体现。
     // 默认是60秒。
@@ -95,7 +100,8 @@ public class PreloadBufferPool {
         maxMemorySize = getMaxMemorySize();
         evictMemorySize = Math.round(maxMemorySize * EVICT_RATIO);
         coreMemorySize = Math.round(maxMemorySize * CORE_RATIO);
-        writePageExtraWeightMs = Long.parseLong(System.getProperty(WRITE_PAGE_EXTRA_WEIGHT_MS_KEY,String.valueOf(DEFAULT_WRITE_PAGE_EXTRA_WEIGHT_MS)));
+        writePageExtraWeightMs = Long.parseLong(System.getProperty(WRITE_PAGE_EXTRA_WEIGHT_MS_KEY, String.valueOf(DEFAULT_WRITE_PAGE_EXTRA_WEIGHT_MS)));
+        maxPageAge = Integer.parseInt(System.getProperty(MAX_PAGE_AGE, String.valueOf(DEFAULT_MAX_PAGE_AGE)));
         preloadThread = buildPreloadThread();
         preloadThread.start();
 
@@ -219,18 +225,27 @@ public class PreloadBufferPool {
             }
         }
 
+        List<LruWrapper<BufferHolder>> sortedPage = Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
+                .filter(BufferHolder::isFree)
+                .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime(), bufferHolder.writable() ? writePageExtraWeightMs : 0L))
+                .sorted(Comparator.comparing(LruWrapper::getWeight))
+                .collect(Collectors.toList());
+
+        Iterator<LruWrapper<BufferHolder>> sortedPageIterator = sortedPage.iterator();
+        while (sortedPageIterator.hasNext()) {
+            LruWrapper<BufferHolder> lruWrapper = sortedPageIterator.next();
+            if (SystemClock.now() - lruWrapper.getLastAccessTime() >= maxPageAge) {
+                lruWrapper.get().evict();
+                sortedPageIterator.remove();
+            } else {
+                break;
+            }
+        }
+
         // 清理使用中最旧的页面，直到内存占用率达标
         if (needEviction()) {
-            List<LruWrapper<BufferHolder>> sorted;
-
-            sorted = Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
-                    .filter(BufferHolder::isFree)
-                    .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime(), bufferHolder.writable() ? writePageExtraWeightMs : 0L))
-                    .sorted(Comparator.comparing(LruWrapper::getWeight))
-                    .collect(Collectors.toList());
-
-            while (needEviction() && !sorted.isEmpty()) {
-                LruWrapper<BufferHolder> wrapper = sorted.remove(0);
+            while (needEviction() && !sortedPage.isEmpty()) {
+                LruWrapper<BufferHolder> wrapper = sortedPage.remove(0);
                 BufferHolder holder = wrapper.get();
                 if (holder.lastAccessTime() == wrapper.getLastAccessTime()) {
                     holder.evict();
