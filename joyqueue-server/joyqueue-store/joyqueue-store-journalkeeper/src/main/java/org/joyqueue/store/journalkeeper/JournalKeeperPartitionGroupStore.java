@@ -53,7 +53,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     private final int group;
     private final EventWatcher eventWatcher;
     private JournalStoreClient client;
-    private AdminClient adminClient;
+    private AdminClient localAdminClient;
     private TransactionStore transactionStore = null;
     private final ExecutorService asyncExecutor;
     private final JournalKeeperStore store;
@@ -84,7 +84,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         super.doStart();
         server.start();
         this.client = server.createLocalClient();
-        this.adminClient = server.getLocalAdminClient();
+        this.localAdminClient = server.getLocalAdminClient();
         this.transactionStore = new JournalKeeperTransactionStore(client);
         if(null != eventWatcher) {
             this.client.watch(eventWatcher);
@@ -217,7 +217,8 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     @Override
     public boolean writable() {
         try {
-            return adminClient.getServerStatus(getUri()).get().getVoterState() == VoterState.LEADER;
+            // 本地调用
+            return localAdminClient.getServerStatus(getUri()).get().getVoterState() == VoterState.LEADER;
         } catch (Throwable e) {
             return false;
         }
@@ -279,7 +280,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
      */
     void updatePreferredLeader(URI id) throws Exception{
         try {
-            adminClient.setPreferredLeader(id).get();
+            localAdminClient.setPreferredLeader(id).get();
         }catch (Exception e){
             logger.info("Update preferred leader exception {}",id,e);
             throw e;
@@ -287,7 +288,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     }
 
     private void rePartition(Collection<Short> partitions) {
-        adminClient.scalePartitions(partitions.stream().mapToInt(p -> (int) p).boxed().collect(Collectors.toSet()))
+        localAdminClient.scalePartitions(partitions.stream().mapToInt(p -> (int) p).boxed().collect(Collectors.toSet()))
                 .whenComplete((aVoid, exception) -> {
                     if(null != exception) {
                         if(exception instanceof NotLeaderException) {
@@ -305,7 +306,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     }
 
     void maybeUpdateConfig(List<URI> newConfigs) {
-        adminClient
+        localAdminClient
             .getClusterConfiguration(server.serverUri())
             .thenAccept(clusterConfiguration -> {
                 List<URI> voters= Lists.newArrayList(clusterConfiguration.getVoters());
@@ -376,7 +377,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
 
     private void updateConfig(List<URI> newConfigs, List<URI> oldConfigs) {
-        adminClient
+        localAdminClient
             .updateVoters(oldConfigs, newConfigs)
             .whenComplete((success, exception) -> {
                 if(null != exception) {

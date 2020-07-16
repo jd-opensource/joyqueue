@@ -15,6 +15,8 @@
  */
 package org.joyqueue.broker.config;
 
+import org.joyqueue.toolkit.config.PropertyDef;
+
 /**
  *
  * Broker config key
@@ -29,6 +31,8 @@ public enum ConfigDef {
     NAME_SERVER_JOURNAL_KEEPER_PORT("nameserver.","journalkeeper.port","bookeeper name server port "),
     NAME_SERVER_JOURNAL_KEEPER_WORKING_DIR("nameserver.","journalkeeper.working.dir"," journalkeeper working dir "),
     NAME_SERVER_JOURNAL_KEEPER_NODES("nameserver.","journalkeeper.nodes","journal keeper cluster config"),
+    NAME_SERVER_COMPENSATION_CACHE_ENABLE("nameservice.","compensation.cache.enable","name server cache"),
+
     STORE_ENGINE("store.","engine","storage engine name");
     private  String region;
     private String name;

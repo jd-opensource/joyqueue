@@ -31,7 +31,7 @@ import org.springframework.context.annotation.PropertySource;
 @SpringBootApplication
 @PropertySource({"classpath:application.properties"})
 @Import(H2DBServerAutoConfiguration.class)
-public class WebApplication implements ApplicationRunner {
+public class   WebApplication implements ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(WebApplication.class);
     @Value("${vertx.http.port}")
     private int port ;

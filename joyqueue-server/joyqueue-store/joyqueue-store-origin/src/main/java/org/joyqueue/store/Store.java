@@ -28,7 +28,7 @@ import org.joyqueue.helper.PortHelper;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.network.transport.config.ServerConfig;
 import org.joyqueue.network.transport.config.TransportConfigSupport;
-import org.joyqueue.store.network.BackendServer;
+import org.joyqueue.store.network.ReplicationServer;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.ha.ReplicableStore;
 import org.joyqueue.store.ha.election.DefaultElectionNode;
@@ -86,7 +86,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
      **/
     private ElectionManager electionManager;
     private ClusterManager clusterManager;
-    private BackendServer backendServer;
+    private ReplicationServer backendServer;
     public Store() {
         //do nothing
     }
@@ -158,7 +158,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         backendConfig.setAcceptThreadName("joyqueue-backend-accept-eventLoop");
         backendConfig.setIoThreadName("joyqueue-backend-io-eventLoop");
         backendConfig.setPort(PortHelper.getStorePortOffset(brokerContext.getBroker().getPort()));
-        this.backendServer = new BackendServer(backendConfig, brokerContext,electionManager);
+        this.backendServer = new ReplicationServer(backendConfig, brokerContext,electionManager);
         backendServer.start();
  }
 
@@ -659,8 +659,15 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     private List<Broker> brokers(List<Integer> brokerIds){
         List<Broker> brokers = new ArrayList<>(brokerIds.size());
         brokerIds.forEach(brokerId -> {
-            brokers.add(clusterManager.getBrokerById(brokerId));
+           Broker b= clusterManager.getBrokerById(brokerId);
+           if(b!=null) {
+               brokers.add(b);
+           }
         });
+        if(brokers.size()!=brokerIds.size()){
+            LOG.warn("Broker ids {}, found ids {}",brokerIds,brokers.stream().map(Broker::getId).collect(Collectors.toList()));
+            throw new IllegalStateException("Some of broker not found");
+        }
         return brokers;
     }
 }

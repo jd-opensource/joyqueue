@@ -30,14 +30,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 后端服务
+ * 存储层Raft复制服务端
  *
  * author: gaohaoxiang
  * date: 2018/9/17
  */
-public class BackendServer extends Service {
+public class ReplicationServer extends Service {
 
-    protected static final Logger logger = LoggerFactory.getLogger(BackendServer.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ReplicationServer.class);
 
     private ServerConfig config;
     private EventBus<TransportEvent> transportEventBus;
@@ -46,7 +46,7 @@ public class BackendServer extends Service {
     private TransportServer transportServer;
     private CommandHandlerFactory commandHandlerFactory;
 
-    public BackendServer(ServerConfig config, BrokerContext brokerContext, ElectionService electionService) {
+    public ReplicationServer(ServerConfig config, BrokerContext brokerContext, ElectionService electionService) {
         this.config = config;
         this.transportEventBus = new EventBus<>("joyqueue-backend-eventBus");
         this.exceptionHandler = new BrokerExceptionHandler();

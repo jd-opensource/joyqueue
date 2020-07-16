@@ -61,6 +61,7 @@ import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.nsr.event.UpdateProducerEvent;
 import org.joyqueue.nsr.event.UpdateTopicEvent;
 import org.joyqueue.response.BooleanResponse;
+import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -649,11 +650,12 @@ public class ClusterManager extends Service {
         if (!config.getTopicLocalElectionEnable() || partitionGroup.getElectType().equals(PartitionGroup.ElectType.fix)) {
             return getBrokerId().equals(partitionGroup.getLeader());
         }
-        ClusterNode clusterNode = clusterNameService.getTopicGroupNode(partitionGroup.getTopic(), partitionGroup.getGroup());
-        if (clusterNode == null) {
+        // TODO optimize 被动缓存
+        PartitionGroupStore pgs = brokerContext.getStoreService().getStore(partitionGroup.getTopic().getFullName(),partitionGroup.getGroup());
+        if (pgs == null) {
             return false;
         }
-        return (clusterNode.getLeader() == getBrokerId());
+        return pgs.writable();
     }
 
     /**

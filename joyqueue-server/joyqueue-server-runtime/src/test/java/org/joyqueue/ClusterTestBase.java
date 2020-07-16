@@ -140,6 +140,7 @@ public class ClusterTestBase extends Service {
         args.append(ConfigDef.APPLICATION_DATA_PATH.key(),applicationRoot);
         args.append(ConfigDef.TRANSPORT_SERVER_PORT.key(),String.valueOf(port));
         args.append(ConfigDef.NAME_SERVER_JOURNAL_KEEPER_NODES.key(),journalKeeperNodes);
+        args.append(ConfigDef.NAME_SERVER_COMPENSATION_CACHE_ENABLE.key(),"false");
         if(engineName!=null)
             args.append(ConfigDef.STORE_ENGINE.key(),engineName);
         return args.build();

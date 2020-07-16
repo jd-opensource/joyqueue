@@ -8,7 +8,7 @@ import com.jd.laf.extension.Extension;
  * date: 2020/3/19
  */
 // 临时组合类，切换存储后删除
-@Extension(order = 0)
+
 public class ClusterStoreService
         //extends Service implements StoreService, LifeCycle, Closeable, PropertySupplierAware, BrokerContextAware
  {
