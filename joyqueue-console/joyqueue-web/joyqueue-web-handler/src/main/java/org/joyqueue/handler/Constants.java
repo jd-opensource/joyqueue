@@ -59,6 +59,10 @@ public interface Constants {
      */
     String APPLICATION = "application";
     /**
+     * 归档
+     */
+    String ARCHIVE = "archive";
+    /**
      * 表单类型
      */
     String FORM_TYPE="formType";

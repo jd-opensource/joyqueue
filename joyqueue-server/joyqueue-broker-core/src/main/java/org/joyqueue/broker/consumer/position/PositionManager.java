@@ -40,6 +40,7 @@ import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.LoopThread;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -51,6 +52,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -77,6 +82,10 @@ public class PositionManager extends Service {
     private final ConsumePositionReplicator consumePositionReplicator;
     // 最近应答时间跟踪器
     private Map<ConsumePartition, /* 最新应答时间 */ AtomicLong> lastAckTimeTrace = new ConcurrentHashMap<>();
+    // 刷新线程
+    private ExecutorService flushIndexThread;
+    // 后刷新时间
+    private AtomicLong lastFlushIndexTimestamp = new AtomicLong();
 
     public PositionManager(ClusterManager clusterManager, StoreService storeService, Consume consume, BrokerTransportManager brokerTransportManager, ConsumeConfig consumeConfig) {
         this.clusterManager = clusterManager;
@@ -96,6 +105,8 @@ public class PositionManager extends Service {
                 ((LocalFileStore) positionStore).setBasePath(config.getConsumePositionPath());
             }
         }
+        flushIndexThread = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(10), new NamedThreadFactory("joyqueue-consume-flush-index-threads", true));
     }
 
     @Override
@@ -157,6 +168,8 @@ public class PositionManager extends Service {
         if(null != this.replicationThread) {
             this.replicationThread.stop();
         }
+        flushIndexThread.shutdownNow();
+        positionStore.forceFlush();
         positionStore.stop();
 
         logger.info("PositionManager is stopped.");
@@ -182,7 +195,7 @@ public class PositionManager extends Service {
         Map<ConsumePartition, Position> consumeInfo = new HashMap<>();
 
         if (appList != null && !appList.isEmpty()) {
-            List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+            List<PartitionGroup> partitionGroupList = clusterManager.getLocalPartitionGroups(topic);
             for (PartitionGroup group : partitionGroupList) {
                 if (group.getGroup() == partitionGroup) {
                     Set<Short> partitions = group.getPartitions();
@@ -233,8 +246,9 @@ public class PositionManager extends Service {
                 Position val = entry.getValue();
                 positionStore.put(key, val);
             });
+
             // 刷盘
-            positionStore.forceFlush();
+            tryForceFlush();
         } catch (Exception ex) {
             logger.error("set consume position error.", ex);
             return false;
@@ -462,16 +476,15 @@ public class PositionManager extends Service {
      * @param partition 消费分区
      * @return 指定分区已经消费到的消息序号
      */
-    private long getMaxMsgIndex(TopicName topic, short partition,int partitionGroupId) {
-        PartitionGroupStore store = storeService.getStore(topic.getFullName(), partitionGroupId);
-
-        if (store == null) {
-            logger.warn("store not exist, topic: {}, partitionGroup: {}, partition: {}", topic, partitionGroupId, partition);
+    private long getMaxMsgIndex(TopicName topic, short partition, int groupId) {
+        try {
+            PartitionGroupStore store = storeService.getStore(topic.getFullName(), groupId);
+            long rightIndex = store.getRightIndex(partition);
+            return rightIndex;
+        } catch (Exception e) {
+            logger.error("getMaxMsgIndex exception, topic: {}, partition: {}, groupId: {}", topic, partition, groupId);
             return 0;
         }
-
-        long rightIndex = store.getRightIndex(partition);
-        return rightIndex;
     }
 
     protected void checkState() {
@@ -493,7 +506,7 @@ public class PositionManager extends Service {
         }
         checkState();
         // 从元数据中获取分组和分区数据，初始化拉取和应答位置
-        List<Short> partitionList = clusterManager.getMasterPartitionList(topic);
+        List<Short> partitionList = clusterManager.getReplicaPartitions(topic);
 
         logger.debug("add consumer partitionList:[{}]", partitionList.toString());
 
@@ -571,7 +584,9 @@ public class PositionManager extends Service {
         AtomicBoolean changed = new AtomicBoolean(false);
         partitions.stream().forEach(partition -> {
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex =getMaxMsgIndex(topic, partition, partitionGroup.getGroup());
+            long currentIndex = getMaxMsgIndex(topic, partition, partitionGroup.getGroup());
+            long currentIndexVal = Math.max(currentIndex, 0);
+
 
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
@@ -622,8 +637,26 @@ public class PositionManager extends Service {
                 logger.info("Remove ConsumePartition by topic:{}, app:{}, partition:{}", consumePartition.getTopic(), consumePartition.getApp(), consumePartition.getPartition());
             }
         }
-
         positionStore.forceFlush();
+    }
+
+    protected void tryForceFlush() {
+        if (config.getIndexFlushInterval() <= 0) {
+            positionStore.forceFlush();
+            return;
+        }
+
+        long now = SystemClock.now();
+        long lastFlushTimestamp = this.lastFlushIndexTimestamp.get();
+        if (now - lastFlushTimestamp < config.getIndexFlushInterval()) {
+            return;
+        }
+        if (!this.lastFlushIndexTimestamp.compareAndSet(lastFlushTimestamp, now)) {
+            return;
+        }
+        flushIndexThread.execute(() -> {
+            positionStore.forceFlush();
+        });
     }
 
     /**

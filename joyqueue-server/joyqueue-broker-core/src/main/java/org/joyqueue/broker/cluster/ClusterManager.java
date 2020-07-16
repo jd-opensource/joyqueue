@@ -17,12 +17,16 @@ package org.joyqueue.broker.cluster;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
+import org.joyqueue.broker.cluster.config.ClusterConfig;
+import org.joyqueue.broker.cluster.entry.ClusterNode;
 import org.joyqueue.broker.cluster.event.CompensateEvent;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.ConsumeConfigKey;
@@ -82,8 +86,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -110,11 +116,15 @@ public class ClusterManager extends Service {
     private EventBus<MetaEvent> eventBus = new EventBus("joyqueue-cluster-eventBus");
 
     private BrokerContext brokerContext;
+    private ClusterNameService clusterNameService;
+    private ClusterConfig config;
 
-    public ClusterManager(BrokerConfig brokerConfig, NameService nameService, BrokerContext brokerContext) {
+    public ClusterManager(BrokerConfig brokerConfig, NameService nameService, ClusterNameService clusterNameService, BrokerContext brokerContext) {
         this.brokerConfig = brokerConfig;
         this.nameService = nameService;
+        this.clusterNameService = clusterNameService;
         this.brokerContext = brokerContext;
+        this.config = new ClusterConfig(brokerContext.getPropertySupplier());
     }
 
 
@@ -146,6 +156,7 @@ public class ClusterManager extends Service {
         localCache.start();
         eventBus.start();
         register();
+        clusterNameService.setBroker(broker);
         localCache.initCache();
         logger.info("clusterManager is started");
     }
@@ -274,12 +285,46 @@ public class ClusterManager extends Service {
      * @param topic
      * @return
      */
-    public List<PartitionGroup> getPartitionGroup(TopicName topic) {
+    public List<PartitionGroup> getLocalPartitionGroups(TopicName topic) {
         TopicConfig topicConfig = getTopicConfig(topic);
         if (null == topicConfig) {
             return null;
         }
-        return topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
+        return getLocalPartitionGroups(topicConfig);
+    }
+
+    public List<PartitionGroup> getLocalPartitionGroups(TopicConfig topicConfig) {
+        List<PartitionGroup> result = Lists.newArrayListWithCapacity(topicConfig.getPartitionGroups().size());
+        for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
+            if (isLeader(entry.getValue())) {
+                result.add(entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    public List<Short> getLocalPartitions(TopicName topic) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (null == topicConfig) {
+            return null;
+        }
+        return getLocalPartitions(topicConfig);
+    }
+
+    public List<Short> getLocalPartitions(TopicConfig topicConfig) {
+        try {
+            return localCache.getPartitionCache().get(topicConfig, () -> {
+                List<Short> result = Lists.newArrayListWithCapacity(topicConfig.getPartitions());
+                for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
+                    if (isLeader(entry.getValue())) {
+                        result.addAll(entry.getValue().getPartitions());
+                    }
+                }
+                return result;
+            });
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -347,13 +392,27 @@ public class ClusterManager extends Service {
      * @param topic
      * @return
      */
-    public List<Integer> getReplicaGroup(TopicName topic) {
+    public List<Integer> getReplicaGroups(TopicName topic) {
         List<Integer> result = new ArrayList<>();
-        List<PartitionGroup> partitionGroup = getPartitionGroup(topic);
+        List<PartitionGroup> partitionGroup = getLocalPartitionGroups(topic);
         if (partitionGroup != null) {
             partitionGroup.stream().forEach(item ->
                     result.addAll(item.getReplicas())
             );
+        }
+        return result;
+    }
+
+    public List<Short> getReplicaPartitions(TopicName topic) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return Collections.emptyList();
+        }
+        List<Short> result = Lists.newArrayListWithCapacity(topicConfig.getPartitions());
+        for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
+            if (entry.getValue().getReplicas().contains(getBrokerId())) {
+                result.addAll(entry.getValue().getPartitions());
+            }
         }
         return result;
     }
@@ -371,16 +430,6 @@ public class ClusterManager extends Service {
         } else {
             return Collections.emptyList();
         }
-    }
-
-    /**
-     * 获取指定主题在broker上的角色是master的分区集合
-     *
-     * @param topic 主题
-     * @return 分区集合
-     */
-    public List<Short> getMasterPartitionList(TopicName topic) {
-        return localCache.getMasterPartitionsByTopic(topic);
     }
 
     /**
@@ -581,7 +630,7 @@ public class ClusterManager extends Service {
             return false;
         }
         PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByGroup(partitionGroupId);
-        return (partitionGroup != null && getBrokerId().equals(partitionGroup.getLeader()));
+        return (partitionGroup != null && isLeader(partitionGroup));
     }
 
     public boolean isLeader(TopicName topic, short partition) {
@@ -590,7 +639,21 @@ public class ClusterManager extends Service {
             return false;
         }
         PartitionGroup partitionGroup = topicConfig.fetchPartitionGroupByPartition(partition);
-        return (partitionGroup != null && getBrokerId().equals(partitionGroup.getLeader()));
+        return (partitionGroup != null && isLeader(partitionGroup));
+    }
+
+    public boolean isLeader(PartitionGroup partitionGroup) {
+        if (!partitionGroup.getReplicas().contains(getBrokerId())) {
+            return false;
+        }
+        if (!config.getTopicLocalElectionEnable() || partitionGroup.getElectType().equals(PartitionGroup.ElectType.fix)) {
+            return getBrokerId().equals(partitionGroup.getLeader());
+        }
+        ClusterNode clusterNode = clusterNameService.getTopicGroupNode(partitionGroup.getTopic(), partitionGroup.getGroup());
+        if (clusterNode == null) {
+            return false;
+        }
+        return (clusterNode.getLeader() == getBrokerId());
     }
 
     /**
@@ -634,13 +697,8 @@ public class ClusterManager extends Service {
                 return BooleanResponse.failed(JoyQueueCode.FW_PUT_MESSAGE_TOPIC_NOT_WRITE);
             }
         }
-        Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
-        if (CollectionUtils.isEmpty(partitionGroups)) {
-            // 没有partitionGroup
-            logger.error("topic[{}] app[{}] cant't be write on broker [{}] has no partitionGroups", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
-            return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
-        }
-        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()))) {
+        Collection<PartitionGroup> partitionGroups = topicConfig.fetchTopicPartitionGroupsByBrokerId(broker.getId());
+        if (partitionGroups.stream().noneMatch(partitionGroup -> isLeader(partitionGroup))) {
             logger.error("topic[{}] cant't be write on broker [] ", topic, app, broker.getId() + "[" + broker.getIp() + ":" + broker.getPort() + "]");
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -668,7 +726,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (group == null || !group.getLeader().equals(broker.getId())) {
+        if (group == null || !isLeader(group)) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -722,14 +780,9 @@ public class ClusterManager extends Service {
                 return BooleanResponse.failed(JoyQueueCode.FW_GET_MESSAGE_APP_CLIENT_IP_NOT_READ);
             }
         }
-        Collection<PartitionGroup> partitionGroups = topicConfig.fetchPartitionGroupByBrokerId(broker.getId());
-        if (CollectionUtils.isEmpty(partitionGroups)) {
-            // 没有partitionGroup
-            logger.error("topic[{}],app[{}],error[{}]", topic, app, JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getMessage());
-            return BooleanResponse.failed(JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP);
-        }
+        Collection<PartitionGroup> partitionGroups = topicConfig.fetchTopicPartitionGroupsByBrokerId(broker.getId());
         // 当前主题在该broker上有角色是master的分区组
-        if (partitionGroups.stream().noneMatch(partitionGroup -> partitionGroup.getLeader().equals(broker.getId()))) {
+        if (partitionGroups.stream().noneMatch(partitionGroup -> isLeader(partitionGroup))) {
             logger.error("topic[{}],app[{}],error[{}]", topic, app, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -756,7 +809,7 @@ public class ClusterManager extends Service {
         }
         TopicConfig topicConfig = getTopicConfig(topic);
         PartitionGroup group = topicConfig.fetchPartitionGroupByPartition(partition);
-        if (group == null || !group.getLeader().equals(broker.getId())) {
+        if (group == null || !isLeader(group)) {
             logger.error("topic[{}],app[{}],partition[{}],error[{}]", topic, app,partition, JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER.getMessage());
             return BooleanResponse.failed(JoyQueueCode.FW_FETCH_TOPIC_MESSAGE_BROKER_NOT_LEADER);
         }
@@ -960,12 +1013,15 @@ public class ClusterManager extends Service {
         // K=主题，V=主题配置; 缓存当前broker上的所有主题配置信息
         private ConcurrentMap<String, TopicConfig> topicConfigCache = new ConcurrentHashMap<>();
 
-        private ConcurrentMap<String, List<Short>> topicPartitionsCache = new ConcurrentHashMap<>();
-
         // K=主题+应用, V=消费者; 缓存当前broker上接入者->消费者
         private ConcurrentMap<String, ConcurrentHashMap<String, CacheConsumer>> consumerCache = new ConcurrentHashMap<>();
         // K=主题+应用, V=生产者; 缓存当前broker上接入者->生产者
         private ConcurrentMap<String, ConcurrentHashMap<String, CacheProducer>> producerCache = new ConcurrentHashMap<>();
+
+        private Cache<TopicConfig, List<Short>> partitionCache =
+                CacheBuilder.newBuilder()
+                        .expireAfterWrite(1000 * 5, TimeUnit.MILLISECONDS)
+                        .build();
 
         /**
          * 刷新缓存
@@ -1011,7 +1067,6 @@ public class ClusterManager extends Service {
             logger.info("build topic cache, topic: {}", topicConfig.getName());
             TopicName topic = topicConfig.getName();
             topicConfigCache.put(topic.getFullName(), topicConfig);
-            topicPartitionsCache.put(topic.getFullName(),topicConfig.fetchPartitionByBroker(broker.getId()));
             if(!consumerCache.containsKey(topic.getFullName())){
                 consumerCache.put(topic.getFullName(),new ConcurrentHashMap<>());
             }
@@ -1039,7 +1094,13 @@ public class ClusterManager extends Service {
 
         protected Consumer buildConsumeCache(Consumer consumer) {
             logger.info("build consumer cache, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-            consumerCache.get(consumer.getTopic().getFullName()).put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
+            ConcurrentHashMap<String, CacheConsumer> consumers = consumerCache.get(consumer.getTopic().getFullName());
+            if (consumers == null) {
+                consumers = new ConcurrentHashMap<>();
+                consumerCache.putIfAbsent(consumer.getTopic().getFullName(), consumers);
+                consumers = consumerCache.get(consumer.getTopic().getFullName());
+            }
+            consumers.put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
             return consumer;
         }
 
@@ -1071,16 +1132,6 @@ public class ClusterManager extends Service {
             return producer.getProducer();
         }
 
-        protected List<Short> getMasterPartitionsByTopic(TopicName topic) {
-            List<Short> partitions = topicPartitionsCache.get(topic.getFullName());
-            if (null != partitions) {
-                return partitions;
-            }
-            TopicConfig topicConfig = getTopicConfig(topic);
-            topicPartitionsCache.put(topic.getFullName(), topicConfig.fetchPartitionByBroker(broker.getId()));
-            return topicPartitionsCache.get(topic.getFullName());
-        }
-
         /**
          * 按接入对象更新生产策略
          *
@@ -1098,7 +1149,13 @@ public class ClusterManager extends Service {
 
         protected Producer buildProduceCache(Producer producer) {
             logger.info("build producer cache, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-            producerCache.get(producer.getTopic().getFullName()).put(producer.getApp(), new CacheProducer(producer));
+            ConcurrentHashMap<String, CacheProducer> producers = producerCache.get(producer.getTopic().getFullName());
+            if (producers == null) {
+                producers = new ConcurrentHashMap<>();
+                producerCache.putIfAbsent(producer.getTopic().getFullName(), producers);
+                producers = producerCache.get(producer.getTopic().getFullName());
+            }
+            producers.put(producer.getApp(), new CacheProducer(producer));
             return producer;
         }
 
@@ -1113,6 +1170,10 @@ public class ClusterManager extends Service {
 
         public Map<String, CacheProducer> getTopicProducers(TopicName topic) {
             return producerCache.get(topic.getFullName());
+        }
+
+        public Cache<TopicConfig, List<Short>> getPartitionCache() {
+            return partitionCache;
         }
 
         @Deprecated
@@ -1289,7 +1350,6 @@ public class ClusterManager extends Service {
                         if (topicConfig == null) {
                             break;
                         }
-                        topicPartitionsCache.remove(topicConfig.getName().getFullName());
                         consumerCache.remove(topicConfig.getName().getFullName());
                         producerCache.remove(topicConfig.getName().getFullName());
                         for (PartitionGroup partitionGroup : topicConfig.fetchTopicPartitionGroupsByBrokerId(brokerConfig.getBrokerId())) {
@@ -1337,7 +1397,13 @@ public class ClusterManager extends Service {
                         Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
                         topicPartitionGroups.remove(partitionGroup.getGroup());
                         oldTopicConfig.setPartitionGroups(topicPartitionGroups);
-                        buildTopicConfigCache(oldTopicConfig);
+                        TopicConfig newTopiConfig =  buildTopicConfigCache(oldTopicConfig);
+
+                        if (CollectionUtils.isEmpty(newTopiConfig.fetchTopicPartitionGroupsByBrokerId(getBrokerId()))) {
+                            consumerCache.remove(newTopiConfig.getName().getFullName());
+                            producerCache.remove(newTopiConfig.getName().getFullName());
+                        }
+
                         break;
                     }
                     case ADD_CONSUMER: {

@@ -76,6 +76,7 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
         } catch (Throwable cause) {
             throw handleConsumeException(cause);
         }
+
     }
 
     @Override

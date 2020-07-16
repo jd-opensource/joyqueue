@@ -16,10 +16,12 @@
 package org.joyqueue.handler.routing.command.config;
 
 
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
@@ -31,7 +33,9 @@ import org.joyqueue.model.domain.DataCenter;
 import org.joyqueue.model.query.QDataCenter;
 import org.joyqueue.service.DataCenterService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by wangxiaofei1 on 2018/10/19.
@@ -43,13 +47,21 @@ public class DataCenterCommand extends NsrCommandSupport<DataCenter,DataCenterSe
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QDataCenter> qPageQuery) throws Exception {
         List<DataCenter> dataCenters = service.findAllDataCenter();
+        List<DataCenter> dataCenterList;
+
+        QDataCenter qDataCenter = qPageQuery.getQuery();
+        if(StringUtils.isNotBlank(qDataCenter.getCode())) {
+            dataCenterList = dataCenters.stream().filter(dataCenter -> StringUtils.containsIgnoreCase(dataCenter.getCode(), qDataCenter.getCode())).collect(Collectors.toList());
+        } else {
+            dataCenterList = new ArrayList<>(dataCenters);
+        }
 
         Pagination pagination = qPageQuery.getPagination();
-        pagination.setTotalRecord(dataCenters.size());
+        pagination.setTotalRecord(dataCenterList.size());
 
-        PageResult<DataCenter> result = new PageResult();
+        PageResult<DataCenter> result = new PageResult<>();
         result.setPagination(pagination);
-        result.setResult(dataCenters);
+        result.setResult(dataCenterList);
         return Responses.success(result.getPagination(), result.getResult());
     }
 
@@ -67,6 +79,12 @@ public class DataCenterCommand extends NsrCommandSupport<DataCenter,DataCenterSe
             throw new ConfigException(deleteErrorCode());
         }
         return Responses.success();
+    }
+
+    @Path("findByIps")
+    public Response findByIps(@Body List<String> ips) throws Exception {
+        List<DataCenter> dataCenters = service.findByIps(ips);
+        return Responses.success(dataCenters);
     }
 
 }

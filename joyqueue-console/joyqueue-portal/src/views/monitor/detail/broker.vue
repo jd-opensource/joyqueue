@@ -47,6 +47,13 @@ export default {
             key: 'ip'
           },
           {
+            title: '机房 [编码/名称]',
+            key: 'dataCenter',
+            formatter (item) {
+              return item.dataCenter.code + '/' + item.dataCenter.name
+            }
+          },
+          {
             title: '连接数',
             key: 'connection',
             render: (h, params) => {
@@ -86,7 +93,7 @@ export default {
         this.showTablePin = false
       })
     }
-  },
+  }
   // watch: {
   //   '$route' (to, from) {
   //     console.log('broker')

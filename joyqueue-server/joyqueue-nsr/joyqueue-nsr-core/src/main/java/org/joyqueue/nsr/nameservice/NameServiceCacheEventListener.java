@@ -17,6 +17,7 @@ package org.joyqueue.nsr.nameservice;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.PartitionGroup;
@@ -60,32 +61,35 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
 
     private NameServiceConfig config;
     private EventBus<NameServerEvent> eventBus;
-    private NameServiceCacheManager nameServiceCacheManager;
+    private MetadataCacheManager metadataCacheManager;
 
-    public NameServiceCacheEventListener(NameServiceConfig config, EventBus<NameServerEvent> eventBus, NameServiceCacheManager nameServiceCacheManager) {
+    public NameServiceCacheEventListener(NameServiceConfig config, EventBus<NameServerEvent> eventBus, MetadataCacheManager metadataCacheManager) {
         this.config = config;
         this.eventBus = eventBus;
-        this.nameServiceCacheManager = nameServiceCacheManager;
+        this.metadataCacheManager = metadataCacheManager;
     }
 
     @Override
     public void onEvent(MetaEvent event) {
-        if (!nameServiceCacheManager.tryLock()) {
-            nameServiceCacheManager.updateVersion();
+        if (!metadataCacheManager.tryLock()) {
+            metadataCacheManager.updateTimestamp();
             return;
         }
         try {
-            AllMetadataCache newCache = nameServiceCacheManager.getCache().clone();
-            doUpdateCache(event, newCache);
+            AllMetadataCache newCache = metadataCacheManager.getCache().clone();
+            boolean updateCache = doUpdateCache(event, newCache);
+            if (!updateCache) {
+                return;
+            }
             doOnEvent(event);
-            nameServiceCacheManager.fillCache(newCache);
-            nameServiceCacheManager.updateVersion();
+            metadataCacheManager.fillCache(newCache);
+            metadataCacheManager.updateTimestamp();
         } finally {
-            nameServiceCacheManager.unlock();
+            metadataCacheManager.unlock();
         }
     }
 
-    protected void doUpdateCache(MetaEvent event, AllMetadataCache cache) {
+    protected boolean doUpdateCache(MetaEvent event, AllMetadataCache cache) {
         switch (event.getEventType()) {
             case ADD_TOPIC: {
                 AddTopicEvent addTopicEvent = (AddTopicEvent) event;
@@ -180,6 +184,12 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 }
 
                 PartitionGroup oldPartitionGroup = updatePartitionGroupEvent.getOldPartitionGroup();
+
+                if (MapUtils.isEmpty(oldTopicConfig.getPartitionGroups()) ||
+                        !oldPartitionGroup.equals(oldTopicConfig.getPartitionGroups().get(oldPartitionGroup.getGroup()))) {
+                    return false;
+                }
+
                 PartitionGroup newPartitionGroup = updatePartitionGroupEvent.getNewPartitionGroup();
                 List<Integer> removedReplica = Lists.newLinkedList();
 
@@ -389,6 +399,7 @@ public class NameServiceCacheEventListener implements MessageListener<MetaEvent>
                 break;
             }
         }
+        return true;
     }
 
     protected void doOnEvent(MetaEvent event) {

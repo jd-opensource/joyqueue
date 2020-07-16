@@ -36,13 +36,19 @@ import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.concurrent.EventListener;
+import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 /**
  * StoreInitializer
  * author: gaohaoxiang
@@ -78,7 +84,6 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         if (CollectionUtils.isEmpty(replicas)) {
             return;
         }
-
         for (Replica replica : replicas) {
             storeService.stopPartitionGroup(replica.getTopic().getFullName(), replica.getGroup());
         }
@@ -90,34 +95,59 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         if (CollectionUtils.isEmpty(replicas)) {
             return;
         }
-        CountDownLatch latch = new CountDownLatch(replicas.size());
-        for (Replica replica : replicas) {
-            PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(),replica.getGroup());
-            if (group == null) {
-                logger.warn("group is null topic {},replica {}", replica.getTopic(), replica.getGroup());
-                throw new RuntimeException(String.format("group is null topic %s,replica %s", replica.getTopic(), replica.getGroup()));
-            }
-            if (!group.getReplicas().contains(broker.getId())) {
-                continue;
-            }
-            PartitionGroupStore store = doRestore(group, replica, broker);
-            if(null != store) {
-                store.whenClusterReady(WAIT_STORE_READY_TIMEOUT_MS).thenAccept(ready -> {
-                    if(!ready) {
-                        logger.warn("Wait for partition group ready timeout! Topic: {}, group: {}.", replica.getTopic(), replica.getGroup());
-                    }
-                    latch.countDown();
-                });
-            } else {
-                latch.countDown();
-            }
-        }
-        logger.info("Waiting all stores ready...");
-        boolean timeout = latch.await(WAIT_STORE_READY_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-        if(timeout) {
-            logger.warn("Some stores is NOT ready until timeout!");
-        } else {
-            logger.info("All stores are ready!");
+//        CountDownLatch latch = new CountDownLatch(replicas.size());
+//        for (Replica replica : replicas) {
+//            PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(),replica.getGroup());
+//            if (group == null) {
+//                logger.warn("group is null topic {},replica {}", replica.getTopic(), replica.getGroup());
+//                throw new RuntimeException(String.format("group is null topic %s,replica %s", replica.getTopic(), replica.getGroup()));
+//            }
+//            if (!group.getReplicas().contains(broker.getId())) {
+//                continue;
+//            }
+//            PartitionGroupStore store = doRestore(group, replica, broker);
+//            if(null != store) {
+//                store.whenClusterReady(WAIT_STORE_READY_TIMEOUT_MS).thenAccept(ready -> {
+//                    if(!ready) {
+//                        logger.warn("Wait for partition group ready timeout! Topic: {}, group: {}.", replica.getTopic(), replica.getGroup());
+//                    }
+//                    latch.countDown();
+//                });
+//            } else {
+//                latch.countDown();
+//            }
+//        }
+//        logger.info("Waiting all stores ready...");
+//        boolean timeout = latch.await(WAIT_STORE_READY_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+//        if(timeout) {
+//            logger.warn("Some stores is NOT ready until timeout!");
+//        } else {
+//            logger.info("All stores are ready!");
+//        }
+//        // 并行恢复所有的PartitionGroup
+        ExecutorService executor = Executors.newFixedThreadPool(32, new NamedThreadFactory("Store-recover-threads"));
+        try {
+            CompletableFuture.allOf(
+                    replicas.stream()
+                            .map(replica -> CompletableFuture.runAsync(() -> {
+                                try {
+                                    PartitionGroup group = clusterManager.getPartitionGroupByGroup(replica.getTopic(), replica.getGroup());
+                                    if (group == null) {
+                                        logger.warn("group is null topic {},replica {}", replica.getTopic(), replica.getGroup());
+                                        throw new RuntimeException(String.format("group is null topic %s,replica %s", replica.getTopic(), replica.getGroup()));
+                                    }
+                                    if (!group.getReplicas().contains(broker.getId())) {
+                                        return;
+                                    }
+                                    doRestore(group, replica, broker);
+                                } catch (Exception e) {
+                                    throw new CompletionException(e);
+                                }
+                                    }, executor)
+                            ).toArray(CompletableFuture[]::new)
+            ).get();
+        } finally {
+            executor.shutdown();
         }
     }
 

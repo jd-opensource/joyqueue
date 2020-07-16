@@ -86,7 +86,6 @@ public class ReplicationManager extends Service {
         clientConfig.getRetryPolicy().setRetryDelay(1000 * 60);
         transportClient = new RaftClientTransportFactory(brokerContext,electionService).create(clientConfig);
         transportClient.start();
-
         replicateQueue = new LinkedBlockingDeque<>(electionConfig.getCommandQueueSize());
         replicateExecutor = new ThreadPoolExecutor(electionConfig.getReplicateThreadNumMin(), electionConfig.getReplicateThreadNumMax(),
                 60, TimeUnit.SECONDS, replicateQueue,

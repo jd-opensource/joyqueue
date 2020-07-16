@@ -1,29 +1,78 @@
 <template>
   <div>
     <d-tabs @on-change="menuChange">
+      <d-tab-pane label="服务器监控" name="brokerServerMonitor">
+        <grid-row>
+          <grid-col>
+            <d-button type="primary" class="right" style="margin-right: 20px" @click="$refs.brokerServerMonitor.getList()">刷新
+              <icon name="plus-circle" style="margin-left: 3px;"></icon>
+            </d-button>
+          </grid-col>
+        </grid-row>
+        <grid-row>
+          <grid-col>
+            <broker-server-monitor ref="brokerServerMonitor"> </broker-server-monitor>
+          </grid-col>
+        </grid-row>
+      </d-tab-pane>
       <d-tab-pane label="生产者详情" name="producer">
-        <my-table :data="tableData" :showPin="showTablePin" style="height: 500px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+        <d-button type="primary" class="right" style="margin-right: 20px" @click="getList">刷新
+          <icon name="plus-circle" style="margin-left: 3px;"></icon>
+        </d-button>
+        <my-table :data="tableData" :showPin="showTablePin" style="overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
       </d-tab-pane>
       <d-tab-pane label="消费者详情" name="consumer">
-        <my-table :data="tableData" :showPin="showTablePin" style="height: 500px;overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+        <d-button type="primary" class="right" style="margin-right: 20px" @click="getList">刷新
+          <icon name="plus-circle" style="margin-left: 3px;"></icon>
+        </d-button>
+        <my-table :data="tableData" :showPin="showTablePin" style="overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
       </d-tab-pane>
       <d-tab-pane label="连接信息" name="brokerConnectionMonitor">
-        <broker-connection-monitor ref="brokerConnectionMonitor" style="height: 500px;overflow-y:auto" :broker-id="this.brokerId"></broker-connection-monitor>
+        <grid-row>
+          <grid-col>
+            <d-button type="primary" class="right" style="margin-right: 20px" @click="$refs.brokerConnectionMonitor.getList()">刷新
+              <icon name="plus-circle" style="margin-left: 3px;"></icon>
+            </d-button>
+          </grid-col>
+        </grid-row>
+        <grid-row>
+          <grid-col>
+            <broker-connection-monitor ref="brokerConnectionMonitor" style="overflow-y:auto"></broker-connection-monitor>
+          </grid-col>
+        </grid-row>
       </d-tab-pane>
       <d-tab-pane label="分区组" name="brokerPartitionGroupMonitor">
-        <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="height: 500px;overflow-y:auto" :broker-id="this.brokerId"></broker-partition-group-monitor>
+        <grid-row>
+          <grid-col>
+            <d-button type="primary" class="right" style="margin-right: 20px" @click="$refs.brokerPartitionGroupMonitor.getList()">刷新
+              <icon name="plus-circle" style="margin-left: 3px;"></icon>
+            </d-button>
+          </grid-col>
+        </grid-row>
+        <grid-row>
+          <grid-col>
+            <broker-partition-group-monitor ref="brokerPartitionGroupMonitor" style="overflow-y:auto"></broker-partition-group-monitor>
+          </grid-col>
+        </grid-row>
       </d-tab-pane>
       <d-tab-pane label="服务器存储文件" name="brokerStoreTreeViewMonitor">
-        <broker-store-tree-view-monitor ref="brokerStoreTreeViewMonitor" :brokerId="brokerId"> </broker-store-tree-view-monitor>
+        <grid-row>
+          <grid-col>
+            <d-button type="primary" class="right" style="margin-right: 20px" @click="$refs.brokerPartitionGroupMonitor.getList()">刷新
+              <icon name="plus-circle" style="margin-left: 3px;"></icon>
+            </d-button>
+          </grid-col>
+        </grid-row>
+        <grid-row>
+          <grid-col>
+            <broker-store-tree-view-monitor ref="brokerStoreTreeViewMonitor"> </broker-store-tree-view-monitor>
+          </grid-col>
+        </grid-row>
       </d-tab-pane>
-      <d-tab-pane label="服务器监控" name="brokerServerMonitor">
-        <broker-server-monitor ref="brokerServerMonitor" :brokerId="brokerId"> </broker-server-monitor>
-      </d-tab-pane>
-
     </d-tabs>
   </div>
 </template>
@@ -37,10 +86,15 @@ import BrokerConnectionMonitor from './brokerConnectionMonitor'
 import BrokerPartitionGroupMonitor from './brokerPartitionGroupMonitor'
 import BrokerServerMonitor from './brokerServerMonitor.vue'
 import BrokerStoreTreeViewMonitor from './brokerStoreTreeViewMonitor.vue'
+import {bytesToSize} from '../../utils/common'
+import GridRow from '../../components/grid/row'
+import GridCol from '../../components/grid/col'
 
 export default {
   name: 'brokerMonitor',
   components: {
+    GridCol,
+    GridRow,
     BrokerPartitionGroupMonitor,
     BrokerConnectionMonitor,
     ClientConnection,
@@ -50,19 +104,17 @@ export default {
     BrokerStoreTreeViewMonitor
   },
   props: {
-    brokerId: {
-      type: Number
-    }
   },
   mixins: [ crud ],
   data () {
     return {
       theme1: 'light',
+      brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
       urls: {
         search: '/monitor/broker/topic/search'
       },
       searchData: {
-        brokerId: this.brokerId,
+        brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
         type: 1
       },
       searchRules: {
@@ -71,8 +123,19 @@ export default {
         rowData: [],
         colData: [
           {
-            title: '队列',
-            key: 'topic'
+            title: '主题',
+            key: 'topic',
+            render: (h, params) => {
+              var topic = params.item.topic
+              var html = []
+              var p = h('router-link', {
+                attrs: {
+                  to: '/' + this.$i18n.locale + '/topic/detail?id=' + topic + '&topic=' + topic
+                }
+              }, params.item.topic)
+              html.push(p)
+              return h('div', {}, html)
+            }
           },
           {
             title: '应用',
@@ -82,8 +145,15 @@ export default {
               var html = []
               if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
-                  var p = h('div', list[i].app)
+                  var p = h('router-link', {
+                    attrs: {
+                      to: '/' + this.$i18n.locale + '/application/detail?app=' + list[i].app
+                    }
+                  }, list[i].app)
                   html.push(p)
+                  if (i < list.length - 1) {
+                    html.push(h('br'))
+                  }
                 }
               }
               return h('div', {}, html)
@@ -127,7 +197,7 @@ export default {
               var html = []
               if (list !== undefined) {
                 for (var i = 0; i < list.length; i++) {
-                  var p = h('div', list[i].totalSize)
+                  var p = h('div', bytesToSize(list[i].totalSize, 2, true))
                   html.push(p)
                 }
               }
@@ -160,7 +230,7 @@ export default {
     }
   },
   mounted () {
-    this.getList()
+
   }
 }
 </script>

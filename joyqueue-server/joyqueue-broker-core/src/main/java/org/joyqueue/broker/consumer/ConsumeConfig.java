@@ -70,6 +70,10 @@ public class ConsumeConfig {
         return propertySupplier.getValue(ConsumeConfigKey.RETRY_RATE);
     }
 
+    public int getIndexFlushInterval() {
+        return propertySupplier.getValue(ConsumeConfigKey.INDEX_FLUSH_INTERVAL);
+    }
+
     /**
      * Get consumer level config from
      *
@@ -79,11 +83,30 @@ public class ConsumeConfig {
                 ConsumeConfigKey.RETRY_RATE_PREFIX.getType(),ConsumeConfigKey.RETRY_RATE_PREFIX.getValue());
     }
 
+    public boolean getRetryForceAck(String topic, String app) {
+        return (boolean) propertySupplier.getValue(ConsumeConfigKey.RETRY_FORCE_ACK)
+                || (boolean) PropertySupplier.getValue(propertySupplier,
+                ConsumeConfigKey.RETRY_FORCE_ACK_PREFIX.getName() + String.format("%s.%s", topic, app),
+                ConsumeConfigKey.RETRY_FORCE_ACK_PREFIX.getType(),
+                ConsumeConfigKey.RETRY_FORCE_ACK_PREFIX.getValue());
+    }
+
     public void setConsumePositionPath(String consumePositionPath) {
         this.consumePositionPath = consumePositionPath;
     }
 
     public boolean getLogDetail(String app) {
         return brokerConfig.getLogDetail(app);
+    }
+
+    public boolean useLegacyPartitionManager() {
+        return propertySupplier.getValue(ConsumeConfigKey.USE_LEGACY_PARTITION_MANAGER);
+    }
+    public boolean useLegacyConcurrentConsumer() {
+        return propertySupplier.getValue(ConsumeConfigKey.USE_LEGACY_CONCURRENT_CONSUMER);
+    }
+
+    public int getPartitionSelectRetryMax() {
+        return propertySupplier.getValue(ConsumeConfigKey.PARTITION_SELECT_RETRY_MAX);
     }
 }

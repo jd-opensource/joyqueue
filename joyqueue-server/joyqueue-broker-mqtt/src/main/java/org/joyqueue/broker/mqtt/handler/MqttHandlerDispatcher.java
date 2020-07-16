@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.mqtt.handler;
 
+
 import io.netty.handler.codec.mqtt.MqttMessageType;
+import org.joyqueue.broker.mqtt.config.MqttContext;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.mqtt.command.MqttHandlerFactory;
-import org.joyqueue.broker.mqtt.config.MqttConfig;
-import org.joyqueue.broker.mqtt.config.MqttContext;
 import org.joyqueue.network.transport.command.handler.CommandHandlerFactory;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -40,10 +40,10 @@ public class MqttHandlerDispatcher extends Service {
     private MqttProtocolHandler mqttProtocolHandler;
     private MqttContext mqttContext;
 
-    public MqttHandlerDispatcher(CommandHandlerFactory handlerFactory, BrokerContext brokerContext) {
+    public MqttHandlerDispatcher(CommandHandlerFactory handlerFactory, BrokerContext brokerContext, MqttContext mqttContext) {
         this.handlerFactory = (MqttHandlerFactory) handlerFactory;
         this.mqttProtocolHandler = new MqttProtocolHandler(brokerContext);
-        this.mqttContext = new MqttContext(new MqttConfig(brokerContext.getPropertySupplier()));
+        this.mqttContext = mqttContext;
     }
 
     public Handler getHandler(MqttMessageType type) {

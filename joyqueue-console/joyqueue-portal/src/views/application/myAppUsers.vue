@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入Erp或中文名" class="input" @on-enter="getList">
+      <d-input v-model="searchData.keyword" oninput="value = value.trim()" placeholder="请输入Erp或中文名" class="input" @on-enter="getList">
         <span slot="prepend">关键词</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
@@ -25,7 +25,7 @@
           <grid-col :span="3" class="label">英文名:</grid-col>
           <grid-col :span="1"/>
           <grid-col :span="14" class="val">
-            <d-input v-model="addData.user.code"></d-input>
+            <d-input v-model="addData.user.code" oninput="value = value.trim()"></d-input>
           </grid-col>
         </grid-row>
     </my-dialog>
@@ -61,51 +61,51 @@ export default {
       tableData: {
         rowData: [],
         colData: [
-            {
-              title: 'erp',
-              key: 'code',
-              width: '12%'
-            },
-            {
-              title: '中文名',
-              key: 'name',
-              width: '12%'
-            },
-            {
-              title: '所属部门',
-              key: 'orgName',
-              width: '25%'
-            },
-            {
-              title: '邮箱',
-              key: 'email',
-              width: '13%'
-            },
-            {
-              title: '手机号',
-              key: 'mobile',
-              width: '10%'
-            },
-            {
-              title: '是否是负责人',
-              key: 'isOwner',
-              width: '10%'
-            }
-          ],
-         btns: [
-           {
-             txt: '移除',
-             method: 'on-del',
-             bindKey: 'canDel',
-             bindVal: 1
-           },
-           {
-             txt: '设置为负责人',
-             method: 'on-owner',
-             bindKey: 'canOwner',
-             bindVal: 1
-           }
-         ]
+          {
+            title: 'erp',
+            key: 'code',
+            width: '12%'
+          },
+          {
+            title: '中文名',
+            key: 'name',
+            width: '12%'
+          },
+          {
+            title: '所属部门',
+            key: 'orgName',
+            width: '25%'
+          },
+          {
+            title: '邮箱',
+            key: 'email',
+            width: '13%'
+          },
+          {
+            title: '手机号',
+            key: 'mobile',
+            width: '10%'
+          },
+          {
+            title: '是否是负责人',
+            key: 'isOwner',
+            width: '10%'
+          }
+        ],
+        btns: [
+          {
+            txt: '移除',
+            method: 'on-del',
+            bindKey: 'canDel',
+            bindVal: 1
+          },
+          {
+            txt: '设置为负责人',
+            method: 'on-owner',
+            bindKey: 'canOwner',
+            bindVal: 1
+          }
+        ]
       },
       multipleSelection: [],
       addDialog: {

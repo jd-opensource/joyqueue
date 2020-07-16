@@ -26,7 +26,7 @@
                 <slot>
                   <div v-html="content"></div>
                   <div :class="[prefixCls + '__input']" v-if="showInput">
-                    <d-input v-model="inputValue" :placeholder="inputPlaceholder" @keyup.enter.native="handleAction('confirm', $event)" ref="input"></d-input>
+                    <d-input v-model="inputValue" :placeholder="inputPlaceholder" oninput="value = value.trim()" @keyup.enter.native="handleAction('confirm', $event)" ref="input"></d-input>
                   </div>
                 </slot>
               </div>

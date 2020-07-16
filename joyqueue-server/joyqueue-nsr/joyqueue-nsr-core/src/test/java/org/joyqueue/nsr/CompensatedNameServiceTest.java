@@ -40,7 +40,6 @@ import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +53,7 @@ import java.util.Set;
  */
 public class CompensatedNameServiceTest {
 
-    private NameServiceTest nameServiceTest;
+    private NameServiceStub nameServiceStub;
     private CompensatedNameService compensatedNameService;
     private PropertySupplier propertySupplier;
 
@@ -65,18 +64,20 @@ public class CompensatedNameServiceTest {
         propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_INTERVAL.getName(), 1000 * 60 * 1);
         propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL.getName(), 1000 * 10);
         propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD.getName(), 3);
+        propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_CACHE_ENABLE.getName(), false);
+        propertySupplierMap.put(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_CACHE_ENABLE.getName(), true);
         propertySupplier = new PropertySupplier.MapSupplier(propertySupplierMap);
 
-        nameServiceTest = new NameServiceTest();
-        compensatedNameService = new CompensatedNameService(nameServiceTest);
-        nameServiceTest.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.PRODUCTION), ClientType.JOYQUEUE);
-        nameServiceTest.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
+        nameServiceStub = new NameServiceStub();
+        compensatedNameService = new CompensatedNameService(nameServiceStub);
+        nameServiceStub.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.PRODUCTION), ClientType.JOYQUEUE);
+        nameServiceStub.subscribe(new Subscription(TopicName.parse("test_topic"), "test_app", Subscription.Type.CONSUMPTION), ClientType.JOYQUEUE);
         compensatedNameService.setSupplier(propertySupplier);
         compensatedNameService.register(1, "127.0.0.1", 50088);
         compensatedNameService.start();
     }
 
-    @Test
+//    @Test
     public void testErrorCache() throws Exception {
         for (int i = 0; i < 2; i++) {
             Assert.assertEquals(compensatedNameService.getProducerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
@@ -84,19 +85,28 @@ public class CompensatedNameServiceTest {
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getApp(), "test_app");
         }
-        Assert.assertEquals(0, NameServiceTest.EXCEPTION_COUNTER);
+        Assert.assertEquals(0, NameServiceStub.EXCEPTION_COUNTER);
 
-        NameServiceTest.THROW_EXCEPTION = true;
-        NameServiceTest.EXCEPTION_SLEEP_TIME = 1000 * 1;
+        NameServiceStub.THROW_EXCEPTION = true;
+        NameServiceStub.EXCEPTION_SLEEP_TIME = 1000 * 1;
         for (int i = 0; i < 2; i++) {
             Assert.assertEquals(compensatedNameService.getProducerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
             Assert.assertEquals(compensatedNameService.getProducerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getApp(), "test_app");
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getApp(), "test_app");
         }
-//        Assert.assertEquals(propertySupplier.getProperty(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD.getName()).getInteger().intValue(), NameServiceTest.EXCEPTION_COUNTER);
+        Assert.assertEquals(propertySupplier.getProperty(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD.getName()).getInteger().intValue(), NameServiceStub.EXCEPTION_COUNTER);
 
-        NameServiceTest.THROW_EXCEPTION = false;
+        Thread.currentThread().sleep(1000 * 10);
+        for (int i = 0; i < 2; i++) {
+            Assert.assertEquals(compensatedNameService.getProducerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
+            Assert.assertEquals(compensatedNameService.getProducerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getApp(), "test_app");
+            Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
+            Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getApp(), "test_app");
+        }
+        Assert.assertEquals(propertySupplier.getProperty(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD.getName()).getInteger().intValue() * 2, NameServiceStub.EXCEPTION_COUNTER);
+
+        NameServiceStub.THROW_EXCEPTION = false;
         Thread.currentThread().sleep(propertySupplier.getProperty(NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL.getName()).getInteger());
         for (int i = 0; i < 2; i++) {
             Assert.assertEquals(compensatedNameService.getProducerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
@@ -104,10 +114,10 @@ public class CompensatedNameServiceTest {
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getTopic().getFullName(), "test_topic");
             Assert.assertEquals(compensatedNameService.getConsumerByTopicAndApp(TopicName.parse("test_topic"), "test_app").getApp(), "test_app");
         }
-        Assert.assertEquals(0, NameServiceTest.EXCEPTION_COUNTER);
+        Assert.assertEquals(0, NameServiceStub.EXCEPTION_COUNTER);
     }
 
-    public static class NameServiceTest implements NameService {
+    public static class NameServiceStub implements NameService {
 
         public static int EXCEPTION_SLEEP_TIME = 1000 * 1;
         public static boolean THROW_EXCEPTION = false;
@@ -116,7 +126,7 @@ public class CompensatedNameServiceTest {
 
         private AllMetadata allMetadata;
 
-        public NameServiceTest() {
+        public NameServiceStub() {
             allMetadata = new AllMetadata();
             allMetadata.setTopics(Maps.newHashMap());
             allMetadata.setBrokers(Maps.newHashMap());

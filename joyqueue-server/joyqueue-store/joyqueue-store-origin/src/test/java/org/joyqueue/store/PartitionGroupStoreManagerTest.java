@@ -16,8 +16,11 @@
 package org.joyqueue.store;
 
 import com.google.common.collect.Lists;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
+import org.joyqueue.store.file.Checkpoint;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.message.MessageParser;
 import org.joyqueue.store.utils.MessageUtils;
@@ -36,18 +39,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -66,7 +73,6 @@ public class PartitionGroupStoreManagerTest {
     private static final String topic = "test_topic";
     private static final int partitionGroup = 3;
     private static final short[] partitions = new short[]{4, 5, 6};
-    private static final int[] nodes = new int[]{0};
     private File base = null;
     private File groupBase = null;
     private PartitionGroupStoreManager store;
@@ -123,13 +129,67 @@ public class PartitionGroupStoreManagerTest {
 
     }
 
+    @Test
+    @Ignore
+    public void readPerformanceTest() throws Exception {
+        short[] partitions = new short[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Short [] p = new Short[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+        store.rePartition(Lists.newArrayList(p));
+        writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION, partitions);
+        destroyStore();
+        recoverStore();
+        readPerformanceTest(10, partitions);
+    }
+
+    private void readPerformanceTest(int batchCount, short [] partitions) throws IOException, InterruptedException {
+
+        AtomicLong readBytes = new AtomicLong(0L);
+        AtomicLong readCount = new AtomicLong(0L);
+        CountDownLatch latch = new CountDownLatch(partitions.length);
+        long t0 = SystemClock.now();
+
+        for (int i = 0; i < partitions.length; i++) {
+            int finalI = i;
+            Thread t = new Thread(() -> {
+                try {
+                    short partition = partitions[finalI];
+                    long index = store.getLeftIndex(partition);
+                    while (index < store.getRightIndex(partition)) {
+                        ReadResult readResult = store.read(partition, index, batchCount, -1);
+                        Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+                        readBytes.addAndGet(Arrays.stream(readResult.getMessages()).mapToLong(ByteBuffer::remaining).sum());
+                        readCount.addAndGet(readResult.getMessages().length);
+                        index += readResult.getMessages().length;
+                    }
+                } catch (IOException e) {
+                    logger.warn("Read exception: ", e);
+                }
+                latch.countDown();
+            });
+            t.start();
+        }
+        latch.await();
+        long t1 = SystemClock.now();
+
+        logger.info("Total read {}, takes {}ms, qps: {}, traffic: {}, batch count: {}.",
+                Format.formatTraffic(readBytes.get()),
+                t1 - t0,
+                Format.formatWithComma(1000L * readCount.get() / (t1 - t0)),
+                Format.formatTraffic(1000L * readBytes.get() / (t1 - t0)),
+                batchCount);
+
+    }
+
     @Ignore
     @Test
     public void writePerformanceTest() throws InterruptedException {
-        writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION);
+        writePerformanceTest(5L * 1024 * 1024 * 1024, 1024, 10, false, QosLevel.REPLICATION, null);
     }
 
-    private void writePerformanceTest(long totalBytes, int msgSize, int batchCount, boolean sync, QosLevel qosLevel) throws InterruptedException {
+    private void writePerformanceTest(long totalBytes, int msgSize, int batchCount, boolean sync, QosLevel qosLevel, short [] partitions) throws InterruptedException {
+        if(null == partitions) {
+            partitions = PartitionGroupStoreManagerTest.partitions;
+        }
         List<ByteBuffer> messages = MessageUtils.build(batchCount, msgSize);
         int size = messages.get(0).remaining();
         int [] intPartitions = new int [partitions.length];
@@ -184,7 +244,6 @@ public class PartitionGroupStoreManagerTest {
         } finally {
             commitThread.stop();
         }
-
     }
 
     @Ignore
@@ -197,6 +256,7 @@ public class PartitionGroupStoreManagerTest {
                 CompletableFuture.runAsync(() -> {
                     for(;;) {
                         store.asyncWrite(QosLevel.RECEIVE, null, writeRequests);
+                        store.commit(store.rightPosition());
                     }
                 }),
                 CompletableFuture.runAsync(() -> {
@@ -301,6 +361,117 @@ public class PartitionGroupStoreManagerTest {
         this.store.recover();
         this.store.start();
         this.store.enable();
+    }
+    @Test
+    public void changeFileSizeTest() throws Exception {
+        int count = 1024;
+        int repeat = 300;
+        long timeout = 500000L;
+        int storeFileSize = 128 * 1024 * 1024;
+        int indexFileSize = 512 * 1024;
+        boolean indexLoadOnRead = true;
+        boolean storeLoadOnRead = false;
+        boolean flushForce = false;
+        List<ByteBuffer> messages = MessageUtils.build(count, 1024);
+
+
+        long length = messages.stream().mapToInt(Buffer::remaining).sum() * repeat;
+        WriteRequest [] writeRequests = IntStream.range(0, messages.size())
+                .mapToObj(i -> new WriteRequest(partitions[i % partitions.length], messages.get(i)))
+                .toArray(WriteRequest[]::new);
+
+
+        for (int i = 0; i < repeat; i++) {
+            store.asyncWrite(QosLevel.RECEIVE, null,writeRequests);
+        }
+
+
+        // 等待建索引和刷盘都完成
+        long t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() < length && store.flushPosition() < length) {
+            Thread.sleep(10L);
+        }
+        store.commit(store.rightPosition());
+
+        destroyStore();
+        if (null == bufferPool) {
+            bufferPool = PreloadBufferPool.getInstance();
+            bufferPool.addPreLoad(storeFileSize, 2, 4);
+            bufferPool.addPreLoad(indexFileSize, 2, 4);
+        }
+        PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
+                new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
+
+        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
+                bufferPool);
+        this.store.recover();
+        this.store.start();
+        this.store.enable();
+
+        for (int i = 0; i < repeat; i++) {
+            store.asyncWrite(QosLevel.RECEIVE, null,writeRequests);
+        }
+
+
+        // 等待建索引和刷盘都完成
+        t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() <  2 * length && store.flushPosition() < 2 * length) {
+            Thread.sleep(10L);
+        }
+        store.commit(store.rightPosition());
+
+        long rollbackPosition = store.position(store.rightPosition(), -13);
+        ByteBuffer byteBuffer = store.readEntryBuffer(rollbackPosition, (int) (store.rightPosition() - rollbackPosition));
+
+        destroyStore();
+
+        // 模拟Follower
+        storeFileSize = 32 * 1024 * 1024;
+        indexFileSize = 128 * 1024;
+
+        if (null == bufferPool) {
+            bufferPool = PreloadBufferPool.getInstance();
+            bufferPool.addPreLoad(storeFileSize, 2, 4);
+            bufferPool.addPreLoad(indexFileSize, 2, 4);
+        }
+
+        config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
+                new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
+
+        this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
+                bufferPool);
+        this.store.recover();
+        this.store.start();
+
+        this.store.setRightPosition(rollbackPosition);
+        this.store.appendEntryBuffer(byteBuffer);
+
+        // 等待建索引和刷盘都完成
+        t0 = SystemClock.now();
+        while (SystemClock.now() - t0 < timeout && store.indexPosition() <  2 * length && store.flushPosition() < 2 * length) {
+            Thread.sleep(10L);
+        }
+        store.commit(store.rightPosition());
+
+        int readCount = 0;
+        for (int i = 0; i < partitions.length; i++) {
+            short p = partitions[i];
+            long index = 0L;
+            while (true) {
+                try {
+                    ReadResult readResult = store.read(p, index, count, 0L);
+                    index += readResult.getMessages().length;
+                    readCount += readResult.getMessages().length;
+                } catch (PositionOverflowException e) {
+                    break;
+                }
+            }
+        }
+        Assert.assertEquals(count * repeat * 2, readCount);
     }
 
     @Test
@@ -627,14 +798,13 @@ public class PartitionGroupStoreManagerTest {
         short partition = 4;
         List<ByteBuffer> messages = MessageUtils.build(count, 1024);
 
-        long length = messages.stream().mapToInt(Buffer::remaining).sum();
-
         final EventFuture<WriteResult> future = new EventFuture<>();
 
         store.asyncWrite(QosLevel.PERSISTENCE, future, messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
 
         WriteResult writeResult = future.get();
         Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
+        store.commit(store.rightPosition());
 
         logger.info("Waiting checkpoint saved...");
 
@@ -647,7 +817,6 @@ public class PartitionGroupStoreManagerTest {
 
         destroyStore();
         recoverStore();
-        store.commit(store.rightPosition());
         for (int i = 0; i < messages.size(); i++) {
             ByteBuffer writeBuffer = messages.get(i);
             writeBuffer.clear();
@@ -658,6 +827,58 @@ public class PartitionGroupStoreManagerTest {
             ByteBuffer readBuffer = readResult.getMessages()[0];
             Assert.assertEquals(writeBuffer, readBuffer);
         }
+
+        // 验证没有CheckPoint文件的情况
+        destroyStore();
+        Assert.assertTrue(checkpointFile.delete());
+        recoverStore();
+        for (int i = 0; i < messages.size(); i++) {
+            ByteBuffer writeBuffer = messages.get(i);
+            writeBuffer.clear();
+
+            ReadResult readResult = store.read(partition, i, 1, 0);
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(1, readResult.getMessages().length);
+            ByteBuffer readBuffer = readResult.getMessages()[0];
+            Assert.assertEquals(writeBuffer, readBuffer);
+        }
+        while (!checkpointFile.isFile()) {
+            Thread.sleep(100L);
+        }
+        // 验证版本号为0的旧版CheckPoint文件的情况
+        destroyStore();
+
+        // 修改CheckPoint文件为旧版本
+        byte[] serializedData = new byte[(int) checkpointFile.length()];
+        try (FileInputStream fis = new FileInputStream(checkpointFile)) {
+            if (serializedData.length != fis.read(serializedData)) {
+                throw new IOException("File length not match!");
+            }
+        }
+        String jsonString = new String(serializedData, StandardCharsets.UTF_8);
+        Checkpoint checkpoint = JSON.parseObject(jsonString, Checkpoint.class);
+
+        checkpoint.setVersion(0);
+        checkpoint.setReplicationPosition(-1L);
+        serializedData = JSON.toJSONString(checkpoint,
+                SerializerFeature.PrettyFormat, SerializerFeature.DisableCircularReferenceDetect).getBytes(StandardCharsets.UTF_8);
+
+        try(FileOutputStream fos = new FileOutputStream(checkpointFile)) {
+            fos.write(serializedData);
+        }
+
+        recoverStore();
+        for (int i = 0; i < messages.size(); i++) {
+            ByteBuffer writeBuffer = messages.get(i);
+            writeBuffer.clear();
+
+            ReadResult readResult = store.read(partition, i, 1, 0);
+            Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+            Assert.assertEquals(1, readResult.getMessages().length);
+            ByteBuffer readBuffer = readResult.getMessages()[0];
+            Assert.assertEquals(writeBuffer, readBuffer);
+        }
+
 
 
     }
@@ -698,11 +919,11 @@ public class PartitionGroupStoreManagerTest {
         recoverStore();
     }
 
-    private void recoverStore() {
+    private void recoverStore() throws Exception {
         if (null == bufferPool) {
             bufferPool = PreloadBufferPool.getInstance();
-            bufferPool.addPreLoad(128 * 1024 * 1024, 2, 4);
-            bufferPool.addPreLoad(512 * 1024, 2, 4);
+            bufferPool.addPreLoad(32 * 1024 * 1024, 2, 4);
+            bufferPool.addPreLoad(128 * 1024, 2, 4);
         }
 
         PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(
@@ -710,8 +931,8 @@ public class PartitionGroupStoreManagerTest {
                 DEFAULT_WRITE_REQUEST_CACHE_SIZE,
                 1L,
                 DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
-                new PositioningStore.Config(128 * 1024 * 1024),
-                new PositioningStore.Config(512 * 1024));
+                new PositioningStore.Config(32 * 1024 * 1024),
+                new PositioningStore.Config(128 * 1024,true, false));
 
         this.store = new PartitionGroupStoreManager(topic, partitionGroup, groupBase, config,
                 bufferPool);

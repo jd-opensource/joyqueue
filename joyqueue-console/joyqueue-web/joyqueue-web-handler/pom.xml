@@ -20,10 +20,10 @@
     <parent>
         <artifactId>joyqueue-web</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.4-SNAPSHOT</version>
+        <version>4.2.5.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>4.2.5.4-SNAPSHOT</version>
 
     <artifactId>joyqueue-web-handler</artifactId>
     <name>JoyQueue-Web-Handler</name>
@@ -70,7 +70,36 @@
             <groupId>com.jd.joyqueue</groupId>
             <artifactId>laf-binding-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-message-filter-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+        </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.11</version>
+                <configuration>
+                    <complianceLevel>1.8</complianceLevel>
+                    <source>1.8</source>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

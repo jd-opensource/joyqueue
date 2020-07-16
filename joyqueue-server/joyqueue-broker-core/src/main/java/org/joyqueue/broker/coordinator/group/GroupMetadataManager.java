@@ -18,6 +18,7 @@ package org.joyqueue.broker.coordinator.group;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import org.joyqueue.broker.coordinator.group.domain.GroupMetadata;
 import org.slf4j.Logger;
@@ -52,6 +53,9 @@ public class GroupMetadataManager {
     }
 
     public <T extends GroupMetadata> T getGroup(String groupId) {
+        if (StringUtils.isBlank(groupId)) {
+            return null;
+        }
         return (T) groupCache.getIfPresent(groupId);
     }
 
@@ -69,6 +73,9 @@ public class GroupMetadataManager {
     }
 
     public <T extends GroupMetadata> T getOrCreateGroup(String groupId) {
+        if (StringUtils.isBlank(groupId)) {
+            return null;
+        }
         return getOrCreateGroup(groupId, new Callable<GroupMetadata>() {
             @Override
             public GroupMetadata call() throws Exception {
@@ -78,6 +85,9 @@ public class GroupMetadataManager {
     }
 
     public <T extends GroupMetadata> T getOrCreateGroup(String groupId, Callable<GroupMetadata> callable) {
+        if (StringUtils.isBlank(groupId)) {
+            return null;
+        }
         try {
             return (T) groupCache.get(groupId, callable);
         } catch (ExecutionException e) {

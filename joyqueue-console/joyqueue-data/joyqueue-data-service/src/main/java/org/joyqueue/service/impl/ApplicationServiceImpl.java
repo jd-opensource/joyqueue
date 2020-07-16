@@ -72,6 +72,9 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
             throw new ValidationException(ValidationException.UNIQUE_EXCEPTION_STATUS, getUniqueExceptionMessage());
         }
         //fill owner_id
+        if (app.getOwner() == null) {
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, "应用负责人不能为空!");
+        }
         if (app.getOwner().getId() == null && app.getOwner().getCode() != null) {
             User user = userService.findByCode(app.getOwner().getCode());
             if (user != null) {

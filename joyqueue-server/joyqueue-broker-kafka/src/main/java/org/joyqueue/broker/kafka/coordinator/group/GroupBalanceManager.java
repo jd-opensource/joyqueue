@@ -109,11 +109,11 @@ public class GroupBalanceManager extends Service {
     }
 
     public void maybePrepareRebalance(GroupMetadata group) {
-        synchronized (group) {
+        group.inLock(() -> {
             if (group.canRebalance()) {
                 prepareRebalance(group);
             }
-        }
+        });
     }
 
     public void prepareRebalance(GroupMetadata group) {

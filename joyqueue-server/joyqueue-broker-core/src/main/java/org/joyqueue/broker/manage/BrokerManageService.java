@@ -17,6 +17,7 @@ package org.joyqueue.broker.manage;
 
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
@@ -44,14 +45,14 @@ public class BrokerManageService extends Service {
     private BrokerManageExporter brokerManageExporter;
 
     public BrokerManageService(BrokerManageConfig config, BrokerMonitorService brokerMonitorService,
-                               ClusterManager clusterManager, StoreManagementService storeManagementService,
+                               ClusterManager clusterManager, ClusterNameService clusterNameService, StoreManagementService storeManagementService,
                                StoreService storeService, Consume consume,
                                MessageRetry retryManager, CoordinatorService coordinatorService,
                                ArchiveManager archiveManager, NameService nameService,
                                MessageConvertSupport messageConvertSupport) {
         this.config = config;
         this.brokerManageServiceManager = new BrokerManageServiceManager(brokerMonitorService.getBrokerMonitor(),
-                clusterManager, storeManagementService,
+                clusterManager, clusterNameService, storeManagementService,
                 storeService, consume,
                 retryManager, coordinatorService,
                 archiveManager, nameService, messageConvertSupport);

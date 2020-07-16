@@ -30,7 +30,8 @@ public class ReplicationStat implements Serializable {
 
     private EnQueueStat replicaStat = new EnQueueStat();
     private EnQueueStat appendStat = new EnQueueStat();
-
+    // partition group replica max log position
+    private long  maxLogPosition;
     public ReplicationStat() {
     }
 
@@ -54,4 +55,13 @@ public class ReplicationStat implements Serializable {
     public EnQueueStat getAppendStat() {
         return appendStat;
     }
+
+    public long getMaxLogPosition() {
+        return maxLogPosition;
+    }
+
+    public void setMaxLogPosition(long maxLogPosition) {
+        this.maxLogPosition = maxLogPosition;
+    }
+
 }

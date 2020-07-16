@@ -21,19 +21,17 @@ export default {
     myDialog
   },
   props: {
-    brokerId: {
-      type: Number
-    }
   },
   mixins: [ crud ],
   data () {
     return {
       theme1: 'light',
+      brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
       urls: {
         search: '/monitor/broker/connection/search'
       },
       searchData: {
-        brokerId: this.brokerId
+        brokerId: this.$route.params.brokerId
       },
       searchRules: {
       },

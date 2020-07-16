@@ -4,6 +4,7 @@
 import apiRequest from '../utils/apiRequest.js'
 import apiUrl from '../utils/apiUrl.js'
 import LangConfig from '../i18n/langs.json'
+import {deepCopy} from '../utils/assist'
 
 export default {
   computed: {
@@ -80,6 +81,9 @@ export default {
           return
         }
         data.data = data.data || []
+        if (typeof (this.sortData) === 'function') {
+          data.data = this.sortData(data.data)
+        }
         data.pagination = data.pagination || {
           totalRecord: data.data.length
         }
@@ -120,7 +124,7 @@ export default {
       if (typeof (this.beforeEditData) === 'function') {
         this.editData = this.beforeEditData(item)
       } else {
-        this.editData = item
+        this.editData = deepCopy(item)
       }
     },
     beforeEdit (item) {

@@ -18,6 +18,9 @@
         <d-menu-item name="namespace" icon="feather" :size="iconSize" :to="`/${ curLang }/setting/namespace`"><!--color="#73C6B6"-->
           <span class="layout-text">{{ langConfig.namespace }}</span>
         </d-menu-item>
+        <d-menu-item name="retryMonitor" icon="compass" :size="iconSize" :to="`/${ curLang }/setting/retryMonitor`"><!--color="#73C6B6"-->
+          <span class="layout-text">{{ langConfig.retryMonitor }}</span>
+        </d-menu-item>
       </d-menu>
     </layout-sider>
     <layout-content>

@@ -8,7 +8,7 @@
       </grid-col>
       <grid-col span="8" >
         <d-form-item label="权重:">
-          <d-input v-model.number="item.weight"  placeholder="请输入"></d-input>
+          <d-input v-model.number="item.weight" oninput="value = value.trim()" placeholder="请输入"></d-input>
         </d-form-item>
       </grid-col>
     </grid-row>

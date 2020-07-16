@@ -26,9 +26,7 @@ import org.joyqueue.model.Pagination;
 import org.joyqueue.server.retry.api.ConsoleMessageRetry;
 import org.joyqueue.server.retry.api.RetryPolicyProvider;
 import org.joyqueue.server.retry.db.DBMessageRetry;
-import org.joyqueue.server.retry.model.RetryMessageModel;
-import org.joyqueue.server.retry.model.RetryQueryCondition;
-import org.joyqueue.server.retry.model.RetryStatus;
+import org.joyqueue.server.retry.model.*;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.db.DaoUtil;
 import org.slf4j.Logger;
@@ -52,8 +50,10 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
 
     // 数据源
     private DataSource dataSource;
+    private DataSource readDataSource;
     // 缓存服务
     private DBMessageRetry dbMessageRetry = new DBMessageRetry();
+
     // start flag
     private boolean isStartFlag = false;
     private PropertySupplier propertySupplier = null;
@@ -61,7 +61,8 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     @Override
     public void start() throws Exception {
         dbMessageRetry.start();
-        dataSource = dbMessageRetry.getDataSource();
+        this.dataSource = dbMessageRetry.getDataSource();
+        this.readDataSource=dbMessageRetry.getReadDataSource();
         isStartFlag = true;
 
         logger.info("ConsoleMessageRetry is started.");
@@ -83,6 +84,9 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
     private static final String GET_BYID = "select * from message_retry where id = ? and topic = ?";
     private static final String QUERY_SQL = "select * from message_retry where topic = ? and app = ? and status = ? ";
     private static final String COUNT_SQL = "select count(*) from message_retry where topic = ? and app = ? and status = ? ";
+    private final String STATE = "select topic,app,min(send_time),max(send_time),count(id) as num from message_retry where status=? group by topic,app order by num desc limit ?";
+    private final String CLEAN_BEFORE="delete from message_retry where topic=? and app=? and update_time<? and status=?";
+    private static final String ALL_CONSUMER="select topic,app from message_retry group by topic,app";
 
     @Override
     public PageResult<ConsumeRetry> queryConsumeRetryList(RetryQueryCondition retryQueryCondition) throws JoyQueueException {
@@ -288,6 +292,57 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
         } else {
             logger.error("update retry message error by retryQueryCondition:{}, status:{}, sendStartTime:{}, sendEndTime:{}", retryQueryCondition, status);
         }
+    }
+
+    @Override
+    public int cleanBefore(String topic, String app, int status, long expireTimeStamp) throws Exception {
+        return DaoUtil.delete(dataSource,1, CLEAN_BEFORE, new DaoUtil.UpdateCallback<Integer>() {
+            @Override
+            public void before(PreparedStatement statement, Integer target) throws Exception {
+                statement.setString(1,topic);
+                statement.setString(2,app);
+                statement.setTimestamp(3,new Timestamp(expireTimeStamp));
+                statement.setInt(4,status);
+            }
+        });
+    }
+
+    @Override
+    public List<RetryMonitorItem> top(int N, int status) throws Exception{
+
+        return  DaoUtil.queryList(readDataSource,STATE,new DaoUtil.QueryCallback<RetryMonitorItem>(){
+            @Override
+            public void before(PreparedStatement statement) throws Exception {
+                statement.setInt(1,status);
+                statement.setInt(2,N);
+            }
+            @Override
+            public RetryMonitorItem map(ResultSet rs) throws Exception {
+                RetryMonitorItem monitorItem=new RetryMonitorItem();
+                monitorItem.setTopic(rs.getString(1));
+                monitorItem.setApp(rs.getString(2));
+                monitorItem.setMinSendTime(rs.getTimestamp(3).getTime());
+                monitorItem.setMaxSendTime(rs.getTimestamp(4).getTime());
+                monitorItem.setCount(rs.getInt(5));
+                return monitorItem;
+            }
+        });
+    }
+
+    @Override
+    public List<RetryMonitorItem> allConsumer() throws Exception {
+        return DaoUtil.queryList(readDataSource, ALL_CONSUMER, new DaoUtil.QueryCallback<RetryMonitorItem>() {
+            @Override
+            public RetryMonitorItem map(ResultSet rs) throws Exception {
+                RetryMonitorItem monitorItem=new RetryMonitorItem();
+                monitorItem.setTopic(rs.getString(1));
+                monitorItem.setApp(rs.getString(2));
+                return monitorItem;
+            }
+            @Override
+            public void before(PreparedStatement statement) throws Exception {
+            }
+        });
     }
 
     @Override

@@ -15,17 +15,24 @@
  */
 package org.joyqueue.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.ConsumeRetry;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QRetry;
 import org.joyqueue.server.retry.api.ConsoleMessageRetry;
 import org.joyqueue.server.retry.model.RetryMessageModel;
+import org.joyqueue.server.retry.model.RetryMonitorItem;
 import org.joyqueue.server.retry.model.RetryQueryCondition;
 import org.joyqueue.server.retry.model.RetryStatus;
+import org.joyqueue.service.ApplicationService;
+import org.joyqueue.service.ApplicationUserService;
 import org.joyqueue.service.RetryService;
+import org.joyqueue.util.LocalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +51,12 @@ public class RetryServiceImpl implements RetryService {
 
     @Autowired(required = false)
     private ConsoleMessageRetry consoleMessageRetry;
+
+    @Autowired(required = false)
+    private ApplicationService applicationService;
+
+    @Autowired(required = false)
+    private ApplicationUserService applicationUserService;
 
     @Value("${retry.enable:false}")
     private Boolean retryEnable;
@@ -78,6 +91,26 @@ public class RetryServiceImpl implements RetryService {
     @Override
     public ConsumeRetry getDataById(Long id,String topic) throws JoyQueueException {
         return consoleMessageRetry.getConsumeRetryById(id,topic);
+    }
+
+    @Override
+    public void validate(String appFullName) {
+        check();
+        if (StringUtils.isEmpty(appFullName)) {
+            throw new ServiceException(ServiceException.BAD_REQUEST, "消费者不能为空");
+        }
+
+        if (LocalSession.getSession().getUser().getRole() == User.UserRole.ADMIN.value()) {
+            return;
+        }
+
+        User user = LocalSession.getSession().getUser();
+        String appCode = CodeConverter.convertAppFullName(appFullName).getCode();
+        if (user.getRole() != User.UserRole.ADMIN.value() &&
+                applicationUserService.findByUserApp(user.getCode(), appCode) == null) {
+            throw new ServiceException(ServiceException.BAD_REQUEST, "没有该消费者权限，不能操作");
+        }
+
     }
 
     @Override
@@ -125,6 +158,22 @@ public class RetryServiceImpl implements RetryService {
     @Override
     public void batchDelete(RetryQueryCondition retryQueryCondition, Long updateTime, int updateBy) throws Exception {
         consoleMessageRetry.batchUpdateStatus(retryQueryCondition, RetryStatus.RETRY_DELETE,updateTime,updateBy);
+    }
+
+
+    @Override
+    public int cleanBefore(String topic, String app, int status, long expireTimeStamp) throws Exception {
+        return consoleMessageRetry.cleanBefore(topic,app,status,expireTimeStamp);
+    }
+
+    @Override
+    public List<RetryMonitorItem> top(int N, int status) throws Exception {
+        return consoleMessageRetry.top(N,status);
+    }
+
+    @Override
+    public List<RetryMonitorItem> allConsumer() throws Exception {
+        return consoleMessageRetry.allConsumer();
     }
 
     /**

@@ -130,6 +130,8 @@ public class MqttConsumerManager extends Service {
                     );
                 }
             }
+        } else {
+            LOG.warn("ClientId: {} has removed session.", clientID);
         }
     }
 

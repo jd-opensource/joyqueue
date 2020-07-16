@@ -123,8 +123,8 @@ public class NsrConsumerConverter extends Converter<Consumer, org.joyqueue.domai
 
         org.joyqueue.domain.Consumer.ConsumerLimitPolicy limitPolicy = nsrConsumer.getLimitPolicy();
         if (limitPolicy != null) {
-            consumerConfig.setLimitTps(limitPolicy.getTps());
-            consumerConfig.setLimitTraffic(limitPolicy.getTraffic());
+            consumerConfig.setLimitTps(limitPolicy.getTps() == null? 0 : limitPolicy.getTps());
+            consumerConfig.setLimitTraffic(limitPolicy.getTraffic() == null ? 0 : limitPolicy.getTraffic());
         }
         consumer.setConfig(consumerConfig);
 

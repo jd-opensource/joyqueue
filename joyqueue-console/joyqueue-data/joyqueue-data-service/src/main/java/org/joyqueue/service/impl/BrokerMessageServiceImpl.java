@@ -22,6 +22,7 @@ import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
+import io.openmessaging.joyqueue.JoyQueueBuiltinKeys;
 import io.openmessaging.joyqueue.producer.ExtensionProducer;
 import io.openmessaging.message.Message;
 import org.apache.commons.collections.CollectionUtils;
@@ -244,7 +245,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
             throw new RuntimeException("topic not exist");
         }
 
-        if (CollectionUtils.isNotEmpty(applicationTokens)) {
+        if (CollectionUtils.isEmpty(applicationTokens)) {
             ApplicationToken applicationToken = new ApplicationToken();
             applicationToken.setApplication(new Identity(application.getId(), application.getCode()));
             try {
@@ -259,6 +260,7 @@ public class BrokerMessageServiceImpl implements BrokerMessageService {
         String[] messages = sendMessage.getMessage().split("\n");
         KeyValue attributes = OMS.newKeyValue();
         attributes.put(OMSBuiltinKeys.ACCOUNT_KEY, applicationTokens.get(0).getToken());
+        attributes.put(JoyQueueBuiltinKeys.IO_THREADS, 1);
         MessagingAccessPoint messagingAccessPoint = OMS.getMessagingAccessPoint(String.format("oms:joyqueue://%s@%s:%s/console", sendMessage.getApp(), broker.getIp(), broker.getPort()), attributes);
         ExtensionProducer producer = (ExtensionProducer) messagingAccessPoint.createProducer();
 

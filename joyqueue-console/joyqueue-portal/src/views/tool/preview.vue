@@ -9,7 +9,7 @@
     <grid-row  style="padding-top:20px;">
       <d-input type="textarea" rows="5" v-model="messageText"></d-input>
     </grid-row>
-  </div>  
+  </div>
 </template>
 
 <script>

@@ -85,4 +85,16 @@ public class Topic implements Serializable {
     public JoyQueueCode getCode() {
         return code;
     }
+
+    @Override
+    public String toString() {
+        return "Topic{" +
+                "topic='" + topic + '\'' +
+                ", producerPolicy=" + producerPolicy +
+                ", consumerPolicy=" + consumerPolicy +
+                ", type=" + type +
+                ", partitionGroups=" + partitionGroups +
+                ", code=" + code +
+                '}';
+    }
 }

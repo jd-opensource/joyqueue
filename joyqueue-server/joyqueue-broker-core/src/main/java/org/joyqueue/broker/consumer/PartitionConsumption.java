@@ -135,7 +135,7 @@ class PartitionConsumption extends Service {
 
         if (pullResult.count() < 1) {
             // 消费普通分区消息
-            List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+            List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
             if (partitionManager.isRetry(consumer)) {
                 partitionList = new ArrayList<>(partitionList);
                 partitionList.add(Partition.RETRY_PARTITION_ID);
@@ -178,6 +178,9 @@ class PartitionConsumption extends Service {
     private PullResult getFromPartition(Consumer consumer, List<Short> partitionList, int count, long ackTimeout, long accessTimes) throws JoyQueueException {
         int partitionSize = partitionList.size();
         int listIndex = -1;
+
+        int retryMax = config.getPartitionSelectRetryMax();
+
         for (int i = 0; i < partitionSize; i++) {
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex, accessTimes);
             short partition = partitionList.get(listIndex);
@@ -189,6 +192,9 @@ class PartitionConsumption extends Service {
                             consumer.getTopic(), consumer.getApp(), count, partition, partitionList, pullMsgCount);
                 }
                 return pullResult;
+            }
+            if (i == retryMax) {
+                break;
             }
             listIndex++;
         }

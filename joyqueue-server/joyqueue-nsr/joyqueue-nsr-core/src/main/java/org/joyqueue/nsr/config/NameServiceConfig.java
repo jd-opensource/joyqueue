@@ -55,6 +55,10 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_HANDLER_KEEPALIVE);
     }
 
+    public int getAllMetadataTransportTimeout() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_TRANSPORT_TIMEOUT);
+    }
+
     public boolean getAllMetadataCacheEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_CACHE_ENABLE);
     }
@@ -65,6 +69,14 @@ public class NameServiceConfig {
 
     public int getAllMetadataCacheExpireTime() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_CACHE_EXPIRE_TIME);
+    }
+
+    public int getAllMetadataInterval() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_INTERVAL);
+    }
+
+    public boolean getAllMetadataRewriteEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_ALL_METADATA_REWRITE_ENABLE);
     }
 
     public boolean getCompensationEnable() {
@@ -123,6 +135,10 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD);
     }
 
+    public int getCompensationThreshold() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_THRESHOLD);
+    }
+
     public int getCompensationErrorRetryInterval() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL);
     }
@@ -133,6 +149,26 @@ public class NameServiceConfig {
 
     public boolean getMessengerIgniteEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_IGNITE_ENABLE);
+    }
+
+    public boolean getMessengerPublishLeaderChangeEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_LEADER_CHANGE_ENABLE);
+    }
+
+    public boolean getMessengerPublishTopicEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_TOPIC_ENABLE);
+    }
+
+    public boolean getMessengerPublishLeaderReportEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_LEADER_REPORT_ENABLE);
+    }
+
+    public boolean getMessengerPublishSubscriptionEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_SUBSCRIPTION_ENABLE);
+    }
+
+    public boolean getMessengerPublishBrokerEnable() {
+        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_BROKER_ENABLE);
     }
 
     public int getThinTransportTimeout() {

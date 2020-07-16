@@ -24,6 +24,7 @@ import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.Topic;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.event.AddPartitionGroupEvent;
 import org.joyqueue.nsr.event.AddTopicEvent;
 import org.joyqueue.nsr.event.LeaderChangeEvent;
@@ -57,14 +58,16 @@ public class DefaultTopicService implements TopicService {
 
     protected static final Logger logger = LoggerFactory.getLogger(DefaultTopicService.class);
 
+    private NameServiceConfig config;
     private Messenger messenger;
     private TopicInternalService topicInternalService;
     private PartitionGroupInternalService partitionGroupInternalService;
     private BrokerInternalService brokerInternalService;
     private TransactionInternalService transactionInternalService;
 
-    public DefaultTopicService(Messenger messenger, TopicInternalService topicInternalService, PartitionGroupInternalService partitionGroupInternalService,
+    public DefaultTopicService(NameServiceConfig config, Messenger messenger, TopicInternalService topicInternalService, PartitionGroupInternalService partitionGroupInternalService,
                                BrokerInternalService brokerInternalService, TransactionInternalService transactionInternalService) {
+        this.config = config;
         this.messenger = messenger;
         this.topicInternalService = topicInternalService;
         this.partitionGroupInternalService = partitionGroupInternalService;
@@ -130,7 +133,9 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new AddTopicEvent(topic, partitionGroups), replicas);
+        if (config.getMessengerPublishTopicEnable()) {
+            messenger.publish(new AddTopicEvent(topic, partitionGroups), replicas);
+        }
     }
 
     @Override
@@ -162,7 +167,9 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new RemoveTopicEvent(topic, partitionGroups), replicas);
+        if (config.getMessengerPublishTopicEnable()) {
+            messenger.publish(new RemoveTopicEvent(topic, partitionGroups), replicas);
+        }
     }
 
     @Override
@@ -199,7 +206,9 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new AddPartitionGroupEvent(partitionGroup.getTopic(), partitionGroup), replicas);
+        if (config.getMessengerPublishTopicEnable()) {
+            messenger.publish(new AddPartitionGroupEvent(partitionGroup.getTopic(), partitionGroup), replicas);
+        }
     }
 
     @Override
@@ -234,7 +243,9 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new RemovePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup), replicas);
+        if (config.getMessengerPublishTopicEnable()) {
+            messenger.publish(new RemovePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup), replicas);
+        }
     }
 
     @Override
@@ -285,7 +296,9 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new UpdatePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup, partitionGroup), Lists.newArrayList(replicas));
+        if (config.getMessengerPublishTopicEnable()) {
+            messenger.publish(new UpdatePartitionGroupEvent(partitionGroup.getTopic(), oldPartitionGroup, partitionGroup), Lists.newArrayList(replicas));
+        }
         return Collections.emptyList();
     }
 
@@ -326,7 +339,9 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new UpdatePartitionGroupEvent(oldPartitionGroup.getTopic(), oldPartitionGroup, newPartitionGroup), replicas);
+        if (config.getMessengerPublishLeaderReportEnable()) {
+            messenger.publish(new UpdatePartitionGroupEvent(oldPartitionGroup.getTopic(), oldPartitionGroup, newPartitionGroup), replicas);
+        }
     }
 
     @Override
@@ -367,7 +382,9 @@ public class DefaultTopicService implements TopicService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new LeaderChangeEvent(group.getTopic(), oldPartitionGroup, group), oldLeader);
+        if (config.getMessengerPublishLeaderChangeEnable()) {
+            messenger.publish(new LeaderChangeEvent(group.getTopic(), oldPartitionGroup, group), oldLeader);
+        }
     }
 
     @Override
@@ -399,12 +416,16 @@ public class DefaultTopicService implements TopicService {
             transactionInternalService.commit();
         } catch (Exception e) {
             logger.error("removeTopic exception, topic: {}, partitionGroups: {}", topic, partitionGroups, e);
-            messenger.publish(new UpdateTopicEvent(topic, oldTopic), replicas);
+            if (config.getMessengerPublishTopicEnable()) {
+                messenger.publish(new UpdateTopicEvent(topic, oldTopic), replicas);
+            }
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
 
-        messenger.publish(new UpdateTopicEvent(oldTopic, topic), replicas);
+        if (config.getMessengerPublishTopicEnable()) {
+            messenger.publish(new UpdateTopicEvent(oldTopic, topic), replicas);
+        }
         return topic;
     }
 

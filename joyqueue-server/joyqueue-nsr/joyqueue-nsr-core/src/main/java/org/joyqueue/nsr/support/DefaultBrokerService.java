@@ -18,6 +18,7 @@ package org.joyqueue.nsr.support;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.event.UpdateBrokerEvent;
 import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.nsr.messenger.Messenger;
@@ -41,11 +42,14 @@ public class DefaultBrokerService implements BrokerService {
 
     private BrokerInternalService brokerInternalService;
     private TransactionInternalService transactionInternalService;
+    private NameServiceConfig config;
     private Messenger messenger;
 
-    public DefaultBrokerService(BrokerInternalService brokerInternalService, TransactionInternalService transactionInternalService, Messenger messenger) {
+    public DefaultBrokerService(BrokerInternalService brokerInternalService, TransactionInternalService transactionInternalService,
+                                NameServiceConfig config, Messenger messenger) {
         this.brokerInternalService = brokerInternalService;
         this.transactionInternalService = transactionInternalService;
+        this.config = config;
         this.messenger = messenger;
     }
 
@@ -109,7 +113,9 @@ public class DefaultBrokerService implements BrokerService {
             throw new NsrException(e);
         }
 
-        messenger.publish(new UpdateBrokerEvent(oldBroker, broker), broker);
+        if (config.getMessengerPublishBrokerEnable()) {
+            messenger.publish(new UpdateBrokerEvent(oldBroker, broker), broker);
+        }
         return broker;
     }
 

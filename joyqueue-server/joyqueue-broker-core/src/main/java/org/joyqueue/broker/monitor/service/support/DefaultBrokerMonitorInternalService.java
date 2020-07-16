@@ -26,6 +26,7 @@ import org.joyqueue.broker.monitor.stat.BrokerStatExt;
 import org.joyqueue.broker.monitor.stat.ConsumerPendingStat;
 import org.joyqueue.broker.monitor.stat.JVMStat;
 import org.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
+import org.joyqueue.broker.monitor.stat.PartitionStat;
 import org.joyqueue.broker.monitor.stat.TopicPendingStat;
 import org.joyqueue.broker.monitor.stat.TopicStat;
 import org.joyqueue.domain.TopicConfig;
@@ -184,6 +185,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
                         }
                         long partitionPending = partitionMetric.getRightIndex() - ackIndex;
                         Map<Short, Long> partitionPendStatMap = partitionGroupPendingStat.getPendingStatSubMap();
+                        PartitionStat stat = new PartitionStat(consumer.getTopic().getFullName(),consumer.getApp(),partitionMetric.getPartition());
+                        stat.setAckIndex(ackIndex);
+                        stat.setRight(partitionMetric.getRightIndex());
+                        partitionGroupPendingStat.getPartitionStatHashMap().put(partitionMetric.getPartition(),stat);
                         partitionPendStatMap.put(partitionMetric.getPartition(), partitionPending);
                         partitionGroupPending += partitionPending;
                     }
@@ -202,11 +207,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         statExt.setArchiveProducePending(archiveManager.getSendBacklogNum());
         statExt.setTopicArchiveProducePending(archiveManager.getSendBacklogNumByTopic());
         return statExt;
-    }
-
-    @Override
-    public BrokerStartupInfo getStartInfo() {
-        return brokerStartupInfo;
     }
 
     /**
@@ -253,6 +253,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         return jvmStat;
     }
 
+    @Override
+    public BrokerStartupInfo getStartInfo() {
+        return brokerStartupInfo;
+    }
 
     @Override
     public void addGcEventListener(GCEventListener listener) {

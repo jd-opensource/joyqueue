@@ -197,7 +197,6 @@ public interface NameService extends LifeCycle {
      *
      * @return
      */
-    @Deprecated
     List<Config> getAllConfigs();
 
     /**

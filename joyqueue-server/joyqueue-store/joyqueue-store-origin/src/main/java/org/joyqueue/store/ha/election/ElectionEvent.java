@@ -33,6 +33,7 @@ public class ElectionEvent {
         this.leaderId = leaderId;
         this.topicPartitionGroup = topicPartitionGroup;
     }
+
     public Type getEventType() {
         return eventType;
     }

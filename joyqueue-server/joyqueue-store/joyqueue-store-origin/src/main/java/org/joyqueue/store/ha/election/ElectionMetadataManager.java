@@ -110,6 +110,14 @@ public class ElectionMetadataManager {
     }
 
     /**
+     * 获取全部election metadata
+     * @return
+     */
+    Map<TopicPartitionGroup, ElectionMetadata> getAllElectionMetadata() {
+        return metadataMap;
+    }
+
+    /**
      * 通过PartitionGroup获取election metadata
      * @param topicPartitionGroup topic 和 partition group id
      * @return 元数据

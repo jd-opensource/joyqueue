@@ -258,7 +258,7 @@ public class ClusterTestBase extends Service {
         long start=SystemClock.now();
         long timeout=unit.toMillis(time);
         do {
-            List<Short> partitions = brokerService.getBrokerContext().getClusterManager().getMasterPartitionList(new TopicName(topic));
+            List<Short> partitions = brokerService.getBrokerContext().getClusterManager().getLocalPartitions(new TopicName(topic));
             if(partitions!=null&partitions.size()>0){
                 return;
             }

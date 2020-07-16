@@ -1,0 +1,2 @@
+org.joyqueue.broker.protocol.network.codec.FetchPartitionMessageRequestCodec
+org.joyqueue.broker.protocol.network.codec.FetchTopicMessageRequestCodec

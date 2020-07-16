@@ -190,7 +190,8 @@ public class DefaultConsumerManageService implements ConsumerManageService {
             if (CollectionUtils.isEmpty(consumers)) {
                 continue;
             }
-            for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(clusterManager.getBrokerId())) {
+
+            for (PartitionGroup partitionGroup : clusterManager.getLocalPartitionGroups(topicConfig)) {
                 for (Short partition : partitionGroup.getPartitions()) {
                     for (org.joyqueue.domain.Consumer consumer : consumers) {
                         apps.add(consumer.getApp());

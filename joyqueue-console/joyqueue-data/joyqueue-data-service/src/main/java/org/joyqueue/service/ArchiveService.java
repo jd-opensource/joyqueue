@@ -31,6 +31,12 @@ public interface ArchiveService {
     void register(ArchiveStore archiveStore);
 
     /**
+     * 操作权限控制
+     * @param qArchive
+     */
+    void validate(QArchive qArchive);
+
+    /**
      * 分页查询归档
      * @param qArchive
      * @return

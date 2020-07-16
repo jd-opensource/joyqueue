@@ -15,6 +15,7 @@
  */
 package org.joyqueue.handler.routing.command.monitor;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -28,30 +29,21 @@ import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
-import org.joyqueue.model.domain.PartitionGroupWeight;
-import org.joyqueue.model.domain.Producer;
-import org.joyqueue.model.domain.ProducerConfig;
-import org.joyqueue.model.domain.TopicPartitionGroup;
-import org.joyqueue.model.domain.User;
+import org.joyqueue.model.domain.*;
 import org.joyqueue.model.query.QProducer;
 import org.joyqueue.nsr.ProducerNameServerService;
-import org.joyqueue.service.ApplicationService;
-import org.joyqueue.service.ApplicationUserService;
-import org.joyqueue.service.ProducerService;
-import org.joyqueue.service.TopicPartitionGroupService;
-import org.joyqueue.service.TopicService;
+import org.joyqueue.service.*;
 import org.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService, QProducer> {
@@ -68,15 +60,22 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     @Value(nullable = false)
     private ApplicationUserService applicationUserService;
 
+    // 是否可以操作元素
+    public static final String CAN_OPERATE_PROPERTY = "canOperate";
+
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QProducer> qPageQuery) throws Exception {
         QProducer query = qPageQuery.getQuery();
-        List<Producer> producers = Collections.emptyList();
+        List<Producer> producers = new ArrayList<>(0);
 
-        if (query.getApp() != null) {
+        boolean appFlag = true;
+        if (query.getApp() != null && query.getTopic()==null) {
             producers = service.findByApp(query.getApp().getCode());
-        } else if (query.getTopic() != null) {
+        } else if (query.getTopic() != null && query.getApp() ==null) {
+            appFlag = false;
             producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
+        } else if (query.getTopic() != null && query.getApp() !=null){
+            producers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(),query.getTopic().getCode(),query.getApp().getCode()));
         }
 
         if (CollectionUtils.isNotEmpty(producers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
@@ -84,18 +83,26 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
             Iterator<Producer> iterator = producers.iterator();
             while (iterator.hasNext()) {
                 Producer producer = iterator.next();
-                if (!producer.getTopic().getCode().equals(qPageQuery.getQuery().getKeyword())) {
-                    iterator.remove();
+                if (appFlag) {
+                    if (!producer.getTopic().getCode().contains(qPageQuery.getQuery().getKeyword())) {
+                        iterator.remove();
+                    }
+                } else {
+                    if (!producer.getApp().getCode().contains(qPageQuery.getQuery().getKeyword())) {
+                        iterator.remove();
+                    }
                 }
             }
         }
 
-        if (CollectionUtils.isNotEmpty(producers) && session.getRole() != User.UserRole.ADMIN.value()) {
-            Iterator<Producer> iterator = producers.iterator();
-            while (iterator.hasNext()) {
-                Producer producer = iterator.next();
-                if (applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) == null) {
-                    iterator.remove();
+        if (appFlag) {
+            if (CollectionUtils.isNotEmpty(producers) && session.getRole() != User.UserRole.ADMIN.value()) {
+                Iterator<Producer> iterator = producers.iterator();
+                while (iterator.hasNext()) {
+                    Producer producer = iterator.next();
+                    if (applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) == null) {
+                        iterator.remove();
+                    }
                 }
             }
         }
@@ -103,10 +110,17 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         Pagination pagination = qPageQuery.getPagination();
         pagination.setTotalRecord(producers.size());
 
-        PageResult<Producer> result = new PageResult();
-        result.setPagination(pagination);
-        result.setResult(producers);
-        return Responses.success(result.getPagination(), result.getResult());
+        // 给producer添加是否可以操作属性
+        return Responses.success(pagination, producers.stream().map(producer -> {
+            JSONObject obj = (JSONObject) JSONObject.toJSON(producer);
+            if (session.getRole() == User.UserRole.ADMIN.value() ||
+                    applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) != null) {
+                obj.put(CAN_OPERATE_PROPERTY, true);
+            } else {
+                obj.put(CAN_OPERATE_PROPERTY, false);
+            }
+            return obj;
+        }).collect(Collectors.toList()));
     }
 
     @Path("query-by-topic")

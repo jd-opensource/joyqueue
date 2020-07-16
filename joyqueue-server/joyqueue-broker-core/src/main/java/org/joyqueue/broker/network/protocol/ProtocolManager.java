@@ -126,12 +126,16 @@ public class ProtocolManager extends Service {
         List<ProtocolServer> protocolServers = doGetProtocolServers();
 
         for (ProtocolService protocolService : protocolServices) {
-            protocolService = new ProtocolServiceWrapper(protocolService, commonThreadPool, fetchThreadPool, produceThreadPool);
+            if (!brokerContext.getBrokerConfig().getServerShardedThreads()) {
+                protocolService = new ProtocolServiceWrapper(protocolService, commonThreadPool, fetchThreadPool, produceThreadPool);
+            }
             register(protocolService);
             result.add(protocolService);
         }
         for (ProtocolServer protocolServer : protocolServers) {
-            protocolServer = new ProtocolServerWrapper(protocolServer, commonThreadPool, fetchThreadPool, produceThreadPool);
+            if (!brokerContext.getBrokerConfig().getServerShardedThreads()) {
+                protocolServer = new ProtocolServerWrapper(protocolServer, commonThreadPool, fetchThreadPool, produceThreadPool);
+            }
             register(protocolServer);
             result.add(protocolServer);
         }

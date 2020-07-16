@@ -15,7 +15,7 @@
  */
 package org.joyqueue.broker.protocol.command;
 
-import org.joyqueue.broker.network.traffic.FetchTrafficPayload;
+import org.joyqueue.broker.network.traffic.FetchResponseTrafficPayload;
 import org.joyqueue.broker.network.traffic.Traffic;
 
 /**
@@ -24,7 +24,7 @@ import org.joyqueue.broker.network.traffic.Traffic;
  * author: gaohaoxiang
  * date: 2019/5/16
  */
-public class FetchPartitionMessageResponse extends org.joyqueue.network.command.FetchPartitionMessageResponse implements FetchTrafficPayload {
+public class FetchPartitionMessageResponse extends org.joyqueue.network.command.FetchPartitionMessageResponse implements FetchResponseTrafficPayload {
 
     private Traffic traffic;
 

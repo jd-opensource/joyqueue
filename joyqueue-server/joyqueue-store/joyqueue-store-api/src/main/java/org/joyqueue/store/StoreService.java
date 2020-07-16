@@ -26,7 +26,6 @@ import java.util.List;
  * Broker 存储元数据服务
  */
 public interface StoreService {
-
     /**
      * 获取事务消息使用的{@link TransactionStore}
      * @return 如果 {@link TransactionStore}存在则直接返回；
@@ -60,6 +59,7 @@ public interface StoreService {
      * @return See {@link PartitionGroupStore}
      *
      */
+
     PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers,
                                                       int thisBrokerId,PropertySupplier extend) throws Exception;
 
@@ -136,8 +136,8 @@ public interface StoreService {
     StoreManagementService getManageService();
 
     /**
-     * 获取内存监控
-     * @return
+     * 获取内存监控信息。
+     * @return 内存监控对象。
      */
     BufferPoolMonitorInfo monitorInfo();
 
@@ -150,7 +150,7 @@ public interface StoreService {
 
     /**
      *
-     * Distinguished store name
+     * Distinguished store engine name
      *
      **/
     String name();

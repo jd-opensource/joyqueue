@@ -53,9 +53,9 @@ public class FlagFilter implements MessageFilter {
     public List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JoyQueueException {
         FilterResult filterResult = doFilter(byteBufferList, pattern);
         List<ByteBuffer> inValidList = filterResult.getInValidList();
-
-        filterCallback.callback(inValidList);
-
+        if (null != filterCallback) {
+            filterCallback.callback(inValidList);
+        }
         return filterResult.getValidList();
     }
 

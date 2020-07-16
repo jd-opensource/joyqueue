@@ -15,11 +15,11 @@
  */
 package org.joyqueue.broker.kafka.coordinator;
 
-import org.joyqueue.broker.network.session.BrokerTransportManager;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.network.transport.session.session.TransportSessionManager;
 
 /**
  * Coordinator
@@ -63,7 +63,7 @@ public class Coordinator {
         return coordinator.getTransactionTopic();
     }
 
-    public BrokerTransportManager getSessionManager() {
+    public TransportSessionManager getSessionManager() {
         return coordinator.getSessionManager();
     }
 }
