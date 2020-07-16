@@ -15,11 +15,11 @@
  */
 package org.joyqueue.network.transport.command.handler.filter;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
-import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.exception.TransportException;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +51,10 @@ public class CommandHandlerInvocation {
         } else {
             return filterIterator.next().invoke(this);
         }
+    }
+
+    public void setTransport(Transport transport) {
+        this.transport = transport;
     }
 
     public Transport getTransport() {

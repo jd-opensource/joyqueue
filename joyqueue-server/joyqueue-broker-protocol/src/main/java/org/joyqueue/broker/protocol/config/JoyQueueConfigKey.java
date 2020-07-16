@@ -35,7 +35,7 @@ public enum JoyQueueConfigKey implements PropertyDef {
     COORDINATOR_PARTITION_ASSIGN_MIN_CONNECTIONS("joyqueue.coordinator.partition.assign.minConnections", 3, PropertyDef.Type.INT),
 
     // 生产最大超时
-    PRODUCE_MAX_TIMEOUT("joyqueue.producer.max.timeout", 1000 * 60, PropertyDef.Type.INT),
+    PRODUCE_MAX_TIMEOUT("joyqueue.producer.max.timeout", 1000 * 3, PropertyDef.Type.INT),
 
 
     ;
