@@ -137,7 +137,7 @@ public class Configuration implements PropertySupplier {
      * @param value
      */
     public Property addProperty(final String key, final String value, final String group) {
-        Property property = new Property(name, key, value, group, 0, priority);
+        Property property = new Property(name, key, value, group, 0, 0);
         properties.put(key, property);
         return property;
     }
