@@ -73,38 +73,31 @@ public class LimitTransport implements Transport {
 
     @Override
     public void acknowledge(Command request, Command response) throws TransportException {
-        acknowledge(request, response, null);
-    }
-
-    @Override
-    public void acknowledge(Command request, Command response, CommandCallback callback) throws TransportException {
         try {
             ResponseTrafficPayload responseTrafficPayload = abstractLimitFilter.getResponseTrafficPayload(request, response);
             if (responseTrafficPayload == null) {
-                delegate.acknowledge(request, response, callback);
+                delegate.acknowledge(request, response);
                 return;
             }
 
-            if (!abstractLimitFilter.limitIfNeeded(responseTrafficPayload)) {
-                if (requestTrafficPayload != null && requestTrafficPayload.getTraffic().isLimited()) {
-                    response = abstractLimitFilter.doLimit(delegate, request, response, isRequired);
-                    if (response != null) {
-                        delegate.acknowledge(request, response, callback);
-                    }
-                } else {
-                    delegate.acknowledge(request, response, callback);
-                }
-            } else {
+            if (requestTrafficPayload != null && requestTrafficPayload.getTraffic().isLimited()) {
                 response = abstractLimitFilter.doLimit(delegate, request, response, isRequired);
-                if (response != null) {
-                    delegate.acknowledge(request, response, callback);
-                }
+            } else if (abstractLimitFilter.limitIfNeeded(responseTrafficPayload)) {
+                response = abstractLimitFilter.doLimit(delegate, request, response, isRequired);
+            }
+            if (response != null) {
+                delegate.acknowledge(request, response);
             }
         } finally {
             if (isRequired && requestTrafficPayload != null) {
                 abstractLimitFilter.releaseRequire(requestTrafficPayload);
             }
         }
+    }
+
+    @Override
+    public void acknowledge(Command request, Command response, CommandCallback callback) throws TransportException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

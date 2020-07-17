@@ -113,18 +113,19 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         Connection connection = SessionHelper.getConnection(transport);
         Traffic traffic = new Traffic(clientId);
         boolean[] isNeedDelay = {false};
+        boolean[] singleTopic = {partitionRequestMap.size() == 1};
 
-        for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> entry : partitionRequestMap.entrySet()) {
-            TopicName topic = TopicName.parse(entry.getKey());
+        for (Map.Entry<String, List<ProduceRequest.PartitionRequest>> partitionRequestEntry : partitionRequestMap.entrySet()) {
+            TopicName topic = TopicName.parse(partitionRequestEntry.getKey());
             Map<Integer, ProducePartitionGroupRequest> partitionGroupRequestMap = Maps.newHashMap();
-            List<ProduceResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(entry.getValue().size());
+            List<ProduceResponse.PartitionResponse> partitionResponses = Lists.newArrayListWithCapacity(partitionRequestEntry.getValue().size());
             partitionResponseMap.put(topic.getFullName(), partitionResponses);
 
             String producerId = connection.getProducer(topic.getFullName(), clientId);
             Producer producer = sessionManager.getProducerById(producerId);
             TopicConfig topicConfig = clusterManager.getTopicConfig(topic);
 
-            for (ProduceRequest.PartitionRequest partitionRequest : entry.getValue()) {
+            for (ProduceRequest.PartitionRequest partitionRequest : partitionRequestEntry.getValue()) {
                 if (producer == null) {
                     buildPartitionResponse(partitionRequest.getPartition(), null, KafkaErrorCode.NOT_LEADER_FOR_PARTITION.getCode(), partitionRequest.getMessages(), partitionResponses);
                     latch.countDown();
@@ -142,6 +143,16 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                 splitByPartitionGroup(topicConfig, topic, producer, clientAddress, traffic, partitionRequest, partitionGroupRequestMap);
             }
 
+            boolean singleGroup = (partitionGroupRequestMap.size() == 1);
+
+            if (singleTopic[0] && !singleGroup) {
+                singleTopic[0] = false;
+            }
+
+            if (singleTopic[0] && isNeedAck && partitionResponses.size() == partitionRequestEntry.getValue().size()) {
+                return delayResponse(transport, request, generateResponse(traffic, partitionResponseMap));
+            }
+
             for (Map.Entry<Integer, ProducePartitionGroupRequest> partitionGroupEntry : partitionGroupRequestMap.entrySet()) {
                 EventListener<ProduceResponse.PartitionResponse> listener = new EventListener<ProduceResponse.PartitionResponse>() {
                     @Override
@@ -156,6 +167,19 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
                         if (produceResponse.getErrorCode() != KafkaErrorCode.NONE.getCode()) {
                             isNeedDelay[0] = true;
                         }
+
+                        if (isNeedAck && singleTopic[0]) {
+                            Command response = null;
+                            if (isNeedDelay[0]) {
+                                response = delayResponse(transport, request, generateResponse(traffic, partitionResponseMap));
+                            } else {
+                                response = generateResponse(traffic, partitionResponseMap);
+                            }
+
+                            if (response != null) {
+                                transport.acknowledge(request, response);
+                            }
+                        }
                     }
                 };
 
@@ -168,7 +192,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             }
         }
 
-        if (!isNeedAck) {
+        if (!isNeedAck || singleTopic[0]) {
             return null;
         }
 
@@ -182,20 +206,30 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
             logger.error("wait produce exception, transport: {}, app: {}, topics: {}", transport.remoteAddress(), clientId, produceRequest.getPartitionRequests().keySet(), e);
         }
 
-        ProduceResponse produceResponse = new ProduceResponse(traffic, partitionResponseMap);
-        Command response = new Command(produceResponse);
-
-        if (isNeedDelay[0] && config.getProduceDelayEnable()) {
-            delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(config.getProduceDelay()) {
-                @Override
-                protected void onComplete() {
-                    transport.acknowledge(request, response);
-                }
-            }, Sets.newHashSet(new DelayedOperationKey()));
-            return null;
+        Command response = generateResponse(traffic, partitionResponseMap);
+        if (isNeedDelay[0]) {
+            return delayResponse(transport, request, response);
         } else {
             return response;
         }
+    }
+
+    protected Command delayResponse(Transport transport, Command request, Command response) {
+        if (config.getProduceDelayEnable()) {
+            return response;
+        }
+        delayPurgatory.tryCompleteElseWatch(new AbstractDelayedOperation(config.getProduceDelay()) {
+            @Override
+            protected void onComplete() {
+                transport.acknowledge(request, response);
+            }
+        }, Sets.newHashSet(new DelayedOperationKey()));
+        return null;
+    }
+
+    protected Command generateResponse(Traffic traffic, Map<String, List<ProduceResponse.PartitionResponse>> partitionResponseMap) {
+        ProduceResponse produceResponse = new ProduceResponse(traffic, partitionResponseMap);
+        return new Command(produceResponse);
     }
 
     protected short checkPartitionRequest(Transport transport, ProduceRequest produceRequest, ProduceRequest.PartitionRequest partitionRequest,

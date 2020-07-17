@@ -127,6 +127,7 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
                     produceMessageAckData = buildResponse(produceMessageData, JoyQueueCode.CN_UNKNOWN_ERROR);
                 }
 
+                latch.countDown();
                 resultData.put(topic, produceMessageAckData);
 
                 if (isNeedAck && singleTopic) {
