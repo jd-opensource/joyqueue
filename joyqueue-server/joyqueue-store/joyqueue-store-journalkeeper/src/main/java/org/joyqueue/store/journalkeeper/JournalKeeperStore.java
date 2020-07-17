@@ -76,6 +76,8 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
     }
 
 
+
+
     @Override
     protected void doStart() throws Exception {
         super.doStart();
@@ -338,6 +340,13 @@ public class JournalKeeperStore extends Service implements StoreService, Propert
         this.brokerContext = brokerContext;
         joyQueueUriParser.setBrokerContext(brokerContext);
         journalCompactionStrategy.setBrokerContext(brokerContext);
+    }
+
+    /**
+     * Broker context;
+     **/
+    public BrokerContext brokerContext(){
+        return brokerContext;
     }
 
     static class TopicPartitionGroup {

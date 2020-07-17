@@ -13,14 +13,12 @@ import io.journalkeeper.exceptions.NotLeaderException;
 import io.journalkeeper.journalstore.JournalStoreClient;
 import io.journalkeeper.journalstore.JournalStoreServer;
 import io.journalkeeper.utils.event.EventWatcher;
+import org.joyqueue.store.*;
+import org.joyqueue.store.event.StoreNodeChangeEvent;
 import org.joyqueue.store.journalkeeper.entry.JoyQueueEntryParser;
 import org.joyqueue.store.journalkeeper.transaction.JournalKeeperTransactionStore;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
-import org.joyqueue.store.PartitionGroupStore;
-import org.joyqueue.store.ReadResult;
-import org.joyqueue.store.WriteRequest;
-import org.joyqueue.store.WriteResult;
 import org.joyqueue.store.message.MessageParser;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.toolkit.concurrent.EventListener;
@@ -91,6 +89,38 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         }
         logger.info("JournalKeeper partition group store {} started",this.getUri());
     }
+
+    /**
+     *  handle leader state change
+     **/
+    public void handleLeaderStateChange(int leaderNodeId,int term){
+        onStorageStateChange();
+    }
+
+    /**
+     * 存储节点(readable/writable)状态改变
+     **/
+    public void onStorageStateChange(){
+        CompletableFuture.runAsync(()->{
+            localAdminClient.getClusterConfiguration(server.serverUri()).thenAccept(config->{
+              List<URI> voters=config.getVoters();
+              if(voters!=null){
+                  URI leader=config.getLeader();
+                  List<StoreNode> nodes = Lists.newArrayListWithCapacity(voters.size());
+                  for(URI uri:voters){
+                      boolean isLeader=uri.equals(leader);
+                      nodes.add(new StoreNode(JoyQueueUriParser.getBrokerId(uri), isLeader, isLeader));
+                  }
+                  store.brokerContext().getEventBus().publishEvent(new StoreNodeChangeEvent(topic,group,new StoreNodes(nodes)));
+              }
+            }).exceptionally(e->{
+                logger.info("on storage state change exception",e);
+                return null;
+            });
+        });
+    }
+
+
 
     @Override
     protected void doStop() {
@@ -305,6 +335,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
                 });
     }
 
+
     void maybeUpdateConfig(List<URI> newConfigs) {
         localAdminClient
             .getClusterConfiguration(server.serverUri())
@@ -398,6 +429,9 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
             });
     }
 
+    /**
+     * Local uri
+     **/
     URI getUri() {
         return server.serverUri();
     }

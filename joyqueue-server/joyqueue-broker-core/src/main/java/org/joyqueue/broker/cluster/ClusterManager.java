@@ -650,12 +650,11 @@ public class ClusterManager extends Service {
         if (!config.getTopicLocalElectionEnable() || partitionGroup.getElectType().equals(PartitionGroup.ElectType.fix)) {
             return getBrokerId().equals(partitionGroup.getLeader());
         }
-        // TODO optimize 被动缓存
-        PartitionGroupStore pgs = brokerContext.getStoreService().getStore(partitionGroup.getTopic().getFullName(),partitionGroup.getGroup());
-        if (pgs == null) {
+        ClusterNode clusterNode = clusterNameService.getTopicGroupNode(partitionGroup.getTopic(), partitionGroup.getGroup());
+        if (clusterNode == null) {
             return false;
         }
-        return pgs.writable();
+        return (clusterNode.getLeader() == getBrokerId());
     }
 
     /**

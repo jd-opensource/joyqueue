@@ -7,6 +7,7 @@ import io.journalkeeper.utils.event.EventWatcher;
 import io.journalkeeper.utils.spi.ServiceSupport;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.store.PartitionGroupStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URI;
@@ -45,6 +46,7 @@ public class LeaderReportEventWatcher implements EventWatcher {
                 logger.info("Leader changed: {}, term: {}, topic: {}, group: {}.", leaderUri, term, topic, group);
                 int brokerId = joyQueueUriParser.getBrokerId(URI.create(leaderUri));
                 clusterManager.leaderReport(new TopicName(topic), group, brokerId, new HashSet<>(), term);
+                notifyPartitionGroupStore(topic,group,brokerId,term);
                 break;
             case EventType.ON_VOTERS_CHANGE:
                 //Map<String, String> eventData = event.getEventData();
@@ -57,6 +59,17 @@ public class LeaderReportEventWatcher implements EventWatcher {
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * Notify partition group store
+     **/
+    public void notifyPartitionGroupStore(String topic,int group,int brokerId,int term){
+        PartitionGroupStore pgs= store.getStore(topic,group);
+        if(pgs!=null&&pgs instanceof JournalKeeperPartitionGroupStore){
+            JournalKeeperPartitionGroupStore jpgs=(JournalKeeperPartitionGroupStore)pgs;
+            jpgs.handleLeaderStateChange(brokerId,term);
         }
     }
 

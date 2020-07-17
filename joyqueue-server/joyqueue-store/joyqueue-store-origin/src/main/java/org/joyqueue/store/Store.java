@@ -28,12 +28,11 @@ import org.joyqueue.helper.PortHelper;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.network.transport.config.ServerConfig;
 import org.joyqueue.network.transport.config.TransportConfigSupport;
+import org.joyqueue.store.event.StoreNodeChangeEvent;
+import org.joyqueue.store.ha.election.*;
 import org.joyqueue.store.network.ReplicationServer;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.ha.ReplicableStore;
-import org.joyqueue.store.ha.election.DefaultElectionNode;
-import org.joyqueue.store.ha.election.ElectionManager;
-import org.joyqueue.store.ha.election.ElectionMetadata;
 import org.joyqueue.store.index.IndexItem;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.store.transaction.TransactionStoreManager;
@@ -125,6 +124,32 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             electionManager=new ElectionManager(this);
             AwareHelper.enrichIfNecessary(electionManager,brokerContext);
         }
+        // and election listener
+        electionManager.addListener(this::handleStorageStateChange);
+    }
+
+    /**
+     * Handle election state change
+     **/
+    public void handleStorageStateChange(ElectionEvent e){
+        LeaderElection leaderElection =electionManager.getLeaderElection(TopicName.parse(e.getTopicPartitionGroup().getTopic()),
+                e.getTopicPartitionGroup().getPartitionGroupId());
+        if (leaderElection == null) {
+            return;
+        }
+        StoreNodes storeNodes = convertElectionNodes(leaderElection);
+        brokerContext.getEventBus().publishEvent(new StoreNodeChangeEvent(e.getTopicPartitionGroup().getTopic(),
+                e.getTopicPartitionGroup().getPartitionGroupId(), storeNodes));
+    }
+
+    protected StoreNodes convertElectionNodes(LeaderElection leaderElection) {
+        Collection<DefaultElectionNode> electionNodes = leaderElection.getAllNodes();
+        List<StoreNode> nodes = Lists.newArrayListWithCapacity(electionNodes.size());
+        for (DefaultElectionNode electionNode : electionNodes) {
+            boolean isLeader = electionNode.getNodeId() == leaderElection.getLeaderId();
+            nodes.add(new StoreNode(electionNode.getNodeId(), isLeader, isLeader));
+        }
+        return new StoreNodes(nodes);
     }
 
     /**
