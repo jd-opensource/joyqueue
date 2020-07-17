@@ -28,7 +28,7 @@
               @on-add-brokerGroup="addBrokerGroup" @on-del="del" :operation-column-width="operationColumnWidth">
     </my-table>
     <!--添加-->
-    <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
+    <my-dialog :dialog="addDialog" class="add-dialog maxDialogHeight" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
       <topic-form @on-dialog-cancel="dialogCancel('addDialog')" :type="$store.getters.addFormType"
                   :addBrokerUrls="addBrokerUrls" :addBrokerColData="addBrokerColData"/>
     </my-dialog>
@@ -287,4 +287,7 @@ export default {
 }
 .hint{color: #f00;}
 .star{color: #f00;}
+.maxDialogHeight /deep/ .dui-dialog__body {
+  height: 650px;
+}
 </style>

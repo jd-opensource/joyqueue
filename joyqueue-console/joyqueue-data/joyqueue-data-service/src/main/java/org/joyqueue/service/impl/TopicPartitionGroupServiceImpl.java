@@ -78,7 +78,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             }
         } catch (Exception e) {
             logger.error("exception",e);
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
         return group;
     }
@@ -107,9 +107,9 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             });
             return topicPartitionGroups;
         } catch (Exception e) {
-            String errorMsg = "新添加partitionGroup，同步NameServer失败";
+            String errorMsg = "查询partitionGroup失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg, e);
         }
     }
 
@@ -127,7 +127,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             groups = partitionGroupServerService.findByTopic(model.getTopic().getCode(), model.getNamespace().getCode());
         } catch (Exception e) {
             logger.error("partitionGroupServerService.findByQuery",e);
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
         int currentPartitions = topic.getPartitions();
         if (groups != null) {

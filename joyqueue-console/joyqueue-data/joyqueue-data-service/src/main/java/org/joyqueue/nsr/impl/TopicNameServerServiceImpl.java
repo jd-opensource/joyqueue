@@ -236,7 +236,8 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         try {
             throw new RuntimeException("请使用addTopic接口");
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
     }
 
@@ -256,7 +257,8 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
             return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR, e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR, e.getMessage(), e);
         }
     }
 
@@ -269,7 +271,8 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             if (pageResult == null || pageResult.getResult() == null) return PageResult.empty();
             return new PageResult<>(pageResult.getPagination(),pageResult.getResult().stream().map(topic -> nsrTopicConverter.revert(topic)).collect(Collectors.toList()));
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR, e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR, e.getMessage(), e);
         }
     }
 
@@ -279,20 +282,22 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             TopicQuery topicQuery = new TopicQuery();
             topicQuery.setNamespace(namespaceCode);
             topicQuery.setCode(code);
-            org.joyqueue.domain.Topic nsrToic= JSON.parseObject(post(GETBYCODE_TOPIC, topicQuery), org.joyqueue.domain.Topic.class);
-            return nsrTopicConverter.revert(nsrToic);
+            org.joyqueue.domain.Topic nsrTopic= JSON.parseObject(post(GETBYCODE_TOPIC, topicQuery), org.joyqueue.domain.Topic.class);
+            return nsrTopicConverter.revert(nsrTopic);
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
     }
 
     @Override
     public Topic findById(String id) {
         try {
-            org.joyqueue.domain.Topic nsrToic= JSON.parseObject(post(GETBYID_TOPIC,id), org.joyqueue.domain.Topic.class);
-            return nsrTopicConverter.revert(nsrToic);
+            org.joyqueue.domain.Topic nsrTopic= JSON.parseObject(post(GETBYID_TOPIC,id), org.joyqueue.domain.Topic.class);
+            return nsrTopicConverter.revert(nsrTopic);
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
     }
     private TopicQuery topicQueryConvert(QTopic qTopic){

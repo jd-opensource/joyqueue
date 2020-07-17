@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -168,6 +169,9 @@ public class ConsumerServiceImpl implements ConsumerService {
             if (applicationList == null || applicationList.size() <= 0) return Lists.newArrayList();
             List<String> appCodes = applicationList.stream().map(application -> application.getCode()).collect(Collectors.toList());
             query.setAppList(appCodes);
+        }
+        if (query.getAppList() == null ) {
+            query.setAppList(Collections.emptyList());
         }
         List<Consumer> consumers = Lists.newLinkedList();
         for (String app : query.getAppList()) {
