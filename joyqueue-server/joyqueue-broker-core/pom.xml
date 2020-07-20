@@ -52,6 +52,10 @@
             <artifactId>joyqueue-retry-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-retry-db-cache</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
         </dependency>

@@ -50,7 +50,9 @@ export default {
             title: '机房 [编码/名称]',
             key: 'dataCenter',
             formatter (item) {
-              return item.dataCenter.code + '/' + item.dataCenter.name
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
             }
           },
           {
