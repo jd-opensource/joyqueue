@@ -134,7 +134,6 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
                 retryManager.retryError(topic, app, ListUtil.toArray(retryError));
             }
 
-            consume.releasePartition(topic, app, partition);
             return JoyQueueCode.SUCCESS;
         } catch (JoyQueueException e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
@@ -142,6 +141,8 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
         } catch (Exception e) {
             logger.error("commit ack exception, topic: {}, app: {}, partition: {}, transport: {}", topic, app, partition, connection.getTransport(), e);
             return JoyQueueCode.CN_UNKNOWN_ERROR;
+        } finally {
+            consume.releasePartition(topic, app, partition);
         }
     }
 

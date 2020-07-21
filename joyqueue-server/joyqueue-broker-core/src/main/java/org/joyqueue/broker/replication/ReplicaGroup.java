@@ -416,7 +416,11 @@ public class ReplicaGroup extends Service {
 
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
-                        if (SystemClock.now() - replica.getLastAppendTime() >= electionConfig.getElectionTimeout()) {
+                        int heartbeatTimeout = electionConfig.getHeartbeatTimeout();
+                        if (electionConfig.enableSharedHeartbeat()) {
+                            heartbeatTimeout = electionConfig.getElectionTimeout();
+                        }
+                        if (SystemClock.now() - replica.getLastAppendTime() >= heartbeatTimeout) {
                             request = generateHeartbeatRequest(replica);
                         } else {
                             replicateResponseQueue.put(new DelayedCommand(ONE_MS_NANO, replica.replicaId()));

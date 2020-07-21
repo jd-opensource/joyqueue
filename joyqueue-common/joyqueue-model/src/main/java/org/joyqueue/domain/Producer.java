@@ -153,7 +153,7 @@ public class Producer extends Subscription {
             this.nearby = false;
             this.single = false;
             this.archive = false;
-            this.timeOut = 1000;
+            this.timeOut = 1000 * 2;
         }
 
         // 就近发送
@@ -297,8 +297,8 @@ public class Producer extends Subscription {
              * 黑名单
              */
             private Set<String> blackList;
-            // 默认生产超时时间 5秒钟
-            private Integer timeOut = 1000 * 1;
+            // 默认生产超时时间 2秒钟
+            private Integer timeOut = 1000 * 2;
 
             public static Builder build() {
                 return new Builder();

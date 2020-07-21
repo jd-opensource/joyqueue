@@ -142,6 +142,12 @@ public class Configuration implements PropertySupplier {
         return property;
     }
 
+    public Property addProperty(final String key, final String value, final String group,int priority) {
+        Property property = new Property(name, key, value, group, 0, priority);
+        properties.put(key, property);
+        return property;
+    }
+
     public Property addProperty(final String key, final String value) {
         return addProperty(key, value, null);
     }

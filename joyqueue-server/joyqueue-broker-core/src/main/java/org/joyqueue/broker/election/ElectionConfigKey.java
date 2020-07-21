@@ -48,7 +48,8 @@ public enum ElectionConfigKey implements PropertyDef {
     ENABLE_ONLINE_NODE_PERIODICALLY("election.enable.onlineNode.periodically", true, Type.BOOLEAN),
     OUTPUT_CONSUME_POS("election.consume.pos.output", false, Type.BOOLEAN),
     CONNECTION_TIMEOUT("election.connection.timeout", 100 * 1, Type.INT),
-    CONNECTION_RETRY_DELAY("election.connection.retryDelay", 1000 * 15, Type.INT),
+    CONNECTION_RETRY_DELAY("election.connection.retryDelay", 1000 * 10, Type.INT),
+    ENABLE_SHARED_HEARTBEAT("election.enable.shared.heartbeat", false, Type.BOOLEAN),
 
     ;
 
