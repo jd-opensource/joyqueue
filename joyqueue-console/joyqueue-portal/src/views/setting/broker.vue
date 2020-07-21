@@ -194,6 +194,16 @@ export default {
             }
           },
           {
+            title: '机房 (编码/名称)',
+            key: 'dataCenter.code',
+            width: '9%',
+            formatter (item) {
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
+            }
+          },
+          {
             title: '内存百分比/存储百分比',//bufferPoolMonitorInfo.used%bufferPoolMonitorInfo.maxMemorySize  store.freeSpace%store.totalSpace
             key: 'bufferPoolMonitorInfo.maxMemorySize',
             width: '9%',
@@ -217,16 +227,6 @@ export default {
             formatter (item) {
               if (item.enQueue&&item.deQueue) {
                 return item.deQueue.count + '/' + item.enQueue.count
-              }
-            }
-          },
-          {
-            title: '机房 (编码/名称)',
-            key: 'dataCenter.code',
-            width: '9%',
-            formatter (item) {
-              if (item.dataCenter) {
-                return item.dataCenter.code + '/' + item.dataCenter.name
               }
             }
           },
