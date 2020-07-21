@@ -75,7 +75,13 @@ export default {
       },
       tableData: {
         rowData: [],
-        colData: this.colData
+        colData: this.colData,
+        btns: [
+          {
+            txt: '断开连接',
+            method: 'on-set-offset'
+          }
+        ]
       },
       page: {
         total: 0

@@ -204,19 +204,20 @@ export default {
             }
           },
           {
-            title: '内存百分比/存储百分比',//bufferPoolMonitorInfo.used%bufferPoolMonitorInfo.maxMemorySize  store.freeSpace%store.totalSpace
+            title: '内存百分比/存储百分比', // bufferPoolMonitorInfo.used%bufferPoolMonitorInfo.maxMemorySize  store.freeSpace%store.totalSpace
             key: 'bufferPoolMonitorInfo.maxMemorySize',
             width: '9%',
-            formatter (item) {
-              if (item.bufferPoolMonitorInfo) {
-                let res1 = 0, res2 = 0
+            formatter: function (item) {
+              if (item.bufferPoolMonitorInfo && item.store) {
+                let res1 = 0
+                let res2 = 0
                 let a = parseFloat(item.bufferPoolMonitorInfo.maxMemorySize)
                 let b = parseFloat(item.bufferPoolMonitorInfo.used)
-                res1=Number(b/a*100).toFixed(1)
+                res1 = Number(b / a * 100).toFixed(1)
                 a = parseFloat(item.store.freeSpace)
                 b = parseFloat(item.store.totalSpace)
-                res2=Number((b-a)/b*100).toFixed(1)
-                return res1+ '% / ' + res2+'%'
+                res2 = Number((b - a) / b * 100).toFixed(1)
+                return res1 + '% / ' + res2 + '%'
               }
             }
           },
@@ -225,23 +226,23 @@ export default {
             key: 'enQueue.count',
             width: '9%',
             formatter (item) {
-              if (item.enQueue&&item.deQueue) {
+              if (item.enQueue && item.deQueue) {
                 return item.deQueue.count + '/' + item.enQueue.count
               }
             }
           },
-/*          {
+          /*          {
             title: '启动时间',
             key: 'startupTime',
             width: '15%'
-          },*/
+          }, */
           {
             title: '启动时间/版本',
             key: 'startupInfo.version',
-            width: '20%',//15
+            width: '20%', // 15
             render: (h, params) => {
               let html = []
-              html.push(params.item.startupTime+'/')
+              html.push(params.item.startupTime + '/')
               let spin = h('d-spin', {
                 attrs: {
                   size: 'small'
@@ -277,19 +278,19 @@ export default {
           {
             title: '重试方式/权限',
             key: 'retryType',
-            width: '18%',//10
+            width: '18%', // 10
             render: (h, params) => {
-              return h('div',[brokerRetryTypeRender(h, params.item.retryType),brokerPermissionTypeRender(h, params.item.permission)])
+              return h('div', [brokerRetryTypeRender(h, params.item.retryType), brokerPermissionTypeRender(h, params.item.permission)])
             }
-          },
-/*          {
+          }
+          /*          {
             title: '权限',
             key: 'permission',
             width: '8%',
             render: (h, params) => {
               return brokerPermissionTypeRender(h, params.item.permission)
             }
-          }*/
+          } */
         ]
       }
     }
