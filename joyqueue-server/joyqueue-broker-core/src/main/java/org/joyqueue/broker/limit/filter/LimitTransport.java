@@ -124,4 +124,9 @@ public class LimitTransport implements Transport {
     public void stop() {
         delegate.stop();
     }
+
+    @Override
+    public String toString() {
+        return delegate.toString();
+    }
 }

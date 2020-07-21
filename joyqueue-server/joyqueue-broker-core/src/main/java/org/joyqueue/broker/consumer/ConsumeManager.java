@@ -618,7 +618,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         String topic = consumer.getTopic();
         Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(topic), partition);
         PartitionGroupStore store = storeService.getStore(topic, partitionGroupId);
-        return store.getLeftIndex(partition);
+        return store.getLeftIndexAndCheck(partition);
     }
 
     @Override
@@ -626,7 +626,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         String topic = consumer.getTopic();
         Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(topic), partition);
         PartitionGroupStore store = storeService.getStore(topic, partitionGroupId);
-        return store.getRightIndex(partition);
+        return store.getRightIndexAndCheck(partition);
     }
 
     /**

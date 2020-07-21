@@ -1182,37 +1182,43 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         writeLoopThread.stop();
     }
 
-    long getLeftIndex(short partition) {
+    public long getLeftIndex(short partition) {
+        long index = -1;
+        Partition p = partitionMap.get(partition);
+        if (null != p) {
+            index = p.store.left() / IndexItem.STORAGE_SIZE;
+        }
+        return index;
+    }
+
+    public long getLeftIndexAndCheck(short partition) {
         rollbackLock.readLock().lock();
         try {
             if (!enabled.get()) {
                 throw new ReadException(String.format("Store disabled! topic: %s, partitionGroup: %d.", topic, partitionGroup));
             }
-            long index = -1;
-            Partition p = partitionMap.get(partition);
-            if (null != p) {
-                index = p.store.left() / IndexItem.STORAGE_SIZE;
-            }
-
-            return index;
+            return getLeftIndex(partition);
         } finally {
             rollbackLock.readLock().unlock();
         }
     }
 
     public long getRightIndex(short partition) {
+        long index = -1;
+        Partition p = partitionMap.get(partition);
+        if (null != p) {
+            index = p.store.right() / IndexItem.STORAGE_SIZE;
+        }
+        return index;
+    }
+
+    public long getRightIndexAndCheck(short partition) {
         rollbackLock.readLock().lock();
         try {
             if (!enabled.get()) {
                 throw new ReadException(String.format("Store disabled! topic: %s, partitionGroup: %d.", topic, partitionGroup));
             }
-            long index = -1;
-            Partition p = partitionMap.get(partition);
-            if (null != p) {
-                index = p.store.right() / IndexItem.STORAGE_SIZE;
-            }
-
-            return index;
+            return getRightIndex(partition);
         } finally {
             rollbackLock.readLock().unlock();
         }
