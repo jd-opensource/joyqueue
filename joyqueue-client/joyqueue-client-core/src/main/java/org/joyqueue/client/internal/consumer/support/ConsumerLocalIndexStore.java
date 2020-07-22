@@ -15,17 +15,15 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.consumer.domain.LocalIndexData;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +49,7 @@ public class ConsumerLocalIndexStore extends Service {
     private File persistFile;
     private volatile boolean isNeedPersist;
     private ScheduledExecutorService persistTimer;
-    private Table<String /** app**/, String /** topic **/, Map<Short, LocalIndexData>> indexTable;
+    private Map<String /** app**/, Map<String /** topic **/, Map<Short, LocalIndexData>>> indexTable;
 
     public ConsumerLocalIndexStore(String persistPath, int persistInterval) {
         this.persistPath = persistPath;
@@ -80,10 +78,15 @@ public class ConsumerLocalIndexStore extends Service {
         if (persistTimer != null) {
             persistTimer.shutdown();
         }
+        persist();
     }
 
     public LocalIndexData fetchIndex(String topic, String app, short partition) {
-        Map<Short, LocalIndexData> partitionMap = indexTable.get(app, topic);
+        Map<String, Map<Short, LocalIndexData>> topicMap = indexTable.get(app);
+        if (topicMap == null) {
+            return null;
+        }
+        Map<Short, LocalIndexData> partitionMap = topicMap.get(topic);
         if (partitionMap == null) {
             return null;
         }
@@ -92,10 +95,16 @@ public class ConsumerLocalIndexStore extends Service {
 
     public boolean saveIndex(String topic, String app, short partition, long index) {
         long now = SystemClock.now();
-        Map<Short, LocalIndexData> partitionMap = indexTable.get(app, topic);
+        Map<String, Map<Short, LocalIndexData>> topicMap = indexTable.get(app);
+        if (topicMap == null) {
+            topicMap = Maps.newHashMap();
+            indexTable.put(app, topicMap);
+        }
+
+        Map<Short, LocalIndexData> partitionMap = topicMap.get(topic);
         if (partitionMap == null) {
             partitionMap = Maps.newHashMap();
-            indexTable.put(app, topic, partitionMap);
+            topicMap.put(topic, partitionMap);
         }
 
         LocalIndexData localIndexData = partitionMap.get(partition);
@@ -125,9 +134,9 @@ public class ConsumerLocalIndexStore extends Service {
 
     // TODO 优化
     // TODO 路径拆分
-    protected Table<String, String, Map<Short, LocalIndexData>> doRead(File persistFile) throws Exception {
+    protected Map<String, Map<String, Map<Short, LocalIndexData>>> doRead(File persistFile) throws Exception {
         String json = FileUtils.readFileToString(persistFile);
-        Table<String, String, Map<Short, LocalIndexData>> result = HashBasedTable.create();
+        Map<String, Map<String, Map<Short, LocalIndexData>>> result = Maps.newHashMap();
 
         if (StringUtils.isBlank(json)) {
             return result;
@@ -153,7 +162,12 @@ public class ConsumerLocalIndexStore extends Service {
                     partitions.put(partition, new LocalIndexData(index, updateTime, createTime));
                 }
 
-                result.put(app, topic, partitions);
+                Map<String, Map<Short, LocalIndexData>> topicMap = result.get(app);
+                if (topicMap == null) {
+                    topicMap = Maps.newHashMap();
+                    result.put(app, topicMap);
+                }
+                topicMap.put(topic, partitions);
             }
         }
         return result;
@@ -168,7 +182,7 @@ public class ConsumerLocalIndexStore extends Service {
     }
 
     protected void doPersist(File persistFile) {
-        String json = new GsonBuilder().create().toJson(indexTable.rowMap());
+        String json = new GsonBuilder().create().toJson(indexTable);
 
         try {
             FileUtils.writeStringToFile(persistFile, json);

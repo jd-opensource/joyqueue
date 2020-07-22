@@ -78,11 +78,15 @@ public class LocalConsumerIndexManager extends Service implements ConsumerIndexM
             logger.error("resetIndex error, topic: {}, partition: {}, error: {}", topic, partition, fetchIndexData.getCode());
             return fetchIndexData.getCode();
         }
-        if (fetchIndexData.getLeftIndex() >= 0) {
-            consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getLeftIndex());
-        } else {
-            consumerIndexStore.saveIndex(topic, app, partition, fetchIndexData.getIndex());
+        long index = 0;
+        if (config.getBroadcastIndexAutoReset() == ConsumerConfig.BROADCAST_AUTO_RESET_CURRENT_INDEX) {
+            index = fetchIndexData.getIndex();
+        } else if (config.getBroadcastIndexAutoReset() == ConsumerConfig.BROADCAST_AUTO_RESET_LEFT_INDEX) {
+            index = fetchIndexData.getLeftIndex();
+        } else if (config.getBroadcastIndexAutoReset() == ConsumerConfig.BROADCAST_AUTO_RESET_RIGHT_INDEX) {
+            index = fetchIndexData.getRightIndex();
         }
+        consumerIndexStore.saveIndex(topic, app, partition, index);
         return JoyQueueCode.SUCCESS;
     }
 
