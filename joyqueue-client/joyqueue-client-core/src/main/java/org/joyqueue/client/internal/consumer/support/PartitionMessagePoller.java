@@ -326,7 +326,7 @@ public class PartitionMessagePoller extends Service implements MessagePoller {
 
         JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, config.getAppFullName(), config.getTimeout());
         if (!result.equals(JoyQueueCode.SUCCESS)) {
-            logger.warn("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
+            logger.error("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
         }
         return result;
     }

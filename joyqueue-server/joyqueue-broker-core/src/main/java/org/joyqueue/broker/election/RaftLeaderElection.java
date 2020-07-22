@@ -807,6 +807,14 @@ public class RaftLeaderElection extends LeaderElection  {
         }
     }
 
+    private synchronized void maybeStartNewHeartbeat() {
+        if (electionConfig.enableSharedHeartbeat()) {
+            startNewHeartbeat();
+        } else {
+            resetHeartbeatTimer();
+        }
+    }
+
     /**
      * 开始新一轮心跳，向Follower节点发送心跳命令，重置心跳定时器
      */
@@ -847,10 +855,7 @@ public class RaftLeaderElection extends LeaderElection  {
                         topicPartitionGroup, localNode, e);
             }
         }
-
-        if (electionConfig.enableSharedHeartbeat()) {
-            resetHeartbeatTimer();
-        }
+        resetHeartbeatTimer();
     }
 
 
@@ -922,7 +927,7 @@ public class RaftLeaderElection extends LeaderElection  {
             heartbeatTimerFuture.cancel(true);
             heartbeatTimerFuture = null;
         }
-        heartbeatTimerFuture = electionTimerExecutor.schedule(this::startNewHeartbeat,
+        heartbeatTimerFuture = electionTimerExecutor.schedule(this::maybeStartNewHeartbeat,
                 electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
     }
 
