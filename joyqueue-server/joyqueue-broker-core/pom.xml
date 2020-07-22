@@ -99,12 +99,12 @@
             <scope>test</scope>
         </dependency>
         <!--FIXME: 不要直接依赖实现-->
-        <dependency>
-            <groupId>org.joyqueue</groupId>
-            <artifactId>joyqueue-store-core</artifactId>
-            <version>4.2.5.4-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.joyqueue</groupId>-->
+            <!--<artifactId>joyqueue-store-core</artifactId>-->
+            <!--<version>4.2.5.4-SNAPSHOT</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
