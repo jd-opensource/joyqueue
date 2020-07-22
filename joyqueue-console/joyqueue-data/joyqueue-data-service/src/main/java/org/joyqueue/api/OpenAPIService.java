@@ -17,15 +17,7 @@ package org.joyqueue.api;
 
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
-import org.joyqueue.model.domain.Application;
-import org.joyqueue.model.domain.ApplicationToken;
-import org.joyqueue.model.domain.Consumer;
-import org.joyqueue.model.domain.Identity;
-import org.joyqueue.model.domain.PartitionOffset;
-import org.joyqueue.model.domain.Producer;
-import org.joyqueue.model.domain.Subscribe;
-import org.joyqueue.model.domain.Topic;
-import org.joyqueue.model.domain.TopicPubSub;
+import org.joyqueue.model.domain.*;
 import org.joyqueue.model.query.QBrokerGroup;
 import org.joyqueue.monitor.PartitionAckMonitorInfo;
 import org.joyqueue.monitor.PendingMonitorInfo;
@@ -135,6 +127,12 @@ public interface OpenAPIService {
      **/
     Topic createTopic(Topic topic, QBrokerGroup brokerGroup, Identity operator) throws Exception;
 
+    /**
+     *
+     * Create topic with selected broker list
+     *
+     **/
+    Topic createTopic(Topic topic, List<Broker> select, Identity operator) throws Exception;
     /**
      * delete topic
      *

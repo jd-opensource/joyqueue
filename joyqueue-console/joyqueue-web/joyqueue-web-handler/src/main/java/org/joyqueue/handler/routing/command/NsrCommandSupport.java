@@ -39,6 +39,7 @@ import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.nsr.NsrService;
+import org.joyqueue.service.ApplicationUserService;
 
 /**
  * Created by wangxiaofei1 on 2019/1/4.
@@ -52,6 +53,8 @@ public abstract class NsrCommandSupport<M, S extends NsrService, Q extends Query
     protected Identity operator;
     @CVertx
     protected Vertx vertx;
+    @Value(nullable = false)
+    protected ApplicationUserService applicationUserService;
 
     @Override
     public Response execute() throws Exception {
@@ -177,5 +180,13 @@ public abstract class NsrCommandSupport<M, S extends NsrService, Q extends Query
                     + JSON.toJSONString(model) + ")", auditType, type + "(" + model.toString() + ")"));
         }
 
+    }
+
+    // 权限约束：普通用户只有该应用下用户才能添加用户
+    public void validatePrivilege(String appCode) {
+        if (session.getRole() != User.UserRole.ADMIN.value() &&
+                applicationUserService.findByUserApp(operator.getCode(), appCode) == null) {
+            throw new ConfigException(ErrorCode.NoPrivilege);
+        }
     }
 }

@@ -25,6 +25,7 @@ import org.joyqueue.toolkit.config.PropertyDef;
 public enum BrokerConfigKey implements PropertyDef {
 
     FRONTEND_SERVER_PORT("broker.frontend-server.transport.server.port", 50088, Type.INT),
+    FRONTEND_SERVER_SHARDED_THREADS("broker.frontend-server.shared.threads", false, Type.BOOLEAN),
     FRONTEND_SERVER_COMMON_THREADS("broker.frontend-server.common.threads", Runtime.getRuntime().availableProcessors() * 4, Type.INT),
     FRONTEND_SERVER_COMMON_THREAD_KEEPALIVE("broker.frontend-server.common.thread.keepalive", 1000 * 60, Type.INT),
     FRONTEND_SERVER_COMMON_THREAD_QUEUE_SIZE("broker.frontend-server.common.thread.queue.size", 102400, Type.INT),

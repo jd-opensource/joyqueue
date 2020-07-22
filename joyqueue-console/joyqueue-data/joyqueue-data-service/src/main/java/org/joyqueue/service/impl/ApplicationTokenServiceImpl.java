@@ -78,6 +78,7 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
         try {
             return appTokenNameServerService.findByApp(application.getCode());
         } catch (Exception e) {
+            logger.error("", e);
             throw new RuntimeException("findByAppAndToken,exception",e);
         }
     }
@@ -87,6 +88,7 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
         try {
             return appTokenNameServerService.findByApp(code);
         } catch (Exception e) {
+            logger.error("", e);
             throw new RuntimeException("findByAppAndToken,exception",e);
         }
     }
@@ -97,6 +99,7 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
         try {
             return appTokenNameServerService.findByAppAndToken(app, token);
         } catch (Exception e) {
+            logger.error("", e);
             throw new RuntimeException("findByAppAndToken", e);//回滚
         }
     }
@@ -106,7 +109,8 @@ public class ApplicationTokenServiceImpl implements ApplicationTokenService {
         try {
             return appTokenNameServerService.findById(id);
         } catch (Exception e) {
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
     }
 

@@ -60,7 +60,8 @@ public class LeaderServiceImpl implements LeaderService {
             if( topicPartitionGroups.isEmpty()){ return Collections.EMPTY_LIST;}
             return findPartitionGroupLeaderBroker(topicPartitionGroups);
         }catch (Exception e){
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
     }
 
@@ -71,7 +72,7 @@ public class LeaderServiceImpl implements LeaderService {
         }catch (Exception e){
             String errorMsg = String.format("topicId %d master group request error", topicPartitionGroups.get(0).getTopic().getId());
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg, e);
         }
     }
 

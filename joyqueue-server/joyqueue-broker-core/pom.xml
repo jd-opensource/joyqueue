@@ -20,14 +20,14 @@
     <parent>
         <artifactId>joyqueue-server</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.4-SNAPSHOT</version>
+        <version>4.2.5.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-core</artifactId>
     <name>JoyQueue-Broker-Core</name>
     <description>Broker core library</description>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>4.2.5.4-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -96,6 +96,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--FIXME: 不要直接依赖实现-->
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-store-core</artifactId>
+            <version>4.2.5.4-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>

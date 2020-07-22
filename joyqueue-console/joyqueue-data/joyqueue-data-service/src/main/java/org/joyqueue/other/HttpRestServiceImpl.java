@@ -50,7 +50,8 @@ public class HttpRestServiceImpl implements HttpRestService {
             logger.info("proxy monitor exception",e);
             throw e;
         }catch (Exception e){
-            throw new ServiceException(ServiceException.IO_ERROR, e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.IO_ERROR, e.getMessage(), e);
         }
     }
 
@@ -72,7 +73,8 @@ public class HttpRestServiceImpl implements HttpRestService {
             logger.info("proxy monitor exception",e);
             throw e;
         }catch (Exception e){
-            throw new ServiceException(ServiceException.IO_ERROR, e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.IO_ERROR, e.getMessage(), e);
         }
     }
 
@@ -94,7 +96,8 @@ public class HttpRestServiceImpl implements HttpRestService {
             logger.info("proxy monitor exception",e);
             throw e;
         }catch (Exception e){
-            throw new ServiceException(ServiceException.IO_ERROR, e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.IO_ERROR, e.getMessage(), e);
         }
     }
 }

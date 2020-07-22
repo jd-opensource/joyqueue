@@ -6,10 +6,10 @@
                      :default-time="['00:00:00', '23:59:59']" @on-enter="getList">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
-      <d-input v-model="search.topic" placeholder="队列名" class="input2" @on-enter="getList">
-        <span slot="prepend">队列名</span>
+      <d-input v-model="search.topic" oninput="value = value.trim()" placeholder="主题名" class="input2" @on-enter="getList">
+        <span slot="prepend">主题名</span>
       </d-input>
-      <d-input v-model="search.businessId" placeholder="业务ID" class="input2" @on-enter="getList">
+      <d-input v-model="search.businessId" oninput="value = value.trim()" placeholder="业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button class="button2" type="primary" @click="getList">查询
@@ -113,7 +113,7 @@ export default {
         consume: '/archive/consume',
         download: '/archive/download',
         retry: '/archive/retry',
-        getApps:'/consumer/findAppsByTopic/topic',
+        getApps: '/consumer/findAppsByTopic',
         preview: '/archive/preview',
         messageTypes: '/archive/message-types'
       },
@@ -138,9 +138,9 @@ export default {
       previewDialogVisible: false,
       previewQuery: undefined,
       retry: {
-        appList:[],
-        app:'',
-        item:{}
+        appList: [],
+        app: '',
+        item: {}
       },
       consumeData: {
         rowData: [],
@@ -151,7 +151,7 @@ export default {
             width: '20%'
           },
           // {
-          //   title:"队列",
+          //   title:"主题",
           //   key: 'topic'
           // },
           {
@@ -218,7 +218,7 @@ export default {
             width: '15%'
           },
           {
-            title: '队列',
+            title: '主题',
             key: 'topic',
             width: '15%'
           }
@@ -249,7 +249,7 @@ export default {
         return
       }
       if (!this.search.topic) {
-        this.$Message.error('队列名不能为空')
+        this.$Message.error('主题名不能为空')
         return
       }
       let oldData = this.tableData.rowData
@@ -260,7 +260,7 @@ export default {
         this.search.rowKeyStart = oldData[oldData.length - 1].rowKeyStart
       } else {
         this.search.sendTime = this.search.beginTime
-        this.search.rowKeyStart = '';
+        this.search.rowKeyStart = ''
       }
       apiRequest.post(this.urlOrigin.search, {}, this.search).then((data) => {
         this.tableData.rowData = data.data
@@ -272,30 +272,29 @@ export default {
       })
     },
     download (item) {
-      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId+'&messageType='+this.messageType
+      let data = '?topic=' + item.topic + '&sendTime=' + item.sendTime + '&businessId=' + item.businessId + '&messageId=' + item.messageId + '&messageType=' + this.messageType
       apiRequest.get(this.urlOrigin.download + data).then(data => {
         this.$Message.success('下载成功')
       })
     },
     preview (item) {
       this.previewQuery = {
-        topic: item.topic ,
+        topic: item.topic,
         sendTime: item.sendTime,
         businessId: item.businessId,
         messageId: item.messageId
       }
       this.previewDialogVisible = true
-
     },
-    retryInit(item) {
-      this.retryDialog.visible = true;
-      this.retry.item = item;
-      apiRequest.get(this.urlOrigin.getApps + '/' + item.topic).then((data) => {
+    retryInit (item) {
+      this.retryDialog.visible = true
+      this.retry.item = item
+      apiRequest.get(this.urlOrigin.getApps + '?topic=' + item.topic).then((data) => {
         this.retry.appList = data.data
       })
     },
     configConfirm () {
-      this.retry.item.app = this.retry.app;
+      this.retry.item.app = this.retry.app
       apiRequest.post(this.urlOrigin.retry, {}, this.retry.item).then(data => {
         this.$Message.success('操作成功')
       })
@@ -319,7 +318,6 @@ export default {
         } else {
           console.error('Property message-types can not be empty!')
         }
-
       })
   }
 }

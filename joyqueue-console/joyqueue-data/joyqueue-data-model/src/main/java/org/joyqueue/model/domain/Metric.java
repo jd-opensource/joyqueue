@@ -50,6 +50,21 @@ public class Metric extends BaseModel implements Identifier, Cloneable {
      */
     private String provider;
 
+    /**
+     * metric user permission
+     */
+    private boolean userPermission;
+
+    /**
+     * metric type: producer, consumer, broker
+     */
+    private String category;
+
+    /**
+     * collect interval, unit seconds
+     */
+    private int collectInterval;
+
     @Override
     public String getCode() {
         return code;
@@ -111,6 +126,30 @@ public class Metric extends BaseModel implements Identifier, Cloneable {
         this.provider = provider;
     }
 
+    public boolean isUserPermission() {
+        return userPermission;
+    }
+
+    public void setUserPermission(boolean userPermission) {
+        this.userPermission = userPermission;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public int getCollectInterval() {
+        return collectInterval;
+    }
+
+    public void setCollectInterval(int collectInterval) {
+        this.collectInterval = collectInterval;
+    }
+
     public enum MetricType implements EnumItem{
         OTHERS(0, "others"),
         ATOMIC(1, "atomic"),
@@ -124,10 +163,12 @@ public class Metric extends BaseModel implements Identifier, Cloneable {
             this.description = description;
         }
 
+        @Override
         public int value() {
             return this.value;
         }
 
+        @Override
         public String description() {
             return this.description;
         }
@@ -150,53 +191,5 @@ public class Metric extends BaseModel implements Identifier, Cloneable {
             return OTHERS;
         }
     }
-
-//    public enum ChartType {
-//        OTHERS(0, "others"),
-//        PRODUCER_DETAIL(1, "pd"),
-//        CONSUMER_DETAIL(2, "cd"),
-//        PRODUCER_TOTAL(3, "pt"),
-//        CONSUMER_TOTAL(4, "ct"),
-//        HOST(5, "host"),
-//        BROKER(6, "broker");
-//
-//        private int value;
-//        private String chart;
-//
-//        ChartType(int value, String chart) {
-//            this.value = value;
-//            this.chart = chart;
-//        }
-//
-//        public int value() {
-//            return this.value;
-//        }
-//
-//        public int valueOf() {
-//            return this.value;
-//        }
-//
-//        public String chart() {
-//            return this.chart;
-//        }
-//
-//        public static ChartType resolve(int value) {
-//            for (ChartType type : ChartType.values()) {
-//                if (type.value() == value) {
-//                    return type;
-//                }
-//            }
-//            return OTHERS;
-//        }
-//
-//        public static ChartType resolve(String chartOrName) {
-//            for (ChartType type : ChartType.values()) {
-//                if (type.chart().equals(chartOrName) || type.name().equals(chartOrName)) {
-//                    return type;
-//                }
-//            }
-//            return OTHERS;
-//        }
-//    }
 
 }

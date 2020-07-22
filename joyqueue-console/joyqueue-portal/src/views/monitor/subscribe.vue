@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ml20 mt10">
-      <d-input v-model="keyword" :placeholder="keywordTip" class="left" style="width: 400px" @on-enter="getList">
+      <d-input v-model="keyword" oninput="value = value.trim()" :placeholder="keywordTip" class="left" style="width: 400px" @on-enter="getList">
         <span slot="prepend">{{keywordName}}</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>

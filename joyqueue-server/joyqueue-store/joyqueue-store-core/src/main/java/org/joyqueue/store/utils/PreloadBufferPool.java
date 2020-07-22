@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ *
  * @author liyue25
  * Date: 2018-12-20
  */
@@ -57,19 +58,28 @@ public class PreloadBufferPool {
      * 缓存核心利用率，系统会尽量将这个比率以内的内存用满。
      */
     private static final double CORE_RATIO = 0.8d;
+
+    private static final long DEFAULT_WRITE_PAGE_EXTRA_WEIGHT_MS = 60000L;
     public static final String PRINT_METRIC_INTERVAL_MS_KEY = "PreloadBufferPool.PrintMetricIntervalMs";
     public static final String MAX_MEMORY_KEY = "PreloadBufferPool.MaxMemory";
-
+    private static final String WRITE_PAGE_EXTRA_WEIGHT_MS_KEY="PreloadBufferPool.WritePageExtraWeightMs";
     private final LoopThread preloadThread;
     private final LoopThread metricThread;
     private final LoopThread evictThread;
     private final long maxMemorySize;
     private final long coreMemorySize;
     private final long evictMemorySize;
+
+    // 正在写入的页在置换时有额外的权重，这个权重用时间Ms体现。
+    // 默认是60秒。
+    // 置换权重 = 上次访问时间戳 + 额外权重，优先从内存中驱逐权重小的页。
+    // 例如：一个只读的页，上次访问时间戳是T，一个读写页，上次访问时间是T - 60秒，
+    // 这两个页在置换时有同样的权重
+    private final long writePageExtraWeightMs;
     private final AtomicLong usedSize = new AtomicLong(0L);
     private final Set<BufferHolder> directBufferHolders = ConcurrentHashMap.newKeySet();
     private final Set<BufferHolder> mMapBufferHolders = ConcurrentHashMap.newKeySet();
-    private Map<Integer, PreLoadCache> bufferCache = new ConcurrentHashMap<>();
+    private final Map<Integer, PreLoadCache> bufferCache = new ConcurrentHashMap<>();
     private static PreloadBufferPool instance = null;
 
     public static PreloadBufferPool getInstance() {
@@ -82,10 +92,10 @@ public class PreloadBufferPool {
 
     private PreloadBufferPool() {
         long printMetricInterval = Long.parseLong(System.getProperty(PRINT_METRIC_INTERVAL_MS_KEY,"30000"));
-        maxMemorySize = Format.parseSize(System.getProperty(MAX_MEMORY_KEY), Math.round(VM.maxDirectMemory() * CACHE_RATIO));
+        maxMemorySize = getMaxMemorySize();
         evictMemorySize = Math.round(maxMemorySize * EVICT_RATIO);
         coreMemorySize = Math.round(maxMemorySize * CORE_RATIO);
-
+        writePageExtraWeightMs = Long.parseLong(System.getProperty(WRITE_PAGE_EXTRA_WEIGHT_MS_KEY,String.valueOf(DEFAULT_WRITE_PAGE_EXTRA_WEIGHT_MS)));
         preloadThread = buildPreloadThread();
         preloadThread.start();
 
@@ -103,6 +113,41 @@ public class PreloadBufferPool {
                 Format.formatSize(maxMemorySize),
                 Format.formatSize(coreMemorySize),
                 Format.formatSize(evictMemorySize));
+    }
+
+    /**
+     * 计算可供缓存使用的最大堆外内存。
+     *
+     * 1. 如果PreloadBufferPool.MaxMemory设置为数值，直接使用设置值。
+     * 2. 如果PreloadBufferPool.MaxMemory设置为百分比，比如：90%，最大堆外内存 = 物理内存 * 90% - 最大堆内存（由JVM参数-Xmx配置）
+     * 3. 如果PreloadBufferPool.MaxMemory未设置或者设置了非法值，最大堆外内存 = VM.maxDirectMemory() * 90%。
+     * 其中VM.maxDirectMemory()取值为JVM参数-XX:MaxDirectMemorySize，如果未设置-XX:MaxDirectMemorySize，取值为JVM参数-Xmx。
+     *
+     * @return 可使用的最大堆外内存大小。
+     */
+    private long getMaxMemorySize() {
+        String mmsString = System.getProperty(MAX_MEMORY_KEY);
+        int pct = Format.getPercentage(mmsString);
+        if (pct > 0 && pct < 100) {
+            long physicalMemorySize = getPhysicalMemorySize();
+            long reservedHeapMemorySize = Runtime.getRuntime().maxMemory();
+            if (Long.MAX_VALUE == reservedHeapMemorySize) {
+                logger.warn("Runtime.getRuntime().maxMemory() returns unlimited!");
+                reservedHeapMemorySize = physicalMemorySize / 2;
+            }
+            // 如果设置了百分比，最大可使用堆外内存= 物理内存 * 百分比 - 最大堆内存
+            long mms = physicalMemorySize * pct / 100 - reservedHeapMemorySize;
+
+            // 最大堆外内存 * CACHE_RATIO，这是使用堆外内存的上限，超过这个上限会导致频繁的FullGC
+            long mdm = Math.round(VM.maxDirectMemory() * CACHE_RATIO);
+
+            if (mms > 0 && mms < mdm) {
+                return mms;
+            } else {
+                return mdm;
+            }
+        }
+        return Format.parseSize(System.getProperty(MAX_MEMORY_KEY), Math.round(VM.maxDirectMemory() * CACHE_RATIO));
     }
 
     private LoopThread buildMetricThread(long printMetricInterval) {
@@ -126,8 +171,8 @@ public class PreloadBufferPool {
                     Format.formatSize(totalSize));
             return totalSize;
         }).sum();
-        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
-        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
+        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
         logger.info("Direct memory usage: preload/direct/mmp/used/max: {}/{}/{}/{}/{}.",
                 Format.formatSize(plUsed),
                 Format.formatSize(directUsed),
@@ -162,8 +207,6 @@ public class PreloadBufferPool {
      * 清除文件缓存页。LRU。
      */
     private void evict() {
-        long before = usedSize.get();
-
         // 清理超过maxCount的缓存页
         for (PreLoadCache preLoadCache : bufferCache.values()) {
             if (!needEviction()) {
@@ -179,10 +222,11 @@ public class PreloadBufferPool {
         // 清理使用中最旧的页面，直到内存占用率达标
         if (needEviction()) {
             List<LruWrapper<BufferHolder>> sorted;
+
             sorted = Stream.concat(directBufferHolders.stream(), mMapBufferHolders.stream())
                     .filter(BufferHolder::isFree)
-                    .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime()))
-                    .sorted(Comparator.comparing(LruWrapper::getLastAccessTime))
+                    .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime(), bufferHolder.writable() ? writePageExtraWeightMs : 0L))
+                    .sorted(Comparator.comparing(LruWrapper::getWeight))
                     .collect(Collectors.toList());
 
             while (needEviction() && !sorted.isEmpty()) {
@@ -194,6 +238,7 @@ public class PreloadBufferPool {
             }
         }
     }
+
 
     private boolean needEviction() {
         return usedSize.get() > evictMemorySize;
@@ -244,10 +289,11 @@ public class PreloadBufferPool {
                     }
                 } else {
                     List<LruWrapper<BufferHolder>> outdated = directBufferHolders.stream()
-                            .filter(b -> b.size() == preLoadCache.bufferSize)
+                            .filter(b -> b.capacity() == preLoadCache.bufferSize)
                             .filter(BufferHolder::isFree)
-                            .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime()))
-                            .sorted(Comparator.comparing(LruWrapper::getLastAccessTime)).collect(Collectors.toList());
+                            .map(bufferHolder -> new LruWrapper<>(bufferHolder, bufferHolder.lastAccessTime(), bufferHolder.writable() ? writePageExtraWeightMs : 0L))
+                            .sorted(Comparator.comparing(LruWrapper::getWeight))
+                            .collect(Collectors.toList());
                     while (preLoadCache.cache.size() < preLoadCache.coreCount && !outdated.isEmpty()) {
                         LruWrapper<BufferHolder> wrapper = outdated.remove(0);
                         BufferHolder holder = wrapper.get();
@@ -314,12 +360,12 @@ public class PreloadBufferPool {
     }
 
     public void allocateMMap(BufferHolder bufferHolder) {
-        reserveMemory(bufferHolder.size());
+        reserveMemory(bufferHolder.capacity());
         mMapBufferHolders.add(bufferHolder);
     }
 
     public ByteBuffer allocateDirect(BufferHolder bufferHolder) {
-        ByteBuffer buffer = allocateDirect(bufferHolder.size());
+        ByteBuffer buffer = allocateDirect(bufferHolder.capacity());
         directBufferHolders.add(bufferHolder);
         return buffer;
     }
@@ -368,10 +414,15 @@ public class PreloadBufferPool {
 
     public void releaseMMap(BufferHolder bufferHolder) {
         mMapBufferHolders.remove(bufferHolder);
-        usedSize.getAndAdd(-1 * bufferHolder.size());
+        usedSize.getAndAdd(-1 * bufferHolder.capacity());
 
     }
 
+    private static long getPhysicalMemorySize() {
+        com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
+                java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        return os.getTotalPhysicalMemorySize();
+    }
     /**
      * buffer监控
      */
@@ -392,8 +443,8 @@ public class PreloadBufferPool {
             plMonitorInfos.add(plMonitorInfo);
             return totalSize;
         }).sum();
-        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::size).sum();
-        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::size).sum();
+        long mmpUsed = mMapBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
+        long directUsed = directBufferHolders.stream().mapToLong(BufferHolder::capacity).sum();
 
         bufferPoolMonitorInfo.setPlMonitorInfos(plMonitorInfos);
         bufferPoolMonitorInfo.setPlUsed(Format.formatSize(plUsed));
@@ -418,11 +469,13 @@ public class PreloadBufferPool {
 
     private static class LruWrapper<V> {
         private final long lastAccessTime;
+        private final long extraWeight;
         private final V t;
 
-        LruWrapper(V t, long lastAccessTime) {
+        LruWrapper(V t, long lastAccessTime, long extraWeight) {
             this.lastAccessTime = lastAccessTime;
             this.t = t;
+            this.extraWeight = extraWeight;
         }
 
         private long getLastAccessTime() {
@@ -431,6 +484,10 @@ public class PreloadBufferPool {
 
         private V get() {
             return t;
+        }
+
+        private long getWeight() {
+            return lastAccessTime + extraWeight;
         }
     }
 }

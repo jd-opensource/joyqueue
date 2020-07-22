@@ -23,6 +23,8 @@ import org.joyqueue.monitor.BrokerMonitorInfo;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.Client;
 
+import java.util.List;
+
 /**
  * Created by wangxiaofei1 on 2019/3/13.
  */
@@ -32,4 +34,5 @@ public interface BrokerTopicMonitorService {
     PageResult<BrokerTopicMonitor> queryTopicsMointor(QPageQuery<QMonitor> qPageQuery);
     BrokerMonitorInfo findBrokerMonitor(Long brokerId);
     BrokerStartupInfo getStartupInfo(Long brokerId) throws Exception;
+    List<String> queryTopicList(Long brokerId) throws Exception;
 }

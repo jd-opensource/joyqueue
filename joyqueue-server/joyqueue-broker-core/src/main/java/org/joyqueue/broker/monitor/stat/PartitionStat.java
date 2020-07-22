@@ -39,6 +39,9 @@ public class PartitionStat implements Serializable {
     //最后应答时间
     private long lastAckTime = lastPullTime;
 
+    private long ackIndex;
+    private long right;
+
     public PartitionStat(String topic, String app, short partition) {
         this.topic = topic;
         this.app = app;
@@ -79,5 +82,21 @@ public class PartitionStat implements Serializable {
 
     public DeQueueStat getDeQueueStat() {
         return deQueueStat;
+    }
+
+    public long getAckIndex() {
+        return ackIndex;
+    }
+
+    public void setAckIndex(long ackIndex) {
+        this.ackIndex = ackIndex;
+    }
+
+    public long getRight() {
+        return right;
+    }
+
+    public void setRight(long right) {
+        this.right = right;
     }
 }

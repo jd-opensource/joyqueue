@@ -22,6 +22,7 @@ import partition from './partition.vue'
 import clientConnection from './clientConnection.vue'
 import broker from './broker.vue'
 import partitionExpand from './partitionExpand'
+import {bytesToSize, mergePartitionGroup} from '../../../utils/common'
 
 export default {
   name: 'producer-detail',
@@ -48,20 +49,23 @@ export default {
                   row: params.row,
                   colData: [
                     {
-                      title: 'ID',
-                      key: 'partitionGroup'
-                    },
-                    // {
-                    //   title: '主分片',
-                    //   key: 'ip'
-                    // },
-                    {
                       title: '分区',
                       key: 'partition'
                     },
                     {
                       title: '入队数',
                       key: 'enQuence.count'
+                    },
+                    {
+                      title: 'TPS',
+                      key: 'enQuence.tps'
+                    },
+                    {
+                      title: '流量',
+                      key: 'enQuence.traffic',
+                      formatter (item) {
+                        return bytesToSize(item.enQuence.traffic)
+                      }
                     }
                   ],
                   subscribe: params.row.subscribe,
@@ -80,7 +84,10 @@ export default {
           },
           {
             title: '分区',
-            key: 'partitions'
+            key: 'partitions',
+            formatter (item) {
+              return mergePartitionGroup(JSON.parse(item.partitions))
+            }
           },
           {
             title: '入队数',

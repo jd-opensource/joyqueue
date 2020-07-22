@@ -69,6 +69,12 @@ public interface ArchiveStore extends LifeCycle {
     Long getPosition(String topic, short partition) throws JoyQueueException;
 
     /**
+     *  Clean topic partition archive position when archive service off
+     *
+     **/
+    void cleanPosition(String topic,short partition) throws JoyQueueException;
+
+    /**
      * 查看发送日志
      *
      * @param query

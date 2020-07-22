@@ -1,28 +1,37 @@
 <template>
-  <d-form  ref="form" :model="formData" :rules="rules"  label-width="100px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
+  <d-form  ref="form" :model="formData" :rules="rules"  label-width="120px" style="height: 350px; overflow-y:auto; width: 100%; padding-right: 20px">
     <d-form-item label="代码:" prop="code" :error="error.code" >
-      <d-input  v-model="formData.code" :disabled="type" placeholder="如app_slice_pending" style="width: 60%" ></d-input>
+      <d-input  v-model="formData.code" oninput="value = value.trim()" :disabled="type" placeholder="如app_slice_pending" style="width: 60%" ></d-input>
     </d-form-item>
     <d-form-item label="简称:" prop="aliasCode" :error="error.aliasCode" >
-      <d-input  v-model="formData.aliasCode" :disabled="type" placeholder="如backlog" style="width: 60%" ></d-input>
+      <d-input  v-model="formData.aliasCode" oninput="value = value.trim()" placeholder="如backlog" style="width: 60%" ></d-input>
     </d-form-item>
     <d-form-item label="名称:" prop="name" >
-      <d-input  v-model="formData.name" placeholder="如积压"  style="width: 60%"></d-input>
+      <d-input  v-model="formData.name" oninput="value = value.trim()" placeholder="如积压"  style="width: 60%"></d-input>
     </d-form-item>
     <d-form-item label="类型:" prop="type" >
-      <d-select v-model.number="formData.type" placeholder="类型" style="width: 60%">
+      <d-select v-model.number="formData.type" oninput="value = value.trim()" placeholder="类型" style="width: 60%">
         <d-option :value=1>原子</d-option>
         <d-option :value=2>聚集</d-option>
       </d-select>
     </d-form-item>
     <d-form-item label="来源:" prop="source"  >
-      <d-input style="width: 60%" v-model="formData.source" placeholder="指标来源"></d-input>
+      <d-input style="width: 60%" v-model="formData.source" oninput="value = value.trim()" placeholder="指标来源"></d-input>
     </d-form-item>
-    <d-form-item label="提供方:" prop="source"  >
-      <d-input style="width: 60%" v-model="formData.provider" placeholder="指标提供方"></d-input>
+    <d-form-item label="提供方:" prop="provider"  >
+      <d-input style="width: 60%" v-model="formData.provider" oninput="value = value.trim()" placeholder="指标提供方"></d-input>
+    </d-form-item>
+    <d-form-item label="用户是否开放权限:"  >
+      <d-switch v-model="formData.userPermission"></d-switch>
+    </d-form-item>
+    <d-form-item label="种类" prop="category">
+      <d-input v-model="formData.category" style="width: 60%" oninput="value = value.trim()" placeholder="指标所属者种类(producer,consumer,broker...)"/>
+    </d-form-item>
+    <d-form-item label="采集间隔" prop="collectInterval">
+      <d-input v-model="formData.collectInterval" style="width: 60%" oninput="value=value.replace(/[^\d]/g, '')" placeholder="采集间隔"/>
     </d-form-item>
     <d-form-item label="描述:"  >
-      <d-input style="width: 60%" v-model="formData.description" placeholder="描述"></d-input>
+      <d-input style="width: 60%" v-model="formData.description" oninput="value = value.trim()" placeholder="描述"></d-input>
     </d-form-item>
   </d-form>
 
@@ -47,7 +56,10 @@ export default {
           aggregator: '',
           groupField: '',
           groupFieldArray: [],
-          summaryLevel: ''
+          summaryLevel: '',
+          userPermission: false,
+          collectInterval: 1,
+          category: ''
         }
       }
     }

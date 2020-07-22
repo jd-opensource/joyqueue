@@ -1,11 +1,16 @@
 /**
- * Copyright 2019 The JoyQueue Authors.
+ * Partially copied from Apache Kafka.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Original LICENSE :
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +23,23 @@ package org.joyqueue.toolkit.delay;
 import org.joyqueue.toolkit.time.SystemClock;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class DelayedOperation extends TimerTask {
 
     private AtomicBoolean completed = new AtomicBoolean(false);
+    private AtomicBoolean tryCompletePending = new AtomicBoolean(false);
+    private Lock lock;
 
     public DelayedOperation(long delayMs) {
+        this(delayMs, new ReentrantLock());
+    }
+
+    public DelayedOperation(long delayMs, Lock lock) {
         // 不加当前时间导致 TimerTask 很快就触发
         this.delayMs = delayMs + SystemClock.now();
+        this.lock = lock;
     }
 
     /*
@@ -79,13 +93,40 @@ public abstract class DelayedOperation extends TimerTask {
     protected abstract boolean tryComplete();
 
     /**
-     * Thread-safe variant of tryComplete(). This can be overridden if the operation provides its
-     * own synchronization.
+     * Thread-safe variant of tryComplete() that attempts completion only if the lock can be acquired
+     * without blocking.
+     *
+     * If threadA acquires the lock and performs the check for completion before completion criteria is met
+     * and threadB satisfies the completion criteria, but fails to acquire the lock because threadA has not
+     * yet released the lock, we need to ensure that completion is attempted again without blocking threadA
+     * or threadB. `tryCompletePending` is set by threadB when it fails to acquire the lock and at least one
+     * of threadA or threadB will attempt completion of the operation if this flag is set. This ensures that
+     * every invocation of `maybeTryComplete` is followed by at least one invocation of `tryComplete` until
+     * the operation is actually completed.
      */
-    protected boolean safeTryComplete() {
-        synchronized (this) {
-            return tryComplete();
-        }
+    protected boolean maybeTryComplete() {
+        boolean retry = false;
+        boolean done = false;
+        do {
+            if (lock.tryLock()) {
+                try {
+                    tryCompletePending.set(false);
+                    done = tryComplete();
+                } finally {
+                    lock.unlock();
+                }
+                // While we were holding the lock, another thread may have invoked `maybeTryComplete` and set
+                // `tryCompletePending`. In this case we should retry.
+                retry = tryCompletePending.get();
+            } else {
+                // Another thread is holding the lock. If `tryCompletePending` is already set and this thread failed to
+                // acquire the lock, then the thread that is holding the lock is guaranteed to see the flag and retry.
+                // Otherwise, we should set the flag and retry on this thread since the thread holding the lock may have
+                // released the lock and returned by the time the flag is set.
+                retry = !tryCompletePending.getAndSet(true);
+            }
+        } while (!isCompleted() && retry);
+        return done;
     }
 
     /*

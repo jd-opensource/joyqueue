@@ -66,6 +66,7 @@ public enum KafkaCommandType {
     // API VERSION
     API_VERSIONS(18, 0, 3),
 
+    // 事务
     INIT_PRODUCER_ID(22, 0, 0),
 
     ADD_PARTITIONS_TO_TXN(24, 0, 1),
@@ -75,6 +76,11 @@ public enum KafkaCommandType {
     END_TXN(26, 0, 1),
 
     TXN_OFFSET_COMMIT(28, 0, 2),
+
+    // SASL
+    SASL_AUTHENTICATE(36, 0, 1),
+
+    SASL_HANDSHAKE(17, 0, 1),
 
     // 自定义命令
     CUSTOMER_COMMAND(100, false),

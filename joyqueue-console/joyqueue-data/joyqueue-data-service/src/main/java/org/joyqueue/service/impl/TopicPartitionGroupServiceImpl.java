@@ -15,6 +15,7 @@
  */
 package org.joyqueue.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.domain.PartitionGroupReplica;
@@ -77,7 +78,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             }
         } catch (Exception e) {
             logger.error("exception",e);
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
         return group;
     }
@@ -90,11 +91,25 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             if (topicPartitionGroups == null || topicPartitionGroups.isEmpty()) {
                 return Collections.emptyList();
             }
+            topicPartitionGroups.forEach(item -> {
+                String partitionStr = item.getPartitions();
+                List<Integer> partitions = JSON.parseArray(partitionStr, Integer.class);
+                partitions.sort((Integer o1, Integer o2) -> {
+                    if (o1 > o2) {
+                        return 1;
+                    } else if (o1.equals(o2)) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                });
+                item.setPartitions(JSON.toJSONString(partitions));
+            });
             return topicPartitionGroups;
         } catch (Exception e) {
-            String errorMsg = "新添加partitionGroup，同步NameServer失败";
+            String errorMsg = "查询partitionGroup失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg, e);
         }
     }
 
@@ -112,7 +127,7 @@ public class TopicPartitionGroupServiceImpl  implements TopicPartitionGroupServi
             groups = partitionGroupServerService.findByTopic(model.getTopic().getCode(), model.getNamespace().getCode());
         } catch (Exception e) {
             logger.error("partitionGroupServerService.findByQuery",e);
-            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage());
+            throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR,e.getMessage(), e);
         }
         int currentPartitions = topic.getPartitions();
         if (groups != null) {

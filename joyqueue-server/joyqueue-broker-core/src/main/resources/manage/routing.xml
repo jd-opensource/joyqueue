@@ -142,6 +142,8 @@
                handlers="brokerMonitorService.deleteMetadata"/>
         <route path="/monitor/metadata/configs" inherit="get"
                handlers="brokerMonitorService.getConfigsMetadata"/>
+        <route path="/monitor/metadata/config" inherit="put"
+               handlers="brokerMonitorService.updateConfigMetadata"/>
         <route path="/monitor/metadata/config" inherit="get"
                handlers="brokerMonitorService.getConfigMetadata"/>
         <route path="/monitor/metadata/cluster" inherit="get"

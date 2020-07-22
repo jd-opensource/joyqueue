@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LongPollingManager extends Service {
     public static final String LONG_POLLING_QUEUE_SIZE = "broker.consume.long_polling_queue_size";
     //TODO 设置一个合理的值
-    public static final int MAX_LONG_POLLING_QUEUE_SIZE = 100000;
+    public static final int MAX_LONG_POLLING_QUEUE_SIZE = 10000;
 
     protected static Logger logger = LoggerFactory.getLogger(LongPollingManager.class);
     // 长轮询请求queue
@@ -153,7 +153,7 @@ public class LongPollingManager extends Service {
         String topic = consumer.getTopic();
         // 长轮询数量不能超过主题队列数量
         AtomicInteger count = getCount(consumer);
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(topic));
         if (count.get() >= masterPartitionList.size()) {
             return false;
         }

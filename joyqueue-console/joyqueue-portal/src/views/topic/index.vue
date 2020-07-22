@@ -13,6 +13,7 @@
       </grid-col>
       <grid-col span="4">
         <d-input v-model="searchData.keyword" placeholder="请输入英文名"
+                 oninput="value = value.trim()"
                 @on-enter="getList">
           <d-button type="borderless" slot="suffix" @click="getList"><icon name="search" size="14" color="#CACACA" ></icon></d-button>
         </d-input>
@@ -27,7 +28,7 @@
               @on-add-brokerGroup="addBrokerGroup" @on-del="del" :operation-column-width="operationColumnWidth">
     </my-table>
     <!--添加-->
-    <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
+    <my-dialog :dialog="addDialog" class="add-dialog maxDialogHeight" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
       <topic-form @on-dialog-cancel="dialogCancel('addDialog')" :type="$store.getters.addFormType"
                   :addBrokerUrls="addBrokerUrls" :addBrokerColData="addBrokerColData"/>
     </my-dialog>
@@ -45,7 +46,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import addBrokerGroup from './addBrokerGroup.vue'
 import topicForm from './topicForm.vue'
 import crud from '../../mixins/crud.js'
-import {basePrimaryBtnRender} from '../../utils/common.js'
+import {basePrimaryBtnRender, sortByTopic} from '../../utils/common.js'
 
 export default {
   name: 'topic',
@@ -68,7 +69,7 @@ export default {
           {
             txt: '删除',
             method: 'on-del',
-            isAdmin: true
+            isAdmin: 1
           }
         ]
       }
@@ -87,19 +88,23 @@ export default {
         return [
           {
             title: 'Broker分组',
-            key: 'group.code'
+            key: 'group.code',
+            width: '20%'
           },
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '20%'
           },
           {
             title: 'IP',
-            key: 'ip'
+            key: 'ip',
+            width: '20%'
           },
           {
             title: '端口',
-            key: 'port'
+            key: 'port',
+            width: '20%'
           }
         ]
       }
@@ -168,7 +173,7 @@ export default {
             }
           },
           {
-            title: '队列数',
+            title: '分区数',
             key: 'partitions'
           }
         ],
@@ -196,6 +201,9 @@ export default {
     goDetail (item) {
       this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
         query: { id: item.id, topic: item.code, namespace: item.namespace.code }})
+    },
+    sortData (data) {
+      return data.sort((a, b) => sortByTopic(a, b))
     },
     addBrokerGroup (item) {
       this.openDialog('addBrokerGroupDialog')
@@ -279,4 +287,7 @@ export default {
 }
 .hint{color: #f00;}
 .star{color: #f00;}
+.maxDialogHeight /deep/ .dui-dialog__body {
+  height: 650px;
+}
 </style>

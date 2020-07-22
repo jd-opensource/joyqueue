@@ -111,10 +111,10 @@ public class NameServerBase {
     }
 
     public int isSuccess(String s){
-     if (s.equals("success")) {
-         return 1;
-     }
-     return 0;
+        if (s.equals("success")) {
+            return 1;
+        }
+        return 0;
     }
 
     /**
@@ -133,9 +133,10 @@ public class NameServerBase {
             entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
             post.setEntity(entity);
         }
-        return onResponse(HttpUtil.executeRequest(post),post);
+        return HttpUtil.request(post);
     }
 
+    @Deprecated
     private String onResponse(CloseableHttpResponse response, HttpUriRequest request) {
         try {
             int statusCode = response.getStatusLine().getStatusCode();

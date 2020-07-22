@@ -30,10 +30,12 @@ public class StoreConfig {
 
     public static final int DEFAULT_MESSAGE_FILE_SIZE = 128 * 1024 * 1024;
     public static final int DEFAULT_INDEX_FILE_SIZE = 512 * 1024;
-    public static final int DEFAULT_THREAD_COUNT = 4;
     public static final int DEFAULT_PRE_LOAD_BUFFER_CORE_COUNT = 3;
     public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
     public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
+    public static final boolean DEFAULT_MESSAGE_FILE_LOAD_ON_READ = false;
+    public static final boolean DEFAULT_INDEX_FILE_LOAD_ON_READ = true;
+    public static final boolean DEFAULT_FLUSH_FORCE = true;
 
     public static final String STORE_PATH = "/store";
     /**
@@ -48,11 +50,6 @@ public class StoreConfig {
      * 索引文件大小 1M
      */
     private int indexFileSize = DEFAULT_INDEX_FILE_SIZE;
-
-    /**
-     * 虚拟线程执行器的线程数量
-     */
-    private int threadCount = DEFAULT_THREAD_COUNT;
 
     /**
      * 预加载DirectBuffer的核心数量
@@ -158,6 +155,10 @@ public class StoreConfig {
         return PropertySupplier.getValue(propertySupplier, StoreConfigKey.FLUSH_INTERVAL_MS, this.flushIntervalMs);
     }
 
+    public boolean isFlushForce() {
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.FLUSH_FORCE, DEFAULT_FLUSH_FORCE);
+    }
+
     public void setFlushIntervalMs(long flushIntervalMs) {
         this.flushIntervalMs = flushIntervalMs;
     }
@@ -177,14 +178,6 @@ public class StoreConfig {
 
     public void setWriteTimeoutMs(long writeTimeoutMs) {
         this.writeTimeoutMs = writeTimeoutMs;
-    }
-
-    public int getThreadCount() {
-        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.THREAD_COUNT, this.threadCount);
-    }
-
-    public void setThreadCount(int threadCount) {
-        this.threadCount = threadCount;
     }
 
     public int getPreLoadBufferCoreCount() {
@@ -227,5 +220,14 @@ public class StoreConfig {
     public void setDiskFullRatio(int diskFullRatio) {
         this.diskFullRatio = diskFullRatio;
     }
+
+    public boolean isMessageFileLoadOnRead() {
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.MESSAGE_FILE_LOAD_ON_READ, DEFAULT_MESSAGE_FILE_LOAD_ON_READ);
+    }
+
+    public boolean isIndexFileLoadOnRead() {
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.INDEX_FILE_LOAD_ON_READ, DEFAULT_INDEX_FILE_LOAD_ON_READ);
+    }
+
 }
 

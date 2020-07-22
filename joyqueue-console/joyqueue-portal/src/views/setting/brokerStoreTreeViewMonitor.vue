@@ -22,7 +22,7 @@
       @on-confirm="remove"
       @on-cancel="cancel">
 
-      <d-input v-model="query.path" style="margin-top: 10px" disabled>
+      <d-input v-model="query.path" style="margin-top: 10px" disabled oninput="value = value.trim()">
         <span slot="prepend" >
           <d-tooltip  content="仅支持删除已软删除的文件">
             <Icon name="help-circle" class="help-icon" size="16" color="#4F8EEB" />
@@ -44,23 +44,21 @@ import apiRequest from '../../utils/apiRequest.js'
 export default {
   name: 'brokerStoreTreeViewMonitor',
   props: {
-    brokerId: {
-      type: Number
-    }
   },
   data () {
     return {
+      brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
       urls: {
         treeView: '/monitor/broker/storeTreeView',
-        deleteStoreGarbageFile:'/manage/broker/garbageFile'
+        deleteStoreGarbageFile: '/manage/broker/garbageFile'
       },
-      query:{
-        path:'',
-        recursive:true,
-        retain:'true'
+      query: {
+        path: '',
+        recursive: true,
+        retain: 'true'
       },
-      modal:false,
-      total:0,
+      modal: false,
+      total: 0,
       detail: {
         store: {
 
@@ -77,44 +75,44 @@ export default {
         bufferPoolMonitorInfo: {
         }
       },
-      treeData:[]
+      treeData: []
 
     }
   },
   methods: {
     getList () {
-      apiRequest.get(this.urls.treeView + '/' + this.brokerId+ '/' + this.query.recursive, '', {}).then(data => {
+      apiRequest.get(this.urls.treeView + '/' + this.brokerId + '/' + this.query.recursive, '', {}).then(data => {
         if (data.code == 200) {
-          this.treeData = data.data.children;
-          this.total=this.treeData.length;
+          this.treeData = data.data.children
+          this.total = this.treeData.length
         }
       })
     },
-    handleNodeClick(data) {
-      console.log(data);
+    handleNodeClick (data) {
+      console.log(data)
     },
     cancel () {
       this.modal = false
-      //this.$Message.info('点击了取消');
+      // this.$Message.info('点击了取消');
     },
-    removeDialog(node, data){
-      this.modal=true
-      this.query.path = data.path;
-      console.log(this.query);
+    removeDialog (node, data) {
+      this.modal = true
+      this.query.path = data.path
+      console.log(this.query)
     },
-    remove() {
-      apiRequest.delete(this.urls.deleteStoreGarbageFile + '?brokerId='+this.brokerId+ '&fileName=' +this.query.path + '&retain=' +this.query.retain).then(data=>{
-        if (data.code == 200&&data.data) {
-          //let isSuccess = data.data;
-          this.$Message.success('删除成功');
-          this.modal=false;
-          this.getList();
-         }else{
+    remove () {
+      apiRequest.delete(this.urls.deleteStoreGarbageFile + '?brokerId=' + this.brokerId + '&fileName=' + this.query.path + '&retain=' + this.query.retain).then(data => {
+        if (data.code == 200 && data.data) {
+          // let isSuccess = data.data;
+          this.$Message.success('删除成功')
+          this.modal = false
+          this.getList()
+        } else {
           this.$Dialog.error({
             content: '删除失败'
           })
         }
-        }
+      }
       )
     }
 

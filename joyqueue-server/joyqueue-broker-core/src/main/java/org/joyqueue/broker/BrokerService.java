@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,14 +18,16 @@ package org.joyqueue.broker;
 import com.google.common.base.Preconditions;
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.config.Configuration;
 import org.joyqueue.broker.config.ConfigurationManager;
+import org.joyqueue.broker.config.scan.ClassScanner;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.coordinator.CoordinatorService;
-import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
+import org.joyqueue.broker.event.BrokerEventBus;
 import org.joyqueue.broker.extension.ExtensionManager;
 import org.joyqueue.broker.helper.AwareHelper;
 import org.joyqueue.broker.manage.BrokerManageService;
@@ -52,18 +54,25 @@ import org.joyqueue.security.Authentication;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.config.Property;
+import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * BrokerService
@@ -79,6 +88,7 @@ public class BrokerService extends Service {
     private Authentication authentication;
     private ProtocolManager protocolManager;
     private BrokerServer brokerServer;
+    private ClusterNameService clusterNameService;
     private ClusterManager clusterManager;
     private Produce produce;
     private Consume consume;
@@ -93,6 +103,7 @@ public class BrokerService extends Service {
     private MessageConvertSupport messageConvertSupport;
     private ExtensionManager extensionManager;
     private BrokerTransportManager brokerTransportManager;
+    private BrokerEventBus brokerEventBus;
     private String[] args;
 
     public BrokerService() {
@@ -110,6 +121,9 @@ public class BrokerService extends Service {
         Configuration configuration = configurationManager.getConfiguration();
         enrichServicePorts(configuration);
         brokerContext.propertySupplier(configuration);
+
+        this.brokerEventBus = new BrokerEventBus(brokerContext);
+        this.brokerContext.eventBus(brokerEventBus);
 
         //build broker config
         this.brokerConfig = new BrokerConfig(configuration);
@@ -132,9 +146,12 @@ public class BrokerService extends Service {
         this.nameService.addListener(configurationManager);
         this.configurationManager.setConfigProvider(new ConfigProviderImpl(nameService));
 
-
         //build and cluster manager
-        this.clusterManager = new ClusterManager(brokerConfig, nameService, brokerContext);
+        this.clusterNameService = new ClusterNameService(nameService, brokerEventBus, configuration);
+        this.clusterNameService.start();
+        this.brokerContext.clusterNameService(clusterNameService);
+
+        this.clusterManager = new ClusterManager(brokerConfig, nameService, clusterNameService, brokerContext);
         this.clusterManager.start();
         this.brokerContext.clusterManager(this.clusterManager);
 
@@ -158,8 +175,7 @@ public class BrokerService extends Service {
         this.brokerContext.brokerMonitorService(this.brokerMonitorService);
 
         // new coordinator service
-        this.coordinatorService = new CoordinatorService(new CoordinatorConfig(configuration),
-                clusterManager, nameService, brokerTransportManager);
+        this.coordinatorService = new CoordinatorService(configuration, clusterManager, nameService);
         this.brokerContext.coordinnatorService(this.coordinatorService);
 
         this.messageConvertSupport = new MessageConvertSupport();
@@ -191,6 +207,7 @@ public class BrokerService extends Service {
         this.brokerManageService = new BrokerManageService(new BrokerManageConfig(configuration,brokerConfig),
                 brokerMonitorService,
                 clusterManager,
+                clusterNameService,
                 storeService.getManageService(),
                 storeService,
                 consume,
@@ -211,6 +228,7 @@ public class BrokerService extends Service {
         this.brokerContext.consumerPolicy(buildGlobalConsumePolicy(configuration));
         this.extensionManager.after();
 
+        enrichConfiguration(configuration);
     }
 
     private void enrichServicePorts(Configuration configuration) {
@@ -228,6 +246,37 @@ public class BrokerService extends Service {
         key = BrokerConfig.BROKER_BACKEND_SERVER_CONFIG_PREFIX + TransportConfigSupport.TRANSPORT_SERVER_PORT;
         configuration.addProperty(key, String.valueOf(PortHelper.getBackendPort(port)));
     }
+
+    private void enrichConfiguration(Configuration configuration) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, ClassNotFoundException, IOException {
+        Map<String, String> configMap = getEnumConstantsConfig();
+        for (Map.Entry<String, String> entry : configMap.entrySet()) {
+            if (!configuration.contains(entry.getKey())&&!entry.getKey().endsWith(".")) {
+                configuration.addProperty(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private Map<String, String> getEnumConstantsConfig() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException, IOException {
+        Map<String, String> configMap = new HashMap<>(10);
+        Set<Class<?>> classes = ClassScanner.defaultSearch();
+        for (Class<?> clazz : classes) {
+            List<Class<?>> impls = Arrays.asList(clazz.getInterfaces());
+            if (impls.contains(PropertyDef.class) && clazz.isEnum()) {
+                Method method = clazz.getMethod("values");
+                if (method.getReturnType().isArray()) {
+                    Object[] values = (Object[]) method.invoke(null);
+                    for (Object obj : values) {
+                        if (obj instanceof PropertyDef) {
+                            PropertyDef propertyDef = (PropertyDef) obj;
+                            configMap.put(propertyDef.getName(), String.valueOf(propertyDef.getValue()));
+                        }
+                    }
+                }
+            }
+        }
+        return configMap;
+    }
+
 
     private NameService getNameService(BrokerContext brokerContext, Configuration configuration) {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
@@ -288,6 +337,8 @@ public class BrokerService extends Service {
     @Override
     protected void doStart() throws Exception {
         startIfNecessary(brokerTransportManager);
+        startIfNecessary(brokerEventBus);
+        startIfNecessary(clusterNameService);
         startIfNecessary(clusterManager);
         startIfNecessary(storeService);
         startIfNecessary(storeInitializer);
@@ -300,10 +351,10 @@ public class BrokerService extends Service {
         startIfNecessary(extensionManager);
         startIfNecessary(protocolManager);
         startIfNecessary(nameService);
+        startIfNecessary(archiveManager);
         startIfNecessary(brokerServer);
         startIfNecessary(coordinatorService);
         startIfNecessary(brokerManageService);
-        startIfNecessary(archiveManager);
         printConfig();
     }
 
@@ -344,6 +395,7 @@ public class BrokerService extends Service {
         destroy(coordinatorService);
         destroy(sessionManager);
         destroy(clusterManager);
+        destroy(clusterNameService);
         destroy(storeInitializer);
         destroy(storeService);
         destroy(configurationManager);
@@ -353,6 +405,7 @@ public class BrokerService extends Service {
         destroy(brokerManageService);
         destroy(nameService);
         destroy(brokerTransportManager);
+        destroy(brokerEventBus);
         logger.info("Broker stopped!!!!");
     }
 
@@ -385,8 +438,6 @@ public class BrokerService extends Service {
     public BrokerContext getBrokerContext() {
         return brokerContext;
     }
-
-
 
 
     private class ConfigProviderImpl implements ConfigurationManager.ConfigProvider {

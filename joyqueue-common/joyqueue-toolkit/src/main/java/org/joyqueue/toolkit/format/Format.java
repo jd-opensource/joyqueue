@@ -83,4 +83,15 @@ public class Format {
         }
         return size;
     }
+
+    public static int getPercentage(String pctString) {
+        int pct = -1;
+
+        if (pctString != null && pctString.trim().endsWith("%")) {
+            String trimString = pctString.trim();
+            trimString = trimString.substring(0, trimString.length() -1);
+            pct = Integer.parseInt(trimString);
+        }
+        return pct;
+    }
 }

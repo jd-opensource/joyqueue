@@ -36,6 +36,7 @@ import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.exception.NsrException;
 import org.joyqueue.nsr.util.DCWrapper;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -52,18 +52,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * author: gaohaoxiang
  * date: 2019/8/30
  */
-public class NameServiceCacheManager extends Service {
+public class MetadataCacheManager extends Service {
 
-    protected static final Logger logger = LoggerFactory.getLogger(NameServiceCacheManager.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MetadataCacheManager.class);
 
     private NameServiceConfig config;
 
     private NameServiceCacheDoubleCopy nameServiceCacheDoubleCopy;
     private volatile AllMetadataCache cache;
     private ReentrantLock lock = new ReentrantLock();
-    private AtomicInteger version = new AtomicInteger();
+    private volatile long timestamp = 0;
 
-    public NameServiceCacheManager(NameServiceConfig config) {
+    public MetadataCacheManager(NameServiceConfig config) {
         this.config = config;
     }
 
@@ -218,8 +218,11 @@ public class NameServiceCacheManager extends Service {
     }
 
     public void fillCache(AllMetadataCache cache) {
-        nameServiceCacheDoubleCopy.flush(cache);
         this.cache = cache;
+    }
+
+    public void flushCache() {
+        nameServiceCacheDoubleCopy.flush(cache);
     }
 
     public Broker getBroker(int brokerId) {
@@ -274,6 +277,10 @@ public class NameServiceCacheManager extends Service {
         return ObjectUtils.defaultIfNull(cache.getTopicConfigBrokerMap().get(brokerId), Collections.emptyMap());
     }
 
+    public Map<TopicName, Producer> getProducerByApp(String app) {
+        return cache.getProducerAppMap().get(app);
+    }
+
     public Producer getProducerByTopicAndApp(TopicName topic, String app) {
         checkCacheStatus();
         Map<String, Producer> producerMap = cache.getProducerTopicMap().get(topic);
@@ -281,6 +288,10 @@ public class NameServiceCacheManager extends Service {
             return null;
         }
         return producerMap.get(app);
+    }
+
+    public Map<TopicName, Consumer> getConsumerByApp(String app) {
+        return cache.getConsumerAppMap().get(app);
     }
 
     public Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
@@ -442,11 +453,11 @@ public class NameServiceCacheManager extends Service {
         return lock.isLocked();
     }
 
-    public int getVersion() {
-        return version.intValue();
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    public void updateVersion() {
-        version.incrementAndGet();
+    public void updateTimestamp() {
+        timestamp = SystemClock.now();
     }
 }

@@ -23,5 +23,11 @@ import java.util.List;
  * Created by wangxiaofei1 on 2019/1/2.
  */
 public interface DataCenterNameServerService extends NsrService<DataCenter, String> {
+
     List<DataCenter> findAllDataCenter() throws Exception;
+
+    DataCenter findByIp(String ip) throws Exception;
+
+    List<DataCenter> findByIps(List<String> ips) throws Exception;
+
 }

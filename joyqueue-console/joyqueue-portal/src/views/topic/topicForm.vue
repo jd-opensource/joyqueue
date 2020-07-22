@@ -2,7 +2,7 @@
   <div>
     <d-steps :current='current'>
       <d-step title="步骤1" description="填写主题信息"></d-step>
-      <d-step title="步骤2" description="选择Broker"></d-step>
+      <d-step v-if="formData.brokerGroup.id <= 0" title="步骤2" description="选择Broker"></d-step>
     </d-steps>
     <div class="steps-content" style="margin-top: 15px; border: 1px solid #e9e9e9; border-radius: 6px;background-color:
     #fafafa; text-align: left; padding: 20px 30px 40px 50px; height: 100%">
@@ -10,12 +10,17 @@
         <div class="stepForm1">
           <d-form ref="form1" :model="formData" :rules="rules.rule1" label-width="110px">
             <d-form-item label="主题英文名：" :error="error.code" prop="code">
-              <d-input v-model="formData.code" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
+              <d-input v-model="formData.code" oninput="value = value.trim()" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="命名空间：" prop="namespace">
-              <d-select v-model="formData.namespace.code" style="width: 50%">
-                <d-option v-for="item in namespaceList" :value="item.code" :key="item.code"></d-option>
-              </d-select>
+              <d-autocomplete
+                class="inline-input"
+                v-model="formData.namespace.code"
+                :fetch-suggestions="searchNamespace"
+                placeholder="请输入内容"
+                style="width: 50%"
+                @select="handleNamespaceSelect"
+              ></d-autocomplete>
             </d-form-item>
             <d-form-item label="主题类型：" prop="type">
               <d-select v-model="formData.type" :value="0" style="width: 70%" @on-change="handlerTypeChange">
@@ -24,8 +29,8 @@
                 <d-option :value="2" >顺序主题</d-option>
               </d-select>
             </d-form-item>
-            <d-form-item label="队列数量：" prop="partitions">
-              <d-input v-model.number="formData.partitions" :disabled="partitionsDisabled" style="width: 70%"></d-input>
+            <d-form-item label="分区数量：" prop="partitions">
+              <d-input v-model.number="formData.partitions" oninput="value = value.trim()" :disabled="partitionsDisabled" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="选举类型：" prop="electType">
               <d-select v-model.number="formData.electType" style="width: 70%">
@@ -48,7 +53,8 @@
           </d-form>
         </div>
         <div class="step-actions" style="text-align: center">
-          <d-button type="primary" @click="next">下一步</d-button>
+          <d-button v-if="formData.brokerGroup.id <= 0" type="primary" @click="next">下一步</d-button>
+          <d-button v-else type="primary" @click="confirm()">确定</d-button>
         </div>
       </div>
       <div class="step2" v-show="current===1">
@@ -117,7 +123,7 @@ export default {
     let validateBroker = (rule, value, callback) => {
       if (this.formData.topic.partitions !== undefined && this.formData.topic.brokers !== undefined &&
           this.formData.topic.brokers.length > this.formData.topic.partitions) {
-        callback(new Error('勾选的broker数量不能大于队列数量'))
+        callback(new Error('勾选的broker数量不能大于分区数量'))
       } else {
         callback()
       }
@@ -146,11 +152,11 @@ export default {
         rule1: {
           code: [
             {required: true, message: '请输入topic英文名', trigger: 'change'},
-            {pattern: /^[a-zA-Z0-9/]+[a-zA-Z0-9/_-]{1,120}[a-zA-Z0-9/]+$/, message: '英文名格式不匹配', trigger: 'change'}
+            {pattern: /^[a-zA-Z0-9/_-]{3,120}$/, message: '英文名格式不匹配', trigger: 'change'}
           ],
           name: getNameRule(),
           partitions: [
-            {type: 'number', required: true, message: '请输入队列数量', trigger: 'change'}
+            {type: 'number', required: true, message: '请输入分区数量', trigger: 'change'}
           ],
           brokerGroup: [
             {validator: validateBrokerGroup, trigger: 'change'}
@@ -197,20 +203,56 @@ export default {
       }
     },
     handlerBrokerGroupChange (data) {
-      this.$refs.brokers.getListByGroup(data)
+      if (this.formData.brokerGroup.id === 0) {
+        this.$refs.brokers.getListByGroup(data)
+      } else {
+        let brokers = this.brokerGroupList.filter(group => group.id === this.formData.brokerGroup.id)
+        let query = {
+          keyword: ''
+        }
+        if (brokers.length > 0) {
+          query.group = {
+            id: brokers[0].id,
+            code: brokers[0].code,
+            name: brokers[0].name
+          }
+        }
+        let data = {
+          pagination: {
+            page: 0,
+            size: 1000
+          },
+          query: query
+        }
+        apiRequest.post(this.urls.searchBroker, {}, data).then((data) => {
+          if (data === '') {
+            return
+          }
+          this.formData.brokers = data.data || []
+        })
+      }
     },
     getNamespaces () {
       apiRequest.get(this.urls.findAllNamespace).then((data) => {
+        data.data.map(namespace => {
+          namespace.value = namespace.code
+          return namespace
+        })
         this.namespaceList = data.data || []
       })
     },
+    searchNamespace (query, callback) {
+      let list = this.namespaceList.filter(item => item.value.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+      callback(list)
+    },
+    handleNamespaceSelect (item) {
+      this.formData.namespace.code = item.code
+      this.formData.namespace.id = item.code
+    },
     getBrokerGroups () {
       apiRequest.get(this.urls.findAllBrokerGroup).then((data) => {
-        if (data.data === undefined || data.data.length < 1) {
-          this.brokerGroupList = [{id: 0, code: '', name: '全部'}]
-        }
         this.brokerGroupList = []
-        let allItem = {id: 0, code: '', name: '全部'}
+        let allItem = {id: 0, code: '全部', name: '全部'}
         this.brokerGroupList.push(allItem);
         (data.data || []).forEach(item => {
           this.brokerGroupList.push(item)
@@ -224,7 +266,28 @@ export default {
     },
     beforeConfirm () {
       let copyData = deepCopy(this.formData || {})
+      if (!copyData.namespace.id && copyData.namespace.code) {
+        copyData.namespace.id = copyData.namespace.code
+      }
       return copyData
+    },
+    confirm () {
+      // Before
+      let data = this.beforeConfirm()
+      // Validate
+      if (this.formData.brokers.length === 0) {
+        this.$Message.error('请选择有broker的分组')
+        return
+      }
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+          apiRequest.post(this.urls.add, {}, data).then((data) => {
+            if (data.code === this.$store.getters.successCode) {
+              this.$emit('on-dialog-cancel')
+            }
+          })
+        }
+      })
     }
   },
   computed: {

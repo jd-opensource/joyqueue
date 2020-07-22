@@ -17,3 +17,6 @@ org.joyqueue.broker.kafka.handler.AddPartitionsToTxnRequestHandler
 org.joyqueue.broker.kafka.handler.EndTxnRequestHandler
 org.joyqueue.broker.kafka.handler.InitProducerIdRequestHandler
 org.joyqueue.broker.kafka.handler.TxnOffsetCommitRequestHandler
+
+org.joyqueue.broker.kafka.handler.SaslAuthenticateHandler
+org.joyqueue.broker.kafka.handler.SaslHandshakeHandler

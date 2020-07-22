@@ -245,6 +245,12 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     public Pager<TopicMonitorInfo> getTopicInfos(int page, int pageSize) {
         return topicMonitorService.getTopicInfos(page, pageSize);
     }
+
+    @Override
+    public BrokerStartupInfo getStartInfo() {
+        return brokerMonitorInternalService.getStartInfo();
+    }
+
     @Override
     public void addGcEventListener(GCEventListener listener) {
         brokerMonitorInternalService.addGcEventListener(listener);
@@ -306,10 +312,6 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
         return brokerMonitorInternalService.getExtendBrokerStat(timeStamp);
     }
 
-    @Override
-    public BrokerStartupInfo getStartInfo() {
-        return brokerMonitorInternalService.getStartInfo();
-    }
     @Override
     public TopicConfig getTopicMetadata(String topic, boolean isCluster) {
         return metadataMonitorService.getTopicMetadata(topic, isCluster);
@@ -373,6 +375,11 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     @Override
     public Map<String, String> getConfigsMetadata() {
         return metadataMonitorService.getConfigsMetadata();
+    }
+
+    @Override
+    public String updateConfigMetadata(String key, String group, String value) {
+        return metadataMonitorService.updateConfigMetadata(key, group, value);
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @ComponentScan(value = {
+        "org.joyqueue.context",
         "org.joyqueue.nsr.impl",
         "org.joyqueue.service.impl",
         "org.joyqueue.util",

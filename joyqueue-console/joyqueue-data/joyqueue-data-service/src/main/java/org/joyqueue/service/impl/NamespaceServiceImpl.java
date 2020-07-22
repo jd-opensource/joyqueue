@@ -57,6 +57,7 @@ public class NamespaceServiceImpl implements NamespaceService {
         try {
             return nameSpaceServerService.add(model);
         } catch (Exception e) {
+            logger.error("", e);
             throw new RuntimeException("add",e);
         }
     }
@@ -66,6 +67,7 @@ public class NamespaceServiceImpl implements NamespaceService {
         try {
             return nameSpaceServerService.delete(model);
         } catch (Exception e) {
+            logger.error("", e);
             throw new RuntimeException("delete", e);
         }
     }
@@ -75,6 +77,7 @@ public class NamespaceServiceImpl implements NamespaceService {
         try {
             return nameSpaceServerService.update(model);
         } catch (Exception e) {
+            logger.error("", e);
             throw new RuntimeException("update",e);
         }
     }

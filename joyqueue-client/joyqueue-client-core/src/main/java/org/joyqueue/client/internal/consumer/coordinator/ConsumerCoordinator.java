@@ -79,15 +79,22 @@ public class ConsumerCoordinator extends Service {
             return brokerAssignmentsHolder.getBrokerAssignments();
         }
 
-        BrokerAssignments brokerAssignments = partitionAssignmentManager.fetchBrokerAssignment(topicMetadata, app, sessionTimeout);
-        brokerAssignmentsHolder = new BrokerAssignmentsHolder(brokerAssignments, SystemClock.now());
-        brokerAssignmentCache.put(app, topicMetadata.getTopic(), brokerAssignmentsHolder);
+        synchronized (this) {
+            brokerAssignmentsHolder = brokerAssignmentCache.get(app, topicMetadata.getTopic());
+            if (brokerAssignmentsHolder != null && !brokerAssignmentsHolder.isExpired(sessionTimeout)) {
+                return brokerAssignmentsHolder.getBrokerAssignments();
+            }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("update consumer assignments, app: {}, topic: {}, assignments: {}", app, topicMetadata.getTopic(), brokerAssignments);
+            BrokerAssignments brokerAssignments = partitionAssignmentManager.fetchBrokerAssignment(topicMetadata, app, sessionTimeout);
+            brokerAssignmentsHolder = new BrokerAssignmentsHolder(brokerAssignments, SystemClock.now());
+            brokerAssignmentCache.put(app, topicMetadata.getTopic(), brokerAssignmentsHolder);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("update consumer assignments, app: {}, topic: {}, assignments: {}", app, topicMetadata.getTopic(), brokerAssignments);
+            }
+
+            return brokerAssignments;
         }
-
-        return brokerAssignments;
     }
 
     public BrokerAssignments fetchAllBrokerAssignments(TopicMetadata topicMetadata, String app) {

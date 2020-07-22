@@ -56,7 +56,7 @@ public class PartitionGroupReplicaServiceImpl  implements PartitionGroupReplicaS
         } catch (Exception e) {
             String errorMsg = "topic"+replica.getTopic().getCode()+"扩容,同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg, e);//回滚
         }
         return result;
     }
@@ -72,7 +72,7 @@ public class PartitionGroupReplicaServiceImpl  implements PartitionGroupReplicaS
         } catch (Exception e) {
             String errorMsg = "topic"+replica.getTopic().getCode()+"缩容,同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg, e);//回滚
         }
         return result;
     }

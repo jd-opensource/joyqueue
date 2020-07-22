@@ -31,8 +31,8 @@ public class ProducerConfig {
     public static final long NONE_PRODUCE_TIMEOUT = -1;
 
     private String app;
-    private long timeout = 1000 * 10;
-    private long produceTimeout = NONE_PRODUCE_TIMEOUT;
+    private long timeout = 1000 * 3;
+    private long produceTimeout = 1000 * 3;
     private long transactionTimeout = 1000 * 60 * 30;
 
     private boolean failover = true;

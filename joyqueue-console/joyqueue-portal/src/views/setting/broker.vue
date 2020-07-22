@@ -1,15 +1,23 @@
 <template>
   <div>
-    <div class="ml20 mt30">
-      <d-input v-model="searchData.keyword" placeholder="请输入ID/Broker分组编码/IP" class="left mr10"
+    <div>
+      <d-input type="textarea" v-model="searchData.keyword" rows="1" placeholder="请输入ID/IP" class="left"
                style="width:300px" @on-enter="getList">
-        <span slot="prepend">关键词</span>
+        <span slot="prepend">&nbsp;ID/IP&nbsp;</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
+      <d-input v-if="searchData.groupVisible" v-model="searchData.group" oninput="value = value.trim()" placeholder="请输入Broker分组编码" class="left mr10"
+               style="width:300px" @on-enter="getList">
+        <span slot="prepend">分组编码</span>
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+      </d-input>
+      <d-button type="primary" @click="getList">搜索</d-button>
+      <d-button type="primary" @click="openBatchBrokerGroupDialog">批量分组调整</d-button>
+
       <slot name="extendBtn"></slot>
     </div>
-    <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-edit="edit" @on-del="del" @on-detail="detail" @on-archiveMonitor="archiveMonitor">
+    <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
+              @on-edit="edit" @on-del="del" @on-archiveMonitor="archiveMonitor">
     </my-table>
 
     <!--编辑Broker-->
@@ -17,13 +25,13 @@
       <grid-row class="mb10">
         <grid-col :span="8" class="label">IP:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="editData.ip"></d-input>
+          <d-input v-model="editData.ip" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
         <grid-col :span="8" class="label">端口:</grid-col>
         <grid-col :span="16" class="val">
-          <d-input v-model="editData.port"></d-input>
+          <d-input v-model="editData.port" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
@@ -70,6 +78,13 @@
     <my-dialog :dialog="monitorDetailDialog">
       <broker-monitor :brokerId="brokerId"> </broker-monitor>
     </my-dialog>
+    <my-dialog :dialog="batchBrokerGroupDialog" @on-dialog-confirm="batchBrokerGroupHandle('batchBrokerGroupSearch')" @on-dialog-cancel="closeBatchBrokerGroupDialog">
+      <d-form ref="batchBrokerGroupSearch" :model="batchBrokerGroupSearch" label-width="100px" :rules="batchBrokerGroupDialog.rules">
+        <d-form-item label="broker分组" prop="batchBrokerGroup">
+          <d-input placeholder="请输入broker分组" oninput="value = value.trim()" v-model="batchBrokerGroupSearch.batchBrokerGroup"></d-input>
+        </d-form-item>
+      </d-form>
+    </my-dialog>
   </div>
 </template>
 
@@ -80,6 +95,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import BrokerMonitor from './brokerMonitor'
 import {timeStampToString} from '../../utils/dateTimeUtils'
+import {brokerRetryTypeRender, brokerPermissionTypeRender} from '../../utils/common.js'
 
 export default {
   name: 'application',
@@ -94,7 +110,8 @@ export default {
       type: Object,
       default: function () {
         return {
-          keyword: ''
+          keyword: '',
+          groupVisible: true
         }
       }
     },
@@ -106,8 +123,10 @@ export default {
           del: '/broker/delete',
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
+          findDetail: '/monitor/broker/findBrokerDetail/',
           telnet: '/broker',
-          startInfo: '/monitor/start'
+          startInfo: '/monitor/start',
+          batchBrokerGroupSearch: '/brokerGroup/mvBatchBrokerGroup'
         }
       }
     },
@@ -126,10 +145,6 @@ export default {
           {
             txt: '归档监控',
             method: 'on-archiveMonitor'
-          },
-          {
-            txt: '详情',
-            method: 'on-detail'
           }
         ]
       }
@@ -149,14 +164,44 @@ export default {
             width: '15%'
           },
           {
-            title: 'IP',
+            title: 'IP:端口',
             key: 'ip',
-            width: '15%'
+            width: '15%',
+            render: (h, params) => {
+              const ip = params.item.ip
+              const port = params.item.port
+              return h('label', {
+                style: {
+                  color: '#3366FF'
+                },
+                on: {
+                  click: () => {
+                    let route = this.$router.resolve({
+                      path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+                      query: {
+                        brokerId: params.item.id,
+                        brokerIp: ip,
+                        brokerPort: port
+                      }
+                    })
+                    window.open(route.href, '_blank')
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
+                }
+              }, `${ip}:${port}`)
+            }
           },
           {
-            title: '端口',
-            key: 'port',
-            width: '10%'
+            title: '机房 (编码/名称)',
+            key: 'dataCenter.code',
+            width: '9%',
+            formatter (item) {
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
+            }
           },
           {
             title: '启动时间',
@@ -164,14 +209,58 @@ export default {
             width: '15%'
           },
           {
+            title: '版本',
+            key: 'startupInfo.version',
+            width: '15%',
+            render: (h, params) => {
+              let html = []
+              let spin = h('d-spin', {
+                attrs: {
+                  size: 'small'
+                },
+                style: {
+                  display: (params.item.startupInfo.version !== undefined) ? 'none' : 'inline-block'
+                }
+              })
+              html.push(spin)
+              let text = params.item.startupInfo.version
+              if (text === 'UNKNOWN') {
+                let error = h('icon', {
+                  style: {
+                    color: 'red'
+                  },
+                  props: {
+                    name: 'x-circle'
+                  }
+                })
+                html.push(error)
+              } else {
+                let textSpan = h('span', {
+                  style: {
+                    position: 'relative',
+                    display: (params.item.startupInfo.version === undefined) ? 'none' : 'inline-block'
+                  }
+                }, text)
+                html.push(textSpan)
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
             title: '重试方式',
             key: 'retryType',
-            width: '10%'
+            width: '10%',
+            render: (h, params) => {
+              return brokerRetryTypeRender(h, params.item.retryType)
+            }
           },
           {
             title: '权限',
             key: 'permission',
-            width: '10%'
+            width: '8%',
+            render: (h, params) => {
+              return brokerPermissionTypeRender(h, params.item.permission)
+            }
           }
         ]
       }
@@ -179,6 +268,10 @@ export default {
   },
   data () {
     return {
+      batchBrokerGroupSearch: {
+        selectedBrokers: [],
+        batchBrokerGroup: ''
+      },
       tableData: {
         rowData: [],
         colData: this.colData,
@@ -203,6 +296,20 @@ export default {
         showFooter: false,
         width: '1200px'
       },
+      batchBrokerGroupDialog: {
+        visible: false,
+        title: '批量分组迁移',
+        showFooter: true,
+        width: '600px',
+        rules: {
+          batchBrokerGroup: [
+            {
+              required: true,
+              message: 'broker分组不可以为空'
+            }
+          ]
+        }
+      },
       retryTypeList: [
         {key: 'DB', value: 'DB'},
         {key: 'RemoteRetry', value: 'RemoteRetry'}
@@ -219,6 +326,10 @@ export default {
   },
   methods: {
     getList () {
+      if (this.searchData.keyword && this.searchData.group) {
+        this.$Message.error('验证不通过，ID/IP搜索和Broker分组编号不能同时搜索')
+        return
+      }
       this.showTablePin = true
       let data = this.getSearchVal()
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
@@ -231,7 +342,11 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         for (let i = 0; i < this.tableData.rowData.length; i++) {
+          if (!this.tableData.rowData[i].startupInfo) {
+            this.tableData.rowData[i].startupInfo = {}
+          }
           this.getBrokerStatus(this.tableData.rowData, i)
+          this.getDetail(this.tableData.rowData[i], i)
         }
         this.showTablePin = false
       })
@@ -246,6 +361,19 @@ export default {
         this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
       })
     },
+    getDetail (row, index) {
+      apiRequest.getBase(this.urls.findDetail + row.id, {}, false)
+        .then((data) => {
+          if (data.code === 200) {
+            this.tableData.rowData[index] = Object.assign(row, data.data || [])
+          } else {
+            this.tableData.rowData[index].startupInfo = {}
+            this.tableData.rowData[index].startupInfo.startupTime = 'UNKNOWN'
+            this.tableData.rowData[index].startupInfo.version = 'UNKNOWN'
+          }
+          this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
+        })
+    },
     archiveMonitor (item) {
       let broker = {
         ip: item.ip,
@@ -256,10 +384,6 @@ export default {
         this.archiveMonitorData = data.data
         this.openDialog('archiveMonitorDialog')
       })
-    },
-    detail (item) {
-      this.brokerId = item.id
-      this.monitorDetailDialog.visible = true
     },
     beforeEdit () {
       return new Promise((resolve, reject) => {
@@ -274,10 +398,39 @@ export default {
           // description: this.editData.description
         })
       })
+    },
+    handleSelectionChange (val) {
+      this.batchBrokerGroupSearch.selectedBrokers = val
+    },
+    openBatchBrokerGroupDialog () {
+      this.batchBrokerGroupDialog.visible = true
+    },
+    closeBatchBrokerGroupDialog () {
+      this.batchBrokerGroupDialog.visible = false
+    },
+    batchBrokerGroupHandle (formName) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          apiRequest.post(this.urls.batchBrokerGroupSearch + '?group=' + this.batchBrokerGroupSearch.batchBrokerGroup, {}, this.batchBrokerGroupSearch.selectedBrokers).then((data) => {
+            if (data.code === 200) {
+              this.$Message.info('update success')
+              this.closeBatchBrokerGroupDialog()
+              this.getList()
+            } else {
+              this.$Message.error(data.message)
+            }
+          })
+        }
+      })
     }
   },
   mounted () {
     this.getList()
+  },
+  computed: {
+    curLang () {
+      return this.$i18n.locale
+    }
   }
 }
 </script>

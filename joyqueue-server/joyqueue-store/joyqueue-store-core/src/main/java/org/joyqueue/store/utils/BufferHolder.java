@@ -25,7 +25,7 @@ public interface BufferHolder extends Timed {
     /**
      * Buffer大小
      */
-    int size();
+    int capacity();
 
     /**
      * 是否可以释放？
@@ -38,4 +38,10 @@ public interface BufferHolder extends Timed {
      * @return 释放成功返回true，否则返回false
      */
     boolean evict();
+
+    /**
+     * 是否可写？
+     * @return true：可写，false：只读
+     */
+    boolean writable();
 }

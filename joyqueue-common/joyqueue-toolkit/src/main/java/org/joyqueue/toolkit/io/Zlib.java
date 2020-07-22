@@ -18,7 +18,6 @@ package org.joyqueue.toolkit.io;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 /**
@@ -34,7 +33,7 @@ public class Zlib implements Compressor {
         if (buf == null || out == null) {
             return;
         }
-        Deflater deflater = new Deflater();
+        ZipDeflater deflater = new ZipDeflater();
         deflater.reset();
         deflater.setInput(buf, offset, size);
         deflater.finish();

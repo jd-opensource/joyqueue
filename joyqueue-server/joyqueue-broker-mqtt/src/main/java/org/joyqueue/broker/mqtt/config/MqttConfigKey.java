@@ -33,7 +33,8 @@ public enum MqttConfigKey implements PropertyDef {
     EXECUTOR_SERVICE_CONNECTION_QUEUESIZE("mqtt.executor.service.connection.queuesize", 10000, Type.INT),
     EXECUTOR_SERVICE_PING_QUEUESIZE("mqtt.executor.service.ping.queuesize", 10000, Type.INT),
     EXECUTOR_SERVICE_SUBSCRIPTION_QUEUESIZE("mqtt.executor.service.subscription.queuesize", 10000, Type.INT),
-    EXECUTOR_SERVICE_PUBLISH_QUEUESIZE("mqtt.executor.service.publish.queuesize", 10000, Type.INT);
+    EXECUTOR_SERVICE_PUBLISH_QUEUESIZE("mqtt.executor.service.publish.queuesize", 10000, Type.INT),
+    MAX_PAYLOAD_SIZE("mqtt.max.payload.size", 8092, Type.INT);
 
     private String name;
     private Object value;

@@ -1,43 +1,42 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.event;
+package org.joyqueue.msg.filter;
+
 
 /**
- * BrokerEvent
- *
- * author: gaohaoxiang
- * date: 2018/11/13
- */
-public class BrokerEvent {
+ * @author jiangnan53
+ * @date 2020/4/22
+ **/
+public class FilterResponse {
 
-    private BrokerEventType type;
+    Object data;
 
-    public BrokerEvent(BrokerEventType type) {
+    OutputType type;
+
+    public FilterResponse(Object data, OutputType type) {
+        this.data = data;
         this.type = type;
     }
 
-    public BrokerEventType getType() {
+    public Object getData() {
+        return data;
+    }
+
+    public OutputType getType() {
         return type;
     }
 
-    public enum BrokerEventType {
-        START,
-
-        STOP,
-
-        ;
-    }
 }

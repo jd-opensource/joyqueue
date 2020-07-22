@@ -124,7 +124,11 @@ public class ProducerServiceImpl  implements ProducerService {
     @Override
     public List<Producer> findByTopic(String namespace, String topic) {
         try {
-            return fillProducers(producerNameServerService.findByTopic(topic, namespace));
+            TopicName topicName = TopicName.parse(topic);
+            if (StringUtils.isNoneBlank(topicName.getNamespace()) && StringUtils.isBlank(namespace)) {
+                namespace = topicName.getNamespace();
+            }
+            return fillProducers(producerNameServerService.findByTopic(topicName.getCode(), namespace));
         } catch (Exception e) {
             logger.error("findByTopic producer with nameServer failed, producer is {}, {}", namespace, topic, e);
             throw new RuntimeException(e);

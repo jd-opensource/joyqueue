@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.service.impl;
-
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
+package org.joyqueue.msg.filter;
 
 /**
- * Created by wangxiaofei1 on 2018/10/17.
- */
-public interface HttpService {
+ * @author jiangnan53
+ * @date 2020/4/1
+ **/
+public interface TopicMsgFilterMatcher {
 
-    CloseableHttpResponse executeRequest(HttpUriRequest request) throws Exception;
+    /**
+     * 符合某种匹配的条件
+     * @param content
+     * @param filter
+     * @return
+     */
+    boolean match(String content, String filter);
 }

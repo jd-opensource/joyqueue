@@ -5,12 +5,12 @@
         <div class="title">{{prop.detail.id}}</div>
         <grid-row :gutter="16">
           <grid-col span="8">
-            <span>队列数:</span>
+            <span>分区数:</span>
             <span>{{prop.detail.partitions}}</span>
           </grid-col>
           <grid-col span="8">
-            <span>标签:</span>
-            <span>{{prop.detail.labels}}</span>
+            <span>数据中心:</span>
+            <span v-for="(value,key) in prop.detail.dataCenters" :key="key">{{value}}&nbsp;&nbsp;</span>
           </grid-col>
           <grid-col span="8">
             <span>备注:</span>
@@ -65,7 +65,7 @@ import ConsumerDetail from '../monitor/detail/consumerDetail.vue'
 import {generateProducerDetailTabName, generateConsumerDetailTabName} from '../../utils/common.js'
 
 export default {
-  name: 'applicationDetail',
+  name: 'topicDetail',
   components: {
     detailSlot,
     Producer,
@@ -84,7 +84,7 @@ export default {
         isRetryEnabled: `/retry/isServerEnabled`
       },
       archiveEnabled: false,
-      retryEnabled: false
+      retryEnabled: true
     }
   },
   methods: {

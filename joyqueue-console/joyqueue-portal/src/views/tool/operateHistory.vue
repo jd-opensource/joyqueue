@@ -3,20 +3,20 @@
     <div class="ml20 mt30">
       <d-date-picker v-model="times" type="daterange" range-separator="至" start-placeholder="开始日期" class="left mr5"
                      end-placeholder="结束日期" value-format="timestamp" :default-time="['00:00:00', '23:59:59']"
-                     style="width: 370px" @on-change="getListWithDate">
+                     style="width: 370px" @on-change="getList">
         <span slot="prepend">日期范围</span>
       </d-date-picker>
       <d-select v-model="searchData.type" class="left mr5"  style="width:213px">
         <span slot="prepend">操作类型</span>
         <d-option v-for="item in typeList" :value="item.key" :key="item.key">{{ item.value }}</d-option>
       </d-select>
-      <d-input v-model="searchData.identity" class="left mr5" placeholder="关联Id" style="width:213px">
+      <d-input v-model="searchData.identity" oninput="value = value.trim()" class="left mr5" placeholder="关联Id" style="width:213px">
         <span slot="prepend">关联Id</span>
       </d-input>
-      <d-input v-model="searchData.erp" placeholder="用户名" class="left mr5" style="width:213px">
+      <d-input v-model="searchData.erp" oninput="value = value.trim()" placeholder="用户名" class="left mr5" style="width:213px">
         <span slot="prepend">用户名</span>
       </d-input>
-      <d-button type="primary" color="success" @click="getListWithDate">查询</d-button>
+      <d-button type="primary" color="success" @click="getList">查询</d-button>
     </div>
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
@@ -29,6 +29,7 @@
 import myTable from '../../components/common/myTable.vue'
 import crud from '../../mixins/crud.js'
 import {timeStampToString} from '../../utils/dateTimeUtils'
+import apiRequest from '../../utils/apiRequest.js'
 
 export default {
   name: 'operate-history',
@@ -42,7 +43,7 @@ export default {
         type: -1,
         beginTime: '',
         endTime: '',
-        erp: ''
+        erp: this.$store.getters.loginUserName
       },
       typeList: [
         {key: -1, value: '请选择类型'},
@@ -163,16 +164,43 @@ export default {
     }
   },
   methods: {
-    getListWithDate () {
+    validate () {
+      if (!this.$store.getters.isAdmin && !this.searchData.erp) {
+        this.$Message.error('用户名不能为空')
+        return false
+      }
+
+      if (!this.$store.getters.isAdmin && this.searchData.erp !== this.$store.getters.loginUserName) {
+        this.$Message.error('用户名必须为登录用户本人')
+        return false
+      }
+
+      return true
+    },
+    getList () {
       this.searchData.beginTime = this.times[0]
       this.searchData.endTime = this.times[1]
-      this.getList()
+      if (this.validate()) {
+        this.showTablePin = true
+        let data = this.getSearchVal()
+        apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+          if (data === '') {
+            return
+          }
+          data.data = data.data || []
+          data.pagination = data.pagination || {
+            totalRecord: data.data.length
+          }
+          this.page.total = data.pagination.totalRecord
+          this.page.page = data.pagination.page
+          this.page.size = data.pagination.size
+          this.tableData.rowData = data.data
+          this.showTablePin = false
+        })
+      }
     }
   },
   mounted () {
-    this.searchData.beginTime = this.times[0]
-    this.searchData.endTime = this.times[1]
-
     this.getList()
   }
 }

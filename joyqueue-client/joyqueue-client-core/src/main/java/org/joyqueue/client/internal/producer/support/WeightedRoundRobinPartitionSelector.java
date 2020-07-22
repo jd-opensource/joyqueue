@@ -46,6 +46,7 @@ public class WeightedRoundRobinPartitionSelector extends AbstractPartitionSelect
         int currentWeight = this.currentWeight.get();
         int size = partitions.size();
         boolean weightChange = this.lastTopicMetadata != topicMetadata;
+        int retry = 0;
 
         if (weightChange) {
             this.lastTopicMetadata = topicMetadata;
@@ -74,7 +75,11 @@ public class WeightedRoundRobinPartitionSelector extends AbstractPartitionSelect
             }
             PartitionMetadata partition = partitions.get(index);
             BrokerNode partitionLeader = partition.getLeader();
-            if (partitionLeader == null || !partitionLeader.isWritable()) {
+            if (partitionLeader == null) {
+                if (retry > 5) {
+                    return null;
+                }
+                retry++;
                 continue;
             }
             int partitionWeight = partitionLeader.getWeight();

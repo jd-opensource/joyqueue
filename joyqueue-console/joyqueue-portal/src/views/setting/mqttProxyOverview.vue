@@ -2,15 +2,15 @@
   <div style="margin-top: 50px" >
     <grid-row class="mb10"  >
       <grid-col :offset=4 :span="4">
-        <d-input v-model="publishQuery.clientId" placeholder="客户id" class="left mr10" style="width: 90%">
+        <d-input v-model="publishQuery.clientId" oninput="value = value.trim()" placeholder="客户id" class="left mr10" style="width: 90%">
         </d-input>
       </grid-col>
       <grid-col :span="4">
-        <d-input v-model="publishQuery.app" placeholder="应用code" class="left mr10" style="width: 90%">
+        <d-input v-model="publishQuery.app" oninput="value = value.trim()" placeholder="应用code" class="left mr10" style="width: 90%">
         </d-input>
       </grid-col>
       <grid-col :span="4">
-        <d-input v-model="publishQuery.topic" placeholder="主题" class="left mr10" style="width: 90%">
+        <d-input v-model="publishQuery.topic" oninput="value = value.trim()" placeholder="主题" class="left mr10" style="width: 90%">
         </d-input>
       </grid-col>
       <grid-col :span="4">
