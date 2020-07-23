@@ -416,13 +416,12 @@ public class ReplicaGroup extends Service {
 
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
-                        int heartbeatTimeout = electionConfig.getHeartbeatTimeout();
-                        if (electionConfig.enableSharedHeartbeat()) {
-                            heartbeatTimeout = electionConfig.getElectionTimeout();
+                        if (!electionConfig.enableSharedHeartbeat()) {
+                            if (SystemClock.now() - replica.getLastAppendTime() >= electionConfig.getHeartbeatTimeout()) {
+                                request = generateHeartbeatRequest(replica);
+                            }
                         }
-                        if (SystemClock.now() - replica.getLastAppendTime() >= heartbeatTimeout) {
-                            request = generateHeartbeatRequest(replica);
-                        } else {
+                        if (request == null) {
                             replicateResponseQueue.put(new DelayedCommand(ONE_MS_NANO, replica.replicaId()));
                             return;
                         }
