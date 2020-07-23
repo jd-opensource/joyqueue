@@ -1,5 +1,8 @@
 <template>
   <div>
+    <d-button type="primary" @click="getList" class="button">刷新
+      <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+    </d-button>
     <d-table :columns="tableData.colData" :data="tableData.rowData" style="height: 400px;overflow-y:auto">
     </d-table>
   </div>
