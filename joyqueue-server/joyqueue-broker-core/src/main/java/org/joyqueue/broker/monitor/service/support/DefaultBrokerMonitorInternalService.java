@@ -26,6 +26,8 @@ import org.joyqueue.broker.monitor.stat.BrokerStatExt;
 import org.joyqueue.broker.monitor.stat.ConsumerPendingStat;
 import org.joyqueue.broker.monitor.stat.JVMStat;
 import org.joyqueue.broker.monitor.stat.PartitionGroupPendingStat;
+import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
+import org.joyqueue.broker.monitor.stat.PartitionStat;
 import org.joyqueue.broker.monitor.stat.TopicPendingStat;
 import org.joyqueue.broker.monitor.stat.TopicStat;
 import org.joyqueue.domain.TopicConfig;
@@ -184,6 +186,10 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
                         }
                         long partitionPending = partitionMetric.getRightIndex() - ackIndex;
                         Map<Short, Long> partitionPendStatMap = partitionGroupPendingStat.getPendingStatSubMap();
+                        PartitionStat stat = new PartitionStat(consumer.getTopic().getFullName(),consumer.getApp(),partitionMetric.getPartition());
+                        stat.setAckIndex(ackIndex);
+                        stat.setRight(partitionMetric.getRightIndex());
+                        partitionGroupPendingStat.getPartitionStatHashMap().put(partitionMetric.getPartition(),stat);
                         partitionPendStatMap.put(partitionMetric.getPartition(), partitionPending);
                         partitionGroupPending += partitionPending;
                     }
@@ -204,9 +210,25 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         return statExt;
     }
 
+
     @Override
     public BrokerStartupInfo getStartInfo() {
         return brokerStartupInfo;
+    }
+    /**
+     * Replica log max position snapshots
+     **/
+    public void snapshotReplicaLag() {
+        Map<String, TopicStat> topicStatMap = brokerStat.getTopicStats();
+        for (TopicStat topicStat : topicStatMap.values()) {
+            Map<Integer, PartitionGroupStat> partitionGroupStatMap = topicStat.getPartitionGroupStatMap();
+            for (PartitionGroupStat partitionGroupStat : partitionGroupStatMap.values()) {
+                StoreManagementService.PartitionGroupMetric partitionGroupMetric = storeManagementService.partitionGroupMetric(partitionGroupStat.getTopic(), partitionGroupStat.getPartitionGroup());
+                if (partitionGroupMetric != null) {
+                    //partitionGroupStat.getReplicationStat().setMaxLogPosition(partitionGroupMetric.getRightPosition());
+                }
+            }
+        }
     }
 
     /**
@@ -252,7 +274,6 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         jvmStat.setMemoryStat(jvmMonitorService.memSnapshot());
         return jvmStat;
     }
-
 
     @Override
     public void addGcEventListener(GCEventListener listener) {

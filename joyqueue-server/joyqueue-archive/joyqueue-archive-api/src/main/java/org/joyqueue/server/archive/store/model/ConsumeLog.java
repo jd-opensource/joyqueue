@@ -15,6 +15,8 @@
  */
 package org.joyqueue.server.archive.store.model;
 
+import java.util.Arrays;
+
 /**
  * 消息消费日志
  * <p>
@@ -112,5 +114,20 @@ public class ConsumeLog {
 
     public void setApp(String app) {
         this.app = app;
+    }
+
+    @Override
+    public String toString() {
+        return "ConsumeLog{" +
+                "bytesMessageId=" + Arrays.toString(bytesMessageId) +
+                ", appId=" + appId +
+                ", brokerId=" + brokerId +
+                ", clientIp=" + Arrays.toString(clientIp) +
+                ", clientIpStr='" + clientIpStr + '\'' +
+                ", consumeTime=" + consumeTime +
+                ", messageId='" + messageId + '\'' +
+                ", topic='" + topic + '\'' +
+                ", app='" + app + '\'' +
+                '}';
     }
 }

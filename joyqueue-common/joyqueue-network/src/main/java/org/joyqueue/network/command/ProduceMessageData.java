@@ -15,6 +15,8 @@
  */
 package org.joyqueue.network.command;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.message.BrokerMessage;
 
@@ -70,5 +72,16 @@ public class ProduceMessageData {
             return 0;
         }
         return messages.size();
+    }
+
+    public int getTraffic() {
+        if (messages == null) {
+            return 0;
+        }
+        int result = 0;
+        for (BrokerMessage message : messages) {
+            result += ObjectUtils.defaultIfNull(message.getByteBody(), ArrayUtils.EMPTY_BYTE_ARRAY).length;
+        }
+        return result;
     }
 }

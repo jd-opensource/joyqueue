@@ -13,7 +13,7 @@
 </template>
 
 <script>
-  import apiUrl from '../../../utils/apiUrl.js'
+import apiUrl from '../../../utils/apiUrl.js'
 import apiRequest from '../../../utils/apiRequest.js'
 import crud from '../../../mixins/crud.js'
 
@@ -48,13 +48,13 @@ export default {
   methods: {
     getDetail () {
       if (this.app.id) {
-          apiRequest.get(this.urlOrigin.detail + '/' + this.app.id, {}).then((data) => {
-              this.detail = data.data || {}
-          })
+        apiRequest.get(this.urlOrigin.detail + '/' + this.app.id, {}).then((data) => {
+          this.detail = data.data || {}
+        })
       } else if (this.app.code) {
-          apiRequest.get(apiUrl['/application'].getByCode + '/' + this.app.code, {}).then((data) => {
-              this.detail = data.data || {}
-          })
+        apiRequest.get(apiUrl['/application'].getByCode + '/' + this.app.code, {}).then((data) => {
+          this.detail = data.data || {}
+        })
       }
     },
     gotoList () {

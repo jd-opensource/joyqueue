@@ -139,6 +139,8 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         List<URI> currentVoters = clusterConfiguration.getVoters();
         if (!currentVoters.contains(currentNode)) {
             List<URI> newVoters = Lists.newArrayList(currentVoters);
+            nodes.clear();
+            nodes.addAll(currentVoters);
             newVoters.add(currentNode);
             logger.info("update journalkeeper cluster, oldVoters: {}, newVoters: {}", currentVoters, newVoters);
             try {

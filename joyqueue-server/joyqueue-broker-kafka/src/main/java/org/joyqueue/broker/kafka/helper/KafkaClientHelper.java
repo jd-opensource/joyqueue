@@ -26,9 +26,42 @@ import org.apache.commons.lang3.StringUtils;
 public class KafkaClientHelper {
 
     private static final String SEPARATOR = "-";
+    private static final String AUTH_SEPARATOR = "@";
     private static final String[] REPLACE = {"spark-executor-"};
+    private static final String[] METADATA_FUZZY_SEARCH = {"MetadataFuzzySearch"};
 
     public static String parseClient(String clientId) {
+        clientId = doParseClient(clientId);
+        if (StringUtils.contains(clientId, AUTH_SEPARATOR)) {
+            String[] strings = StringUtils.splitByWholeSeparator(clientId, AUTH_SEPARATOR);
+            clientId = strings[0];
+        }
+        return clientId;
+    }
+
+    public static boolean isMetadataFuzzySearch(String clientId) {
+        if (StringUtils.isBlank(clientId)) {
+            return false;
+        }
+        String[] strings = StringUtils.splitByWholeSeparator(clientId, SEPARATOR);
+        for (String fuzzySearch : METADATA_FUZZY_SEARCH) {
+            if (strings[strings.length - 1].equals(fuzzySearch)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String parseToken(String clientId) {
+        clientId = doParseClient(clientId);
+        if (StringUtils.contains(clientId, AUTH_SEPARATOR)) {
+            String[] strings = StringUtils.splitByWholeSeparator(clientId, AUTH_SEPARATOR);
+            return strings[1];
+        }
+        return null;
+    }
+
+    protected static String doParseClient(String clientId) {
         if (StringUtils.isBlank(clientId)) {
             return clientId;
         }
@@ -37,7 +70,7 @@ public class KafkaClientHelper {
         }
         if (StringUtils.contains(clientId, SEPARATOR)) {
             String[] strings = StringUtils.splitByWholeSeparator(clientId, SEPARATOR);
-            return strings[0];
+            clientId = strings[0];
         }
         return clientId;
     }

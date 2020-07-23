@@ -57,17 +57,35 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
     }
 
     @Override
+    protected boolean requireIfAcquired(String topic, String app, String type) {
+        RateLimiter rateLimiter = rateLimiterManager.getRateLimiter(topic, app, type);
+        if (rateLimiter == null) {
+            return false;
+        }
+        return rateLimiter.tryAcquireRequire();
+    }
+
+    @Override
+    protected boolean releaseRequire(String topic, String app, String type) {
+        RateLimiter rateLimiter = rateLimiterManager.getRateLimiter(topic, app, type);
+        if (rateLimiter == null) {
+            return false;
+        }
+        return rateLimiter.releaseRequire();
+    }
+
+    @Override
     protected boolean limitIfNeeded(String topic, String app, String type, Traffic traffic) {
         RateLimiter rateLimiter = rateLimiterManager.getRateLimiter(topic, app, type);
         if (rateLimiter == null) {
             return false;
         }
-        return !rateLimiter.tryAcquireTps() || !rateLimiter.tryAcquireTraffic(traffic.getTraffic(topic));
+        return !rateLimiter.tryAcquireTps(traffic.getTps(topic)) || !rateLimiter.tryAcquireTraffic(traffic.getTraffic(topic));
     }
 
     @Override
-    protected Command doLimit(Transport transport, Command request, Command response) {
-        int delay = getDelay(transport, request, response);
+    protected Command doLimit(Transport transport, Command request, Command response, boolean isRequired) {
+        int delay = getDelay(transport, request, response, isRequired);
         LimitContext limitContext = new LimitContext(transport, request, response, delay);
 
         if (logger.isDebugEnabled()) {
@@ -76,7 +94,10 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
         return limitRejectedStrategy.execute(limitContext);
     }
 
-    protected int getDelay(Transport transport, Command request, Command response) {
+    protected int getDelay(Transport transport, Command request, Command response, boolean isRequired) {
+        if (!isRequired) {
+            return config.getMinDelay();
+        }
         int delay = config.getDelay();
         if (delay == LimitConfig.DELAY_DYNAMIC) {
             int dynamicDelay = (int) (1000 - (SystemClock.now() % 1000));

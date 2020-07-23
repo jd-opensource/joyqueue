@@ -15,7 +15,10 @@
  */
 package org.joyqueue.nsr.network.handler;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.joyqueue.domain.AllMetadata;
+import org.joyqueue.domain.Config;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Types;
@@ -26,10 +29,14 @@ import org.joyqueue.nsr.network.codec.GetAllMetadataResponseCodec;
 import org.joyqueue.nsr.network.command.GetAllMetadataRequest;
 import org.joyqueue.nsr.network.command.GetAllMetadataResponse;
 import org.joyqueue.nsr.network.command.NsrCommandType;
+import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * GetAllMetadataRequestHandler
@@ -40,14 +47,17 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
 
     protected static final Logger logger = LoggerFactory.getLogger(GetAllMetadataRequestHandler.class);
 
+    private PropertySupplier supplier;
     private NameServiceConfig config;
     private NameService nameService;
 
-    private volatile byte[] allMetadataCache;
+    private volatile AllMetadata allMetadataCache;
+    private volatile byte[] allMetadataCacheByte;
     private Thread refreshCacheThread;
 
     @Override
     public void setSupplier(PropertySupplier supplier) {
+        this.supplier = supplier;
         this.config = new NameServiceConfig(supplier);
     }
 
@@ -57,16 +67,15 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
         this.refreshCacheThread = new Thread(() -> {
             while (true) {
                 try {
-                    if (!config.getAllMetadataCacheEnable()) {
-                        continue;
+                    if (config.getAllMetadataCacheEnable()) {
+                        allMetadataCacheByte = doGetAllMetadata();
                     }
-                    allMetadataCache = doGetAllMetadata();
                     Thread.currentThread().sleep(config.getAllMetadataCacheExpireTime());
                 } catch (Exception e) {
                     logger.error("refresh cache exception", e);
                 }
             }
-        }, "joyqueue-allmetadata-cache-refresh");
+        }, "joyqueue-allmetadata-cache-refresh-thread");
         this.refreshCacheThread.setDaemon(true);
         this.refreshCacheThread.start();
     }
@@ -77,10 +86,10 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
         byte[] response = null;
 
         if (config.getAllMetadataCacheEnable()) {
-            if (allMetadataCache == null) {
-                allMetadataCache = doGetAllMetadata();
+            if (allMetadataCacheByte == null) {
+                allMetadataCacheByte = doGetAllMetadata();
             }
-            response = allMetadataCache;
+            response = allMetadataCacheByte;
         } else {
             response = doGetAllMetadata();
         }
@@ -91,8 +100,38 @@ public class GetAllMetadataRequestHandler implements NsrCommandHandler, Property
     }
 
     protected byte[] doGetAllMetadata() {
-        AllMetadata allMetadata = nameService.getAllMetadata();
-        return GetAllMetadataResponseCodec.toJson(allMetadata);
+        boolean isException = false;
+        try {
+            allMetadataCache = nameService.getAllMetadata();
+        } catch (Exception e) {
+            if (allMetadataCache == null) {
+                throw e;
+            }
+            isException = true;
+            logger.error("get all metadata exception", e);
+        }
+
+        if (isException || config.getAllMetadataRewriteEnable()) {
+            try {
+                allMetadataCache.setConfigs(mergeMemoryConfigs(allMetadataCache.getConfigs()));
+            } catch (Exception e1) {
+                throw e1;
+            }
+        }
+
+        return GetAllMetadataResponseCodec.toJson(allMetadataCache);
+    }
+
+    protected List<Config> mergeMemoryConfigs(List<Config> configs) {
+        Set<Config> result = Sets.newHashSet();
+        result.addAll(configs);
+        List<Property> properties = supplier.getProperties();
+        for (Property property : properties) {
+            if ("all".equals(property.getGroup())) {
+                result.add(new Config(property.getGroup(), property.getKey(), String.valueOf(property.getValue())));
+            }
+        }
+        return Lists.newArrayList(result);
     }
 
     @Override

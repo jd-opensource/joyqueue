@@ -160,12 +160,17 @@ public class MqttProtocolHandler extends Service {
         MqttConnAckMessage okResp = sendAckToClient(client, connectMessage, MqttConnectReturnCode.CONNECTION_ACCEPTED, !isCleanSession);
 
         if (okResp.variableHeader().connectReturnCode().byteValue() != MqttConnectReturnCode.CONNECTION_ACCEPTED.byteValue()) {
-            LOG.info("CONN clientID: <{}>, ConnectionStatus: <{}>", clientId, okResp.variableHeader().connectReturnCode().byteValue());
+            LOG.info("CONNECT-none-accepted clientID: <{}>, ConnectionStatus: <{}>, client-address: <{}>, server-address: <{}>",
+                    clientId,
+                    okResp.variableHeader().connectReturnCode().byteValue(),
+                    client.remoteAddress(),
+                    client.localAddress()
+            );
         }
 
         consumerManager.fireConsume(clientId);
 
-        LOG.info("CONNECT successful, clientID: {}", clientId);
+        LOG.info("CONNECT successful, clientID: {}, client-address: <{}>, server-address: <{}>", clientId, client.remoteAddress(), client.localAddress());
     }
 
     private MqttConnAckMessage sendAckToClient(Channel client, MqttConnectMessage connectMessage, MqttConnectReturnCode ackCode, boolean sessionPresent) {
@@ -346,7 +351,7 @@ public class MqttProtocolHandler extends Service {
             }
 
             List<MqttTopicSubscription> topicSubscribes = subscribeMessage.payload().topicSubscriptions();
-            LOG.info("Subscribe topics: {}", topicSubscribes);
+            LOG.info("Subscribe topics: {}, clientID: {}", topicSubscribes, clientID);
 
             try {
                 if (null != topicSubscribes) {
@@ -386,19 +391,20 @@ public class MqttProtocolHandler extends Service {
         client.writeAndFlush(subAckMessage);
     }
 
-    private Set<MqttSubscription> subscribe(List<MqttTopicSubscription> topicSubscribes, String clientID, String clientGroup, List<Integer> resultCode) throws Exception {
+    private Set<MqttSubscription> subscribe(List<MqttTopicSubscription> topicSubscribes, String clientID, String clientGroup, List<Integer> resultCodes) throws Exception {
         List<MqttSubscription> needSubsTopicFilters = new ArrayList<>();
         for (MqttTopicSubscription mts : topicSubscribes) {
             // 验证topicfilter是不是合法
-            if (!new TopicFilter(mts.topicName()).isValid()) {
-                resultCode.add(MqttQoS.FAILURE.value());
+            if (!new TopicFilter(mts.topicName()).isValid() /*|| Token.MULTI.toString().equals(mts.topicName())*/) {
+                resultCodes.add(MqttQoS.FAILURE.value());
                 LOG.warn("topic filter[{}] of clientID[{}] is invalid", mts.topicName(), clientID);
             } else {
                 // todo: 目前只支持qos=1的订阅 所以正确返回码统一填充AT_LEAST_ONCE 不填充订阅要求的qos=mts.qualityOfService().value()值 后续实现订阅qos等级要求 先记录qos即可
                 needSubsTopicFilters.add(new MqttSubscription(clientID, new TopicFilter(mts.topicName()), mts.qualityOfService()));
-                resultCode.add(MqttQoS.AT_LEAST_ONCE.value());
+                resultCodes.add(MqttQoS.AT_LEAST_ONCE.value());
             }
         }
+        LOG.info("Do subscribe topics: {}, clientGroup: {}", needSubsTopicFilters, clientGroup);
         return subscriptionManager.subscribes(clientGroup, needSubsTopicFilters);
     }
 
@@ -467,8 +473,8 @@ public class MqttProtocolHandler extends Service {
             if (session != null) {
                 Set<MqttSubscription> subscriptions = session.listSubsciptions();
                 for (MqttSubscription subscription : subscriptions) {
-                    // todo: 不支持通配符取消订阅模式
-                    if (subscription.getTopicFilter().toString().equals(topicFilter)/* || new TopicFilter(topicFilter).match(filter)*/) {
+                    if (subscription.getTopicFilter().toString().equals(topicFilter) ||
+                            subscription.getTopicFilter().match(new TopicFilter(topicFilter))) {
                         needUnSubscriptions.add(subscription);
                     }
                 }

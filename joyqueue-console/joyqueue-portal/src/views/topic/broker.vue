@@ -22,6 +22,7 @@
 import MyTable from '../../components/common/myTable'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
+import {brokerPermissionTypeRender, brokerRetryTypeRender} from '../../utils/common.js'
 import {timeStampToString} from '../../utils/dateTimeUtils'
 
 export default {
@@ -30,47 +31,108 @@ export default {
   mixins: [crud],
   props: {
     topicId: {
-     type: String,
-     default: ''
-   },
-   showBrokerChart: {
-     type: Boolean,
-     default: true
-   },
-   showHostChart: {
-     type: Boolean,
-     default: true
-   }
+      type: String,
+      default: ''
+    },
+    showBrokerChart: {
+      type: Boolean,
+      default: true
+    },
+    showHostChart: {
+      type: Boolean,
+      default: true
+    }
   },
   data () {
     return {
       urls: {
         search: `/broker/findByTopic`,
-        startInfo: '/monitor/start',
-        getUrl: `/grafana/getRedirectUrl`
+        getUrl: `/grafana/getRedirectUrl`,
+        findDetail: '/monitor/broker/findBrokerDetail/'
       },
       tableData: {
         rowData: [],
         colData: [
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '12%'
           },
           {
-            title: 'IP',
-            key: 'ip'
+            title: 'IP:端口',
+            key: 'ip',
+            width: '15%',
+            render: (h, params) => {
+              console.log(params.item)
+              const ip = params.item.ip
+              const port = params.item.port
+              return h('label', {
+                style: {
+                  color: '#3366FF'
+                },
+                on: {
+                  click: () => {
+                    this.$router.push({
+                      path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+                      query: {
+                        brokerId: params.item.id,
+                        brokerIp: ip,
+                        brokerPort: port
+                      }
+                    })
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
+                }
+              }, `${ip}:${port}`)
+            }
           },
           {
-            title: '端口',
-            key: 'port'
+            title: '机房 [编码/名称]',
+            key: 'dataCenter.code',
+            width: '15%',
+            formatter (item) {
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
+            }
+          },
+          {
+            title: 'broker分组',
+            key: 'group.code',
+            width: '10%'
+          },
+          {
+            title: '版本',
+            key: 'startupInfo.version',
+            width: '12%'
           },
           {
             title: '启动时间',
-            key: 'startupTime'
+            key: 'startupInfo.startupTime',
+            width: '15%',
+            formatter (item) {
+              if (item.startupInfo) {
+                return timeStampToString(item.startupInfo.startupTime)
+              }
+            }
           },
           {
-            title: 'revision',
-            key: 'revision'
+            title: '重试类型',
+            key: 'retryType',
+            width: '12%',
+            render: (h, params) => {
+              return brokerRetryTypeRender(h, params.item.retryType)
+            }
+          },
+          {
+            title: '权限',
+            key: 'permission',
+            width: '12%',
+            render: (h, params) => {
+              return brokerPermissionTypeRender(h, params.item.permission)
+            }
           }
         ]
       },
@@ -87,46 +149,42 @@ export default {
         data.data = data.data || []
         this.tableData.rowData = data.data
         for (let i = 0; i < this.tableData.rowData.length; i++) {
-          this.getBrokerStatus(this.tableData.rowData, i)
+          this.getDetail(this.tableData.rowData[i], i)
         }
         this.showTablePin = false
       })
     },
-    getBrokerStatus (rowData, i) {
-      apiRequest.get(this.urls.startInfo + '/' + rowData[i].id).then((data) => {
-        if (data.code === 200) {
-          this.tableData.rowData[i].startupTime = timeStampToString(data.data.startupTime)
-          this.tableData.rowData[i].revision = data.data.revision
-        } else {
-          this.tableData.rowData[i].startupTime = '不存活'
+    getDetail (row, index) {
+      apiRequest.getBase(this.urls.findDetail + row.id, {}, false)
+        .then((data) => {
+          this.tableData.rowData[index] = Object.assign(row, data.data || [])
+          this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
+        })
+    },
+    goBrokerChart () {
+      apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.broker, {}, {}).then((data) => {
+        let url = data.data || ''
+        if (url.indexOf('?') < 0) {
+          url += '?'
+        } else if (!url.endsWith('?')) {
+          url += '&'
         }
-        this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+        url = url + 'var-topic=' + this.topicId
+        window.open(url)
       })
     },
-     goBrokerChart () {
-       apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.broker, {}, {}).then((data) => {
-         let url = data.data || ''
-         if (url.indexOf('?') < 0) {
-           url += '?'
-         } else if (!url.endsWith('?')) {
-           url += '&'
-         }
-         url = url + 'var-topic=' + this.topicId
-         window.open(url)
-       })
-     },
-     goHostChart () {
-       apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.host, {}, {}).then((data) => {
-         let url = data.data || ''
-         if (url.indexOf('?') < 0) {
-           url += '?'
-         } else if (!url.endsWith('?')) {
-           url += '&'
-         }
-         url = url + 'var-topic=' + this.topicId
-         window.open(url)
-       })
-     }
+    goHostChart () {
+      apiRequest.get(this.urls.getUrl + '/' + this.monitorUId.host, {}, {}).then((data) => {
+        let url = data.data || ''
+        if (url.indexOf('?') < 0) {
+          url += '?'
+        } else if (!url.endsWith('?')) {
+          url += '&'
+        }
+        url = url + 'var-topic=' + this.topicId
+        window.open(url)
+      })
+    }
   }
 }
 </script>

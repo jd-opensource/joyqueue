@@ -79,7 +79,6 @@ public class DefaultMessageManageService implements MessageManageService {
             consumer.setTopic(topic);
             consumer.setApp(app);
 
-            List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(count);
             List<BrokerMessageInfo> result = Lists.newArrayListWithCapacity(count);
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
             for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
@@ -95,6 +94,7 @@ public class DefaultMessageManageService implements MessageManageService {
                     if (ackIndex >= partitionMetric.getRightIndex()) {
                         continue;
                     }
+                    List<BrokerMessage> brokerMessages = Lists.newLinkedList();
                     byte[][] bytes = storeManagementService.readMessages(topic, partitionMetric.getPartition(), ackIndex, realCount);
                     if (ArrayUtils.isNotEmpty(bytes)) {
                         for (byte[] message : bytes) {
@@ -123,7 +123,6 @@ public class DefaultMessageManageService implements MessageManageService {
             consumer.setTopic(topic);
             consumer.setApp(app);
 
-            List<BrokerMessage> brokerMessages = Lists.newArrayListWithCapacity(count);
             List<BrokerMessageInfo> result = Lists.newArrayListWithCapacity(count);
             StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
             for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
@@ -144,6 +143,7 @@ public class DefaultMessageManageService implements MessageManageService {
                         realIndex = partitionMetric.getRightIndex() - realCount;
                         realIndex = Math.max(realIndex, 0);
                     }
+                    List<BrokerMessage> brokerMessages = Lists.newLinkedList();
                     byte[][] bytes = storeManagementService.readMessages(topic, partitionMetric.getPartition(), realIndex, realCount);
                     if (ArrayUtils.isNotEmpty(bytes)) {
                         for (byte[] message : bytes) {

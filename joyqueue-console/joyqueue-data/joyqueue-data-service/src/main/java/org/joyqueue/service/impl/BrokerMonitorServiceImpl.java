@@ -163,7 +163,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         return monitorRecords;
     }
@@ -259,7 +259,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info(" parse connection info exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         //mock large size result
 //        if(clients.size()>0){
@@ -337,7 +337,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         if(!NullUtil.isEmpty(monitorRecords)){
             monitorRecords.sort(Comparator.comparing(e->e.getPartition()));
@@ -498,7 +498,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         return  monitorRecords;
     }

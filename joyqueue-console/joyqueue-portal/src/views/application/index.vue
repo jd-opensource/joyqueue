@@ -2,7 +2,7 @@
   <div>
     <grid-row class="table-query">
       <grid-col span="4">
-      <d-input v-model="searchData.keyword" :placeholder="langConfig.placeholder1" class="left mr10" style="width: 100%"
+      <d-input v-model="searchData.keyword" oninput="value = value.trim()" :placeholder="langConfig.placeholder1" class="left mr10" style="width: 100%"
         @on-enter="getList">
         <d-button type="borderless" slot="suffix" @click="getList"><icon name="search" size="14" color="#CACACA"></icon></d-button>
       </d-input>
@@ -30,6 +30,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import appAddForm from './appAddForm.vue'
 import crud from '../../mixins/crud.js'
 import viewLang from '../../i18n/views.json'
+import {sortByCode} from '../../utils/common.js'
 
 export default {
   name: 'application',
@@ -141,7 +142,7 @@ export default {
           {
             txt: this.langConfig['colData']['btnDelete'],
             method: 'on-del',
-            isAdmin: true
+            isAdmin: 1
           }
         ]
       }
@@ -176,8 +177,8 @@ export default {
         name: `/${this.curLang}/application/detail`,
         query: {id: item.id, app: item.code}})
     },
-    isAdmin (item) {
-      return this.$store.getters.isAdmin
+    sortData (data) {
+      return data.sort((a, b) => sortByCode(a, b))
     }
   },
   mounted () {

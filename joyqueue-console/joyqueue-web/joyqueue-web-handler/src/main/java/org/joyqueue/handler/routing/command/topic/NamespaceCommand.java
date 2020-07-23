@@ -18,6 +18,7 @@ package org.joyqueue.handler.routing.command.topic;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
 import org.joyqueue.model.PageResult;
@@ -27,6 +28,7 @@ import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.query.QNamespace;
 import org.joyqueue.service.NamespaceService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,13 +40,33 @@ public class NamespaceCommand extends NsrCommandSupport<Namespace, NamespaceServ
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QNamespace> qPageQuery) throws Exception {
         List<Namespace> namespaces = service.findAll();
+        List<Namespace> namespaceList = new ArrayList<>();
 
+        QNamespace qNamespace = qPageQuery.getQuery();
+        if (StringUtils.isNotBlank(qNamespace.getCode()) ||
+                StringUtils.isNotBlank(qNamespace.getName()) ||
+                StringUtils.isNotBlank(qNamespace.getKeyword())) {
+            for (Namespace namespace: namespaces) {
+                if (StringUtils.isNotBlank(qNamespace.getCode()) && StringUtils.containsIgnoreCase(namespace.getCode(),qNamespace.getCode())) {
+                    namespaceList.add(namespace);
+                } else if (StringUtils.isNotBlank(qNamespace.getName()) && StringUtils.containsIgnoreCase(namespace.getName(),qNamespace.getName())) {
+                    namespaceList.add(namespace);
+                } else if (StringUtils.isNotBlank(qNamespace.getKeyword())) {
+                    if (StringUtils.containsIgnoreCase(namespace.getCode(), qNamespace.getKeyword()) ||
+                        StringUtils.containsIgnoreCase(namespace.getName(), qNamespace.getKeyword())) {
+                        namespaceList.add(namespace);
+                    }
+                }
+            }
+        } else {
+            namespaceList.addAll(namespaces);
+        }
         Pagination pagination = qPageQuery.getPagination();
-        pagination.setTotalRecord(namespaces.size());
+        pagination.setTotalRecord(namespaceList.size());
 
-        PageResult<Namespace> result = new PageResult();
+        PageResult<Namespace> result = new PageResult<>();
         result.setPagination(pagination);
-        result.setResult(namespaces);
+        result.setResult(namespaceList);
         return Responses.success(result.getPagination(), result.getResult());
     }
 

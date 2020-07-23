@@ -17,11 +17,14 @@ package org.joyqueue.broker;
 
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.position.PositionManager;
 import org.joyqueue.broker.coordinator.CoordinatorService;
+
+import org.joyqueue.broker.event.BrokerEventBus;
 import org.joyqueue.broker.manage.BrokerManageService;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.monitor.BrokerMonitorService;
@@ -44,6 +47,7 @@ import org.joyqueue.toolkit.config.PropertySupplier;
 public class BrokerContext {
     private BrokerConfig brokerConfig;
     private SessionManager sessionManager;
+    private ClusterNameService clusterNameService;
     private ClusterManager clusterManager;
     private Produce produce;
     private Consume consume;
@@ -61,6 +65,8 @@ public class BrokerContext {
     private Producer.ProducerPolicy globalproducerPolicy;
     private MessageConvertSupport messageConvertSupport;
     private BrokerTransportManager brokerTransportManager;
+    private BrokerEventBus brokerEventBus;
+
     public BrokerContext() {
     }
 
@@ -182,6 +188,15 @@ public class BrokerContext {
         return this;
     }
 
+    public BrokerContext clusterNameService(ClusterNameService clusterNameService) {
+        this.clusterNameService = clusterNameService;
+        return this;
+    }
+
+    public ClusterNameService getClusterNameService() {
+        return clusterNameService;
+    }
+
     public BrokerContext clusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
         return this;
@@ -257,10 +272,22 @@ public class BrokerContext {
         return this;
     }
 
+
     public BrokerContext brokerTransportManager(BrokerTransportManager brokerTransportManager) {
         this.brokerTransportManager = brokerTransportManager;
         return this;
     }
+
+
+    public BrokerContext eventBus(BrokerEventBus brokerEventBus) {
+        this.brokerEventBus = brokerEventBus;
+        return this;
+    }
+
+    public BrokerEventBus getEventBus() {
+        return brokerEventBus;
+    }
+
 
     public Broker getBroker() {
         return null==clusterManager?null:clusterManager.getBroker();

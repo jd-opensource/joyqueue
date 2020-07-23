@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * Created by wangxiaofei1 on 2018/10/17.
  */
-public class ConfigCommand extends NsrCommandSupport<Config,ConfigService,QConfig> {
+public class ConfigCommand extends NsrCommandSupport<Config, ConfigService, QConfig> {
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QConfig> qPageQuery) throws Exception {
@@ -46,18 +46,23 @@ public class ConfigCommand extends NsrCommandSupport<Config,ConfigService,QConfi
         List<Config> configs = new ArrayList<>();
         QConfig qConfig = qPageQuery.getQuery();
 
-        for (Config config : allConfigs) {
-            if (StringUtils.isNotBlank(qConfig.getKey()) && StringUtils.isNotBlank(qConfig.getGroup())) {
-                if (config.getKey().equals(qConfig.getKey()) || config.getGroup().equals(qConfig.getGroup())) {
+        if (StringUtils.isNotBlank(qConfig.getKey()) ||
+                StringUtils.isNotBlank(qConfig.getGroup()) ||
+                StringUtils.isNotBlank(qConfig.getKeyword())) {
+            for (Config config : allConfigs) {
+                if (StringUtils.isNotBlank(qConfig.getKey()) && StringUtils.containsIgnoreCase(config.getKey(), qConfig.getKey())) {
                     configs.add(config);
-                }
-            } else if (StringUtils.isNotBlank(qConfig.getKey())) {
-                if (config.getKey().equals(qConfig.getKey())) {
+                } else if (StringUtils.isNotBlank(qConfig.getGroup()) && StringUtils.containsIgnoreCase(config.getGroup(), qConfig.getGroup())) {
                     configs.add(config);
+                } else if (StringUtils.isNotBlank(qConfig.getKeyword())) {
+                    if (StringUtils.containsIgnoreCase(config.getKey(), qConfig.getKeyword()) ||
+                        StringUtils.containsIgnoreCase(config.getGroup(), qConfig.getKeyword())) {
+                        configs.add(config);
+                    }
                 }
-            } else {
-                configs.add(config);
             }
+        } else {
+            configs.addAll(allConfigs);
         }
 
         Pagination pagination = qPageQuery.getPagination();

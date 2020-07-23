@@ -275,7 +275,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     private PutResult writeMessages(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, long endTime) throws JoyQueueException {
         PutResult putResult = new PutResult();
         String topic = producer.getTopic();
-        List<Short> partitions = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> partitions = clusterManager.getLocalPartitions(TopicName.parse(topic));
         if (partitions == null || partitions.size() == 0) {
             logger.error("no partitions available topic:%s", topic);
             throw new JoyQueueException(JoyQueueCode.CN_NO_PERMISSION);
@@ -326,7 +326,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     private void writeMessagesAsync(Producer producer, List<BrokerMessage> msgs, QosLevel qosLevel, long endTime, EventListener<WriteResult> eventListener) throws JoyQueueException {
         String topic = producer.getTopic();
         String app = producer.getApp();
-        List<Short> partitions = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> partitions = clusterManager.getLocalPartitions(TopicName.parse(topic));
         if (partitions == null || partitions.size() == 0) {
             logger.error("no partitions available topic:%s", topic);
             throw new JoyQueueException(JoyQueueCode.CN_NO_PERMISSION);

@@ -1,0 +1,3 @@
+org.joyqueue.nsr.config.NameServiceConfigKey
+org.joyqueue.nsr.config.NameServerConfigKey
+org.joyqueue.nsr.config.MessengerConfigKey

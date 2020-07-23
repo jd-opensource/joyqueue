@@ -28,11 +28,20 @@ public enum ConsumeConfigKey implements PropertyDef {
     RETRY_RANDOM_BOUND_APP_PREFIX("retry.random.bound.app.", -1, Type.INT),
     RETRY_RATE("retry.rate", -1, Type.INT),
     RETRY_RATE_PREFIX("retry.rate.", -1, Type.INT),
+    RETRY_FORCE_ACK("retry.ack.force", false, Type.BOOLEAN),
+    RETRY_FORCE_ACK_PREFIX("retry.ack.force.", false, Type.BOOLEAN),
     BROADCAST_INDEX_RESET_ENABLE("consume.broadcast.index.reset.enable", true, Type.BOOLEAN),
     BROADCAST_INDEX_RESET_INTERVAL("consume.broadcast.index.reset.interval", 1000 * 60 * 5, Type.INT),
     BROADCAST_INDEX_RESET_TIME("consume.broadcast.index.reset.time", 1000 * 60 * 60 * 24 * 2, Type.INT),
     REPLICATE_CONSUME_POS_INTERVAL("consume.replicate.interval", 1000 * 5, Type.INT),
-    ;
+    INDEX_FLUSH_INTERVAL("consume.index.flush.interval", 1000 * 5, Type.INT),
+    // 是否使用旧版的PartitionManager
+    USE_LEGACY_PARTITION_MANAGER("consume.legacy.partition.manager", false, Type.BOOLEAN),
+
+    // 是否使用旧版的并行消费
+    USE_LEGACY_CONCURRENT_CONSUMER("consume.legacy.concurrent.consumer", false, Type.BOOLEAN),
+
+    PARTITION_SELECT_RETRY_MAX("consume.partition.select.retry.max", 20, Type.INT);
     private String name;
     private Object value;
     private PropertyDef.Type type;

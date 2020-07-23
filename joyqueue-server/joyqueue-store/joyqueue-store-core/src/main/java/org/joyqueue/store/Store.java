@@ -17,11 +17,14 @@ package org.joyqueue.store;
 
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
+import org.joyqueue.store.event.StoreEvent;
 import org.joyqueue.store.file.PositioningStore;
+import org.joyqueue.store.index.IndexItem;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.store.transaction.TransactionStoreManager;
 import org.joyqueue.store.utils.PreloadBufferPool;
+import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
 import org.joyqueue.toolkit.service.Service;
@@ -44,47 +47,27 @@ import java.util.stream.Collectors;
  * Date: 2018/8/13
  * <p>
  * root                            # 数据文件根目录
- * ├── metadata                    # 元数据，目前只存放brokerId
  * ├── lock                        # 进程锁目录，避免多进程同时操作导致数据损坏
- * │   └── 112334                  # 当前持有锁的进程的PID
  * └── topics                      # 所有topic目录，子目录就是topic名称
- * ├── coupon                  # topic coupon
- * └── order                   # topic order
- * ├── 1                   # topic group
- * │   ├── checkpoint      # 检查点文件
- * │   ├── index           # 索引文件目录，每个子目录为partition，目录名称就是partitionId
- * │   │   ├── 3           # partition 3，目录下的文件为该partition的索引文件
- * │   │   │   ├── 1048576 # 索引文件，固定文件长度，文件名为文件记录的第一条消息索引在Partition中的序号。
- * │   │   │   └── 2097152
- * │   │   ├── 4
- * │   │   └── 5
- * │   ├── 0               # 消息日志文件
- * │   ├── 134217728
- * │   └── 268435456
- * ├── tx                  # 事务消息目录，存放未提交的事务消息
- * │   ├── 0
- * │   ├── 1
- * │   └── 2
- * └── subscription        # 订阅文件，记录所有订阅和消费指针
+ *     ├── coupon                  # topic coupon
+ *     └── order                   # topic order
+ *         └── 1                   # partition group 1
  */
 public class Store extends Service implements StoreService, Closeable, PropertySupplierAware {
 
     private static final Logger logger = LoggerFactory.getLogger(Store.class);
-    private static final int SCHEDULE_EXECUTOR_THREADS = 16;
-
-
+    // 所有topic目录，子目录就是topic名称
     private static final String TOPICS_DIR = "topics";
     private static final String TX_DIR = "tx";
     private static final String DEL_PREFIX = ".d.";
-    /**
-     * key: [topic]/[group index]，例如：order/1
-     */
-    private final Map<String, PartitionGroupStoreManager> storeMap = new HashMap<>();
+
+    private final Map<String /* Partition Group，格式为：[topic]/[group index] */, PartitionGroupStoreManager> storeMap = new HashMap<>();
     private final Map<String, TransactionStoreManager> txStoreMap = new HashMap<>();
     private StoreConfig config;
     private PreloadBufferPool bufferPool;
     private File base;
     private PropertySupplier propertySupplier;
+    // 文件锁，防止同一Store目录被多个进程读写
     private StoreLock storeLock;
 
     public Store() {
@@ -109,6 +92,8 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             storeLock = new StoreLock(new File(base, "lock"));
             storeLock.lock();
         }
+
+        // 初始化文件缓存页
         if (bufferPool == null) {
             System.setProperty(PreloadBufferPool.PRINT_METRIC_INTERVAL_MS_KEY, String.valueOf(config.getPrintMetricIntervalMs()));
             this.bufferPool = PreloadBufferPool.getInstance();
@@ -128,7 +113,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             if (!manger.isStarted()) manger.start();
         }
 
-        started.set(true);
+        started.set(true); // FixMe: 这条语句是否应该删除？
         logger.info("Store started.");
     }
 
@@ -255,7 +240,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
 
     @Override
-    public synchronized void restorePartitionGroup(String topic, int partitionGroup){
+    public synchronized void restorePartitionGroup(String topic, int partitionGroup) throws Exception {
 
         PartitionGroupStoreManager partitionGroupStoreManger = partitionGroupStore(topic, partitionGroup);
         if (null == partitionGroupStoreManger) {
@@ -273,7 +258,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     @Override
-    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) {
+    public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
         if (!storeMap.containsKey(topic + "/" + partitionGroup)) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
             if (groupBase.exists()) delete(groupBase);
@@ -296,12 +281,12 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
 
     private PositioningStore.Config getIndexStoreConfig(StoreConfig config) {
         return new PositioningStore.Config(config.getIndexFileSize(),
-                config.getFileHeaderSize(), config.getDiskFullRatio());
+                config.getFileHeaderSize(), config.getDiskFullRatio(), IndexItem.STORAGE_SIZE, config.isIndexFileLoadOnRead(), config.isFlushForce());
     }
 
     private PositioningStore.Config getMessageStoreConfig(StoreConfig config) {
         return new PositioningStore.Config(config.getMessageFileSize(),
-                config.getFileHeaderSize(), config.getDiskFullRatio(),config.getMaxMessageLength());
+                config.getFileHeaderSize(), config.getDiskFullRatio(),config.getMaxMessageLength(), config.isMessageFileLoadOnRead(), config.isFlushForce());
     }
 
     /**
@@ -360,6 +345,25 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         return bufferPool.monitorInfo();
     }
 
+    @Override
+    public StoreNodes getNodes(String topic, int partitionGroup) {
+        PartitionGroupStoreManager partitionGroupStoreManger = partitionGroupStore(topic, partitionGroup);
+        if (partitionGroupStoreManger == null) {
+            return null;
+        }
+        return new StoreNodes(new StoreNode(0, true, true));
+    }
+
+    @Override
+    public void addListener(EventListener<StoreEvent> listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeListener(EventListener<StoreEvent> listener) {
+        throw new UnsupportedOperationException();
+    }
+
     private String getPartitionGroupRelPath(String topic, int partitionGroup) {
         return TOPICS_DIR + File.separator + topic.replace('/', '@') + File.separator + partitionGroup;
     }
@@ -374,7 +378,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
 
-    // TODO: 在哪儿调用呢？
     @Override
     public void close() throws IOException {
         for (PartitionGroupStoreManager p : storeMap.values()) {

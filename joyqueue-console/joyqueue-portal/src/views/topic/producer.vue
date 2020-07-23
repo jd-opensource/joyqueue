@@ -1,7 +1,7 @@
 <template>
   <div>
     <producer-base ref="producerBase" :keywordTip="keywordTip" :keywordName="keywordName" :colData="colData"
-                   :subscribeDialogColData="subscribeDialog.colData" @on-enter="getList"
+                   :subscribeDialogColData="subscribeDialog.colData" @on-enter="getList" :btns="btns" :operates="operates"
                     :search="search" :subscribeUrls="subscribeDialog.urls" @on-detail="handleDetail"/>
   </div>
 </template>
@@ -31,43 +31,47 @@ export default {
         {
           title: '应用',
           key: 'app.code',
-          formatter(row) {
-              return getAppCode(row.app, row.subscribeGroup)
+          width: '10%',
+          formatter (row) {
+            return getAppCode(row.app, row.subscribeGroup)
           },
           render: (h, params) => {
             const app = params.item.app
-            return h('d-button', {
-                props: {
-                    type: 'borderless',
-                    color: 'primary'
-                },
+            if (params.item.canOperate) {
+              return h('label', {
                 style: {
-                    color: '#3366FF'
+                  color: '#3366FF'
                 },
                 on: {
-                    click: () => {
-                        this.$router.push({
-                            name: `/${this.$i18n.locale}/application/detail`,
-                            query: {
-                                id: app.id,
-                                app: app.code,
-                                tab: 'producer'
-                            }
-                        })
-                    }
+                  click: () => {
+                    this.$router.push({
+                      name: `/${this.$i18n.locale}/application/detail`,
+                      query: {
+                        id: app.id,
+                        app: app.code,
+                        tab: 'producer'
+                      }
+                    })
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
                 }
-            }, app.code)
+              }, app.code)
+            } else {
+              return h('label', app.code)
+            }
           }
         },
         {
           title: '主题',
           key: 'topic.code',
-          width: 100
+          width: '14%'
         },
-        {
-          title: '命名空间',
-          key: 'namespace.code'
-        },
+        // {
+        //   title: '命名空间',
+        //   key: 'namespace.code'
+        // },
         // {
         //   title: '负责人',
         //   key: 'owner.code'
@@ -75,51 +79,88 @@ export default {
         {
           title: '连接数',
           key: 'connections',
-          width: 100,
+          width: '8%',
           render: (h, params) => {
-            const connections = params.item.connections
-            const formatNumFilter = Vue.filter('formatNum')
-            return h('label', formatNumFilter(connections))
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: (params.item.connections !== undefined) ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let connections = params.item.connections
+            if (connections === undefined) {
+              return h('div', {}, html)
+            } else if (connections === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
+            } else {
+              const formatNumFilter = Vue.filter('formatNum')
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: (params.item.connections === undefined) ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(connections))
+              html.push(textSpan)
+              return h('div', {}, html)
+            }
           }
         },
         {
           title: '入队数',
           key: 'enQuence.count',
-          width: 150,
+          width: '14%',
           render: (h, params) => {
-            const enQuence = params.item.enQuence
-            if (!enQuence) {
-              return h('label', '')
+            let html = []
+            let spin = h('d-spin', {
+              attrs: {
+                size: 'small'
+              },
+              style: {
+                display: params.item.enQuence !== undefined ? 'none' : 'inline-block'
+              }
+            })
+            html.push(spin)
+            let enQuence = params.item.enQuence
+            if (enQuence === undefined) {
+              return h('div', {}, html)
+            } else if (enQuence === 'unknown') {
+              return h('icon', {
+                style: {
+                  color: 'red'
+                },
+                props: {
+                  name: 'x-circle'
+                }
+              })
             } else {
               const formatNumFilter = Vue.filter('formatNum')
-              return h('label', formatNumFilter(enQuence.count))
+              let textSpan = h('label', {
+                style: {
+                  position: 'relative',
+                  display: params.item.enQuence.count === undefined ? 'none' : 'inline-block'
+                }
+              }, formatNumFilter(enQuence.count))
+              html.push(textSpan)
+              return h('div', {}, html)
             }
           }
         },
-        {
-          title: '生产权重',
-          key: 'config.weight'
-        },
-        {
-          title: '限制IP发送',
-          key: 'config.blackList',
-          render: (h, params) => {
-              const value = params.item.config ? params.item.config.blackList : ''
-              return h('d-tooltip', {
-                      props: {
-                          content: value
-                      }
-                  }, [h('div', {
-                      attrs: {
-                          style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
-                      }
-                  }, value)]
-              )
-          }
-        },
+
         {
           title: '单线程发送',
           key: 'config.single',
+          width: '6%',
           render: (h, params) => {
             return yesOrNoBtnRender(h, params.item.config === undefined ? undefined : params.item.config.single)
           }
@@ -127,23 +168,90 @@ export default {
         {
           title: '归档',
           key: 'config.archive',
+          width: '6%',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.archive)
           }
         },
         {
-          title: '就近机房发送',
+          title: '客户端类型',
+          key: 'clientType',
+          width: '6%',
+          render: (h, params) => {
+            return clientTypeBtnRender(h, params.item.clientType)
+          }
+        },
+        {
+          title: '就近发送',
           key: 'config.nearBy',
+          width: '6%',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.nearBy)
           }
         },
         {
-          title: '客户端类型',
-          key: 'clientType',
+          title: '生产权重',
+          key: 'config.weight',
+          width: '6%'
+        },
+        {
+          title: '限制IP发送',
+          key: 'config.blackList',
+          width: '8%',
           render: (h, params) => {
-            return clientTypeBtnRender(h, params.item.clientType)
+            const value = params.item.config ? params.item.config.blackList : ''
+            return h('d-tooltip', {
+              props: {
+                content: value
+              }
+            }, [h('div', {
+              attrs: {
+                style: 'width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'
+              }
+            }, value)]
+            )
           }
+        }
+      ],
+      btns: [
+        {
+          txt: '生产详情',
+          method: 'on-detail',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '配置',
+          method: 'on-config',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '取消订阅',
+          method: 'on-cancel-subscribe',
+          bindKey: 'canOperate',
+          bindVal: true,
+          isAdmin: 1
+        }
+      ],
+      operates: [
+        {
+          txt: '设置生产权重',
+          method: 'on-weight',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '发送消息',
+          method: 'on-send-message',
+          bindKey: 'canOperate',
+          bindVal: true
+        },
+        {
+          txt: '限流',
+          method: 'on-rateLimit',
+          bindKey: 'canOperate',
+          bindVal: true
         }
       ],
       // 订阅框

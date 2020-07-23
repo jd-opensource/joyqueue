@@ -54,7 +54,7 @@ public class MqttSessionManager extends Service {
 
         if (session == null) {
             LOG.error("Can't find the session for client: <{}>", clientID);
-            throw new RuntimeException("Can't find the session for client <" + clientID + ">");
+            //throw new RuntimeException("Can't find the session for client <" + clientID + ">");
         }
         return session;
     }

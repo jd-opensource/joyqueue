@@ -9,9 +9,12 @@
         `alias_code` AS aliasCode,
         `name`      ,
         `type`      ,
+        collect_interval AS collectInterval,
+        `category`  ,
         source      ,
         provider    ,
         description ,
+        user_permission AS userPermission,
         create_time AS createTime,
         create_by   AS `createBy.id`,
         update_time AS updateTime,
@@ -27,9 +30,12 @@
           `alias_code`    ,
           `name`     ,
           `type`     ,
+          `collect_interval`,
+          `category` ,
           source     ,
           provider   ,
           description,
+          user_permission,
           create_time,
           create_by  ,
           update_time,
@@ -41,9 +47,12 @@
            #{aliasCode},
            #{name},
            #{type},
+           #{collectInterval},
+           #{category},
            #{source},
            #{provider},
            #{description},
+           #{userPermission},
            #{createTime},
            #{createBy.id},
            #{updateTime},
@@ -56,11 +65,14 @@
           metric
         SET
           `alias_code`     =  #{aliasCode},
-          `name`      =  #{name},       
-          `type`      =  #{type},       
+          `name`      =  #{name},
+          `type`      =  #{type},
+          `collect_interval` = #{collectInterval},
+          `category`  = #{category},
           source      =  #{source},
           provider    =  #{provider},   
           description =  #{description},
+          user_permission = #{userPermission},
           status      =  #{status},
           update_time =  #{updateTime},
           update_by   =  #{updateBy.id}
@@ -94,9 +106,13 @@
             <if test="query.keyword != null and query.keyword != ''">
                 AND (m.alias_code LIKE CONCAT('%',#{query.keyword},'%') OR m.name LIKE CONCAT('%',#{query.keyword},'%')
                 OR m.type LIKE CONCAT('%',#{query.keyword},'%') )
+                OR m.category LIKE CONCAT('%', #{query.category}, '%')
             </if>
             <if test="query.code != null and query.code != ''">
                 AND m.code = #{query.code}
+            </if>
+            <if test="query.userPermission != null">
+                AND m.user_permission = #{query.userPermission}
             </if>
         </where>
     </sql>

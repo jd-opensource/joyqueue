@@ -17,7 +17,7 @@ package org.joyqueue.broker.kafka.coordinator.group;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.index.command.ConsumeIndexQueryRequest;
 import org.joyqueue.broker.index.command.ConsumeIndexQueryResponse;
 import org.joyqueue.broker.index.command.ConsumeIndexStoreRequest;
@@ -29,8 +29,6 @@ import org.joyqueue.broker.kafka.config.KafkaConfig;
 import org.joyqueue.broker.kafka.coordinator.group.domain.GroupMetadata;
 import org.joyqueue.broker.kafka.model.OffsetAndMetadata;
 import org.joyqueue.broker.kafka.model.OffsetMetadataAndError;
-import org.joyqueue.broker.network.session.BrokerTransportManager;
-import org.joyqueue.broker.network.session.BrokerTransportSession;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
@@ -38,10 +36,11 @@ import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.CommandCallback;
 import org.joyqueue.network.transport.command.JoyQueueCommand;
+import org.joyqueue.network.transport.session.session.TransportSession;
+import org.joyqueue.network.transport.session.session.TransportSessionManager;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -58,13 +57,13 @@ public class GroupOffsetManager extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(GroupOffsetManager.class);
 
     private KafkaConfig config;
-    private ClusterManager clusterManager;
+    private ClusterNameService clusterNameService;
     private GroupMetadataManager groupMetadataManager;
-    private BrokerTransportManager sessionManager;
+    private TransportSessionManager sessionManager;
 
-    public GroupOffsetManager(KafkaConfig config, ClusterManager clusterManager, GroupMetadataManager groupMetadataManager, BrokerTransportManager sessionManager) {
+    public GroupOffsetManager(KafkaConfig config, ClusterNameService clusterNameService, GroupMetadataManager groupMetadataManager, TransportSessionManager sessionManager) {
         this.config = config;
-        this.clusterManager = clusterManager;
+        this.clusterNameService = clusterNameService;
         this.groupMetadataManager = groupMetadataManager;
         this.sessionManager = sessionManager;
     }
@@ -78,11 +77,11 @@ public class GroupOffsetManager extends Service {
             Broker broker = entry.getKey();
 
             try {
-                BrokerTransportSession session = sessionManager.getOrCreateSession(broker);
+                TransportSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexQueryRequest indexQueryRequest = new ConsumeIndexQueryRequest(groupId, entry.getValue());
                 Command request = new JoyQueueCommand(indexQueryRequest);
 
-                session.async(request, new CommandCallback() {
+                session.async(request, config.getOffsetSyncTimeout(), new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
                         synchronized (result) {
@@ -185,11 +184,11 @@ public class GroupOffsetManager extends Service {
             Broker broker = entry.getKey();
 
             try {
-                BrokerTransportSession session = sessionManager.getOrCreateSession(broker);
+                TransportSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(groupId, buildSaveOffsetParam(entry.getValue()));
                 Command request = new JoyQueueCommand(indexStoreRequest);
 
-                session.async(request, new CommandCallback() {
+                session.async(request, config.getOffsetSyncTimeout(), new CommandCallback() {
                     @Override
                     public void onSuccess(Command request, Command response) {
                         synchronized (result) {
@@ -291,7 +290,7 @@ public class GroupOffsetManager extends Service {
         Map<Broker, Map<String, List<OffsetAndMetadata>>> result = Maps.newHashMapWithExpectedSize(offsets.size());
         for (Map.Entry<String, List<OffsetAndMetadata>> entry : offsets.entrySet()) {
             String topic = entry.getKey();
-            TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topic));
+            TopicConfig topicConfig = clusterNameService.getNameService().getTopicConfig(TopicName.parse(topic));
             if (topicConfig == null) {
                 logger.error("get leader failed, topic not exist, topic: {}", topic);
                 continue;
@@ -327,7 +326,7 @@ public class GroupOffsetManager extends Service {
 
         for (Map.Entry<String, List<Integer>> entry : topicAndPartitions.entrySet()) {
             String topic = entry.getKey();
-            TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(TopicName.parse(topic));
+            TopicConfig topicConfig = clusterNameService.getNameService().getTopicConfig(TopicName.parse(topic));
             if (topicConfig == null) {
                 logger.error("get leader failed, topic not exist, topic: {}", topic);
                 continue;

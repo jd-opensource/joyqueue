@@ -21,9 +21,16 @@ import org.joyqueue.model.domain.DataCenter;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.nsr.DataCenterNameServerService;
 import org.joyqueue.nsr.NameServerBase;
+import org.joyqueue.nsr.model.DataCenterQuery;
+import org.joyqueue.nsr.util.DCWrapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +45,8 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
     public static final String GETBYID_DATACENTER="/datacenter/getById";
     private static final String LIST_DATACENTER="/datacenter/list";
 
+    public static final String DEFAULT_DATA_CENTER_NAME = "UNKNOWN";
+
     private NsrDataCenterConverter nsrDataCenterConverter = new NsrDataCenterConverter();
 
     /**
@@ -47,7 +56,7 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
      */
     @Override
     public List<DataCenter> findAllDataCenter() throws Exception {
-        String result = post(LIST_DATACENTER, null);
+        String result = post(LIST_DATACENTER, new DataCenterQuery());
         List<org.joyqueue.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(org.joyqueue.domain.DataCenter.class);
         return dataCenterList.stream().map(dataCenter -> nsrDataCenterConverter.revert(dataCenter)).collect(Collectors.toList());
     }
@@ -78,5 +87,44 @@ public class DataCenterNameServerServiceImpl extends NameServerBase implements D
         String result = post(GETBYID_DATACENTER,id);
         org.joyqueue.domain.DataCenter nsrDataCenter = JSON.parseObject(result, org.joyqueue.domain.DataCenter.class);
         return nsrDataCenterConverter.revert(nsrDataCenter);
+    }
+
+    @Override
+    public DataCenter findByIp(String ip) throws Exception {
+        String result = post(LIST_DATACENTER, null);
+        List<org.joyqueue.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(org.joyqueue.domain.DataCenter.class);
+        if (dataCenterList == null || dataCenterList.isEmpty()) {
+            return null;
+        }
+
+        Optional<org.joyqueue.domain.DataCenter> optional = dataCenterList.stream().filter(
+                dataCenter -> new DCWrapper(dataCenter).match(ip)).findFirst();
+        if (optional.isPresent()) {
+            return nsrDataCenterConverter.revert(optional.get());
+        }
+        DataCenter dataCenter = nsrDataCenterConverter.revert(org.joyqueue.domain.DataCenter.DEFAULT);
+        dataCenter.setName(DEFAULT_DATA_CENTER_NAME);
+        return dataCenter;
+    }
+
+    @Override
+    public List<DataCenter> findByIps(List<String> ips) throws Exception {
+        String result = post(LIST_DATACENTER, null);
+        List<org.joyqueue.domain.DataCenter> dataCenterList = JSON.parseArray(result).toJavaList(org.joyqueue.domain.DataCenter.class);
+        if (dataCenterList == null || dataCenterList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Set<DataCenter> centers = new HashSet<>();
+        for(String ip: ips) {
+            Set<DataCenter> centerSet = dataCenterList.stream().filter(
+                    dataCenter -> new DCWrapper(dataCenter).match(ip)).map(center -> nsrDataCenterConverter.revert(center)).collect(Collectors.toSet());
+            centers.addAll(centerSet);
+        }
+        if (centers.size() == 0) {
+            DataCenter dataCenter = nsrDataCenterConverter.revert(org.joyqueue.domain.DataCenter.DEFAULT);
+            dataCenter.setName(DEFAULT_DATA_CENTER_NAME);
+            centers.add(dataCenter);
+        }
+        return new ArrayList<>(centers);
     }
 }

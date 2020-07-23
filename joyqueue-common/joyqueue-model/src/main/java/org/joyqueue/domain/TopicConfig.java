@@ -73,6 +73,16 @@ public class TopicConfig extends Topic implements Serializable {
         return config;
     }
 
+    public TopicConfig clone() {
+        TopicConfig topicConfig = toTopicConfig(this);
+        Map<Integer, PartitionGroup> partitionGroups = Maps.newHashMap();
+        for (Map.Entry<Integer, PartitionGroup> entry : getPartitionGroups().entrySet()) {
+            partitionGroups.put(entry.getKey(), entry.getValue().clone());
+        }
+        topicConfig.setPartitionGroups(partitionGroups);
+        return topicConfig;
+    }
+
     public Map<Integer,PartitionGroup> getPartitionGroups() {
         return partitionGroups;
     }
@@ -84,16 +94,6 @@ public class TopicConfig extends Topic implements Serializable {
             }
         }
         return false;
-    }
-
-    public List<PartitionGroup> fetchPartitionGroupByBrokerId(int brokerId) {
-        List<PartitionGroup> list = new ArrayList<>();
-        for(PartitionGroup group : partitionGroups.values()) {
-            if (group.getLeader().equals(brokerId)){
-                list.add(group);
-            }
-        }
-        return list;
     }
 
     public List<PartitionGroup> fetchTopicPartitionGroupsByBrokerId(int brokerId) {
@@ -189,16 +189,6 @@ public class TopicConfig extends Topic implements Serializable {
         Set<Short> partitions = new HashSet<>();
         for (PartitionGroup group : partitionGroups.values()) {
             partitions.addAll(group.getPartitions());
-        }
-        return partitions;
-    }
-    //TODO 性能差，需要排查下并发问题
-    public List<Short> fetchPartitionByBroker(int brokerId) {
-        List<Short> partitions = new ArrayList<>();
-        for (PartitionGroup group : partitionGroups.values()) {
-            if (group.getLeader().equals(brokerId)){
-                partitions.addAll(group.getPartitions());
-            }
         }
         return partitions;
     }

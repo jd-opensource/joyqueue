@@ -165,10 +165,10 @@ public class ConfigurationManager extends Service implements EventListener<NameS
 
                 if (type.equals(EventType.REMOVE_CONFIG)) {
                     logger.info("delete config {}", config.getKey());
-                    configuration.addProperty(config.getKey(), null);
+                    configuration.addProperty(config.getKey(), null, config.getGroup());
                 } else {
                     logger.info("add config {}, value is {}", config.getKey(), config.getValue());
-                    configuration.addProperty(config.getKey(), config.getValue());
+                    configuration.addProperty(config.getKey(), config.getValue(), config.getGroup());
                 }
             } else {
                 logger.info("config {} group not match, value is {}, group is {}, ", config.getKey(), config.getValue(), config.getGroup());

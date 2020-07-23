@@ -65,6 +65,11 @@ public interface ReplicableStore {
      */
     long leftPosition();
 
+    /**
+     * 清空Store所有数据，并将所有位置置为position
+     * @param position 新的起始位置
+     * @throws IOException 发生IO异常时抛出
+     */
     void clear(long position) throws IOException;
 
     /**
@@ -95,9 +100,11 @@ public interface ReplicableStore {
     ByteBuffer readEntryBuffer(long position, int length) throws IOException;
 
     /**
-     * 追加写入一段日志数据，给定的ByteBuffer必须满足如下条件：
-     * 1. 连续且完整的多条日志。
-     * 2. 这些日志具有相同的term。
+     * 追加写入一段消息数据，给定的ByteBuffer必须满足如下条件：
+     * 1. 连续且完整的多条消息。
+     * 2. 这些消息具有相同的term。
+     * 3. 消息中同一分区内的索引序号必须连续，并且与同分区已有消息的索引序号连续。
+     *
      * @param byteBuffer 待写入的ByteBuffer，将position至limit之间的数据写入存储。
      *                   写入完成后， position == limit。
      * @return {@link #rightPosition()}
@@ -112,6 +119,11 @@ public interface ReplicableStore {
      * @param offsetCount 偏移的日志条数，可以为负数
      */
     long position(long position, int offsetCount) throws IOException;
+
+    /**
+     * 最后一条消息的Term
+     */
+    int lastEntryTerm();
 
     /**
      * LEADER 收到半数以上回复后，调用此方法提交位置。

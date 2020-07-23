@@ -103,6 +103,7 @@ public class AddConnectionRequestHandler implements JoyQueueCommandHandler, Type
         connection.setAddress(IpUtil.toByte((InetSocketAddress) transport.remoteAddress()));
         connection.setServerAddress(brokerConfig.getFrontendConfig().getHost().getBytes());
         connection.setSystem(authentication.isAdmin(addConnectionRequest.getApp()));
+        connection.setAuth(true);
         return connection;
     }
 

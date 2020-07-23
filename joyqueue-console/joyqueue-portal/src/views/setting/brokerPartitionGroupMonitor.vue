@@ -12,6 +12,7 @@ import myTable from '../../components/common/myTable.vue'
 import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import ClientConnection from '../monitor/detail/clientConnection'
+import {mergePartitionGroup} from '../../utils/common'
 
 export default {
   name: 'brokerPartitionGroupMonitor',
@@ -21,18 +22,16 @@ export default {
     myDialog
   },
   props: {
-    brokerId: {
-      type: Number
-    }
   },
   mixins: [ crud ],
   data () {
     return {
+      brokerId: this.$route.params.brokerId || this.$route.query.brokerId,
       urls: {
         search: '/monitor/broker/partition/search'
       },
       searchData: {
-        brokerId: this.brokerId
+        brokerId: this.$route.params.brokerId || this.$route.query.brokerId
       },
       searchRules: {
       },
@@ -72,7 +71,7 @@ export default {
               var html = []
               if (list != undefined) {
                 for (var i = 0; i < list.length; i++) {
-                  var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'}, list[i].partitions)
+                  var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'}, mergePartitionGroup(JSON.parse('[' + list[i].partitions + ']')))
                   html.push(p)
                 }
               }

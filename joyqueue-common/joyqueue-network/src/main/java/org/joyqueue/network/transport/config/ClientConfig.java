@@ -25,7 +25,7 @@ public class ClientConfig extends TransportConfig {
 
     private boolean preferIPv6 = false;
     // 连接超时(毫秒)
-    private int connectionTimeout = 5 * 1000;
+    private int connectionTimeout = 100 * 1;
 
     public ClientConfig() {
     }

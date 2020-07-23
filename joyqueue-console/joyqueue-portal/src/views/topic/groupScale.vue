@@ -2,8 +2,16 @@
   <div>
     <div class="ml20 mt10">
       <d-input v-model="searchData.keyword" placeholder="请输入要查询的IP/名称" class="left"
+               oninput="value = value.trim()"
                style="width: 300px" @on-enter="getList">
         <span slot="prepend">关键词</span>
+        <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
+      </d-input>
+
+      <d-input v-model="searchData.group" placeholder="请输入要查询的Broker分组" class="left"
+               oninput="value = value.trim()"
+               style="width: 300px" @on-enter="getList">
+        <span slot="prepend">Broker分组</span>
         <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
       </d-input>
     </div>
@@ -34,31 +42,37 @@ export default {
   mixins: [ crud ],
   data () {
     return {
+      firstOpen: true,
       urls: {
         search: '/partitionGroupReplica/searchBrokerToScale',
         addUrl: '/partitionGroupReplica/add'
       },
       searchData: {
-        keyword: ''
+        keyword: '',
+        group: ''
       },
       tableData: {
         rowData: [{}],
         colData: [
           {
             title: 'Broker分组',
-            key: 'group.code'
+            key: 'group.code',
+            width: '20%'
           },
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '20%'
           },
           {
             title: 'IP',
-            key: 'ip'
+            key: 'ip',
+            width: '20%'
           },
           {
             title: '端口',
-            key: 'port'
+            key: 'port',
+            width: '20%'
           }
         ],
         btns: [
@@ -99,6 +113,10 @@ export default {
     // 查询
     getList () {
       // 1. 查询数据库里的数据
+      if (this.searchData.group && this.searchData.keyword) {
+        this.$Message.error('查询关键字和broker分组不能同时输入')
+        return
+      }
       this.showTablePin = true
       let data = {
         pagination: {
@@ -108,9 +126,21 @@ export default {
         query: {
           topic: this.data.topic,
           namespace: this.data.namespace,
-          groupNo: this.data.groupNo,
-          keyword: this.searchData.keyword
+          groupNo: this.data.groupNo
         }
+      }
+      if (this.data.ip) {
+        data.query.keyword = this.data.ip
+        delete this.data.ip
+        this.urlOrigin.search = '/partitionGroupReplica/searchBrokerToScaleDefault'
+      } else {
+        data.query.keyword = this.searchData.keyword
+        this.urlOrigin.search = '/partitionGroupReplica/searchBrokerToScale'
+      }
+      if (this.searchData.group) {
+        data.query.topic.brokerGroup = this.searchData.group
+      } else {
+        delete data.query.topic.brokerGroup
       }
       apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
         data.data = data.data || []
@@ -121,6 +151,29 @@ export default {
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
+        if (this.firstOpen && this.tableData.rowData.length > 0) {
+          let groupCode = ''
+          if (this.tableData.rowData[0].group) {
+            groupCode = this.tableData.rowData[0].group.code
+          }
+          let unique = true
+          for (let i in this.tableData.rowData) {
+            if (this.tableData.rowData.hasOwnProperty(i)) {
+              if (this.tableData.rowData[i].group) {
+                if (this.tableData.rowData[i].group.code.indexOf(groupCode) < 0) {
+                  unique = false
+                  break
+                }
+              }
+            }
+          }
+          if (unique) {
+            this.searchData.group = groupCode
+          } else {
+            this.searchData.group = ''
+          }
+        }
+        this.firstOpen = false
         this.showTablePin = false
       })
     }

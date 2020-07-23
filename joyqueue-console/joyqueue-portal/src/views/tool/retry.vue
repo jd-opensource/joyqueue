@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="headLine2">
-      <d-input v-model="search.topic" placeholder="请输入队列名" class="input2" @on-enter="getList">
-        <span slot="prepend">队列名</span>
+      <d-input v-model="search.topic" oninput="value = value.trim()" placeholder="请输入主题名" class="input2" @on-enter="getList">
+        <span slot="prepend">主题名</span>
       </d-input>
-      <d-input v-model="search.app" placeholder="请输入消费者" class="input2" @on-enter="getList">
+      <d-input v-model="search.app" oninput="value = value.trim()" placeholder="请输入消费者" class="input2" @on-enter="getList">
         <span slot="prepend">消费者</span>
       </d-input>
       <d-select v-model="search.status" class="input3" @on-change="getList">
@@ -22,7 +22,7 @@
                      :default-time="['00:00:00', '23:59:59']">
         <span slot="prepend">发送时间</span>
       </d-date-picker>
-      <d-input v-model="businessId" placeholder="请输入业务ID" class="input2" @on-enter="getList">
+      <d-input v-model="businessId" oninput="value = value.trim()" placeholder="请输入业务ID" class="input2" @on-enter="getList">
         <span slot="prepend">业务ID</span>
       </d-input>
       <d-button class="button2" type="primary" @click="getList">查询
@@ -94,7 +94,7 @@ export default {
             key: 'id'
           },
           {
-            title: '队列',
+            title: '主题',
             key: 'topic'
           },
           {
@@ -143,7 +143,9 @@ export default {
           },
           {
             txt: '删除',
-            method: 'on-del'
+            method: 'on-del',
+            bindKey: 'status',
+            bindVal: [0, -2, 1]
           }
         ]
       },
@@ -218,10 +220,11 @@ export default {
         data.endTime = ''
       }
       apiRequest.post(this.urlOrigin.batchDelete, {}, data).then((data) => {
-        if (data == 200) {
+        if (data.status === 200) {
           this.$Dialog.success({
             content: '批量删除成功'
           })
+          this.getList()
         } else {
           this.$Dialog.error({
             content: data.message
@@ -230,23 +233,31 @@ export default {
       })
     },
     download (item) {
-      document.location.assign("/v1"+this.urls.download+'/' +item.id+'/topic/'+item.topic)
+      document.location.assign('v1' + this.urls.download + '?id=' + item.id + '&topic=' + item.topic)
       // apiRequest.get(this.urlOrigin.download + '/' + item.id).then()
     },
     recovery (item) {
-      apiRequest.put(this.urlOrigin.recovery + '/' + item.id +'/topic/'+item.topic).then(data => {
-        this.$Dialog.success({
-          content: '恢复成功'
-        })
-        this.getList()
+      apiRequest.put(this.urlOrigin.recovery + '?id=' + item.id + 'topic=' + item.topic).then(data => {
+        if (data.status === 200) {
+          this.$Dialog.success({
+            content: '恢复成功'
+          })
+          this.getList()
+        } else {
+          this.$Dialog.error({
+            content: data.message
+          })
+        }
       })
     },
     del (item) {
-      apiRequest.delete(this.urlOrigin.del + '/' + item.id +'/topic/'+item.topic).then(data => {
-        this.$Dialog.success({
-          content: '删除成功'
-        })
-        this.getList()
+      apiRequest.delete(this.urlOrigin.del + '?id=' + item.id + '&topic=' + item.topic).then(data => {
+        if (data.status === 200) {
+          this.$Dialog.success({
+            content: '删除成功'
+          })
+          this.getList()
+        }
       })
     }
   },

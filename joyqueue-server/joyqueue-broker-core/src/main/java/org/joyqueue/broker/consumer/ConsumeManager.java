@@ -57,7 +57,6 @@ import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -80,7 +79,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     private final Logger logger = LoggerFactory.getLogger(ConsumeManager.class);
 
     // 并行消费处理
-    private ConcurrentConsumption concurrentConsumption;
+    private ConcurrentConsumer concurrentConsumption;
     // 分区消费处理
     private PartitionConsumption partitionConsumption;
     // 消息重试管理
@@ -166,11 +165,16 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             logger.warn("archive manager is null.");
         }
         this.filterMessageSupport = new FilterMessageSupport(clusterManager);
-        this.partitionManager = new PartitionManager(clusterManager, sessionManager);
         this.positionManager = new PositionManager(clusterManager, storeService, this, brokerContext.brokerTransportManager(), consumeConfig);
+        this.partitionManager = consumeConfig.useLegacyPartitionManager() ?
+                new LegacyPartitionManager(clusterManager, sessionManager): new CasPartitionManager(clusterManager, sessionManager);
         this.brokerContext.positionManager(positionManager);
         this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager, consumeConfig);
-        this.concurrentConsumption = new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager);
+        this.concurrentConsumption =
+                consumeConfig.useLegacyConcurrentConsumer() ?
+                    new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager):
+                    new SlideWindowConcurrentConsumer(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, consumeConfig)
+        ;
         this.resetBroadcastIndexTimer = new Timer("joyqueuue-consume-reset-broadcast-index-timer");
     }
 
@@ -199,6 +203,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         Close.close(partitionConsumption);
         Close.close(concurrentConsumption);
         resetBroadcastIndexTimer.cancel();
+        partitionManager.close();
         logger.info("ConsumeManager is stopped.");
     }
 
@@ -565,7 +570,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
     @Override
     public boolean resetPullIndex(String topic, String app) throws JoyQueueException {
         // 获取当前broker上master角色的partition集合
-        List<Short> masterPartitionList = clusterManager.getMasterPartitionList(TopicName.parse(topic));
+        List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(topic));
         // 遍历partition集合，重置消费拉取位置
         int successCount = 0;
         for (short partition : masterPartitionList) {
@@ -589,7 +594,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
 
     @Override
     public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, String app, int partitionGroup) {
-        List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+        List<PartitionGroup> partitionGroupList = clusterManager.getLocalPartitionGroups(topic);
         if (CollectionUtils.isEmpty(partitionGroupList)) {
             return null;
         }
@@ -598,7 +603,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
 
     @Override
     public Map<ConsumePartition, Position> getConsumePositionByGroup(TopicName topic, int partitionGroup) {
-        List<PartitionGroup> partitionGroupList = clusterManager.getPartitionGroup(topic);
+        List<PartitionGroup> partitionGroupList = clusterManager.getLocalPartitionGroups(topic);
         if (CollectionUtils.isEmpty(partitionGroupList)) {
             return null;
         }
@@ -673,7 +678,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
                 continue;
             }
 
-            for (PartitionGroup partitionGroup : topicConfig.fetchPartitionGroupByBrokerId(clusterManager.getBrokerId())) {
+            for (PartitionGroup partitionGroup : clusterManager.getLocalPartitionGroups(topicConfig)) {
                 doResetBroadcastIndex(topicConfig, partitionGroup, broadcastConsumers);
             }
         }

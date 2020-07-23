@@ -17,18 +17,21 @@ package org.joyqueue.store.file;
 
 import org.joyqueue.store.utils.BufferHolder;
 import org.joyqueue.store.utils.PreloadBufferPool;
+import org.joyqueue.toolkit.concurrent.CasLock;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Cleaner;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
@@ -48,6 +51,9 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     private final long filePosition;
     // 文件头长度
     private final int headerSize;
+
+    private final boolean loadOnRead;
+    private final boolean flushForce;
     // 对应的File
     private final File file;
     // buffer读写锁：
@@ -55,33 +61,38 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     // 加载、释放buffer时加写锁；
     private final StampedLock bufferLock = new StampedLock();
     private final LogSerializer<T> serializer;
-    private final long createTimestamp;
     // 缓存页
     private ByteBuffer pageBuffer = null;
     private int bufferType = NO_BUFFER;
     private PreloadBufferPool bufferPool;
-    private int capacity;
+    private final int capacity;
     private long lastAccessTime = SystemClock.now();
     // 当前刷盘位置
     private int flushPosition;
     // 当前写入位置
     private int writePosition = 0;
     private long timestamp = -1L;
-    private AtomicBoolean positionLock = new AtomicBoolean(false);
+    // 文件锁，读写文件时加锁
+    private final CasLock fileLock = new CasLock();
+    private AtomicBoolean forced = new AtomicBoolean(false);
 
-    public StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength) {
+    private FileChannel fileChannel;
+    private RandomAccessFile raf;
+    private volatile boolean writeClosed = true;
+
+    StoreFileImpl(long filePosition, File base, int headerSize, LogSerializer<T> serializer, PreloadBufferPool bufferPool, int maxFileDataLength, boolean loadOnRead, boolean flushForce) {
         this.filePosition = filePosition;
         this.headerSize = headerSize;
         this.serializer = serializer;
         this.bufferPool = bufferPool;
-        this.capacity = maxFileDataLength;
+        this.loadOnRead = loadOnRead;
+        this.flushForce = flushForce;
         this.file = new File(base, String.valueOf(filePosition));
         if (file.exists() && file.length() > headerSize) {
             this.writePosition = (int) (file.length() - headerSize);
             this.flushPosition = writePosition;
         }
-        createTimestamp = SystemClock.now();
-
+        this.capacity = Math.max(maxFileDataLength, (int )(file.length() - headerSize));
     }
 
     @Override
@@ -104,12 +115,17 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
                 loadBuffer =
                         fileChannel.map(FileChannel.MapMode.READ_ONLY, headerSize, file.length() - headerSize);
             }
-//            loadBuffer.load();
+            if( loadOnRead ) {
+                loadBuffer.load();
+            }
             pageBuffer = loadBuffer;
             bufferType = MAPPED_BUFFER;
             pageBuffer.clear();
+            forced.set(true);
+        } catch (ClosedByInterruptException cie) {
+            throw cie;
         } catch (Throwable t) {
-//            logger.warn("Exception: ", t);
+            logger.warn("Exception: ", t);
             bufferPool.releaseMMap(this);
             pageBuffer = null;
             throw t;
@@ -122,20 +138,29 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
         } else if (bufferType == MAPPED_BUFFER) {
             unloadUnsafe();
         }
-        ByteBuffer buffer = bufferPool.allocateDirect(this);
-        loadDirectBuffer(buffer);
+        loadDirectBuffer();
+        writeClosed = false;
     }
 
-    private void loadDirectBuffer(ByteBuffer buffer) throws IOException {
-        if (file.exists() && file.length() > headerSize) {
-            try (RandomAccessFile raf = new RandomAccessFile(file, "r");
-                 FileChannel fileChannel = raf.getChannel()) {
-                fileChannel.position(headerSize);
-                int length;
-                do {
-                    length = fileChannel.read(buffer);
-                } while (length > 0);
-            }
+    private void loadDirectBuffer() throws IOException {
+        ByteBuffer buffer = bufferPool.allocateDirect(this);
+
+        boolean needLoadFileContent = file.exists() && file.length() > headerSize;
+        boolean writeTimestamp = !file.exists();
+        // 打开文件描述符
+        raf = new RandomAccessFile(file, "rw");
+        fileChannel = raf.getChannel();
+        if (writeTimestamp) {
+            // 第一次创建文件写入头部预留128字节中0位置开始的前8字节长度:文件创建时间戳
+            writeTimestamp();
+        }
+        if (needLoadFileContent) {
+            logger.debug("Reload file for write! size: {}, file: {}.", file.length(), file);
+            fileChannel.position(headerSize);
+            int length;
+            do {
+                length = fileChannel.read(buffer);
+            } while (length > 0);
             buffer.clear();
         }
         this.pageBuffer = buffer;
@@ -143,36 +168,41 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     }
 
     public long timestamp() {
-
-        if (timestamp <= 0) {
+        if (timestamp == -1L) {
             // 文件存在初始化时间戳
-            timestamp = readTimestamp();
+            readTimestamp();
         }
         return timestamp;
     }
 
-    private long readTimestamp() {
-        if (file.exists() && file.length() > 8) {
-            ByteBuffer timeBuffer = ByteBuffer.allocate(8);
-            try (RandomAccessFile raf = new RandomAccessFile(file, "r");
-                 FileChannel fileChannel = raf.getChannel()) {
-                fileChannel.position(0);
-                fileChannel.read(timeBuffer);
-                timeBuffer.flip();
-                return timeBuffer.getLong();
-            } catch (Exception e) {
-                logger.warn("Error to read timestamp from file: {} header.", file.getAbsolutePath(), e);
-            }
+    private void readTimestamp() {
+        ByteBuffer timeBuffer = ByteBuffer.allocate(8);
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r"); FileChannel fileChannel = raf.getChannel()) {
+            fileChannel.position(0);
+            fileChannel.read(timeBuffer);
+        } catch (FileNotFoundException ignored) {
+            timeBuffer.putLong(0, -1L);
+        } catch (Exception e) {
+            logger.warn("Exception: ", e);
+        } finally {
+            timestamp = timeBuffer.getLong(0);
         }
-        return createTimestamp;
     }
 
-    private void writeTimestamp(FileChannel fileChannel) throws IOException {
-        ByteBuffer timeBuffer = ByteBuffer.allocate(Long.BYTES);
-        timestamp = createTimestamp;
-        timeBuffer.putLong(timestamp);
-        timeBuffer.flip();
-        fileChannel.write(timeBuffer, 0L);
+    private void writeTimestamp() {
+        ByteBuffer timeBuffer = ByteBuffer.allocate(8);
+        long creationTime = SystemClock.now();
+        timeBuffer.putLong(0, creationTime);
+        ensureOpen();
+        try {
+            fileChannel.position(0);
+            fileChannel.write(timeBuffer);
+        } catch (ClosedByInterruptException ignored) {
+        } catch (Exception e) {
+            logger.warn("Exception:", e);
+        } finally {
+            timestamp = creationTime;
+        }
     }
 
     @Override
@@ -322,37 +352,29 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     /**
      * 刷盘
      */
-    // Not thread safe!
     @Override
     public int flush() throws IOException {
         long stamp = bufferLock.readLock();
         try {
-            if (positionLock.compareAndSet(false, true)) {
-                try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
-                     FileChannel fileChannel = raf.getChannel()) {
+            if (writePosition > flushPosition && fileLock.tryLock()) {
 
-                    if (writePosition > flushPosition) {
-                        if (flushPosition == 0) {
-                            writeTimestamp(fileChannel);
-                        }
-                        return flushPageBuffer(fileChannel);
-                    }
-                } catch (Throwable t) {
-                    logger.warn("StoreFileImpl flush exception! file: {}, flushPosition: {}, writePosition: {}.",
-                            file.getAbsolutePath(), flushPosition, writePosition, t);
-                    throw t;
+                try {
+
+                    return flushPageBuffer(fileChannel);
                 } finally {
-                    positionLock.compareAndSet(true, false);
+                    fileLock.unlock();
                 }
+
             }
+            return 0;
         } finally {
             bufferLock.unlockRead(stamp);
         }
-        return 0;
     }
 
 
     private int flushPageBuffer(FileChannel fileChannel) throws IOException {
+        ensureOpen();
         int flushEnd = writePosition;
         ByteBuffer flushBuffer = pageBuffer.asReadOnlyBuffer();
         flushBuffer.position(flushPosition);
@@ -364,30 +386,37 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             fileChannel.write(flushBuffer);
         }
         flushPosition = flushEnd;
+        if (flushSize > 0) {
+            forced.compareAndSet(true, false);
+        }
         return flushSize;
     }
 
-    // Not thread safe!
     @Override
     public void rollback(int position) throws IOException {
-        while (!positionLock.compareAndSet(false, true)) {
-            Thread.yield();
-        }
+        long stamp = bufferLock.writeLock();
         try {
             if (position < writePosition) {
                 writePosition = position;
             }
             if (position < flushPosition) {
-                flushPosition = position;
-                try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
-                     FileChannel fileChannel = raf.getChannel()) {
-                    fileChannel.truncate(position + headerSize);
+                fileLock.waitAndLock();
+                try {
+                    flushPosition = position;
+                    if (fileChannel != null && fileChannel.isOpen()) {
+                        fileChannel.truncate(position + headerSize);
+                    } else {
+                        try (RandomAccessFile raf = new RandomAccessFile(file, "rw"); FileChannel fileChannel = raf.getChannel()) {
+                            fileChannel.truncate(position + headerSize);
+                        }
+                    }
+                } finally {
+                    fileLock.unlock();
                 }
             }
         } finally {
-            positionLock.compareAndSet(true, false);
+            bufferLock.unlockWrite(stamp);
         }
-
     }
 
     @Override
@@ -421,6 +450,25 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             unloadMappedBuffer();
         } else if (DIRECT_BUFFER == this.bufferType) {
             unloadDirectBuffer();
+
+            try {
+                closeFileChannel();
+            } catch (IOException e) {
+                logger.warn("Close file {} exception: ", file.getAbsolutePath(), e);
+            }
+            writeClosed = true;
+        }
+    }
+
+    private void closeFileChannel() throws IOException {
+        if (flushForce) {
+            force();
+        }
+        if (null != fileChannel) {
+            fileChannel.close();
+        }
+        if (null != raf) {
+            raf.close();
         }
     }
 
@@ -451,7 +499,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
 
 
     @Override
-    public int size() {
+    public int capacity() {
         return capacity;
     }
 
@@ -463,5 +511,43 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
     @Override
     public boolean evict() {
         return unload();
+    }
+
+    @Override
+    public void force() throws IOException {
+        if(forced.compareAndSet(false, true)) {
+            fileLock.waitAndLock();
+            ensureOpen();
+            try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("force file, file: {}, writePosition: {}, flushPosition: {}", file.getAbsolutePath(), writePosition, flushPosition);
+                }
+                fileChannel.force(true);
+            } catch (Throwable t) {
+                forced.set(false);
+                throw t;
+            } finally {
+                fileLock.unlock();
+            }
+        }
+    }
+
+    private void ensureOpen() {
+        if (fileChannel == null || !fileChannel.isOpen()) {
+            throw new IllegalStateException(
+                    String.format(
+                            "File %s is not open!", file.getAbsolutePath()
+                    )
+            );
+        }
+    }
+    @Override
+    public void closeWrite() {
+        writeClosed = true;
+    }
+
+    @Override
+    public boolean writable() {
+        return bufferType == DIRECT_BUFFER && !writeClosed;
     }
 }

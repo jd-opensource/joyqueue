@@ -69,7 +69,8 @@ import java.util.stream.Collectors;
  * <br>
  * Created by chengzhiliang on 2018/8/16.
  */
-class ConcurrentConsumption extends Service {
+@Deprecated
+class ConcurrentConsumption extends Service implements ConcurrentConsumer {
 
     private final Logger logger = LoggerFactory.getLogger(ConcurrentConsumption.class);
 
@@ -144,7 +145,7 @@ class ConcurrentConsumption extends Service {
                 }).build();
 
         cleanExpireThread.start();
-        logger.info("ConcurrentConsumption is started.");
+        logger.info("ConcurrentConsumer is started.");
 
         sessionManager.addListener(new MovePartitionSegmentListener());
     }
@@ -154,7 +155,7 @@ class ConcurrentConsumption extends Service {
         super.doStop();
         Close.close(moveExpireThread);
         Close.close(cleanExpireThread);
-        logger.info("ConcurrentConsumption is stopped.");
+        logger.info("ConcurrentConsumer is stopped.");
     }
 
     /**
@@ -173,9 +174,10 @@ class ConcurrentConsumption extends Service {
      * @param accessTimes 访问次数用于均匀读取每个分区
      * @return 读取的消息
      */
+    @Override
     public PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         // 消费普通分区消息
-        List<Short> partitionList = clusterManager.getMasterPartitionList(TopicName.parse(consumer.getTopic()));
+        List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
         // 首先尝试从过期未应答队列获取分区段进行消费
         PartitionSegment partitionSegment = pollPartitionSegment(consumer, partitionList);
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
@@ -608,6 +610,7 @@ class ConcurrentConsumption extends Service {
      * @return
      * @throws JoyQueueException
      */
+    @Override
     public boolean acknowledge(MessageLocation[] locations, Consumer consumer, boolean isSuccessAck) throws JoyQueueException {
         boolean isSuccess = false;
         if (locations.length < 1) {

@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.cluster.ClusterNameService;
 import org.joyqueue.broker.kafka.KafkaCommandType;
 import org.joyqueue.broker.kafka.KafkaContext;
 import org.joyqueue.broker.kafka.KafkaContextAware;
@@ -42,7 +43,6 @@ import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
-import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.delay.AbstractDelayedOperation;
 import org.joyqueue.toolkit.delay.DelayedOperationKey;
 import org.joyqueue.toolkit.delay.DelayedOperationManager;
@@ -67,16 +67,16 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
 
     protected static final Logger logger = LoggerFactory.getLogger(TopicMetadataRequestHandler.class);
 
-    private NameService nameService;
     private KafkaConfig config;
+    private ClusterNameService clusterNameService;
     private DelayedOperationManager delayPurgatory;
 
     private Cache<String, Map<String, TopicConfig>> appCache;
 
     @Override
     public void setKafkaContext(KafkaContext kafkaContext) {
-        this.nameService = kafkaContext.getBrokerContext().getNameService();
         this.config = kafkaContext.getConfig();
+        this.clusterNameService = kafkaContext.getBrokerContext().getClusterNameService();
         this.appCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(config.getMetadataCacheExpireTime(), TimeUnit.MILLISECONDS)
                 .build();
@@ -91,7 +91,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
 
         Map<String, TopicConfig> topicConfigs = Collections.emptyMap();
         if (CollectionUtils.isEmpty(topicMetadataRequest.getTopics()) && StringUtils.isNotBlank(clientId)) {
-            if (config.getFuzzySearchEnable()) {
+            if (config.getMetadataFuzzySearchEnable() && KafkaClientHelper.isMetadataFuzzySearch(topicMetadataRequest.getClientId())) {
                 topicConfigs = getAllTopicConfigs(clientId);
             }
         } else {
@@ -153,8 +153,8 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     protected Map<String, TopicConfig> doGetAllTopicConfigs(String clientId) {
         // TODO 常量
         String[] appGroup = clientId.split("\\.");
-        Map<TopicName, TopicConfig> consumers = nameService.getTopicConfigByApp(clientId, Subscription.Type.CONSUMPTION);
-        Map<TopicName, TopicConfig> producers = nameService.getTopicConfigByApp(appGroup[0], Subscription.Type.PRODUCTION);
+        Map<TopicName, TopicConfig> consumers = clusterNameService.getTopicConfigByApp(clientId, Subscription.Type.CONSUMPTION);
+        Map<TopicName, TopicConfig> producers = clusterNameService.getTopicConfigByApp(appGroup[0], Subscription.Type.PRODUCTION);
 
         Map<String, TopicConfig> result = Maps.newHashMap();
 
@@ -173,14 +173,7 @@ public class TopicMetadataRequestHandler extends AbstractKafkaCommandHandler imp
     }
 
     protected Map<String, TopicConfig> getTopicConfigs(List<String> topics) {
-        Map<String, TopicConfig> result = Maps.newHashMap();
-        for (String topic : topics) {
-            TopicConfig topicConfig = nameService.getTopicConfig(TopicName.parse(topic));
-            if (topicConfig != null) {
-                result.put(topic, topicConfig);
-            }
-        }
-        return result;
+        return clusterNameService.getTopicConfigs(topics);
     }
 
     protected List<KafkaBroker> getTopicBrokers(Map<String, TopicConfig> topicConfigs) {

@@ -41,10 +41,16 @@ public enum StoreConfigKey implements PropertyDef {
      * 索引文件大小 1M
      */
     INDEX_FILE_SIZE("store.index.file.size", StoreConfig.DEFAULT_INDEX_FILE_SIZE, Type.INT),
+
     /**
-     * 虚拟线程执行器的线程数量
+     * 预读取消息文件
      */
-    THREAD_COUNT("store.thread.count", StoreConfig.DEFAULT_THREAD_COUNT, Type.INT),
+    MESSAGE_FILE_LOAD_ON_READ("store.message.file.load", StoreConfig.DEFAULT_MESSAGE_FILE_LOAD_ON_READ, Type.BOOLEAN),
+    /**
+     * 预读取索引文件
+     */
+    INDEX_FILE_LOAD_ON_READ("store.index.file.load", StoreConfig.DEFAULT_INDEX_FILE_LOAD_ON_READ, Type.BOOLEAN),
+
     /**
      * 预加载DirectBuffer的核心数量
      */
@@ -69,6 +75,10 @@ public enum StoreConfigKey implements PropertyDef {
      * 异步刷盘的时间间隔(ms)
      */
     FLUSH_INTERVAL_MS("store.flush.interval", DEFAULT_FLUSH_INTERVAL_MS, Type.LONG),
+    /**
+     * 是否强制刷盘
+     */
+    FLUSH_FORCE("store.flush.force", StoreConfig.DEFAULT_FLUSH_FORCE, Type.BOOLEAN),
     /**
      * 文件头长度
      */

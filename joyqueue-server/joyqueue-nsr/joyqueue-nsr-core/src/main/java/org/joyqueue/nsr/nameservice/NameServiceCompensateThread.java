@@ -20,6 +20,7 @@ import org.joyqueue.domain.AllMetadata;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,22 +35,24 @@ public class NameServiceCompensateThread extends Service implements Runnable {
 
     private NameServiceConfig config;
     private NameService delegate;
-    private NameServiceCacheManager nameServiceCacheManager;
-    private NameServiceCompensator nameServiceCompensator;
+    private MetadataCacheManager metadataCacheManager;
+    private MetadataCompensator metadataCompensator;
 
+    private MetadataValidator metadataValidator;
     private Thread compensationThread;
     private volatile boolean started = false;
 
     public NameServiceCompensateThread(NameServiceConfig config, NameService delegate,
-                                       NameServiceCacheManager nameServiceCacheManager, NameServiceCompensator nameServiceCompensator) {
+                                       MetadataCacheManager metadataCacheManager, MetadataCompensator metadataCompensator) {
         this.config = config;
         this.delegate = delegate;
-        this.nameServiceCacheManager = nameServiceCacheManager;
-        this.nameServiceCompensator = nameServiceCompensator;
+        this.metadataCacheManager = metadataCacheManager;
+        this.metadataCompensator = metadataCompensator;
     }
 
     @Override
     protected void validate() throws Exception {
+        metadataValidator = new MetadataValidator(config);
         compensationThread = new Thread(this, "joyqueue-nameservice-compensation");
         compensationThread.setDaemon(true);
     }
@@ -84,42 +87,72 @@ public class NameServiceCompensateThread extends Service implements Runnable {
         if (!config.getCompensationEnable()) {
             return;
         }
-        if (nameServiceCacheManager.getCache() == null) {
+
+        if (metadataCacheManager.getCache() == null) {
             AllMetadata allMetadata = delegate.getAllMetadata();
-            AllMetadataCache newCache = nameServiceCacheManager.buildCache(allMetadata);
+            AllMetadataCache newCache = metadataCacheManager.buildCache(allMetadata);
 
             if (logger.isDebugEnabled()) {
                 logger.debug("doCompensate, newCache: {}, metadata: {}", JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
             }
 
-            nameServiceCacheManager.fillCache(newCache);
+            metadataCacheManager.fillCache(newCache);
+            metadataCacheManager.flushCache();
         } else {
-            if (!nameServiceCacheManager.tryLock()) {
+            if (metadataCompensator.getBrokerId() < 0) {
+                return;
+            }
+            if (!metadataCacheManager.tryLock()) {
                 return;
             }
             try {
+                boolean isFlush = true;
+                AllMetadata allMetadata = null;
                 AllMetadataCache newCache = null;
-                AllMetadataCache oldCache = nameServiceCacheManager.getCache();
-                int version = nameServiceCacheManager.getVersion();
+                AllMetadataCache oldCache = metadataCacheManager.getCache();
+                long version = metadataCacheManager.getTimestamp();
+
+                if (SystemClock.now() - version < config.getAllMetadataInterval()) {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("doCompensate, interval less than threshold, last: {}, threshold: {}",
+                                version, config.getAllMetadataInterval());
+                    }
+                    return;
+                }
 
                 for (int i = 0; i <= config.getCompensationRetryTimes(); i++) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("doCompensate pre, oldCache: {}", JSON.toJSONString(oldCache));
                     }
 
-                    AllMetadata allMetadata = delegate.getAllMetadata();
-                    newCache = nameServiceCacheManager.buildCache(allMetadata);
+                    try {
+                        allMetadata = delegate.getAllMetadata();
+                    } catch (Exception e) {
+                        logger.error("getAllMetadata exception", e);
+                        continue;
+                    }
+
+                    newCache = metadataCacheManager.buildCache(allMetadata);
 
                     if (logger.isDebugEnabled()) {
                         logger.debug("doCompensate, oldCache: {}, newCache: {}, metadata: {}",
                                 JSON.toJSONString(oldCache), JSON.toJSONString(newCache), JSON.toJSONString(allMetadata));
                     }
 
-                    if (config.getCompensationEnable()) {
-                        nameServiceCompensator.compensate(oldCache, newCache);
+                    if (!metadataValidator.validateChange(oldCache, newCache)) {
+                        logger.error("doCompensate validate error");
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("doCompensate validate error, oldCache: {}, newCache: {}", oldCache, newCache);
+                        }
+                        isFlush = false;
+                        break;
                     }
 
-                    int currentVersion = nameServiceCacheManager.getVersion();
+                    if (config.getCompensationEnable()) {
+                        metadataCompensator.compensate(oldCache, newCache);
+                    }
+
+                    long currentVersion = metadataCacheManager.getTimestamp();
                     if (version == currentVersion) {
                         break;
                     } else {
@@ -135,9 +168,12 @@ public class NameServiceCompensateThread extends Service implements Runnable {
                     }
                 }
 
-                nameServiceCacheManager.fillCache(newCache);
+                if (newCache != null && isFlush) {
+                    metadataCacheManager.fillCache(newCache);
+                    metadataCacheManager.flushCache();
+                }
             } finally {
-                nameServiceCacheManager.unlock();
+                metadataCacheManager.unlock();
             }
         }
     }

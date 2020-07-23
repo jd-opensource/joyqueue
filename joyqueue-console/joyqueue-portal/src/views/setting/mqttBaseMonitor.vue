@@ -1,7 +1,7 @@
 <template>
     <div>
       <div class="ml20 mt30" v-if="!threadSelect&&inputable">
-          <d-input v-model="searchData.clientId" placeholder="客户端ID" class="left mr10"
+          <d-input v-model="searchData.clientId" oninput="value = value.trim()" placeholder="客户端ID" class="left mr10"
                    style="width:213px" @on-enter="getList">
             <icon name="search" size="14" color="#CACACA" slot="suffix" @click="getList"></icon>
           </d-input>
@@ -126,7 +126,7 @@ export default {
       let threadStatus = !item.debug
       let _this = this
       apiRequest.put(this.urls.threadDebug + threadStatus, {}, this.searchData).then((data) => {
-        if (data.code == this.$store.getters.successCode) {
+        if (data.code === this.$store.getters.successCode) {
           this.$Message.success('成功')
           _this.loadThread()
         } else {
@@ -139,7 +139,7 @@ export default {
       this.searchData.clientId = item.clientId
       let _this = this
       apiRequest.put(this.urls.clientDebug + clientStatus, {}, this.searchData).then((data) => {
-        if (data.code == this.$store.getters.successCode) {
+        if (data.code === this.$store.getters.successCode) {
           this.$Message.success('成功')
           _this.getList()
         } else {

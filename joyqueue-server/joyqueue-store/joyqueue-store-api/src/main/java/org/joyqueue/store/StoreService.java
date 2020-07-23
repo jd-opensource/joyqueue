@@ -16,6 +16,7 @@
 package org.joyqueue.store;
 
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
+
 import org.joyqueue.store.transaction.TransactionStore;
 
 import java.io.IOException;
@@ -115,10 +116,11 @@ public interface StoreService {
     StoreManagementService getManageService();
 
     /**
-     * 获取内存监控
-     * @return
+     * 获取内存监控信息。
+     * @return 内存监控对象。
      */
     BufferPoolMonitorInfo monitorInfo();
 
     List<TransactionStore> getTransactionStores(String topic);
 }
+
