@@ -63,6 +63,8 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String partitiongroupIndexPath="/manage/topic/%s/partitionGroup/%s/store/metric";
 
     /** offset management*/
+    private String removeProducersConnectionsPath= "/manage/topic/%s/app/%s/producers";
+    private String removeConsumersConnectionsPath= "/manage/topic/%s/app/%s/consumers";
     private String appConsumeOffsetMonitorPath="/manage/topic/%s/app/%s/acks"; // topic|app
     private String appPartitionOffsetMonitorPath="/manage/topic/%s/app/%s/partition/%s/ack";// topic|app|partition,method=get|put
     private String resetAppPartitionOffsetPath="/manage/topic/%s/app/%s/partition/%s/ack?index=%s";// topic|app|partition,method=get|put

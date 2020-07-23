@@ -1,7 +1,8 @@
 <template>
   <div>
     <my-table :data="tableData" :showPin="showTablePin" :showPagination=false
-              :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"/>
+              :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
+              @on-disconnect="disconnectBroker"/>
     <label >共 {{page.total}} 条记录</label>
   </div>
 </template>
@@ -71,6 +72,7 @@ export default {
   data () {
     return {
       urls: {
+        disconnect: `/monitor/remove/connections`,
         getMonitor: `/monitor/find/connection`
       },
       tableData: {
@@ -78,8 +80,9 @@ export default {
         colData: this.colData,
         btns: [
           {
-            txt: '断开连接',
-            method: 'on-set-offset'
+            txt: '关闭连接',
+            method: 'on-disconnect',
+            isAdmin: 1
           }
         ]
       },
@@ -90,6 +93,20 @@ export default {
     }
   },
   methods: {
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
+    },
+    disconnectBroker () {
+      apiRequest.postBase(this.urls.disconnect, {}, this.search, true).then((data) => {
+        data.data = data.data
+        if (data.data === 'success') {
+          this.$Message.success('断开成功')
+          this.getList()
+        } else {
+          this.$Message.error('断开失败')
+        }
+      })
+    },
     getList () {
       this.showTablePin = true
       apiRequest.postBase(this.urls.getMonitor, {}, this.search, false).then((data) => {
