@@ -885,11 +885,7 @@ public class ReplicaGroup extends Service {
      */
     private long getPrevPosition(long position) {
         try {
-            if (replicableStore.rightPosition() - replicableStore.leftPosition() > electionConfig.getMaxReplicateLength()) {
-                return replicableStore.position(position, -electionConfig.getMaxReplicateLength());
-            } else {
-                return replicableStore.leftPosition();
-            }
+            return replicableStore.position(position, -1);
         } catch (Throwable t) {
             long leftPosition = replicableStore.leftPosition();
             logger.warn("Partition group {}/node {} get previous position " +
