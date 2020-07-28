@@ -386,6 +386,10 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
     }
 
     protected QosLevel getConfigQosLevel(Producer producer, QosLevel qosLevel) {
+        org.joyqueue.domain.Producer.ProducerPolicy producerPolicy = clusterManager.tryGetProducerPolicy(TopicName.parse(producer.getTopic()), producer.getApp());
+        if (producerPolicy != null && producerPolicy.getQosLevel() != null) {
+            return QosLevel.valueOf(producerPolicy.getQosLevel());
+        }
         if (config.getTopicQosLevel(producer.getTopic()) != -1) {
             return QosLevel.valueOf(config.getTopicQosLevel(producer.getTopic()));
         }

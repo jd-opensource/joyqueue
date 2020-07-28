@@ -16,6 +16,7 @@
 package org.joyqueue.network.domain;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * BrokerNode
@@ -137,12 +138,14 @@ public class BrokerNode implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrokerNode that = (BrokerNode) o;
-        return id == that.getId();
+        return id == that.id &&
+                port == that.port &&
+                host.equals(that.host);
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return Objects.hash(id, host, port);
     }
 
     @Override

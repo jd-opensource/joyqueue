@@ -154,8 +154,8 @@ public class ElectionManager extends Service implements ElectionService, BrokerC
 
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setIoThreadName("joyqueue-election-io-eventLoop");
-        clientConfig.setConnectionTimeout(300 * 1);
-        clientConfig.getRetryPolicy().setRetryDelay(1000 * 60);
+        clientConfig.setConnectionTimeout(electionConfig.getConnectionTimeout());
+        clientConfig.getRetryPolicy().setRetryDelay(electionConfig.getConnectionRetryDelay());
         transportClient = new BrokerTransportClientFactory().create(clientConfig);
         transportClient.start();
 

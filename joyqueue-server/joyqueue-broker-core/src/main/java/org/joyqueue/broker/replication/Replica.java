@@ -51,6 +51,8 @@ public class Replica {
 
     private ReplicateCommandState replicateCommandState;
 
+    private long lastAppendTime;
+
     Replica(int replicaId, String address) {
         this.replicaId = replicaId;
         this.address = address;
@@ -139,6 +141,14 @@ public class Replica {
 
     public void setReplicateCommandState(ReplicateCommandState replicateCommandState) {
         this.replicateCommandState = replicateCommandState;
+    }
+
+    public long getLastAppendTime() {
+        return lastAppendTime;
+    }
+
+    public void setLastAppendTime(long lastAppendTime) {
+        this.lastAppendTime = lastAppendTime;
     }
 
     @Override

@@ -974,6 +974,10 @@ public class ClusterManager extends Service {
         return null != appToken && appToken.getEffectiveTime().before(now) && appToken.getExpirationTime().after(now);
     }
 
+    public TopicConfig rebuildTopicConfigCache(TopicName topicName) {
+        return localCache.buildTopicConfigCache(topicName);
+    }
+
     public NameService getNameService() {
         return nameService;
     }

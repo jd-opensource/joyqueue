@@ -23,6 +23,8 @@ import org.joyqueue.client.internal.transport.ClientState;
 import org.joyqueue.network.command.CommitAckData;
 import org.joyqueue.network.command.CommitAckRequest;
 import org.joyqueue.network.command.CommitAckResponse;
+import org.joyqueue.network.command.CommitIndexRequest;
+import org.joyqueue.network.command.CommitIndexResponse;
 import org.joyqueue.network.command.FetchIndexRequest;
 import org.joyqueue.network.command.FetchIndexResponse;
 import org.joyqueue.network.command.FetchPartitionMessageData;
@@ -124,6 +126,11 @@ public class ConsumerClient {
         client.async(new JoyQueueCommand(fetchPartitionMessageRequest), timeout, callback);
     }
 
+    public CommitIndexResponse commitIndex(Table<String, Short, Long> partitions, String app, long timeout) {
+        CommitIndexRequest commitIndexRequest = buildCommitIndexCommand(partitions, app);
+        return (CommitIndexResponse) client.sync(new JoyQueueCommand(commitIndexRequest), timeout).getPayload();
+    }
+
     public void addConsumers() {
         connectionState.handleAddConsumers();
     }
@@ -180,6 +187,13 @@ public class ConsumerClient {
         fetchTopicMessageRequest.setAckTimeout((int) ackTimeout);
         fetchTopicMessageRequest.setLongPollTimeout((int) longPollTimeout);
         return fetchTopicMessageRequest;
+    }
+
+    protected CommitIndexRequest buildCommitIndexCommand(Table<String, Short, Long> partitions, String app) {
+        CommitIndexRequest commitIndexRequest = new CommitIndexRequest();
+        commitIndexRequest.setData(partitions);
+        commitIndexRequest.setApp(app);
+        return commitIndexRequest;
     }
 
     public TransportAttribute getAttribute() {

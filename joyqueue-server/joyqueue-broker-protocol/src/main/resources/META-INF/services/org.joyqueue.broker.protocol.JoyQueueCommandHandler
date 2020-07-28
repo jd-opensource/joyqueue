@@ -12,6 +12,7 @@ org.joyqueue.broker.protocol.handler.FetchAssignedPartitionRequestHandler
 org.joyqueue.broker.protocol.handler.FetchTopicMessageRequestHandler
 org.joyqueue.broker.protocol.handler.FetchPartitionMessageRequestHandler
 org.joyqueue.broker.protocol.handler.CommitAckRequestHandler
+org.joyqueue.broker.protocol.handler.CommitIndexRequestHandler
 org.joyqueue.broker.protocol.handler.FetchIndexRequestHandler
 org.joyqueue.broker.protocol.handler.ProduceMessageRequestHandler
 org.joyqueue.broker.protocol.handler.ProduceMessagePrepareRequestHandler

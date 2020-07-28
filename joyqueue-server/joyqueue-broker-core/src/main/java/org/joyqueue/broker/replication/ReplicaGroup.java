@@ -416,8 +416,15 @@ public class ReplicaGroup extends Service {
 
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
-                        replicateResponseQueue.put(new DelayedCommand(ONE_MS_NANO, replica.replicaId()));
-                        return;
+                        if (!electionConfig.enableSharedHeartbeat()) {
+                            if (SystemClock.now() - replica.getLastAppendTime() >= electionConfig.getHeartbeatTimeout()) {
+                                request = generateHeartbeatRequest(replica);
+                            }
+                        }
+                        if (request == null) {
+                            replicateResponseQueue.put(new DelayedCommand(ONE_MS_NANO, replica.replicaId()));
+                            return;
+                        }
                     }
 
                     JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
@@ -428,6 +435,7 @@ public class ReplicaGroup extends Service {
                                 topicPartitionGroup, leaderId, request, replica.replicaId(), usTime() - startTimeUs);
                     }
 
+                    replica.setLastAppendTime(SystemClock.now());
                     this.sendCommand(replica.getAddress(), new Command(header, request),
                             electionConfig.getSendCommandTimeout(),
                             new AppendEntriesRequestCallback(replica, startTimeUs, request.getEntriesLength()));
@@ -495,6 +503,16 @@ public class ReplicaGroup extends Service {
                 .commitPosition(replicableStore.commitPosition()).prevTerm(prevTerm)
                 .prevPosition(prevPosition).entriesTerm(entriesTerm).entries(entries)
                 .build();
+    }
+
+    /**
+     * 构造心跳请求
+     * @param replica
+     * @return
+     */
+    private AppendEntriesRequest generateHeartbeatRequest(Replica replica) {
+        return AppendEntriesRequest.Build.create()
+                .partitionGroup(topicPartitionGroup).term(currentTerm).leader(leaderId).build();
     }
 
     /**

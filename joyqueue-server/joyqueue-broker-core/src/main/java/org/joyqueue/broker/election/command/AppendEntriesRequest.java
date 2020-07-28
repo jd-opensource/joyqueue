@@ -148,6 +148,9 @@ public class AppendEntriesRequest extends JoyQueuePayload implements Releasable 
     }
 
     public int getEntriesLength() {
+        if (entries == null) {
+            return 0;
+        }
         return entries.remaining();
     }
 

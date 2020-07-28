@@ -320,6 +320,11 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
+    public TopicConfig rebuildTopicMetadata(String topic) {
+        return metadataMonitorService.rebuildTopicMetadata(topic);
+    }
+
+    @Override
     public BooleanResponse getReadableResult(String topic, String app, String address) {
         return metadataMonitorService.getReadableResult(topic, app, address);
     }

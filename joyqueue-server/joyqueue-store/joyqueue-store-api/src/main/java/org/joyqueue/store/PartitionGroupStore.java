@@ -67,11 +67,25 @@ public interface PartitionGroupStore {
     long getLeftIndex(short partition);
 
     /**
+     * 获取分区当前的最小索引，并确认存储状态
+     * @param partition 分区
+     * @return 返回值小于0时表示分区不存在，否则返回分区最大索引
+     */
+    long getLeftIndexAndCheck(short partition);
+
+    /**
      * 获取分区当前的最大索引，用于初始化消费
      * @param partition 分区
      * @return 返回值小于0时表示分区不存在，否则返回分区最大索引
      */
     long getRightIndex(short partition);
+
+    /**
+     * 获取分区当前的最大索引，并确认状态
+     * @param partition 分区
+     * @return 返回值小于0时表示分区不存在，否则返回分区最大索引
+     */
+    long getRightIndexAndCheck(short partition);
 
     /**
      * 根据消息存储时间获取索引。
