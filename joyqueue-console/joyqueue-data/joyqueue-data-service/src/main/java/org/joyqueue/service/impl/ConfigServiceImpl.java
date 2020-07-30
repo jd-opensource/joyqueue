@@ -76,6 +76,7 @@ public class ConfigServiceImpl implements ConfigService {
         try {
             return configNameServerService.findByGroupAndKey(group, key);
         } catch (Exception e) {
+            logger.error("", e);
             throw new RuntimeException("getListConfig exception",e);
         }
     }

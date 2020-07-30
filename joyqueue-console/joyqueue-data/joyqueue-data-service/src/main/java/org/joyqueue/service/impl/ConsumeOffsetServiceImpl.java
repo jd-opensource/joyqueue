@@ -312,6 +312,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 try {
                     put.setEntity(new StringEntity(String.valueOf(offset.getOffset())));
                 }catch (UnsupportedEncodingException e){
+                    logger.error("", e);
                     throw new IllegalStateException(e);
                 }
                 AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(url, SystemClock.now(),latch,String.valueOf(offset.getPartition()),resultMap));

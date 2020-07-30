@@ -8,13 +8,19 @@
       </d-input>
       <d-button type="primary" @click="openDialog('addDialog')">新建配置<icon name="plus-circle" style="margin-left: 5px;"></icon></d-button>
     </div>
+    <div class ="ml20 mt30">
+      <d-button type="primary" color = "success" name="search" v-on:click = "getList">all</d-button>
+      <d-button type="primary" color = "success" name="search" v-on:click = "getListByPrefix('store.max.store.time')">store.max.store.time</d-button>
+      <d-button type="primary" color = "success" name="search" v-on:click = "getListByPrefix('store.clean.keep.unconsumed')">store.clean.keep.unconsumed</d-button>
+      <d-button type="primary" color = "success" name="search" v-on:click = "getListByPrefix('retry.random.bound')">retry.random.bound</d-button>
+    </div>
     <my-table :data="tableData" :showPin="showTablePin" :showPagination="false" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
               @on-selection-change="handleSelectionChange" @on-edit="edit" @on-del="del">
     </my-table>
 
-    <d-button class="right load-btn" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
-      <icon name="refresh-cw" style="margin-left: 3px;"></icon>
-    </d-button>
+    <!--    <d-button class="right load-btn" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>-->
 
     <!--新增-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="addConfirm()" @on-dialog-cancel="dialogCancel('addDialog')" >
@@ -52,6 +58,7 @@ export default {
       searchData: {
         keyword: ''
       },
+      searchKeyPrefix: '',
       tableData: {
         rowData: [],
         colData: [
@@ -101,6 +108,34 @@ export default {
     }
   },
   methods: {
+    getListByPrefix (value) {
+      this.tableData.rowData = []
+      this.showTablePin = true
+      let data = this.getSearchVal()
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord // 总数
+        this.page.page = data.pagination.page // 分页
+        this.page.size = data.pagination.size // 分页大小
+        let result = []
+        for (let i = 0, j = 0; i < data.data.length; i++) {
+          if (data.data[i]['key'].slice(0, value.length) == value) {
+            result.push(data.data[i])
+          }
+        }
+        this.tableData.rowData = result
+        this.curIndex = data.data.length - 1
+        /*        } */
+        this.cacheList = data.data
+        this.showTablePin = false
+      })
+    },
     getList () {
       this.tableData.rowData = []
       this.showTablePin = true
@@ -116,31 +151,31 @@ export default {
         this.page.total = data.pagination.totalRecord
         this.page.page = data.pagination.page
         this.page.size = data.pagination.size
-        if (data.data.length > this.page.size) {
-          this.tableData.rowData = data.data.slice(0, this.page.size)
-          this.curIndex = this.page.size - 1
-        } else {
-          this.tableData.rowData = data.data
-          this.curIndex = data.data.length - 1
-        }
+        /*        if (data.data.length > this.page.size) {
+                    this.tableData.rowData = data.data.slice(0, this.page.size)
+                    this.curIndex = this.page.size - 1
+                  } else { */
+        this.tableData.rowData = data.data
+        this.curIndex = data.data.length - 1
+        /*        } */
         this.cacheList = data.data
         this.showTablePin = false
       })
-    },
-    getRestList () {
-      if (this.curIndex < this.cacheList.length - 1) {
-        for (let i = 0; i < this.page.size; i++) {
-          if (this.curIndex < this.cacheList.length - 1) {
-            this.curIndex += 1
-            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
-              this.tableData.rowData.push(this.cacheList[this.curIndex])
+    }
+    /* getRestList () {
+        if (this.curIndex < this.cacheList.length - 1) {
+          for (let i = 0; i < this.page.size; i++) {
+            if (this.curIndex < this.cacheList.length - 1) {
+              this.curIndex += 1
+              if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+                this.tableData.rowData.push(this.cacheList[this.curIndex])
+              }
+            } else {
+              break
             }
-          } else {
-            break
           }
         }
-      }
-    }
+      } */
   },
   mounted () {
     this.getList()
@@ -150,7 +185,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.label{text-align: right; line-height: 32px;}
-.val{}
-.load-btn { margin-right: 50px;margin-top: -30px;position: relative}
+  .label{text-align: right; line-height: 32px;}
+  .val{}
+  .load-btn { margin-right: 50px;margin-top: -30px;position: relative}
 </style>

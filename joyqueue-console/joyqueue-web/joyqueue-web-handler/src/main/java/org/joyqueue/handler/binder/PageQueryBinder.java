@@ -26,6 +26,8 @@ import com.jd.laf.binding.marshaller.Marshaller;
 import com.jd.laf.binding.marshaller.Unmarshaller;
 import com.jd.laf.binding.reflect.exception.ReflectionException;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -36,6 +38,7 @@ import java.util.Map;
 public class PageQueryBinder<Q extends Query> implements Binder {
     private static final String pagination = "pagination";
     private static final String query = "query";
+    private static final Logger logger = LoggerFactory.getLogger(PageQueryBinder.class);
     @Override
     public boolean bind(final Context context) throws ReflectionException {
         if (context == null) {
@@ -68,8 +71,10 @@ public class PageQueryBinder<Q extends Query> implements Binder {
 
             context.bind(pageQuery);
         } catch (ReflectionException e) {
+            logger.error("", e);
             throw e;
         } catch (Exception e) {
+            logger.error("", e);
             throw new ReflectionException(e.getMessage(), e);
         }
         return true;
