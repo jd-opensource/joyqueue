@@ -800,9 +800,18 @@ public class RaftLeaderElection extends LeaderElection  {
         } else {
             // as heartbeat
             return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
-                               new AppendEntriesResponse.Build().success(true).term(currentTerm)
-                                       .nextPosition(request.getStartPosition())
-                                       .writePosition(replicableStore.rightPosition()).build());
+                    new AppendEntriesResponse.Build().topicPartitionGroup(topicPartitionGroup)
+                    .term(currentTerm).writePosition(replicableStore.rightPosition()).nextPosition(replicableStore.rightPosition())
+                    .replicaId(localNodeId).success(true).entriesTerm(request.getEntriesTerm())
+                    .build());
+        }
+    }
+
+    private synchronized void maybeStartNewHeartbeat() {
+        if (electionConfig.enableSharedHeartbeat()) {
+            startNewHeartbeat();
+        } else {
+            resetHeartbeatTimer();
         }
     }
 
@@ -846,7 +855,6 @@ public class RaftLeaderElection extends LeaderElection  {
                         topicPartitionGroup, localNode, e);
             }
         }
-
         resetHeartbeatTimer();
     }
 
@@ -919,7 +927,7 @@ public class RaftLeaderElection extends LeaderElection  {
             heartbeatTimerFuture.cancel(true);
             heartbeatTimerFuture = null;
         }
-        heartbeatTimerFuture = electionTimerExecutor.schedule(this::startNewHeartbeat,
+        heartbeatTimerFuture = electionTimerExecutor.schedule(this::maybeStartNewHeartbeat,
                 electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
     }
 
@@ -1266,7 +1274,7 @@ public class RaftLeaderElection extends LeaderElection  {
         TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(
                 TopicName.parse(topicPartitionGroup.getTopic()));
         PartitionGroup pg = topicConfig.getPartitionGroups().get(topicPartitionGroup.getPartitionGroupId());
-        if (pg.getRecLeader() == null) {
+        if (pg == null || pg.getRecLeader() == null) {
             return INVALID_NODE_ID;
         }
         return pg.getRecLeader();
@@ -1311,7 +1319,7 @@ public class RaftLeaderElection extends LeaderElection  {
             int recommendLeader = getRecommendLeader();
 
             if (recommendLeader == INVALID_NODE_ID) {
-                logger.info("Partition group {}/node {} rebalance leader, recommend leader is -1",
+                logger.debug("Partition group {}/node {} rebalance leader, recommend leader is -1",
                         topicPartitionGroup, localNode);
                 return;
             }

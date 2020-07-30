@@ -19,7 +19,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.joyqueue</groupId>
-    <version>4.2.5.4-SNAPSHOT</version>
+    <version>4.2.6-RC1</version>
     <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
     <url>http://www.joyqueue.org</url>
@@ -70,17 +70,17 @@
         <journalkeeper.version>0.1.7</journalkeeper.version>
         <fastjson.version>1.2.68</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
-        <log4j.version>2.9.0</log4j.version>
+        <log4j.version>2.13.3</log4j.version>
         <commons-logging.version>1.2</commons-logging.version>
         <commons-io.version>2.3</commons-io.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
-        <commons-beanutils.version>1.9.2</commons-beanutils.version>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-collections4.version>4.1</commons-collections4.version>
         <commons-cli.version>1.4</commons-cli.version>
         <httpclient.version>4.5.12</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
-        <jackson-databind.version>2.9.10.4</jackson-databind.version>
+        <jackson-databind.version>2.10.0.pr1</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <hibernate-validator.version>5.3.5.Final</hibernate-validator.version>
         <el.version>2.2.4</el.version>

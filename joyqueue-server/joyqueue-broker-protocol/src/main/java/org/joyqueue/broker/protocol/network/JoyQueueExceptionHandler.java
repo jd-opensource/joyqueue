@@ -64,10 +64,9 @@ public class JoyQueueExceptionHandler implements ExceptionHandler {
                 JoyQueueException joyQueueException = (JoyQueueException) throwable;
                 code = joyQueueException.getCode();
                 error = joyQueueException.getMessage();
-            } else if (throwable instanceof JoyQueueException) {
-                JoyQueueException joyQueueException = (JoyQueueException) throwable;
-                code = joyQueueException.getCode();
-                error = joyQueueException.getMessage();
+            } else if (throwable instanceof RejectedExecutionException) {
+                code = JoyQueueCode.CN_THREAD_EXECUTOR_BUSY.getCode();
+                error = JoyQueueCode.CN_THREAD_EXECUTOR_BUSY.getMessage();
             }
 
             transport.acknowledge(command, BooleanAck.build(code, error));

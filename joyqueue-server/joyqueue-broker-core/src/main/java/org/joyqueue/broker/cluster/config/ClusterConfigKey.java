@@ -17,7 +17,7 @@ public enum ClusterConfigKey implements PropertyDef {
     GET_TOPIC_DYNAMIC_METADATA_MAX_PARALLEL_THRESHOLD("cluster.topic.dynamic.metadata.max.parallel.threshold", 15, Type.INT),
     GET_TOPIC_DYNAMIC_METADATA_MAX_BATCH_THRESHOLD("cluster.topic.dynamic.metadata.max.batch.threshold", 50, Type.INT),
     GET_TOPIC_DYNAMIC_METADATA_BATCH_PARALLEL_ENABLE("cluster.topic.dynamic.metadata.batch.parallel.enable", true, Type.BOOLEAN),
-    GET_TOPIC_DYNAMIC_METADATA_BATCH_TIMEOUT("cluster.topic.dynamic.metadata.batch.timeout", 1000 * 5, Type.INT),
+    GET_TOPIC_DYNAMIC_METADATA_BATCH_TIMEOUT("cluster.topic.dynamic.metadata.batch.timeout", 1000 * 2, Type.INT),
     GET_TOPIC_DYNAMIC_METADATA_BATCH_MIN_THREADS("cluster.topic.dynamic.metadata.batch.min.threads", Runtime.getRuntime().availableProcessors(), Type.INT),
     GET_TOPIC_DYNAMIC_METADATA_BATCH_MAX_THREADS("cluster.topic.dynamic.metadata.batch.max.threads", Runtime.getRuntime().availableProcessors() * 4, Type.INT),
     GET_TOPIC_DYNAMIC_METADATA_BATCH_THREAD_QUEUE_SIZE("cluster.topic.dynamic.metadata.batch.thread.queue.size", 128, Type.INT),

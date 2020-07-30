@@ -244,6 +244,31 @@ public class MessageConsumerWrapper extends Service implements MessageConsumer {
     }
 
     @Override
+    public JoyQueueCode commitIndex(short partition, long index) {
+        return delegate.commitIndex(partition, index);
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex(short partition) {
+        return delegate.commitMaxIndex(partition);
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex() {
+        return delegate.commitMaxIndex();
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex(short partition) {
+        return delegate.commitMinIndex(partition);
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex() {
+        return delegate.commitMinIndex();
+    }
+
+    @Override
     public FetchIndexData fetchIndex(short partition) {
         return delegate.fetchIndex(partition);
     }

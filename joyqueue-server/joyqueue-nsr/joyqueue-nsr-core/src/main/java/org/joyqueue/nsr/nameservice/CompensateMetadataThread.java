@@ -25,13 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * NameServiceCompensateThread
+ * CompensateMetadataThread
  * author: gaohaoxiang
  * date: 2019/9/2
  */
-public class NameServiceCompensateThread extends Service implements Runnable {
+public class CompensateMetadataThread extends Service implements Runnable {
 
-    protected static final Logger logger = LoggerFactory.getLogger(NameServiceCompensateThread.class);
+    protected static final Logger logger = LoggerFactory.getLogger(CompensateMetadataThread.class);
 
     private NameServiceConfig config;
     private NameService delegate;
@@ -42,8 +42,8 @@ public class NameServiceCompensateThread extends Service implements Runnable {
     private Thread compensationThread;
     private volatile boolean started = false;
 
-    public NameServiceCompensateThread(NameServiceConfig config, NameService delegate,
-                                       MetadataCacheManager metadataCacheManager, MetadataCompensator metadataCompensator) {
+    public CompensateMetadataThread(NameServiceConfig config, NameService delegate,
+                                    MetadataCacheManager metadataCacheManager, MetadataCompensator metadataCompensator) {
         this.config = config;
         this.delegate = delegate;
         this.metadataCacheManager = metadataCacheManager;
@@ -53,7 +53,7 @@ public class NameServiceCompensateThread extends Service implements Runnable {
     @Override
     protected void validate() throws Exception {
         metadataValidator = new MetadataValidator(config);
-        compensationThread = new Thread(this, "joyqueue-nameservice-compensation");
+        compensationThread = new Thread(this, "joyqueue-metadata-compensation");
         compensationThread.setDaemon(true);
     }
 
