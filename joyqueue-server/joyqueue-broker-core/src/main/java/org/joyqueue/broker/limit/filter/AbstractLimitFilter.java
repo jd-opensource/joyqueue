@@ -58,31 +58,9 @@ public abstract class AbstractLimitFilter implements ProtocolCommandHandlerFilte
             isRequired = true;
         }
 
-        try {
-            Command response = invocation.invoke();
-            if (response == null) {
-                return response;
-            }
-
-            ResponseTrafficPayload responseTrafficPayload = getResponseTrafficPayload(request, response);
-            if (responseTrafficPayload == null) {
-                return response;
-            }
-
-            if (!limitIfNeeded(responseTrafficPayload)) {
-                if (requestTrafficPayload != null && requestTrafficPayload.getTraffic().isLimited()) {
-                    return doLimit(invocation.getTransport(), request, response, isRequired);
-                } else {
-                    return response;
-                }
-            }
-
-            return doLimit(invocation.getTransport(), request, response, isRequired);
-        } finally {
-            if (isRequired && requestTrafficPayload != null) {
-                releaseRequire(requestTrafficPayload);
-            }
-        }
+        LimitTransport limitTransport = new LimitTransport(invocation.getTransport(), isRequired, this, requestTrafficPayload);
+        invocation.setTransport(limitTransport);
+        return invocation.invoke();
     }
 
     protected RequestTrafficPayload getRequestTrafficPayload(Command request) {

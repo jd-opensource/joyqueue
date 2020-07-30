@@ -29,6 +29,7 @@ import java.util.List;
  */
 public interface ExtensionConsumer extends Consumer {
 
+    // receive
     Message receive(short partition, long timeout);
 
     List<Message> batchReceive(short partition, long timeout);
@@ -37,7 +38,20 @@ public interface ExtensionConsumer extends Consumer {
 
     List<Message> batchReceive(short partition, long index, long timeout);
 
+    // ack
     void batchAck(List<MessageReceipt> receiptList);
 
+    // commit
+    void commitIndex(short partition, long index);
+
+    void commitMaxIndex(short partition);
+
+    void commitMaxIndex();
+
+    void commitMinIndex(short partition);
+
+    void commitMinIndex();
+
+    // index
     ConsumerIndex getIndex(short partition);
 }

@@ -115,6 +115,7 @@ public class KeyValueConverter {
         consumerConfig.setBroadcastLocalPath(KeyValueHelper.getString(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, consumerConfig.getBroadcastLocalPath()));
         consumerConfig.setBroadcastPersistInterval(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_PERSIST_INTERVAL, consumerConfig.getBroadcastPersistInterval()));
         consumerConfig.setBroadcastIndexExpireTime(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_INDEX_EXPIRE_TIME, consumerConfig.getBroadcastIndexExpireTime()));
+        consumerConfig.setBroadcastIndexAutoReset(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_INDEX_AUTO_RESET, consumerConfig.getBroadcastIndexAutoReset()));
         return consumerConfig;
     }
 

@@ -207,9 +207,9 @@ public class MessagePollerInner extends Service {
             };
 
             if (index == FETCH_PARTITION_NONE_INDEX) {
-                messageFetcher.fetchPartitionAsync(brokerNode, topic, app, partition, index, batchSize, timeout, partitionFetchListenerAdapter);
-            } else {
                 messageFetcher.fetchPartitionAsync(brokerNode, topic, app, partition, batchSize, timeout, partitionFetchListenerAdapter);
+            } else {
+                messageFetcher.fetchPartitionAsync(brokerNode, topic, app, partition, index, batchSize, timeout, partitionFetchListenerAdapter);
             }
             return null;
         }
@@ -250,7 +250,6 @@ public class MessagePollerInner extends Service {
             }
             case FW_BROKER_NOT_READABLE: {
                 logger.debug("fetch message error, broker not readable, topic: {}", topic);
-                clusterManager.updateTopicMetadata(topic, app);
                 break;
             }
             default: {

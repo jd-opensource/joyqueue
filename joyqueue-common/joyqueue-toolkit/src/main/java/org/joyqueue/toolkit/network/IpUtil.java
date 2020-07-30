@@ -17,8 +17,18 @@ package org.joyqueue.toolkit.network;
 
 import sun.net.util.IPAddressUtil;
 
-import java.net.*;
-import java.util.*;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Ipv4工具
@@ -50,6 +60,8 @@ public class IpUtil {
      * 是否启用IPV6
      */
     public static boolean PREFER_IPV6 = false;
+
+    public static String PREFER_HOSTNAME_OVERIP = "preferHostnameOverIp";
 
     static {
         // 从环境变量里面获取默认的网卡和管理网络
@@ -170,9 +182,22 @@ public class IpUtil {
     public static String getLocalIp() {
         // In JD.com IDC, this should be:
         // return getLocalIp(NET_INTERFACE, MANAGE_IP);
-        return getDefaultLocalIp();
+
+        boolean preferHostnameOverIp = Boolean.valueOf(System.getProperty(PREFER_HOSTNAME_OVERIP));
+        if (preferHostnameOverIp) {
+            return getDefaultLocalHost();
+        } else {
+            return getDefaultLocalIp();
+        }
     }
 
+    private static String getDefaultLocalHost() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            return getDefaultLocalIp();
+        }
+    }
 
     private static String getDefaultLocalIp() {
         try {

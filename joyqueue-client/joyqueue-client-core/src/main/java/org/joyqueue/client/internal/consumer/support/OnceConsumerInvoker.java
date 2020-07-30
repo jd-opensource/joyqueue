@@ -63,29 +63,27 @@ public class OnceConsumerInvoker implements ConsumerInvoker {
         List<ConsumeReply> result = Lists.newArrayListWithCapacity(messages.size());
 
         for (ConsumeMessage message : messages) {
-            if (context.isFilteredMessage(message)) {
-                continue;
-            }
-
-            long ackTimeout = (config.getAckTimeout() != ConsumerConfig.NONE_ACK_TIMEOUT ? config.getAckTimeout() : consumerPolicy.getAckTimeout());
             RetryType retryType = RetryType.NONE;
-            try {
-                long startTime = SystemClock.now();
-                for (MessageListener listener : listeners) {
-                    listener.onMessage(message);
-                }
-                long endTime = SystemClock.now();
-                if (endTime - startTime > ackTimeout) {
-                    logger.warn("execute messageListener timeout, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
-                    retryType = RetryType.NONE;
-                }
-            } catch (Exception e) {
-                if (e instanceof IgnoreAckException) {
-                    logger.debug("execute messageListener, ignore ack, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
-                    retryType = RetryType.OTHER;
-                } else {
-                    logger.error("execute messageListener exception, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners, e);
-                    retryType = RetryType.EXCEPTION;
+            if (!context.isFilteredMessage(message)) {
+                long ackTimeout = (config.getAckTimeout() != ConsumerConfig.NONE_ACK_TIMEOUT ? config.getAckTimeout() : consumerPolicy.getAckTimeout());
+                try {
+                    long startTime = SystemClock.now();
+                    for (MessageListener listener : listeners) {
+                        listener.onMessage(message);
+                    }
+                    long endTime = SystemClock.now();
+                    if (endTime - startTime > ackTimeout) {
+                        logger.warn("execute messageListener timeout, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
+                        retryType = RetryType.NONE;
+                    }
+                } catch (Exception e) {
+                    if (e instanceof IgnoreAckException) {
+                        logger.debug("execute messageListener, ignore ack, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
+                        retryType = RetryType.OTHER;
+                    } else {
+                        logger.error("execute messageListener exception, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners, e);
+                        retryType = RetryType.EXCEPTION;
+                    }
                 }
             }
             result.add(new ConsumeReply(message.getPartition(), message.getIndex(), retryType));

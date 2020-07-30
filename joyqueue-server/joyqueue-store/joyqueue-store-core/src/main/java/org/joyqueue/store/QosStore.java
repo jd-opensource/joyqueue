@@ -61,8 +61,18 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
+    public long getLeftIndexAndCheck(short partition) {
+        return store.getLeftIndexAndCheck(partition);
+    }
+
+    @Override
     public long getRightIndex(short partition) {
         return store.getRightIndex(partition);
+    }
+
+    @Override
+    public long getRightIndexAndCheck(short partition) {
+        return store.getRightIndexAndCheck(partition);
     }
 
     @Override

@@ -53,19 +53,19 @@ public class CommandExecuteTask implements Runnable {
 
     @Override
     public void run() {
+        List<CommandHandlerFilter> commandHandlerFilters = commandHandlerFilterFactory.getFilters();
+        CommandHandlerInvocation commandHandlerInvocation = new CommandHandlerInvocation(transport, request, commandHandler, commandHandlerFilters);
         try {
-            List<CommandHandlerFilter> commandHandlerFilters = commandHandlerFilterFactory.getFilters();
-            CommandHandlerInvocation commandHandlerInvocation = new CommandHandlerInvocation(transport, request, commandHandler, commandHandlerFilters);
             Command response = commandHandlerInvocation.invoke();
 
             if (response != null) {
-                transport.acknowledge(request, response);
+                commandHandlerInvocation.getTransport().acknowledge(request, response);
             }
         } catch (Throwable t) {
             logger.error("command handler exception, tratnsport: {}, command: {}", transport, request, t);
 
             if (exceptionHandler != null) {
-                exceptionHandler.handle(transport, request, t);
+                exceptionHandler.handle(commandHandlerInvocation.getTransport(), request, t);
             }
         }
     }

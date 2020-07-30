@@ -179,6 +179,31 @@ public class BroadcastMessagePoller extends Service implements MessagePoller {
     }
 
     @Override
+    public JoyQueueCode commitIndex(String topic, short partition, long index) {
+        return delegate.commitIndex(topic, partition, index);
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex(String topic, short partition) {
+        return delegate.commitMaxIndex(topic, partition);
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex(String topic) {
+        return delegate.commitMaxIndex(topic);
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex(String topic, short partition) {
+        return delegate.commitMinIndex(topic, partition);
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex(String topic) {
+        return delegate.commitMinIndex(topic);
+    }
+
+    @Override
     public FetchIndexData fetchIndex(String topic, short partition) {
         return delegate.fetchIndex(topic, partition);
     }

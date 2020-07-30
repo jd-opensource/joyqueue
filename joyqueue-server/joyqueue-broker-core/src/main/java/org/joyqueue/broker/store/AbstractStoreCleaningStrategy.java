@@ -1,6 +1,7 @@
 package org.joyqueue.broker.store;
 
 import org.joyqueue.broker.config.BrokerStoreConfig;
+import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.toolkit.config.PropertySupplier;
 
 /**
@@ -12,13 +13,27 @@ public abstract class AbstractStoreCleaningStrategy implements StoreCleaningStra
 
     private BrokerStoreConfig brokerStoreConfig;
     @Override
-    public long storeLogMaxTime(String topic) {
-        return brokerStoreConfig.getMaxStoreTime(topic);
+    public long storeLogMaxTime(TopicConfig topicConfig) {
+        if (topicConfig != null) {
+            if (topicConfig.getPolicy() != null && topicConfig.getPolicy().getStoreMaxTime() != null) {
+                return topicConfig.getPolicy().getStoreMaxTime();
+            } else {
+                return brokerStoreConfig.getMaxStoreTime(topicConfig.getName().getFullName());
+            }
+        }
+        return brokerStoreConfig.getMaxStoreTime();
     }
 
     @Override
-    public boolean keepUnconsumed(String topic) {
-        return brokerStoreConfig.keepUnconsumed(topic);
+    public boolean keepUnconsumed(TopicConfig topicConfig) {
+        if (topicConfig != null) {
+            if (topicConfig.getPolicy() != null && topicConfig.getPolicy().getStoreCleanKeepUnconsumed() != null) {
+                return topicConfig.getPolicy().getStoreCleanKeepUnconsumed();
+            } else {
+                return brokerStoreConfig.keepUnconsumed(topicConfig.getName().getFullName());
+            }
+        }
+        return brokerStoreConfig.keepUnconsumed();
     }
 
     @Override

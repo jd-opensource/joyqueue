@@ -15,9 +15,11 @@
  */
 package org.joyqueue.broker.store;
 
+import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.time.SystemClock;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -30,16 +32,16 @@ public class IntervalTimeStoreCleaningStrategy extends AbstractStoreCleaningStra
     }
 
     @Override
-    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap) throws IOException {
+    public long deleteIfNeeded(PartitionGroupStore partitionGroupStore, Map<Short, Long> partitionAckMap, TopicConfig topicConfig) throws IOException {
         long currentTimestamp = SystemClock.now();
-        long targetDeleteTimeline = currentTimestamp -storeLogMaxTime(partitionGroupStore.getTopic()) ;
+        long targetDeleteTimeline = currentTimestamp -storeLogMaxTime(topicConfig) ;
 
         long totalDeletedSize = 0L;  // 总共删除长度
         long deletedSize = 0L;
 
         if (partitionGroupStore != null) {
             do {
-                deletedSize = partitionGroupStore.clean(targetDeleteTimeline, partitionAckMap, keepUnconsumed(partitionGroupStore.getTopic()));
+                deletedSize = partitionGroupStore.clean(targetDeleteTimeline, partitionAckMap, keepUnconsumed(topicConfig));
                 totalDeletedSize += deletedSize;
             } while (deletedSize > 0L);
         }

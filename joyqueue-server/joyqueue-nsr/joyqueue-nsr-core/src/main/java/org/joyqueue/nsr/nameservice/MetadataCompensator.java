@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * NameServiceCompensator
@@ -367,6 +368,9 @@ public class MetadataCompensator extends Service {
             return false;
         }
         if (topicConfig1.getPartitions() != topicConfig2.getPartitions()) {
+            return false;
+        }
+        if (!Objects.equals(topicConfig1.getPolicy(), topicConfig2.getPolicy())) {
             return false;
         }
         return true;
