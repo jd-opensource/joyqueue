@@ -45,6 +45,8 @@ public class QTopicMsgFilter extends QKeyword {
 
     private int queryCount;
 
+    private int totalCount;
+
     private long offset;
 
     private long offsetStartTime;
@@ -158,5 +160,13 @@ public class QTopicMsgFilter extends QKeyword {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(int totalCount) {
+        this.totalCount = totalCount;
     }
 }

@@ -390,8 +390,12 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                         if (topicMessageFilterSupport.match(content, msgFilter.getFilter())) {
                             hitCount++;
                             filterClock = SystemClock.now();
-                            strBuilder.append("bornTime:").append(dateFormat.format(new Date(message.header().getBornTimestamp())))
-                                    .append('\n');
+                            strBuilder.append("partition:").append(partition.partitionId()).append(',');
+                            if (message.extensionHeader().isPresent()) {
+                                strBuilder.append("messageKey:").append(message.extensionHeader().get().getMessageKey()).append(',');
+                                strBuilder.append("offset:").append(message.extensionHeader().get().getOffset()).append(',');
+                            }
+                            strBuilder.append("bornTime:").append(dateFormat.format(new Date(message.header().getBornTimestamp()))).append('\n');
                             strBuilder.append(content).append('\n');
                             appendCount++;
                             // 每1w行追加一次
@@ -452,7 +456,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     }
 
     private boolean consumerCondition(TopicMsgFilter msgFilter, int totalCount, Map<Integer, Long> maxIndexMap) {
-        if (totalCount >= maxItemSize) {
+        if (totalCount >= Math.max(msgFilter.getTotalCount(), maxItemSize)) {
             return false;
         }
         if (msgFilter.getOffsetStartTime() != null) {
@@ -579,6 +583,12 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
 
     @Override
     public PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query) {
-        return repository.findTopicMsgFiltersByQuery(query);
+        PageResult<TopicMsgFilter> pageResult = repository.findTopicMsgFiltersByQuery(query);
+        for (int i=0;i<pageResult.getResult().size();i++) {
+            Long id = pageResult.getResult().get(i).getCreateBy().getId();
+            User user = userService.findById(id);
+            pageResult.getResult().get(i).setCreateBy(new Identity(id, user.getCode()));
+        }
+        return pageResult;
     }
 }

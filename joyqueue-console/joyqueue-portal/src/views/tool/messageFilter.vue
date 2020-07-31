@@ -28,7 +28,7 @@
       <d-form ref="search" :model="search" label-width="80px" :rules="rules">
         <div>
           <grid-row>
-            <grid-col span="8">
+            <grid-col span="7">
               <d-form-item label="主题" prop="topic">
                 <d-tooltip content="如主题有namespace,请加上namespace">
                   <d-input v-model="search.topic" oninput="value=value.trim()" placeholder="请输入主题"
@@ -37,7 +37,7 @@
                 </d-tooltip>
               </d-form-item>
             </grid-col>
-            <grid-col span="8">
+            <grid-col span="7">
               <d-form-item label="消息格式" prop="msgFormat">
                 <d-select v-model="search.msgFormat" style="width:200px">
                   <d-option v-for="(supportedMessageType, index) in msgFormats" :value="supportedMessageType"
@@ -46,8 +46,8 @@
                 </d-select>
               </d-form-item>
             </grid-col>
-            <grid-col span="8">
-              <d-form-item label="分区" style="margin-left: -43px;" prop="partition">
+            <grid-col span="7">
+              <d-form-item label="分区" prop="partition">
                 <d-input v-model="search.partition" oninput="value=value.replace(/[^\d]/g, '')"
                          placeholder="分区为空默认查询所有分区"
                          style="width: 200px">
@@ -56,23 +56,30 @@
             </grid-col>
           </grid-row>
           <grid-row>
-            <grid-col span="8">
+            <grid-col span="7">
               <d-form-item label="应用" prop="app">
                 <d-input v-model="search.app" oninput="value=value.trim()" placeholder="请输入应用"
                          style="width: 200px">
                 </d-input>
               </d-form-item>
             </grid-col>
-            <grid-col span="8">
+            <grid-col span="7">
               <d-form-item label="令牌" prop="token">
                 <d-input v-model="search.token" oninput="value=value.trim()" placeholder="请输入token"
                          style="width: 200px">
                 </d-input>
               </d-form-item>
             </grid-col>
+            <grid-col span="7" v-if="$store.getters.isAdmin">
+              <d-form-item label="最大查询总数" prop="totalCount">
+                <d-input v-model.number="search.totalCount" oninput="value=value.trim()" placeholder="请输入最大查询总数"
+                         style="width: 200px">
+                </d-input>
+              </d-form-item>
+            </grid-col>
           </grid-row>
           <grid-row>
-            <grid-col span="8">
+            <grid-col span="7">
               <d-form-item>
                 <d-radio-group v-model="search.method" name="radioGroup" @on-change="changeRadio">
                   <d-radio label="searchByOffsetTime">
