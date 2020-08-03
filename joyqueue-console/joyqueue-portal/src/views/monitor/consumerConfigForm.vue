@@ -263,21 +263,21 @@ export default {
           return false
         }
       })
-    },
-    mounted () {
-      this.formData = this.data
+    }
+  },
+  mounted () {
+    this.formData = this.data
 
-      if (!this.data.maxRetrys) {
-        this.formData.maxRetrysStr = ''
-      } else {
-        this.formData.maxRetrysStr = this.data.maxRetrys.toString()
-      }
+    if (!this.data.maxRetrys) {
+      this.formData.maxRetrysStr = ''
+    } else {
+      this.formData.maxRetrysStr = this.data.maxRetrys.toString()
+    }
 
-      if (!this.formData.maxRetrys) {
-        this.formData.expireTimeStr = ''
-      } else {
-        this.formData.expireTimeStr = this.data.expireTime.toString()
-      }
+    if (!this.formData.maxRetrys) {
+      this.formData.expireTimeStr = ''
+    } else {
+      this.formData.expireTimeStr = this.data.expireTime.toString()
     }
   }
 }

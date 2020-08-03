@@ -9,7 +9,7 @@
 <script>
 import Vue from 'vue'
 import producerBase from '../monitor/producerBase.vue'
-import {getAppCode, yesOrNoBtnRender, openOrCloseBtnRender, clientTypeSelectRender,
+import {getAppCode, yesOrNoBtnRender, openOrCloseBtnRender, clientTypeSelectRender, clientTypeSelectRender2,
   clientTypeBtnRender} from '../../utils/common.js'
 
 export default {
@@ -178,7 +178,11 @@ export default {
           key: 'clientType',
           width: '6%',
           render: (h, params) => {
-            return clientTypeBtnRender(h, params.item.clientType)
+            if (this.$store.getters.isAdmin) {
+              return clientTypeSelectRender2(h, params, 'producer')
+            } else {
+              return clientTypeBtnRender(h, params.item.clientType)
+            }
           }
         },
         {

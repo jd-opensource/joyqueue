@@ -10,7 +10,7 @@
 <script>
 import Vue from 'vue'
 import consumerBase from '../monitor/consumerBase.vue'
-import { getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+import { getAppCode, openOrCloseBtnRender, clientTypeSelectRender, clientTypeSelectRender2,
   clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender, getTopicCodeByCode } from '../../utils/common.js'
 
 export default {
@@ -321,7 +321,11 @@ export default {
           key: 'clientType',
           width: '5%',
           render: (h, params) => {
-            return clientTypeBtnRender(h, params.item.clientType)
+            if (this.$store.getters.isAdmin) {
+              return clientTypeSelectRender2(h, params, 'consumer')
+            } else {
+              return clientTypeBtnRender(h, params.item.clientType)
+            }
           }
         },
         {
