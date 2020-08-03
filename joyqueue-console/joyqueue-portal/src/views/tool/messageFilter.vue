@@ -202,6 +202,12 @@ export default {
       }
       return callback()
     }
+    let totalCountValidator = (rule, value, callback) => {
+      if (this.search.totalCount < 1 || this.search.totalCount > 99999999) {
+        return callback(new Error('最大查询总数范围在[1-99999999]'))
+      }
+      return callback()
+    }
     return {
       btnDisabled: false,
       search: {
@@ -399,6 +405,11 @@ export default {
         queryCount: [
           {
             validator: queryCountValidator
+          }
+        ],
+        totalCount: [
+          {
+            validator: totalCountValidator
           }
         ]
       }
