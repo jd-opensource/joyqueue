@@ -361,6 +361,10 @@
 
         <!-- monitor -->
         <route inherit="post"
+               path="/v1/monitor/remove/connections" handlers="brokerMonitor#removeConnections render"
+               errors="error"/>
+
+        <route inherit="post"
                path="/v1/monitor/find" handlers="brokerMonitor#find render"
                errors="error"/>
 

@@ -16,6 +16,7 @@
 package org.joyqueue.async;
 
 
+import org.apache.http.client.methods.HttpDelete;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.domain.Broker;
@@ -99,6 +100,27 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
             url = urlMappingService.monitorUrl(b) + path;
             logger.info(String.format("start sync request,%s", url));
             AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
+                    SystemClock.now(), latch, provider.getKey(b, null, (short) -1, condition), resultMap));
+        }
+        return new DefaultBrokerInfoFuture(latch, resultMap, logKey);
+    }
+
+    @Override
+    public Future<Map<String, String>> asyncDeleteOnBroker(Subscribe condition, RetrieveProvider<Subscribe> provider, String pathKey, String logKey) {
+        List<Broker> brokers = leaderService.findLeaderBroker(condition.getTopic().getCode(), condition.getNamespace().getCode());
+        String pathTemplate = urlMappingService.pathTemplate(pathKey);
+        if (NullUtil.isEmpty(brokers) || NullUtil.isEmpty(pathTemplate)) {
+            throw new IllegalStateException("topic leader broker or rest path not found");
+        }
+        String path = provider.getPath(pathTemplate, null, (short) -1, condition);
+        CountDownLatch latch = new CountDownLatch(brokers.size());
+        Map<String/*request key*/, String/*response*/> resultMap = new ConcurrentHashMap<>(brokers.size());
+        String url;
+        for (Broker b : brokers) {
+            //monitorUrl+ path with parameter
+            url = urlMappingService.monitorUrl(b) + path;
+            logger.info(String.format("start sync request,%s", url));
+            AsyncHttpClient.AsyncRequest(new HttpDelete(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
                     SystemClock.now(), latch, provider.getKey(b, null, (short) -1, condition), resultMap));
         }
         return new DefaultBrokerInfoFuture(latch, resultMap, logKey);
