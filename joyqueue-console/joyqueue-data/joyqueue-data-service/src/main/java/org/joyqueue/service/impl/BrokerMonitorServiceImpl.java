@@ -99,15 +99,14 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
     private BrokerRestUrlMappingService urlMappingService;
 
     @Override
-    public boolean removeBrokerMonitorConnections(Subscribe subscribe) {
+    public boolean removeBrokerMonitorConnections(Subscribe subscribe,Integer brokerId) {
         this.checkArgument(subscribe);
         List<Broker> brokers=new ArrayList<>();
         if(subscribe.getType().value()==PRODUCER_TYPE){
-            Future<Map<String,String >> resultFuture= brokerCluster.asyncDeleteOnBroker(subscribe, new RetrieveProvider<Subscribe>() {
+            Future<Map<String,String >> resultFuture= brokerCluster.asyncDeleteOnBroker(brokerId,subscribe, new RetrieveProvider<Subscribe>() {
                 @Override
                 public String getKey(Broker broker, PartitionGroup partitionGroup,short partition , Subscribe condition) {
                     brokers.add(broker);
-                    System.out.println(broker.getIp()+":"+broker.getPort());
                     return broker.getIp()+":"+broker.getPort();
                 }
                  @Override
@@ -118,11 +117,10 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             },"removeProducersConnections","monitor on broker");
         }
         else if(subscribe.getType().value()==CONSUMER_TYPE){
-            Future<Map<String,String >> resultFuture= brokerCluster.asyncDeleteOnBroker(subscribe, new RetrieveProvider<Subscribe>() {
+            Future<Map<String,String >> resultFuture= brokerCluster.asyncDeleteOnBroker(brokerId,subscribe, new RetrieveProvider<Subscribe>() {
                 @Override
                 public String getKey(Broker broker, PartitionGroup partitionGroup,short partition , Subscribe condition) {
                     brokers.add(broker);
-                    System.out.println(broker.getIp()+":"+broker.getPort());
                     return broker.getIp()+":"+broker.getPort();
                 }
                 @Override
@@ -634,6 +632,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
                 connectionMonitorInfoWithIp.setConsumer(con.getConsumer());
                 connectionMonitorInfoWithIp.setProducer(con.getProducer());
                 connectionMonitorInfoWithIp.setTotal(con.getTotal());
+                connectionMonitorInfoWithIp.setId(b.getId());
                 connectionRecords.add(connectionMonitorInfoWithIp);
             }
             //Future

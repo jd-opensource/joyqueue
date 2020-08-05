@@ -100,8 +100,9 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
      *
      */
     @Path("removeConnections")
-    public Response removeConnections(@Body Subscribe subscribe) {
-        if(brokerMonitorService.removeBrokerMonitorConnections(subscribe))
+    public Response removeConnections(@Body Subscribe subscribe, @QueryParam("id") Long id) {
+        Integer brokerId = id.intValue();
+        if(brokerMonitorService.removeBrokerMonitorConnections(subscribe,brokerId))
             return Responses.success("success");
         return Responses.error(500,"broker not found, operation error");
     }
