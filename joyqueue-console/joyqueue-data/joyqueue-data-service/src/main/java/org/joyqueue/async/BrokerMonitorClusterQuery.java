@@ -106,23 +106,26 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
     }
 
     @Override
-    public Future<Map<String, String>> asyncDeleteOnBroker(Subscribe condition, RetrieveProvider<Subscribe> provider, String pathKey, String logKey) {
-        List<Broker> brokers = leaderService.findLeaderBroker(condition.getTopic().getCode(), condition.getNamespace().getCode());
+    public Future<Map<String, String>> asyncDeleteOnBroker(Integer brokerId, Subscribe condition, RetrieveProvider<Subscribe> provider, String pathKey, String logKey) {
+        Broker broker;
+        try {
+            broker = brokerService.findById(brokerId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         String pathTemplate = urlMappingService.pathTemplate(pathKey);
-        if (NullUtil.isEmpty(brokers) || NullUtil.isEmpty(pathTemplate)) {
-            throw new IllegalStateException("topic leader broker or rest path not found");
+        if (NullUtil.isEmpty(broker) || NullUtil.isEmpty(pathTemplate)) {
+            throw new IllegalStateException("this Broker not found");
         }
         String path = provider.getPath(pathTemplate, null, (short) -1, condition);
-        CountDownLatch latch = new CountDownLatch(brokers.size());
-        Map<String/*request key*/, String/*response*/> resultMap = new ConcurrentHashMap<>(brokers.size());
+        CountDownLatch latch = new CountDownLatch(1);
+        Map<String/*request key*/, String/*response*/> resultMap = new ConcurrentHashMap<>(1);
         String url;
-        for (Broker b : brokers) {
-            //monitorUrl+ path with parameter
-            url = urlMappingService.monitorUrl(b) + path;
-            logger.info(String.format("start sync request,%s", url));
-            AsyncHttpClient.AsyncRequest(new HttpDelete(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
-                    SystemClock.now(), latch, provider.getKey(b, null, (short) -1, condition), resultMap));
-        }
+        //monitorUrl+ path with parameter
+        url = urlMappingService.monitorUrl(broker) + path;
+        logger.info(String.format("start sync request,%s", url));
+        AsyncHttpClient.AsyncRequest(new HttpDelete(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
+                SystemClock.now(), latch, provider.getKey(broker, null, (short) -1, condition), resultMap));
         return new DefaultBrokerInfoFuture(latch, resultMap, logKey);
     }
 

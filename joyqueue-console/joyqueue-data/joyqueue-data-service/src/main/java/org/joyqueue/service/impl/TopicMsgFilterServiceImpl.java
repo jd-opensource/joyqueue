@@ -22,6 +22,7 @@ import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.exception.OMSRuntimeException;
+import io.openmessaging.extension.ExtensionHeader;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.joyqueue.JoyQueueBuiltinKeys;
 import io.openmessaging.joyqueue.consumer.ExtensionConsumer;
@@ -58,6 +59,7 @@ import org.joyqueue.service.ConsumerService;
 import org.joyqueue.service.MessagePreviewService;
 import org.joyqueue.service.TopicMsgFilterService;
 import org.joyqueue.service.UserService;
+import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -304,6 +306,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
         builder.append("UserId: ").append(msgFilter.getCreateBy().getId()).append('\n');
         builder.append("UserCode: ").append(msgFilter.getCreateBy().getCode()).append('\n');
+        builder.append("executeHost: ").append(IpUtil.getLocalIp()).append('\n');
         builder.append("CreateTime: ").append(msgFilter.getCreateTime()).append('\n');
         builder.append("---------------------------------------------------------------------").append('\n');
         return builder.toString();
@@ -392,7 +395,10 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                             filterClock = SystemClock.now();
                             strBuilder.append("partition:").append(partition.partitionId()).append(',');
                             if (message.extensionHeader().isPresent()) {
-                                strBuilder.append("messageKey:").append(message.extensionHeader().get().getMessageKey()).append(',');
+                                ExtensionHeader extensionHeader = message.extensionHeader().get();
+                                if (extensionHeader.getMessageKey() != null) {
+                                    strBuilder.append("messageKey:").append(extensionHeader.getMessageKey()).append(',');
+                                }
                                 strBuilder.append("offset:").append(message.extensionHeader().get().getOffset()).append(',');
                             }
                             strBuilder.append("bornTime:").append(dateFormat.format(new Date(message.header().getBornTimestamp()))).append('\n');

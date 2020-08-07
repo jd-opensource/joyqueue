@@ -96,8 +96,9 @@ export default {
     isAdmin (item) {
       return this.$store.getters.isAdmin
     },
-    disconnectBroker () {
-      apiRequest.postBase(this.urls.disconnect, {}, this.search, true).then((data) => {
+    disconnectBroker (item, index) {
+      let params = '?id=' + item.id
+      apiRequest.postBase(this.urls.disconnect + params, {}, this.search, true).then((data) => {
         data.data = data.data
         if (data.data === 'success') {
           this.$Message.success('断开成功')
