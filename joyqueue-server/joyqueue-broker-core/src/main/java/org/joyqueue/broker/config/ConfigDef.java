@@ -15,8 +15,6 @@
  */
 package org.joyqueue.broker.config;
 
-import org.joyqueue.toolkit.config.PropertyDef;
-
 /**
  *
  * Broker config key

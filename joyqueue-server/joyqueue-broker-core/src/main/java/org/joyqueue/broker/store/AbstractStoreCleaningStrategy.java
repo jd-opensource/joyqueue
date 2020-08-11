@@ -8,7 +8,7 @@ import org.joyqueue.toolkit.config.PropertySupplier;
  * Base store clean strategy with dynamic config
  *
  **/
-public abstract class AbstractStoreCleaningStrategy implements StoreCleaningStrategy,DynamicStoreConfig {
+public abstract class AbstractStoreCleaningStrategy implements StoreCleaningStrategy, DynamicStoreConfig {
 
     private BrokerStoreConfig brokerStoreConfig;
     @Override

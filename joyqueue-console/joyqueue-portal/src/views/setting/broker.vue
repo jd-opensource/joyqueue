@@ -17,7 +17,7 @@
       <slot name="extendBtn"></slot>
     </div>
     <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-edit="edit" @on-del="del" @on-detail="detail" @on-archiveMonitor="archiveMonitor">
+              @on-edit="edit" @on-del="del" @on-archiveMonitor="archiveMonitor">
     </my-table>
 
     <!--编辑Broker-->
@@ -95,6 +95,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import BrokerMonitor from './brokerMonitor'
 import {timeStampToString} from '../../utils/dateTimeUtils'
+import {brokerRetryTypeRender, brokerPermissionTypeRender} from '../../utils/common.js'
 
 export default {
   name: 'application',
@@ -122,6 +123,7 @@ export default {
           del: '/broker/delete',
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
+          findDetail: '/monitor/broker/findBrokerDetail/',
           telnet: '/broker',
           startInfo: '/monitor/start',
           batchBrokerGroupSearch: '/brokerGroup/mvBatchBrokerGroup'
@@ -143,10 +145,6 @@ export default {
           {
             txt: '归档监控',
             method: 'on-archiveMonitor'
-          },
-          {
-            txt: '详情',
-            method: 'on-detail'
           }
         ]
       }
@@ -166,14 +164,44 @@ export default {
             width: '15%'
           },
           {
-            title: 'IP',
+            title: 'IP:端口',
             key: 'ip',
-            width: '15%'
+            width: '15%',
+            render: (h, params) => {
+              const ip = params.item.ip
+              const port = params.item.port
+              return h('label', {
+                style: {
+                  color: '#3366FF'
+                },
+                on: {
+                  click: () => {
+                    let route = this.$router.resolve({
+                      path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+                      query: {
+                        brokerId: params.item.id,
+                        brokerIp: ip,
+                        brokerPort: port
+                      }
+                    })
+                    window.open(route.href, '_blank')
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
+                }
+              }, `${ip}:${port}`)
+            }
           },
           {
-            title: '端口',
-            key: 'port',
-            width: '10%'
+            title: '机房 (编码/名称)',
+            key: 'dataCenter.code',
+            width: '9%',
+            formatter (item) {
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
+            }
           },
           {
             title: '启动时间',
@@ -181,14 +209,58 @@ export default {
             width: '15%'
           },
           {
+            title: '版本',
+            key: 'startupInfo.version',
+            width: '15%',
+            render: (h, params) => {
+              let html = []
+              let spin = h('d-spin', {
+                attrs: {
+                  size: 'small'
+                },
+                style: {
+                  display: (params.item.startupInfo.version !== undefined) ? 'none' : 'inline-block'
+                }
+              })
+              html.push(spin)
+              let text = params.item.startupInfo.version
+              if (text === 'UNKNOWN') {
+                let error = h('icon', {
+                  style: {
+                    color: 'red'
+                  },
+                  props: {
+                    name: 'x-circle'
+                  }
+                })
+                html.push(error)
+              } else {
+                let textSpan = h('span', {
+                  style: {
+                    position: 'relative',
+                    display: (params.item.startupInfo.version === undefined) ? 'none' : 'inline-block'
+                  }
+                }, text)
+                html.push(textSpan)
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
             title: '重试方式',
             key: 'retryType',
-            width: '10%'
+            width: '10%',
+            render: (h, params) => {
+              return brokerRetryTypeRender(h, params.item.retryType)
+            }
           },
           {
             title: '权限',
             key: 'permission',
-            width: '10%'
+            width: '8%',
+            render: (h, params) => {
+              return brokerPermissionTypeRender(h, params.item.permission)
+            }
           }
         ]
       }
@@ -270,7 +342,11 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         for (let i = 0; i < this.tableData.rowData.length; i++) {
+          if (!this.tableData.rowData[i].startupInfo) {
+            this.tableData.rowData[i].startupInfo = {}
+          }
           this.getBrokerStatus(this.tableData.rowData, i)
+          this.getDetail(this.tableData.rowData[i], i)
         }
         this.showTablePin = false
       })
@@ -285,6 +361,19 @@ export default {
         this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
       })
     },
+    getDetail (row, index) {
+      apiRequest.getBase(this.urls.findDetail + row.id, {}, false)
+        .then((data) => {
+          if (data.code === 200) {
+            this.tableData.rowData[index] = Object.assign(row, data.data || [])
+          } else {
+            this.tableData.rowData[index].startupInfo = {}
+            this.tableData.rowData[index].startupInfo.startupTime = 'UNKNOWN'
+            this.tableData.rowData[index].startupInfo.version = 'UNKNOWN'
+          }
+          this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
+        })
+    },
     archiveMonitor (item) {
       let broker = {
         ip: item.ip,
@@ -294,17 +383,6 @@ export default {
         data.data = data.data || {}
         this.archiveMonitorData = data.data
         this.openDialog('archiveMonitorDialog')
-      })
-    },
-    detail (item) {
-      this.brokerId = item.id
-      this.$router.push({
-        path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
-        query: {
-          brokerId: item.id,
-          brokerIp: item.ip,
-          brokerPort: item.port
-        }
       })
     },
     beforeEdit () {

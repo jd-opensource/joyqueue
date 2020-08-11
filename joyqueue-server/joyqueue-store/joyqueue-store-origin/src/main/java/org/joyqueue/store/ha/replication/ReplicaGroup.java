@@ -21,7 +21,6 @@ import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.monitor.BrokerMonitor;
-import org.joyqueue.broker.replication.ReplicationTransportSession;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.TransportClient;

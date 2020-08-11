@@ -551,7 +551,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
      **/
     public List<MonitorRecord> buildReplicaLag(PartitionGroupStat partitionGroupStat, String brokerId, String topic,
                                                String app, Integer partitionGroup, long timestampMs) {
-        long maxLogPosition = partitionGroupStat.getReplicationStat().getMaxLogPosition();
+        long maxLogPosition = -1;//partitionGroupStat.getReplicationStat().getMaxLogPosition();
         MonitorRecord replicaRecord = new MonitorRecord();
         fillRecord(replicaRecord, timestampMs);
         replicaRecord.setValue(maxLogPosition);

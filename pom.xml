@@ -183,11 +183,6 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-server-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-archive-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -279,6 +274,11 @@
             <dependency>
                 <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-store-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-server-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -491,11 +491,6 @@
                 <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-store-journalkeeper</artifactId>
                 <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-store-origin</artifactId>
-                <scope>${project.version}</scope>
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
@@ -994,6 +989,7 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+
                                 <configuration>
                                     <gpgArguments>
                                         <arg>--pinentry-mode</arg>

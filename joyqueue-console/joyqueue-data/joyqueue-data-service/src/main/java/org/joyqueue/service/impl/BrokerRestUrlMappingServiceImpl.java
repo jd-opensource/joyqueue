@@ -128,7 +128,8 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
         try {
             loadUrlMapping();
         }catch (IllegalAccessException e){
-            throw new IllegalStateException("parse broker routing config file failure!");
+            logger.error("", e);
+            throw new IllegalStateException("parse broker routing config file failure!", e);
         }
     }
 

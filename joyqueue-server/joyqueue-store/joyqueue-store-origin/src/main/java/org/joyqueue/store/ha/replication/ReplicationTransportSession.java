@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.broker.replication;
+package org.joyqueue.store.ha.replication;
 
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.TransportClient;

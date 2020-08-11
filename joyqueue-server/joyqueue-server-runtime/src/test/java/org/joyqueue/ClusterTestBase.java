@@ -116,10 +116,9 @@ public class ClusterTestBase extends Service {
     }
 
     /**
-     * Launch multi broker use default store engine
+     * Launch multi broker use default store engine, JoyQueue
      **/
     public boolean launchCluster(int N) throws Exception{
-        //"JournalKeeper"
         return launchCluster(N,brokerPort,300000,TimeUnit.MILLISECONDS,null);
     }
 
@@ -343,18 +342,6 @@ public class ClusterTestBase extends Service {
             }
         }
         return null;
-    }
-
-
-    /**
-     * Cleanup cluster
-     **/
-    public void cleanupCluster(){
-        for(BrokerService b:brokers){
-            b.stop();
-        }
-        brokers.clear();
-        Files.deleteDirectory(new File(ROOT_DIR));
     }
 
     public void doStop(){

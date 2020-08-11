@@ -121,6 +121,7 @@ public class RetryServiceImpl implements RetryService {
         try {
             consoleMessageRetry.addRetry(retryMessageModels);
         } catch (JoyQueueException e) {
+            logger.error("",e);
             throw new RuntimeException("add retry error",e);
         }
     }

@@ -92,7 +92,7 @@ public class TopicServiceImpl implements TopicService {
         } catch (Exception e) {
             String errorMsg = "新建主题，同步NameServer失败";
             logger.error(errorMsg, e);
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg);//回滚
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR, errorMsg, e);//回滚
         }
     }
 
@@ -186,7 +186,8 @@ public class TopicServiceImpl implements TopicService {
             try {
                 topicResult = topicNameServerService.search(query);
             } catch (Exception e) {
-                throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR, "query topic by name server error.");
+                logger.error("", e);
+                throw new ServiceException(ServiceException.NAMESERVER_RPC_ERROR, "query topic by name server error.", e);
             }
         } else {
             // TODO 方法不对

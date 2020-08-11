@@ -89,6 +89,7 @@ import BrokerStoreTreeViewMonitor from './brokerStoreTreeViewMonitor.vue'
 import {bytesToSize} from '../../utils/common'
 import GridRow from '../../components/grid/row'
 import GridCol from '../../components/grid/col'
+import apiRequest from '../../utils/apiRequest.js'
 
 export default {
   name: 'brokerMonitor',
@@ -126,9 +127,13 @@ export default {
             title: '主题',
             key: 'topic',
             render: (h, params) => {
-              var topic = params.item.topic
-              var html = []
-              var p = h('router-link', {
+              let topic = params.item.topic
+              let html = []
+              let p = h('router-link', {
+                style: {
+                  'text-decoration': 'underline',
+                  color: 'dodgerblue'
+                },
                 attrs: {
                   to: '/' + this.$i18n.locale + '/topic/detail?id=' + topic + '&topic=' + topic
                 }
@@ -141,13 +146,17 @@ export default {
             title: '应用',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              var list = params.item.brokerTopicMonitorRecordList
-              var html = []
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
               if (list !== undefined) {
-                for (var i = 0; i < list.length; i++) {
-                  var p = h('router-link', {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('router-link', {
+                    style: {
+                      'text-decoration': 'underline',
+                      color: 'dodgerblue'
+                    },
                     attrs: {
-                      to: '/' + this.$i18n.locale + '/application/detail?app=' + list[i].app
+                      to: '/' + this.$i18n.locale + '/application/detail?app=' + list[i].app + '&id=' + list[i].id
                     }
                   }, list[i].app)
                   html.push(p)
@@ -163,11 +172,11 @@ export default {
             title: '连接数',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              var list = params.item.brokerTopicMonitorRecordList
-              var html = []
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
               if (list !== undefined) {
-                for (var i = 0; i < list.length; i++) {
-                  var p = h('div', list[i].connections)
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].connections)
                   html.push(p)
                 }
               }
@@ -178,11 +187,11 @@ export default {
             title: '出/入队数',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              var list = params.item.brokerTopicMonitorRecordList
-              var html = []
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
               if (list !== undefined) {
-                for (var i = 0; i < list.length; i++) {
-                  var p = h('div', list[i].count)
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].count)
                   html.push(p)
                 }
               }
@@ -193,15 +202,290 @@ export default {
             title: '出/入队流量',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
-              var list = params.item.brokerTopicMonitorRecordList
-              var html = []
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
               if (list !== undefined) {
-                for (var i = 0; i < list.length; i++) {
-                  var p = h('div', bytesToSize(list[i].totalSize, 2, true))
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', bytesToSize(list[i].totalSize, 2, true))
                   html.push(p)
                 }
               }
               return h('div', html)
+            }
+          }
+        ]
+      },
+      producerTableData: {
+        rowData: [],
+        colData: [
+          {
+            title: '主题',
+            key: 'topic',
+            render: (h, params) => {
+              let topic = params.item.topic
+              let html = []
+              let p = h('router-link', {
+                style: {
+                  'text-decoration': 'underline',
+                  color: 'dodgerblue'
+                },
+                attrs: {
+                  to: '/' + this.$i18n.locale + '/topic/detail?id=' + topic + '&topic=' + topic
+                }
+              }, params.item.topic)
+              html.push(p)
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '应用',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', '')
+                  if (list[i].id) {
+                      p = h('router-link', {
+                      style: {
+                        'text-decoration': 'underline',
+                        color: 'dodgerblue'
+                      },
+                      attrs: {
+                        to: '/' + this.$i18n.locale + '/application/detail?app=' + list[i].app + '&id=' + list[i].id
+                      }
+                    }, list[i].app)
+                  } else {
+                    p = h('div', list[i].app)
+                  }
+                  html.push(p)
+                  if (i < list.length - 1) {
+                    html.push(h('br'))
+                  }
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '连接数',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].connections)
+                  html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '入队数',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].count)
+                  html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '入队流量',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', bytesToSize(list[i].totalSize, 2, true))
+                  html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '入队TPS',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].tps)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
+          }
+        ]
+      },
+      consumerTableData: {
+        rowData: [],
+        colData: [
+          {
+            title: '主题',
+            key: 'topic',
+            render: (h, params) => {
+              let topic = params.item.topic
+              let html = []
+              let p = h('router-link', {
+                style: {
+                  'text-decoration': 'underline',
+                  color: 'dodgerblue'
+                },
+                attrs: {
+                  to: '/' + this.$i18n.locale + '/topic/detail?id=' + topic + '&topic=' + topic
+                }
+              }, params.item.topic)
+              html.push(p)
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '应用',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', '')
+                  if (list[i].id) {
+                      p = h('router-link', {
+                      style: {
+                        'text-decoration': 'underline',
+                        color: 'dodgerblue'
+                      },
+                      attrs: {
+                        to: '/' + this.$i18n.locale + '/application/detail?app=' + list[i].app + '&id=' + list[i].id
+                      }
+                    }, list[i].app)
+                  } else {
+                    p = h('div', list[i].app)
+                  }
+                  html.push(p)
+                  if (i < list.length - 1) {
+                    html.push(h('br'))
+                  }
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '连接数',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].connections)
+                  html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '出队数',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].count)
+                  html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '出队流量',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', bytesToSize(list[i].totalSize, 2, true))
+                  html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '出队TPS',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].tps)
+                  html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '重试数',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].retryCount)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '重试tps',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].retryTps)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '积压数',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  let p = h('div', list[i].backlog)
+                  html.push(p)
+                }
+              }
+              return h('div', {}, html)
             }
           }
         ]
@@ -220,14 +504,54 @@ export default {
     menuChange (item) {
       if (item.name === 'consumer') {
         this.searchData.type = 2
+        this.tableData = this.consumerTableData
         this.getList()
       } else if (item.name === 'producer') {
         this.searchData.type = 1
+        this.tableData = this.producerTableData
         this.getList()
       } else {
+        this.tableData = this.producerTableData
         this.$refs[item.name].getList()
       }
-    }
+    },
+    getList () {
+      this.showTablePin = true
+      let data = this.getSearchVal()
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        this.tableData.rowData = data.data
+        for (let i in this.tableData.rowData) {
+          if (this.tableData.rowData.hasOwnProperty(i)) {
+            if (this.tableData.rowData[i].brokerTopicMonitorRecordList) {
+              for (let j in this.tableData.rowData[i].brokerTopicMonitorRecordList) {
+                if (this.tableData.rowData[i].brokerTopicMonitorRecordList.hasOwnProperty(j)) {
+                  let app = this.tableData.rowData[i].brokerTopicMonitorRecordList[j].app
+                  let idx = app.indexOf('.')
+                  if (idx !== -1) {
+                    app = app.substring(0, idx)
+                  }
+                  apiRequest.get('/application/getByCode/' + app, {}).then((data) => {
+                    this.tableData.rowData[i].brokerTopicMonitorRecordList[j].id = data.data.id
+                    this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+                  })
+                }
+              }
+            }
+          }
+        }
+        this.showTablePin = false
+      })
+    },
   },
   mounted () {
 

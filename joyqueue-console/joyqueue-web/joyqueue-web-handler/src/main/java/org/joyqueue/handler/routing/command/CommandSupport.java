@@ -43,7 +43,6 @@ import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.service.ApplicationUserService;
 import org.joyqueue.service.PageService;
-
 import java.util.Date;
 
 import static org.joyqueue.handler.message.MessageType.AUDIT_LOG;
