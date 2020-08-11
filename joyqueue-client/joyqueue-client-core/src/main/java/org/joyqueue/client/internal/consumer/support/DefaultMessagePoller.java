@@ -353,7 +353,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
 
         PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
-        Preconditions.checkArgument(partitionMetadata != null, "partition is not exist");
+        Preconditions.checkArgument(partitionMetadata != null, "partition dose not exist");
 
         return consumerIndexManager.commitIndex(topic, config.getAppFullName(), partition, index, config.getTimeout());
     }

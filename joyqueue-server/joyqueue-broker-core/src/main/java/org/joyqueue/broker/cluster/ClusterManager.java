@@ -1096,7 +1096,7 @@ public class ClusterManager extends Service {
 
         protected Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
             if (!consumerCache.containsKey(topic.getFullName())) {
-                logger.warn("topic {} is not exist on this broker", topic.getFullName());
+                logger.warn("topic {} dose not exist on this broker", topic.getFullName());
                 return null;
             }
             CacheConsumer consumer = consumerCache.get(topic.getFullName()).get(app);
@@ -1110,7 +1110,7 @@ public class ClusterManager extends Service {
 
         protected Producer getProducerByTopicAndApp(TopicName topic, String app) {
             if (!producerCache.containsKey(topic.getFullName())) {
-                logger.warn("topic {} is not exist on this broker", topic.getFullName());
+                logger.warn("topic {} dose not exist on this broker", topic.getFullName());
                 return null;
             }
             CacheProducer producer = producerCache.get(topic.getFullName()).get(app);

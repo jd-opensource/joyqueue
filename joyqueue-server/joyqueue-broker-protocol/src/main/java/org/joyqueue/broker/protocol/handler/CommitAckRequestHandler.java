@@ -86,7 +86,7 @@ public class CommitAckRequestHandler implements JoyQueueCommandHandler, Type, Br
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(commitAckRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, commitAckRequest.getApp());
+            logger.warn("connection dose not exist, transport: {}, app: {}", transport, commitAckRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

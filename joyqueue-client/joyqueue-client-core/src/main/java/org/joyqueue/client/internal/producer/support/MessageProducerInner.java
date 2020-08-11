@@ -301,10 +301,10 @@ public class MessageProducerInner extends Service {
     public TopicMetadata getAndCheckTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getApp());
         if (topicMetadata == null) {
-            throw new ProducerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ProducerException(String.format("topic %s dose not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getProducerPolicy() == null) {
-            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, nameServerConfig.getApp()), JoyQueueCode.FW_PRODUCER_NOT_EXISTS.getCode());
+            throw new ProducerException(String.format("topic %s producer %s dose not exist", topic, nameServerConfig.getApp()), JoyQueueCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

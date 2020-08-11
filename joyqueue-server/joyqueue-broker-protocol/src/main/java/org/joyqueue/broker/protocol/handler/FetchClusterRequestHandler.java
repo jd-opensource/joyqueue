@@ -79,7 +79,7 @@ public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type,
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchClusterRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchClusterRequest.getApp());
+            logger.warn("connection dose not exist, transport: {}, app: {}", transport, fetchClusterRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

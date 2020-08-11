@@ -126,10 +126,10 @@ public class TopicMessageConsumer extends Service {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getAppFullName());
 
         if (topicMetadata == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s dose not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, config.getAppFullName()), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s consumer %s dose not exist", topic, config.getAppFullName()), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
 
         if (config.getThread() == ConsumerConfig.NONE_THREAD) {

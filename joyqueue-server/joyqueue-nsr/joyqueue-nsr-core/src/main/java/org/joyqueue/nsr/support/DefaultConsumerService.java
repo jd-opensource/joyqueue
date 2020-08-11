@@ -97,7 +97,7 @@ public class DefaultConsumerService implements ConsumerService {
     @Override
     public Consumer add(Consumer consumer) {
         if (topicInternalService.getTopicByCode(consumer.getTopic().getNamespace(), consumer.getTopic().getCode()) == null) {
-            throw new NsrException(String.format("topic: %s is not exist", consumer.getTopic()));
+            throw new NsrException(String.format("topic: %s dose not exist", consumer.getTopic()));
         }
         if (consumerInternalService.getByTopicAndApp(consumer.getTopic(), consumer.getApp()) != null) {
             throw new NsrException(String.format("consumer: %s,%s is exist", consumer.getTopic(), consumer.getApp()));
@@ -134,7 +134,7 @@ public class DefaultConsumerService implements ConsumerService {
     public Consumer update(Consumer consumer) {
         Consumer oldConsumer = consumerInternalService.getByTopicAndApp(consumer.getTopic(), consumer.getApp());
         if (oldConsumer == null) {
-            throw new NsrException(String.format("topic: %s, consumer: %s is not exist", oldConsumer.getTopic(), oldConsumer.getApp()));
+            throw new NsrException(String.format("topic: %s, consumer: %s dose not exist", oldConsumer.getTopic(), oldConsumer.getApp()));
         }
 
         logger.info("updateConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
@@ -168,7 +168,7 @@ public class DefaultConsumerService implements ConsumerService {
     public void delete(String id) {
         Consumer consumer = consumerInternalService.getById(id);
         if (consumer == null) {
-            throw new NsrException(String.format("consumer: %s is not exist", id));
+            throw new NsrException(String.format("consumer: %s dose not exist", id));
         }
 
         logger.info("deleteConsumer, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
