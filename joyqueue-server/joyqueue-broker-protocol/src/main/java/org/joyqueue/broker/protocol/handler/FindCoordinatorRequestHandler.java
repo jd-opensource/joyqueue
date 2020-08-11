@@ -67,7 +67,7 @@ public class FindCoordinatorRequestHandler implements JoyQueueCommandHandler, Ty
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(findCoordinatorRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, findCoordinatorRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, findCoordinatorRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

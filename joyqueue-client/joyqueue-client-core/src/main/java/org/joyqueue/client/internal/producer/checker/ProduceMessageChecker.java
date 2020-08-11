@@ -43,7 +43,7 @@ public class ProduceMessageChecker {
             throwCheckException("message body is not empty");
         }
         if (produceMessage.getPartition() != ProduceMessage.NONE_PARTITION && produceMessage.getPartition() < 0) {
-            throwCheckException("message body is not exist");
+            throwCheckException("message body does not exist");
         }
         if (StringUtils.isNotBlank(produceMessage.getBody()) && produceMessage.getBody().length() > config.getBodyLengthLimit()) {
             throwCheckException(String.format("body is too long, it must less than %s characters", config.getBodyLengthLimit()));

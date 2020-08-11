@@ -172,7 +172,7 @@ public class DefaultMessageAccessPoint extends Service implements MessageAccessP
         Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic can not be null");
         TxFeedbackManager txFeedbackManager = txFeedbackManagerMap.get(topic);
         if (txFeedbackManager == null) {
-            throw new IllegalArgumentException(String.format("%s feedback is not exist", topic));
+            throw new IllegalArgumentException(String.format("%s feedback does not exist", topic));
         }
         txFeedbackManager.removeTransactionCallback(topic);
     }

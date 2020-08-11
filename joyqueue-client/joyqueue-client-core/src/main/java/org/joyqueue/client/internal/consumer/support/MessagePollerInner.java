@@ -331,10 +331,10 @@ public class MessagePollerInner extends Service {
     public TopicMetadata getAndCheckTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getAppFullName());
         if (topicMetadata == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s does not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, config.getAppFullName()), JoyQueueCode.FW_CONSUMER_NOT_EXISTS.getCode());
+            throw new ConsumerException(String.format("topic %s consumer %s does not exist", topic, config.getAppFullName()), JoyQueueCode.FW_CONSUMER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

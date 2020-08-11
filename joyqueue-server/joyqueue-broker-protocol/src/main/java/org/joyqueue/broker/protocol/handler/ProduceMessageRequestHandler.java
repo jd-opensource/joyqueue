@@ -89,7 +89,7 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
         String app = produceMessageRequest.getApp();
 
         if (connection == null || !connection.isAuthorized(app)) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, app);
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, app);
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

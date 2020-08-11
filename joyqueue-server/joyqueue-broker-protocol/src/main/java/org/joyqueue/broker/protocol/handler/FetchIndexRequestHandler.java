@@ -62,7 +62,7 @@ public class FetchIndexRequestHandler implements JoyQueueCommandHandler, Type, B
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchIndexRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, fetchIndexRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, fetchIndexRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
