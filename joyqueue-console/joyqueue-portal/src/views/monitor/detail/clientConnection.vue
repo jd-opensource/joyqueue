@@ -73,10 +73,7 @@ export default {
             title: '授权',
             key: 'client.auth',
             formatter (item) {
-              if (item.client) {
-                if (item.client.auth === true) return '是'
-                else return '否'
-              }
+              return (item.client && item.client.auth === true) ? '是' : '否'
             }
           }
         ]
