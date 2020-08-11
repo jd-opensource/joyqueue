@@ -174,9 +174,9 @@ public class ConsumeArchiveService extends Service {
 
     private void cleanAndRollWriteFile() {
         // 删除已归档文件
-//        repository.delArchivedFile();
-//        // 5分钟滚动生成一个新的写文件，旧文件可归档
-//        repository.tryFinishCurWriteFile();
+        repository.delArchivedFile();
+        // 5分钟滚动生成一个新的写文件，旧文件可归档
+        repository.tryFinishCurWriteFile();
     }
 
     /**
