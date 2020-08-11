@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,13 +69,13 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         List<Producer> producers = new ArrayList<>(0);
 
         boolean appFlag = true;
-        if (query.getApp() != null && query.getTopic()==null) {
+        if (query.getApp() != null && query.getTopic() == null) {
             producers = service.findByApp(query.getApp().getCode());
-        } else if (query.getTopic() != null && query.getApp() ==null) {
+        } else if (query.getTopic() != null && query.getApp() == null) {
             appFlag = false;
             producers = service.findByTopic(query.getTopic().getNamespace().getCode(), query.getTopic().getCode());
-        } else if (query.getTopic() != null && query.getApp() !=null){
-            producers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(),query.getTopic().getCode(),query.getApp().getCode()));
+        } else if (query.getTopic() != null && query.getApp() != null) {
+            producers.add(service.findByTopicAppGroup(query.getTopic().getNamespace().getCode(), query.getTopic().getCode(), query.getApp().getCode()));
         }
 
         if (CollectionUtils.isNotEmpty(producers) && qPageQuery.getQuery() != null && StringUtils.isNotBlank(qPageQuery.getQuery().getKeyword())) {
@@ -125,12 +125,12 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
 
     @Path("query-by-topic")
     public Response queryByTopic(@Body QProducer qProducer) throws Exception {
-        if(qProducer.getTopic() == null || qProducer.getTopic().getCode() == null) {
+        if (qProducer.getTopic() == null || qProducer.getTopic().getCode() == null) {
             return Responses.error(Response.HTTP_BAD_REQUEST, "Empty topic!");
         }
         String namespace = null;
         String topic = qProducer.getTopic().getCode();
-        if(null != qProducer.getTopic().getNamespace()) {
+        if (null != qProducer.getTopic().getNamespace()) {
             namespace = qProducer.getTopic().getNamespace().getCode();
         }
         List<Producer> producers = service.findByTopic(namespace, topic);
@@ -151,21 +151,31 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
     @Path("weight")
     public Response findPartitionGroupWeight(@QueryParam(Constants.ID) String id) throws Exception {
         Producer producer = service.findById(id);
-        List<PartitionGroupWeight> currentWeights=new ArrayList<>();
-        if(!NullUtil.isEmpty(producer)) {
-          ProducerConfig producerConfig=  producer.getConfig();
-          Map<String,Short> weights=producerConfig.weights();
-          PartitionGroupWeight weight;
-          List<TopicPartitionGroup>  topicPartitionGroups= topicPartitionGroupService.findByTopic(producer.getNamespace(),producer.getTopic());
-          for(TopicPartitionGroup p:topicPartitionGroups){
-              Short weightVal=0;
-              if(!NullUtil.isEmpty(weights)&&weights.get(String.valueOf(p.getGroupNo()))!=null)
-                 weightVal=weights.get(String.valueOf(p.getGroupNo()));
-              weight=new PartitionGroupWeight();
-              weight.setGroupNo(String.valueOf(p.getGroupNo()));
-              weight.setWeight(weightVal);
-              currentWeights.add(weight);
-          }
+        List<PartitionGroupWeight> currentWeights = new ArrayList<>();
+        if (!NullUtil.isEmpty(producer)) {
+            ProducerConfig producerConfig = producer.getConfig();
+            Map<String, Short> weights = producerConfig.weights();
+            PartitionGroupWeight weight;
+            List<TopicPartitionGroup> topicPartitionGroups = topicPartitionGroupService.findByTopic(producer.getNamespace(), producer.getTopic());
+            StringBuilder weightBuilder = new StringBuilder();
+            for (TopicPartitionGroup p : topicPartitionGroups) {
+                Short weightVal = -1;
+                if (!NullUtil.isEmpty(weights) && weights.get(String.valueOf(p.getGroupNo())) != null) {
+                    weightVal = weights.get(String.valueOf(p.getGroupNo()));
+                    if (weightVal > 0) {
+                        weightBuilder.append(p.getGroupNo()).append(":").append(weightVal).append(",");
+                    }
+                }
+                weight = new PartitionGroupWeight();
+                weight.setGroupNo(String.valueOf(p.getGroupNo()));
+                weight.setWeight(weightVal);
+                currentWeights.add(weight);
+            }
+            if (weightBuilder.length() > 1) {
+                weightBuilder.deleteCharAt(weightBuilder.length() - 1);
+            }
+            producer.getConfig().setWeight(weightBuilder.toString());
+            service.update(producer);
         }
         return Responses.success(currentWeights);
     }
@@ -222,7 +232,6 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
 //        }
 //        return Responses.success("同步mqtt producer成功"+successCount+"条,失败"+failCount+"条");
 //    }
-
 
 
 }
