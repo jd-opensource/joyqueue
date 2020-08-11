@@ -95,7 +95,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import BrokerMonitor from './brokerMonitor'
 import {timeStampToString} from '../../utils/dateTimeUtils'
-import {brokerRetryTypeRender, brokerPermissionTypeRender} from '../../utils/common.js'
+import {brokerRetryTypeRender, brokerPermissionTypeRender, bytesToSize} from '../../utils/common.js'
 
 export default {
   name: 'application',
@@ -156,17 +156,17 @@ export default {
           {
             title: 'ID',
             key: 'id',
-            width: '10%'
+            width: '9%'
           },
           {
             title: 'Broker分组编码',
             key: 'group.code',
-            width: '15%'
+            width: '5%'
           },
           {
             title: 'IP:端口',
             key: 'ip',
-            width: '15%',
+            width: '12%',
             render: (h, params) => {
               const ip = params.item.ip
               const port = params.item.port
@@ -204,46 +204,139 @@ export default {
             }
           },
           {
-            title: '内存百分比/存储百分比', // bufferPoolMonitorInfo.used%bufferPoolMonitorInfo.maxMemorySize  store.freeSpace%store.totalSpace
+            title: '内存/存储', // bufferPoolMonitorInfo.used%bufferPoolMonitorInfo.maxMemorySize  store.freeSpace%store.totalSpace
             key: 'bufferPoolMonitorInfo.maxMemorySize',
-            width: '9%',
-            formatter: function (item) {
-              if (item.bufferPoolMonitorInfo && item.store) {
+            width: '12%',
+            formatter (item) {
+              if (item.bufferPoolMonitorInfo) {
                 let res1 = 0
                 let res2 = 0
-                let a = parseFloat(item.bufferPoolMonitorInfo.maxMemorySize)
-                let b = parseFloat(item.bufferPoolMonitorInfo.used)
+                let maxMemorySize = item.bufferPoolMonitorInfo.maxMemorySize
+                let used = item.bufferPoolMonitorInfo.used
+                let a = parseFloat(maxMemorySize)
+                let b = parseFloat(used)
+                // 统一转换为MB
+                if (maxMemorySize.indexOf('KB') !== -1) {
+                  a = a / 1024
+                } else if (maxMemorySize.indexOf('GB') !== -1) {
+                  a = a * 1024
+                } else if (maxMemorySize.indexOf('TB') !== -1) {
+                  a = a * 1024 * 1024
+                }
+                if (used.indexOf('KB') !== -1) {
+                  b = b / 1024
+                } else if (used.indexOf('GB') !== -1) {
+                  b = b * 1024
+                } else if (used.indexOf('TB') !== -1) {
+                  b = b * 1024 * 1024
+                }
                 res1 = Number(b / a * 100).toFixed(1)
-                a = parseFloat(item.store.freeSpace)
-                b = parseFloat(item.store.totalSpace)
-                res2 = Number((b - a) / b * 100).toFixed(1)
+                let totalSpace = item.store.totalSpace
+                let freeSpace = item.store.freeSpace
+                a = parseFloat(totalSpace)
+                b = parseFloat(freeSpace)
+                if (totalSpace.indexOf('KB') !== -1) {
+                  a = a / 1024
+                } else if (totalSpace.indexOf('GB') !== -1) {
+                  a = a * 1024
+                } else if (totalSpace.indexOf('TB') !== -1) {
+                  a = a * 1024 * 1024
+                }
+                if (freeSpace.indexOf('KB') !== -1) {
+                  b = b / 1024
+                } else if (freeSpace.indexOf('GB') !== -1) {
+                  b = b * 1024
+                } else if (freeSpace.indexOf('TB') !== -1) {
+                  b = b * 1024 * 1024
+                }
+                res2 = Number((a - b) / a * 100).toFixed(1)
                 return res1 + '% / ' + res2 + '%'
               }
             }
           },
           {
             title: '出队/入队',
-            key: 'enQueue.count',
-            width: '9%',
-            formatter (item) {
-              if (item.enQueue && item.deQueue) {
-                return item.deQueue.count + '/' + item.enQueue.count
+            key: 'enQueue.tps',
+            width: '20%',
+            render: (h, params) => {
+              let condition = ''
+              if (params.item.enQueue && params.item.deQueue) {
+                let deQueuetraffic = parseFloat(params.item.deQueue.traffic)
+                let enQeueutraffic = parseFloat(params.item.enQueue.traffic)
+                let html = []
+                condition = 'tps:' + params.item.deQueue.tps + '/' + params.item.enQueue.tps
+                let target = ''
+                if (condition.length > 100) {
+                  target = condition.substring(0, 100) + ' ...'
+                } else {
+                  target = condition
+                }
+                var p = h('d-tooltip', {
+                  attrs: {
+                    content: condition
+                  }
+                }, [h('span', {
+                }, target)])
+                html.push(p)
+                html.push(h('br'))
+                condition = 'traffic:' + bytesToSize(deQueuetraffic, 2, true) + '/' + bytesToSize(enQeueutraffic, 2, true)
+                target = ''
+                if (condition.length > 100) {
+                  target = condition.substring(0, 100) + ' ...'
+                } else {
+                  target = condition
+                }
+                p = h('d-tooltip', {
+                  attrs: {
+                    content: condition
+                  }
+                }, [h('span', {
+                }, target)])
+                html.push(p)
+                return html
               }
             }
           },
-          /*          {
-            title: '启动时间',
-            key: 'startupTime',
-            width: '15%'
-          }, */
           {
             title: '启动时间/版本',
             key: 'startupInfo.version',
-            width: '20%', // 15
+            width: '15%',
             render: (h, params) => {
               let html = []
-              html.push(params.item.startupTime + '/')
               let spin = h('d-spin', {
+                attrs: {
+                  size: 'small'
+                },
+                style: {
+                  display: (params.item.startupInfo.startupTime !== undefined) ? 'none' : 'inline-block'
+                }
+              })
+              html.push(spin)
+              let text = ''
+              if (params.item.startupInfo) {
+                if (params.item.startupInfo.startupTime === 'UNKNOWN') {
+                  let error = h('icon', {
+                    style: {
+                      color: 'red'
+                    },
+                    props: {
+                      name: 'x-circle'
+                    }
+                  })
+                  html.push(error)
+                } else {
+                  text = timeStampToString(params.item.startupInfo.startupTime)
+                  let textSpan = h('span', {
+                    style: {
+                      position: 'relative',
+                      display: (params.item.startupInfo.startupTime === undefined) ? 'none' : 'inline-block'
+                    }
+                  }, text)
+                  html.push(textSpan)
+                }
+              }
+              html.push(' / ')
+              spin = h('d-spin', {
                 attrs: {
                   size: 'small'
                 },
@@ -252,7 +345,7 @@ export default {
                 }
               })
               html.push(spin)
-              let text = params.item.startupInfo.version
+              text = params.item.startupInfo.version
               if (text === 'UNKNOWN') {
                 let error = h('icon', {
                   style: {
@@ -278,7 +371,7 @@ export default {
           {
             title: '重试方式/权限',
             key: 'retryType',
-            width: '18%', // 10
+            width: '20%', // 10
             render: (h, params) => {
               return h('div', [brokerRetryTypeRender(h, params.item.retryType), brokerPermissionTypeRender(h, params.item.permission)])
             }
