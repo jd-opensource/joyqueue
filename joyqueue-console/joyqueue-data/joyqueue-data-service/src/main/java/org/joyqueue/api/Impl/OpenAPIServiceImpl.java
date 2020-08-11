@@ -342,7 +342,7 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     public void removeTopic(String namespace, String topicCode) throws Exception {
         Topic topic = topicService.findByCode(namespace, topicCode);
         if (topic == null) {
-            throw new BusinessException("topic is not exist");
+            throw new BusinessException("topic does not exist");
         }
         topicService.delete(topic);
     }
