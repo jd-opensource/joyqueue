@@ -74,7 +74,7 @@ public class FetchPartitionMessageRequestHandler implements JoyQueueCommandHandl
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchPartitionMessageRequest.getApp())) {
-            logger.warn("connection dose not exist, transport: {}, app: {}", transport, fetchPartitionMessageRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, fetchPartitionMessageRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

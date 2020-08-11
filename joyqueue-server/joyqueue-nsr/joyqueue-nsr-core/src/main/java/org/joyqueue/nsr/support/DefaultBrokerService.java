@@ -92,7 +92,7 @@ public class DefaultBrokerService implements BrokerService {
     public Broker update(Broker broker) {
         Broker oldBroker = brokerInternalService.getById(broker.getId());
         if (oldBroker == null) {
-            throw new NsrException(String.format("broker: %s dose not exist", broker.getId()));
+            throw new NsrException(String.format("broker: %s does not exist", broker.getId()));
         }
 
         try {

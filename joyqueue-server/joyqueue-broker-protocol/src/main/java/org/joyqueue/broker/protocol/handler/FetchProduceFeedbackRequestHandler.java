@@ -70,7 +70,7 @@ public class FetchProduceFeedbackRequestHandler implements JoyQueueCommandHandle
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(fetchProduceFeedbackRequest.getApp())) {
-            logger.warn("connection dose not exist, transport: {}, app: {}", transport, fetchProduceFeedbackRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, fetchProduceFeedbackRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

@@ -66,7 +66,7 @@ public class ProduceMessageCommitRequestHandler implements JoyQueueCommandHandle
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(produceMessageCommitRequest.getApp())) {
-            logger.warn("connection dose not exist, transport: {}, app: {}", transport, produceMessageCommitRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, produceMessageCommitRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

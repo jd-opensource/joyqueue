@@ -51,7 +51,7 @@ public class CommitIndexRequestHandler implements JoyQueueCommandHandler, Type, 
         String app = commitIndexRequest.getApp();
 
         if (connection == null || !connection.isAuthorized(app)) {
-            logger.warn("connection dose not exist, transport: {}, app: {}", transport, app);
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, app);
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

@@ -63,7 +63,7 @@ public class AddConsumerRequestHandler implements JoyQueueCommandHandler, Type, 
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(addConsumerRequest.getApp())) {
-            logger.warn("connection dose not exist, transport: {}", transport);
+            logger.warn("connection does not exist, transport: {}", transport);
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

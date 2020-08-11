@@ -263,7 +263,7 @@ public class NameServerInternal extends Service implements NameService, Property
             }
         }
         if (null == group) {
-            throw new RuntimeException(String.format("topic[%s] group[%s] dose not exist", topic, partitionGroup));
+            throw new RuntimeException(String.format("topic[%s] group[%s] does not exist", topic, partitionGroup));
         }
         group.setIsrs(isrId);
         group.setLeader(leaderBrokerId);

@@ -97,10 +97,10 @@ public class DefaultProducerService implements ProducerService {
     @Override
     public Producer add(Producer producer) {
         if (topicInternalService.getTopicByCode(producer.getTopic().getNamespace(), producer.getTopic().getCode()) == null) {
-            throw new NsrException(String.format("topic: %s dose not exist", producer.getTopic()));
+            throw new NsrException(String.format("topic: %s does not exist", producer.getTopic()));
         }
         if (producerInternalService.getByTopicAndApp(producer.getTopic(), producer.getApp()) != null) {
-            throw new NsrException(String.format("producer: %s,%s dose not exist", producer.getTopic(), producer.getApp()));
+            throw new NsrException(String.format("producer: %s,%s does not exist", producer.getTopic(), producer.getApp()));
         }
 
         logger.info("addProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
@@ -134,7 +134,7 @@ public class DefaultProducerService implements ProducerService {
     public Producer update(Producer producer) {
         Producer oldProducer = producerInternalService.getByTopicAndApp(producer.getTopic(), producer.getApp());
         if (oldProducer == null) {
-            throw new NsrException(String.format("topic: %s, producer: %s dose not exist", producer.getTopic(), producer.getApp()));
+            throw new NsrException(String.format("topic: %s, producer: %s does not exist", producer.getTopic(), producer.getApp()));
         }
 
         logger.info("updateProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
@@ -168,7 +168,7 @@ public class DefaultProducerService implements ProducerService {
     public void delete(String id) {
         Producer producer = producerInternalService.getById(id);
         if (producer == null) {
-            throw new NsrException(String.format("producer: %s dose not exist", id));
+            throw new NsrException(String.format("producer: %s does not exist", id));
         }
 
         logger.info("deleteProducer, topic: {}, app: {}", producer.getTopic(), producer.getApp());
