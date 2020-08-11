@@ -63,7 +63,7 @@ public interface ArchiveStore extends LifeCycle {
      *
      * @param topic
      * @param partition
-     * @return
+     * @return current archived position
      * @throws JoyQueueException
      */
     Long getPosition(String topic, short partition) throws JoyQueueException;
@@ -78,7 +78,7 @@ public interface ArchiveStore extends LifeCycle {
      * 查看发送日志
      *
      * @param query
-     * @return
+     * @return send logs
      * @throws JoyQueueException
      */
     List<SendLog> scanSendLog(Query query) throws JoyQueueException;
@@ -87,7 +87,7 @@ public interface ArchiveStore extends LifeCycle {
      * 查看一条发送日志
      *
      * @param query
-     * @return
+     * @return send log
      * @throws JoyQueueException
      */
     SendLog getOneSendLog(Query query) throws JoyQueueException;
@@ -97,7 +97,7 @@ public interface ArchiveStore extends LifeCycle {
      *
      * @param messageId
      * @param count
-     * @return
+     * @return consume logs
      * @throws JoyQueueException
      */
     List<ConsumeLog> scanConsumeLog(String messageId,Integer count) throws JoyQueueException;

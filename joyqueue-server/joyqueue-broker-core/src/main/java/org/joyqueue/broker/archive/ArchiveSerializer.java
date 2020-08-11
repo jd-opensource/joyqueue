@@ -92,6 +92,17 @@ public class ArchiveSerializer {
     }
 
     /**
+     * length +  consumeLog bytes
+     **/
+    public static ConsumeLog tryRead(ByteBuffer buffer){
+       int len= buffer.getInt();
+       if(len<=0||buffer.remaining()<len){
+           return null;
+       }
+       return read(buffer);
+    }
+
+    /**
      * @param buffer
      * @return
      */

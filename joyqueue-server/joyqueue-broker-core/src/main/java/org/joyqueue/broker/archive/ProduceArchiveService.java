@@ -134,7 +134,7 @@ public class ProduceArchiveService extends Service {
         this.updateItemThread = LoopThread.builder()
                 .sleepTime(1000 * 10, 1000 * 10)
                 .name("UpdateArchiveItem-Thread")
-                .onException(e -> logger.warn("Exception:", e))
+                .onException(e -> logger.warn("Produce archive service update item thread Exception:", e))
                 .doWork(() -> {
                     // 更新item列表
                     updateArchiveItem();
@@ -145,7 +145,7 @@ public class ProduceArchiveService extends Service {
         this.readMsgThread = LoopThread.builder()
                 .sleepTime(0, 10)
                 .name("ReadArchiveMsg-Thread")
-                .onException(e -> logger.warn("Exception:", e))
+                .onException(e -> logger.warn("Produce archive service read message thread Exception:", e))
                 .doWork(() -> {
                     // 消费接口读取消息，放入队列
                     readArchiveMsg();
