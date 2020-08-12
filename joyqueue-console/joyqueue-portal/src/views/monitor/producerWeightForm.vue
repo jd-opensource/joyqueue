@@ -62,13 +62,22 @@ export default {
     getList () {
       apiRequest.get(this.urls.search + '/' + this.producerId, {}).then(data => {
         this.formData = data.data
+        for (let i in this.formData) {
+          if (this.formData.hasOwnProperty(i)) {
+            if (this.formData[i].weight <= 0) {
+              this.formData[i].weight = undefined
+            }
+          }
+        }
       })
     },
     getWeights () {
       let weight = ''
       for (let i = 0; i < this.formData.length; i++) {
         let item = this.formData[i]
-        weight += item.groupNo + ':' + item.weight + ','
+        if (item.weight && item.weight > 0) {
+          weight += item.groupNo + ':' + item.weight + ','
+        }
       }
       return weight
     }
