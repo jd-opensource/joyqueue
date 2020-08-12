@@ -15,10 +15,14 @@
  */
 package org.joyqueue.client.internal.producer.support;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import org.joyqueue.client.internal.metadata.domain.PartitionNode;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.PartitionSelector;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
+import org.joyqueue.network.domain.BrokerNode;
 
 import java.util.List;
 
@@ -31,28 +35,48 @@ import java.util.List;
 public abstract class AbstractPartitionSelector implements PartitionSelector {
 
     @Override
-    public PartitionMetadata select(ProduceMessage message, TopicMetadata topicMetadata, List<PartitionMetadata> partitions) {
+    public PartitionNode select(ProduceMessage message, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes) {
+        if (CollectionUtils.isEmpty(brokerNodes)) {
+            return null;
+        }
         if (message.getPartition() != ProduceMessage.NONE_PARTITION) {
-            return selectPartition(message, topicMetadata, partitions);
+            return selectPartition(message, topicMetadata, brokerNodes);
         }
         if (message.getPartitionKey() != ProduceMessage.NONE_PARTITION_KEY) {
-            return hashPartition(message, topicMetadata, partitions);
+            return hashPartition(message, topicMetadata, brokerNodes);
         }
-        return nextPartition(message, topicMetadata, partitions);
-    }
-
-    protected PartitionMetadata selectPartition(ProduceMessage message, TopicMetadata topicMetadata, List<PartitionMetadata> partitions) {
-        for (PartitionMetadata partition : partitions) {
-            if (message.getPartition() == partition.getId()) {
-                return partition;
-            }
+        if (brokerNodes.size() == 1) {
+            return randomSelectPartitionNode(topicMetadata, brokerNodes.get(0));
         }
-        return null;
+        return nextPartition(message, topicMetadata, brokerNodes);
     }
 
-    protected PartitionMetadata hashPartition(ProduceMessage message, TopicMetadata topicMetadata, List<PartitionMetadata> partitions) {
-        return partitions.get(Math.abs(message.getPartitionKey().hashCode() % partitions.size()));
+    protected PartitionNode selectPartition(ProduceMessage message, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes) {
+        PartitionMetadata partitionMetadata = topicMetadata.getPartition(message.getPartition());
+        if (partitionMetadata == null) {
+            return null;
+        }
+        if (!brokerNodes.contains(partitionMetadata.getLeader())) {
+            return null;
+        }
+        return new PartitionNode(partitionMetadata);
     }
 
-    protected abstract PartitionMetadata nextPartition(ProduceMessage message, TopicMetadata topicMetadata, List<PartitionMetadata> partitions);
+    protected PartitionNode hashPartition(ProduceMessage message, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes) {
+        int hashCode = message.getPartitionKey().hashCode();
+        BrokerNode brokerNode = brokerNodes.get(Math.abs(hashCode % brokerNodes.size()));
+        List<PartitionMetadata> partitions = topicMetadata.getBrokerPartitions(brokerNode.getId());
+        return new PartitionNode(partitions.get(Math.abs(hashCode % partitions.size())));
+    }
+
+    protected PartitionNode randomSelectPartitionNode(TopicMetadata topicMetadata, BrokerNode brokerNode) {
+        return new PartitionNode(randomSelectPartition(topicMetadata, brokerNode));
+    }
+
+    protected PartitionMetadata randomSelectPartition(TopicMetadata topicMetadata, BrokerNode brokerNode) {
+        List<PartitionMetadata> brokerPartitions = topicMetadata.getBrokerPartitions(brokerNode.getId());
+        return brokerPartitions.get(RandomUtils.nextInt(0, brokerPartitions.size()));
+    }
+
+    protected abstract PartitionNode nextPartition(ProduceMessage message, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes);
 }

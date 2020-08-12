@@ -17,6 +17,9 @@ package org.joyqueue.client.internal.metadata.converter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.metadata.domain.ClusterMetadata;
 import org.joyqueue.client.internal.metadata.domain.PartitionGroupMetadata;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
@@ -27,11 +30,10 @@ import org.joyqueue.network.command.Topic;
 import org.joyqueue.network.command.TopicPartition;
 import org.joyqueue.network.command.TopicPartitionGroup;
 import org.joyqueue.network.domain.BrokerNode;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * ClusterMetadataConverter
@@ -66,6 +68,10 @@ public class ClusterMetadataConverter {
         Map<Integer, PartitionGroupMetadata> partitionGroupMap = Maps.newHashMap();
         List<BrokerNode> brokers = Lists.newArrayList();
         List<BrokerNode> nearbyBrokers = Lists.newArrayList();
+        Set<BrokerNode> writableBrokers = Sets.newHashSet();
+        Set<BrokerNode> readableBrokers = Sets.newHashSet();
+        Set<BrokerNode> writableNearbyBrokers = Sets.newHashSet();
+        Set<BrokerNode> readableNearbyBrokers = Sets.newHashSet();
         Map<Integer, List<PartitionMetadata>> brokerPartitions = Maps.newHashMap();
         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups = Maps.newHashMap();
         boolean allAvailable = true;
@@ -83,19 +89,31 @@ public class ClusterMetadataConverter {
             partitionGroups.add(partitionGroupMetadata);
             partitionGroupMap.put(entry.getKey(), partitionGroupMetadata);
 
-            if (partitionGroupMetadata.getLeader() == null) {
+            BrokerNode leader = partitionGroupMetadata.getLeader();
+
+            if (leader == null) {
                 allAvailable = false;
             } else {
-                if (!partitionGroupMetadata.getLeader().isWritable() || !partitionGroupMetadata.getLeader().isReadable()) {
-                    allAvailable = false;
-                }
-
-                List<PartitionGroupMetadata> brokerPartitionGroupList = brokerPartitionGroups.get(partitionGroupMetadata.getLeader().getId());
+                List<PartitionGroupMetadata> brokerPartitionGroupList = brokerPartitionGroups.get(leader.getId());
                 if (brokerPartitionGroupList == null) {
                     brokerPartitionGroupList = Lists.newArrayList();
-                    brokerPartitionGroups.put(partitionGroupMetadata.getLeader().getId(), brokerPartitionGroupList);
+                    brokerPartitionGroups.put(leader.getId(), brokerPartitionGroupList);
                 }
                 brokerPartitionGroupList.add(partitionGroupMetadata);
+
+                if (leader.isWritable()) {
+                    writableBrokers.add(leader);
+                    if (leader.isNearby()) {
+                        writableNearbyBrokers.add(leader);
+                    }
+                }
+
+                if (leader.isReadable()) {
+                    readableBrokers.add(leader);
+                    if (leader.isNearby()) {
+                        readableNearbyBrokers.add(leader);
+                    }
+                }
             }
 
             for (Map.Entry<Short, PartitionMetadata> partitionEntry : partitionGroupMetadata.getPartitions().entrySet()) {
@@ -130,7 +148,8 @@ public class ClusterMetadataConverter {
         }
 
         return new TopicMetadata(code, topic.getProducerPolicy(), topic.getConsumerPolicy(), topic.getType(), partitionGroups, partitions, partitionMap, partitionGroupMap, brokers,
-                nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, topic.getCode());
+                Lists.newArrayList(writableBrokers), Lists.newArrayList(readableBrokers), nearbyBrokers, Lists.newArrayList(writableNearbyBrokers), Lists.newArrayList(readableNearbyBrokers),
+                brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, topic.getCode());
     }
 
     public static PartitionGroupMetadata convertPartitionGroupMetadata(String topic, TopicPartitionGroup partitionGroup, Map<Integer, BrokerNode> brokers) {

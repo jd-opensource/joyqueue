@@ -15,10 +15,11 @@
  */
 package org.joyqueue.client.internal.producer;
 
-import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import com.jd.laf.extension.Type;
+import org.joyqueue.client.internal.metadata.domain.PartitionNode;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
-import com.jd.laf.extension.Type;
+import org.joyqueue.network.domain.BrokerNode;
 
 import java.util.List;
 
@@ -30,5 +31,5 @@ import java.util.List;
  */
 public interface PartitionSelector extends Type<String> {
 
-    PartitionMetadata select(ProduceMessage message, TopicMetadata topicMetadata, List<PartitionMetadata> partitions);
+    PartitionNode select(ProduceMessage message, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes);
 }

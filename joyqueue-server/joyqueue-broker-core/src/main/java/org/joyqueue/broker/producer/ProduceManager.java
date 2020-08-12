@@ -361,6 +361,12 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                 metric.addLatency("async", t1 - t0);
             } else {
                 partitionStore.asyncWrite(event -> {
+                    if (partitionGroup.getGroup() > 0) {
+                        try {
+                            Thread.currentThread().sleep(partitionGroup.getGroup() * 10);
+                        } catch (InterruptedException e) {
+                        }
+                    }
                     if (event.getCode().equals(JoyQueueCode.SUCCESS)) {
                         onPutMessage(topic, app, partitionGroup.getGroup(), startTime, writeRequests);
                     }
