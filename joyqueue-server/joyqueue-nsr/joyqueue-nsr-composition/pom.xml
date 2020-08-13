@@ -25,11 +25,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-nsr-composition</artifactId>
+    <name>JoyQueue-NamingService-Composition</name>
 
     <dependencies>
         <dependency>
             <groupId>org.joyqueue</groupId>
-            <artifactId>joyqueue-nsr-ignite</artifactId>
+            <artifactId>joyqueue-nsr-sql</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
