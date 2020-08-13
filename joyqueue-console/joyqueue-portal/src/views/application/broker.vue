@@ -81,7 +81,9 @@ export default {
             key: 'dataCenter.code',
             width: '17%',
             formatter (item) {
-              return item.dataCenter.code + '/' + item.dataCenter.name
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
             }
           },
           {
