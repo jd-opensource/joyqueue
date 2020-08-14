@@ -99,7 +99,7 @@ public class SQLInternalServiceManager extends Service {
 
     @Override
     protected void validate() throws Exception {
-        baseRepository = new BaseRepository(sqlOperator, tracer);
+        baseRepository = createBaseRepository(sqlOperator, tracer);
         topicRepository = new TopicRepository(baseRepository);
         partitionGroupRepository = new PartitionGroupRepository(baseRepository);
         partitionGroupReplicaRepository = new PartitionGroupReplicaRepository(baseRepository);
@@ -124,6 +124,10 @@ public class SQLInternalServiceManager extends Service {
         sqlTransactionInternalService = new SQLTransactionInternalService();
         sqlOperationInternalService = new SQLOperationInternalService(baseRepository);
         sqlClusterInternalService = new SQLClusterInternalService();
+    }
+
+    protected BaseRepository createBaseRepository(SQLOperator sqlOperator, PointTracer tracer) {
+        return new BaseRepository(sqlOperator, tracer);
     }
 
     public <T> T getService(Class<T> service) {

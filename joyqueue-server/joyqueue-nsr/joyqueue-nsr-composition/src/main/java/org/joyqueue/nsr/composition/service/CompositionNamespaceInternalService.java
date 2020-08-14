@@ -33,54 +33,54 @@ public class CompositionNamespaceInternalService implements NamespaceInternalSer
     protected final Logger logger = LoggerFactory.getLogger(CompositionNamespaceInternalService.class);
 
     private CompositionConfig config;
-    private NamespaceInternalService igniteNamespaceService;
-    private NamespaceInternalService journalkeeperNamespaceService;
+    private NamespaceInternalService sourceNamespaceService;
+    private NamespaceInternalService targetNamespaceService;
 
-    public CompositionNamespaceInternalService(CompositionConfig config, NamespaceInternalService igniteNamespaceService,
-                                               NamespaceInternalService journalkeeperNamespaceService) {
+    public CompositionNamespaceInternalService(CompositionConfig config, NamespaceInternalService sourceNamespaceService,
+                                               NamespaceInternalService targetNamespaceService) {
         this.config = config;
-        this.igniteNamespaceService = igniteNamespaceService;
-        this.journalkeeperNamespaceService = journalkeeperNamespaceService;
+        this.sourceNamespaceService = sourceNamespaceService;
+        this.targetNamespaceService = targetNamespaceService;
     }
 
     @Override
     public List<Namespace> getAll() {
-        if (config.isReadIgnite()) {
-            return igniteNamespaceService.getAll();
+        if (config.isReadSource()) {
+            return sourceNamespaceService.getAll();
         } else {
             try {
-                return journalkeeperNamespaceService.getAll();
+                return targetNamespaceService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return igniteNamespaceService.getAll();
+                return sourceNamespaceService.getAll();
             }
         }
     }
 
     @Override
     public Namespace getByCode(String code) {
-        if (config.isReadIgnite()) {
-            return igniteNamespaceService.getByCode(code);
+        if (config.isReadSource()) {
+            return sourceNamespaceService.getByCode(code);
         } else {
             try {
-                return journalkeeperNamespaceService.getByCode(code);
+                return targetNamespaceService.getByCode(code);
             } catch (Exception e) {
                 logger.error("getByCode exception, code: {}", code, e);
-                return igniteNamespaceService.getByCode(code);
+                return sourceNamespaceService.getByCode(code);
             }
         }
     }
 
     @Override
     public Namespace getById(String id) {
-        if (config.isReadIgnite()) {
-            return igniteNamespaceService.getById(id);
+        if (config.isReadSource()) {
+            return sourceNamespaceService.getById(id);
         } else {
             try {
-                return journalkeeperNamespaceService.getById(id);
+                return targetNamespaceService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id: {}", id, e);
-                return igniteNamespaceService.getById(id);
+                return sourceNamespaceService.getById(id);
             }
         }
     }
@@ -88,14 +88,14 @@ public class CompositionNamespaceInternalService implements NamespaceInternalSer
     @Override
     public Namespace add(Namespace namespace) {
         Namespace result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteNamespaceService.add(namespace);
+        if (config.isWriteSource()) {
+            result = sourceNamespaceService.add(namespace);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperNamespaceService.add(namespace);
+                targetNamespaceService.add(namespace);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", namespace, e);
+                logger.error("add exception, params: {}", namespace, e);
             }
         }
         return result;
@@ -104,14 +104,14 @@ public class CompositionNamespaceInternalService implements NamespaceInternalSer
     @Override
     public Namespace update(Namespace namespace) {
         Namespace result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteNamespaceService.update(namespace);
+        if (config.isWriteSource()) {
+            result = sourceNamespaceService.update(namespace);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperNamespaceService.update(namespace);
+                targetNamespaceService.update(namespace);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", namespace, e);
+                logger.error("update exception, params: {}", namespace, e);
             }
         }
         return result;
@@ -119,14 +119,14 @@ public class CompositionNamespaceInternalService implements NamespaceInternalSer
 
     @Override
     public void delete(String id) {
-        if (config.isWriteIgnite()) {
-            igniteNamespaceService.delete(id);
+        if (config.isWriteSource()) {
+            sourceNamespaceService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperNamespaceService.delete(id);
+                targetNamespaceService.delete(id);
             } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", id, e);
+                logger.error("delete exception, params: {}", id, e);
             }
         }
     }

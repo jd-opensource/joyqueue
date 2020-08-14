@@ -18,10 +18,14 @@ package org.joyqueue.nsr.journalkeeper;
 import io.journalkeeper.sql.client.SQLClient;
 import io.journalkeeper.sql.server.SQLServer;
 import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.nsr.journalkeeper.repository.JournalkeeperBaseRepository;
 import org.joyqueue.nsr.journalkeeper.service.JournalkeeperClusterInternalService;
+import org.joyqueue.nsr.journalkeeper.service.JournalkeeperTransactionInternalService;
 import org.joyqueue.nsr.service.internal.ClusterInternalService;
+import org.joyqueue.nsr.service.internal.TransactionInternalService;
 import org.joyqueue.nsr.sql.SQLInternalServiceManager;
 import org.joyqueue.nsr.sql.operator.SQLOperator;
+import org.joyqueue.nsr.sql.repository.BaseRepository;
 
 /**
  * JournalkeeperInternalServiceManager
@@ -35,6 +39,7 @@ public class JournalkeeperInternalServiceManager extends SQLInternalServiceManag
     private SQLOperator sqlOperator;
 
     private JournalkeeperClusterInternalService journalkeeperClusterInternalService;
+    private JournalkeeperTransactionInternalService journalkeeperTransactionInternalService;
 
     public JournalkeeperInternalServiceManager(SQLServer sqlServer, SQLClient sqlClient, SQLOperator sqlOperator, PointTracer tracer) {
         super(sqlOperator, tracer);
@@ -47,11 +52,19 @@ public class JournalkeeperInternalServiceManager extends SQLInternalServiceManag
     protected void validate() throws Exception {
         super.validate();
         journalkeeperClusterInternalService = new JournalkeeperClusterInternalService(sqlClient);
+        journalkeeperTransactionInternalService = new JournalkeeperTransactionInternalService();
+    }
+
+    @Override
+    protected BaseRepository createBaseRepository(SQLOperator sqlOperator, PointTracer tracer) {
+        return new JournalkeeperBaseRepository(sqlOperator, tracer);
     }
 
     @Override
     public <T> T getService(Class<T> service) {
-        if (service.equals(ClusterInternalService.class)) {
+        if (service.equals(TransactionInternalService.class)) {
+            return (T) journalkeeperTransactionInternalService;
+        } else if (service.equals(ClusterInternalService.class)) {
             return (T) journalkeeperClusterInternalService;
         } else {
             return super.getService(service);

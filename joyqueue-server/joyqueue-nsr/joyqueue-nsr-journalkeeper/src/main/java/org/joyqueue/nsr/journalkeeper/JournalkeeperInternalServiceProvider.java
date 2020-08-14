@@ -34,7 +34,6 @@ import org.joyqueue.nsr.NsrPlugins;
 import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfig;
 import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfigKey;
 import org.joyqueue.nsr.journalkeeper.operator.JournalkeeperSQLOperator;
-import org.joyqueue.nsr.sql.BatchOperationContext;
 import org.joyqueue.nsr.sql.operator.SQLOperator;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -129,7 +128,7 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
             this.sqlClient = clientAccessPoint.createClient(nodes);
         }
         this.sqlOperator = new JournalkeeperSQLOperator(this.sqlClient);
-        BatchOperationContext.init(sqlOperator);
+        JournalkeeperBatchOperationContext.init(sqlOperator);
         this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator, this.tracer);
         this.journalkeeperInternalServiceManager.start();
     }

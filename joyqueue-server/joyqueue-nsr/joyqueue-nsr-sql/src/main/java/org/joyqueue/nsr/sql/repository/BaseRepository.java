@@ -53,7 +53,7 @@ public class BaseRepository {
     }
 
     protected String doInsert(String sql, Object... params) {
-        BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
+        BatchSQLOperator batchSQLOperator = getBatchSQLOperator();
         if (batchSQLOperator != null) {
             batchSQLOperator.insert(sql, params);
             return null;
@@ -80,7 +80,7 @@ public class BaseRepository {
     }
 
     protected int doUpdate(String sql, Object... params) {
-        BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
+        BatchSQLOperator batchSQLOperator = getBatchSQLOperator();
         if (batchSQLOperator != null) {
             batchSQLOperator.update(sql, params);
             return 0;
@@ -102,7 +102,7 @@ public class BaseRepository {
     }
 
     protected int doDelete(String sql, Object... params) {
-        BatchSQLOperator batchSQLOperator = BatchOperationContext.getBatchSQLOperator();
+        BatchSQLOperator batchSQLOperator = getBatchSQLOperator();
         if (batchSQLOperator != null) {
             batchSQLOperator.delete(sql, params);
             return 0;
@@ -156,6 +156,10 @@ public class BaseRepository {
     public <T> T queryOnce(Class<T> type, String sql, Object... params) {
         ResultSet resultSet = query(sql, params);
         return ResultSetHelper.assembleOnce(type, resultSet);
+    }
+
+    protected BatchSQLOperator getBatchSQLOperator() {
+        return BatchOperationContext.getBatchSQLOperator();
     }
 
     protected String getTraceKey(String name) {

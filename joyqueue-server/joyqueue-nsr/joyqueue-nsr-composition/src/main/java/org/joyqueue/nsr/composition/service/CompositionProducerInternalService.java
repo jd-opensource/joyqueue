@@ -34,82 +34,82 @@ public class CompositionProducerInternalService implements ProducerInternalServi
     protected static final Logger logger = LoggerFactory.getLogger(CompositionProducerInternalService.class);
 
     private CompositionConfig config;
-    private ProducerInternalService igniteProducerService;
-    private ProducerInternalService journalkeeperProducerService;
+    private ProducerInternalService sourceProducerService;
+    private ProducerInternalService targetProducerService;
 
-    public CompositionProducerInternalService(CompositionConfig config, ProducerInternalService igniteProducerService,
-                                              ProducerInternalService journalkeeperProducerService) {
+    public CompositionProducerInternalService(CompositionConfig config, ProducerInternalService sourceProducerService,
+                                              ProducerInternalService targetProducerService) {
         this.config = config;
-        this.igniteProducerService = igniteProducerService;
-        this.journalkeeperProducerService = journalkeeperProducerService;
+        this.sourceProducerService = sourceProducerService;
+        this.targetProducerService = targetProducerService;
     }
 
     @Override
     public Producer getById(String id) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.getById(id);
+        if (config.isReadSource()) {
+            return sourceProducerService.getById(id);
         } else {
             try {
-                return journalkeeperProducerService.getById(id);
+                return targetProducerService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id: {}", id, e);
-                return igniteProducerService.getById(id);
+                return sourceProducerService.getById(id);
             }
         }
     }
 
     @Override
     public Producer getByTopicAndApp(TopicName topic, String app) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.getByTopicAndApp(topic, app);
+        if (config.isReadSource()) {
+            return sourceProducerService.getByTopicAndApp(topic, app);
         } else {
             try {
-                return journalkeeperProducerService.getByTopicAndApp(topic, app);
+                return targetProducerService.getByTopicAndApp(topic, app);
             } catch (Exception e) {
                 logger.error("getByTopicAndApp exception, topic: {}, app: {}", topic, app, e);
-                return igniteProducerService.getByTopicAndApp(topic, app);
+                return sourceProducerService.getByTopicAndApp(topic, app);
             }
         }
     }
 
     @Override
     public List<Producer> getByTopic(TopicName topic) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.getByTopic(topic);
+        if (config.isReadSource()) {
+            return sourceProducerService.getByTopic(topic);
         } else {
             try {
-                return journalkeeperProducerService.getByTopic(topic);
+                return targetProducerService.getByTopic(topic);
             } catch (Exception e) {
                 logger.error("getByTopic exception, topic: {}", topic, e);
-                return igniteProducerService.getByTopic(topic);
+                return sourceProducerService.getByTopic(topic);
             }
         }
     }
 
     @Override
     public List<Producer> getByApp(String app) {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.getByApp(app);
+        if (config.isReadSource()) {
+            return sourceProducerService.getByApp(app);
         } else {
             try {
-                return journalkeeperProducerService.getByApp(app);
+                return targetProducerService.getByApp(app);
             } catch (Exception e) {
                 logger.error("getByApp exception, app: {}", app, e);
-                return igniteProducerService.getByApp(app);
+                return sourceProducerService.getByApp(app);
             }
         }
     }
 
     @Override
     public List<Producer> getAll() {
-        if (config.isReadIgnite()) {
-            return igniteProducerService.getAll();
+        if (config.isReadSource()) {
+            return sourceProducerService.getAll();
         } else {
             try {
-                return journalkeeperProducerService.getAll();
+                return targetProducerService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return igniteProducerService.getAll();
+                return sourceProducerService.getAll();
             }
         }
     }
@@ -117,14 +117,14 @@ public class CompositionProducerInternalService implements ProducerInternalServi
     @Override
     public Producer add(Producer producer) {
         Producer result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteProducerService.add(producer);
+        if (config.isWriteSource()) {
+            result = sourceProducerService.add(producer);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperProducerService.add(producer);
+                targetProducerService.add(producer);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", producer, e);
+                logger.error("add exception, params: {}", producer, e);
             }
         }
         return result;
@@ -133,14 +133,14 @@ public class CompositionProducerInternalService implements ProducerInternalServi
     @Override
     public Producer update(Producer producer) {
         Producer result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteProducerService.update(producer);
+        if (config.isWriteSource()) {
+            result = sourceProducerService.update(producer);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperProducerService.update(producer);
+                targetProducerService.update(producer);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", producer, e);
+                logger.error("update exception, params: {}", producer, e);
             }
         }
         return result;
@@ -148,14 +148,14 @@ public class CompositionProducerInternalService implements ProducerInternalServi
 
     @Override
     public void delete(String id) {
-        if (config.isWriteIgnite()) {
-            igniteProducerService.delete(id);
+        if (config.isWriteSource()) {
+            sourceProducerService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperProducerService.delete(id);
+                targetProducerService.delete(id);
             } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", id, e);
+                logger.error("delete exception, params: {}", id, e);
             }
         }
     }

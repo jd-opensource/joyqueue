@@ -34,82 +34,82 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
     protected static final Logger logger = LoggerFactory.getLogger(CompositionPartitionGroupReplicaInternalService.class);
 
     private CompositionConfig config;
-    private PartitionGroupReplicaInternalService ignitePartitionGroupReplicaService;
-    private PartitionGroupReplicaInternalService journalkeeperPartitionGroupReplicaService;
+    private PartitionGroupReplicaInternalService sourcePartitionGroupReplicaService;
+    private PartitionGroupReplicaInternalService targetPartitionGroupReplicaService;
 
-    public CompositionPartitionGroupReplicaInternalService(CompositionConfig config, PartitionGroupReplicaInternalService ignitePartitionGroupReplicaService,
-                                                           PartitionGroupReplicaInternalService journalkeeperPartitionGroupReplicaService) {
+    public CompositionPartitionGroupReplicaInternalService(CompositionConfig config, PartitionGroupReplicaInternalService sourcePartitionGroupReplicaService,
+                                                           PartitionGroupReplicaInternalService targetPartitionGroupReplicaService) {
         this.config = config;
-        this.ignitePartitionGroupReplicaService = ignitePartitionGroupReplicaService;
-        this.journalkeeperPartitionGroupReplicaService = journalkeeperPartitionGroupReplicaService;
+        this.sourcePartitionGroupReplicaService = sourcePartitionGroupReplicaService;
+        this.targetPartitionGroupReplicaService = targetPartitionGroupReplicaService;
     }
 
     @Override
     public List<Replica> getByTopic(TopicName topic) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.getByTopic(topic);
+        if (config.isReadSource()) {
+            return sourcePartitionGroupReplicaService.getByTopic(topic);
         } else {
             try {
-                return journalkeeperPartitionGroupReplicaService.getByTopic(topic);
+                return targetPartitionGroupReplicaService.getByTopic(topic);
             } catch (Exception e) {
                 logger.error("getByTopic exception, topic: {}", topic, e);
-                return ignitePartitionGroupReplicaService.getByTopic(topic);
+                return sourcePartitionGroupReplicaService.getByTopic(topic);
             }
         }
     }
 
     @Override
     public List<Replica> getByTopicAndGroup(TopicName topic, int groupNo) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+        if (config.isReadSource()) {
+            return sourcePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
         } else {
             try {
-                return journalkeeperPartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+                return targetPartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
             } catch (Exception e) {
                 logger.error("getByTopicAndGroup exception, topic: {}, groupNo: {}", topic, groupNo, e);
-                return ignitePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
+                return sourcePartitionGroupReplicaService.getByTopicAndGroup(topic, groupNo);
             }
         }
     }
 
     @Override
     public List<Replica> getByBrokerId(Integer brokerId) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.getByBrokerId(brokerId);
+        if (config.isReadSource()) {
+            return sourcePartitionGroupReplicaService.getByBrokerId(brokerId);
         } else {
             try {
-                return journalkeeperPartitionGroupReplicaService.getByBrokerId(brokerId);
+                return targetPartitionGroupReplicaService.getByBrokerId(brokerId);
             } catch (Exception e) {
                 logger.error("getByBrokerId exception, brokerId: {}", brokerId, e);
-                return ignitePartitionGroupReplicaService.getByBrokerId(brokerId);
+                return sourcePartitionGroupReplicaService.getByBrokerId(brokerId);
             }
         }
     }
 
     @Override
     public Replica getById(String id) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.getById(id);
+        if (config.isReadSource()) {
+            return sourcePartitionGroupReplicaService.getById(id);
         } else {
             try {
-                return journalkeeperPartitionGroupReplicaService.getById(id);
+                return targetPartitionGroupReplicaService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception", e);
-                return ignitePartitionGroupReplicaService.getById(id);
+                return sourcePartitionGroupReplicaService.getById(id);
             }
         }
     }
 
     @Override
     public List<Replica> getAll() {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupReplicaService.getAll();
+        if (config.isReadSource()) {
+            return sourcePartitionGroupReplicaService.getAll();
         } else {
             try {
-                return journalkeeperPartitionGroupReplicaService.getAll();
+                return targetPartitionGroupReplicaService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return ignitePartitionGroupReplicaService.getAll();
+                return sourcePartitionGroupReplicaService.getAll();
             }
         }
     }
@@ -117,14 +117,14 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
     @Override
     public Replica add(Replica replica) {
         Replica result = null;
-        if (config.isWriteIgnite()) {
-            result = ignitePartitionGroupReplicaService.add(replica);
+        if (config.isWriteSource()) {
+            result = sourcePartitionGroupReplicaService.add(replica);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperPartitionGroupReplicaService.add(replica);
+                targetPartitionGroupReplicaService.add(replica);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", replica, e);
+                logger.error("add exception, params: {}", replica, e);
             }
         }
         return result;
@@ -133,14 +133,14 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
     @Override
     public Replica update(Replica replica) {
         Replica result = null;
-        if (config.isWriteIgnite()) {
-            result = ignitePartitionGroupReplicaService.update(replica);
+        if (config.isWriteSource()) {
+            result = sourcePartitionGroupReplicaService.update(replica);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperPartitionGroupReplicaService.update(replica);
+                targetPartitionGroupReplicaService.update(replica);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", replica, e);
+                logger.error("update exception, params: {}", replica, e);
             }
         }
         return result;
@@ -148,14 +148,14 @@ public class CompositionPartitionGroupReplicaInternalService implements Partitio
 
     @Override
     public void delete(String id) {
-        if (config.isWriteIgnite()) {
-            ignitePartitionGroupReplicaService.delete(id);
+        if (config.isWriteSource()) {
+            sourcePartitionGroupReplicaService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperPartitionGroupReplicaService.delete(id);
+                targetPartitionGroupReplicaService.delete(id);
             } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", id, e);
+                logger.error("delete exception, params: {}", id, e);
             }
         }
     }

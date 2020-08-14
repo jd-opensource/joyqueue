@@ -41,10 +41,6 @@ public class SQLTransactionInternalService implements TransactionInternalService
 
     @Override
     public void rollback() {
-        try {
-            BatchOperationContext.rollback();
-        } catch (Exception e) {
-            logger.error("transaction rollback error", e);
-        }
+        BatchOperationContext.rollback();
     }
 }
