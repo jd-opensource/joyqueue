@@ -126,8 +126,9 @@ public interface ConsumerManageService {
 
     /**
      * 初始化消费ack
+     * @param right
      * @return
      * @throws JoyQueueException
      */
-    String initConsumerAckIndexes() throws JoyQueueException;
+    String initConsumerAckIndexes(boolean right) throws JoyQueueException;
 }
