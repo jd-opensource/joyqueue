@@ -270,13 +270,11 @@ public class ClusterManager extends Service {
      * @return
      */
     public List<TopicConfig> getTopics() {
-        List<TopicConfig> result = Lists.newLinkedList();
-        for (Map.Entry<String, TopicConfig> entry : localCache.getTopicConfigCache().entrySet()) {
-            if (entry.getValue().isReplica(getBrokerId())) {
-                result.add(entry.getValue());
-            }
+        Map<TopicName, TopicConfig> topics = nameService.getTopicConfigByBroker(getBrokerId());
+        if (MapUtils.isEmpty(topics)) {
+            return Collections.emptyList();
         }
-        return result;
+        return Lists.newArrayList(topics.values());
     }
 
     /**
@@ -881,15 +879,7 @@ public class ClusterManager extends Service {
     }
 
     public List<Consumer> getLocalConsumersByTopic(TopicName topic) {
-        Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topic);
-        if (MapUtils.isEmpty(consumers)) {
-            return Collections.emptyList();
-        }
-        List<Consumer> result = Lists.newLinkedList();
-        for (Map.Entry<String, MetaDataLocalCache.CacheConsumer> entry : consumers.entrySet()) {
-            result.add(entry.getValue().getConsumer());
-        }
-        return result;
+        return Lists.newArrayList(nameService.getConsumerByTopic(topic));
     }
 
     public AppToken getAppToken(String app, String token) {
