@@ -279,7 +279,7 @@ export default {
             if (operate.bindKey && params.item[operate.bindKey] !== operate.bindVal) { // 数据权限控制
               continue
             }
-            if (operate.isAdmin) { // 登录用户权限控制,admin:1,user:0
+            if (operate.isAdmin && !this.$store.getters.isAdmin) { // 登录用户权限控制,admin:1,user:0
               continue
             }
             items.push(h('DDropdownItem', {
