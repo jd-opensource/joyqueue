@@ -300,6 +300,9 @@ public class Producer extends Subscription {
             // 默认生产超时时间 2秒钟
             private Integer timeOut = 1000 * 2;
 
+            private Integer qosLevel;
+            private String region;
+
             public static Builder build() {
                 return new Builder();
             }
@@ -339,14 +342,27 @@ public class Producer extends Subscription {
                 return this;
             }
 
+            public Builder qosLevel(Integer qosLevel) {
+                this.qosLevel = qosLevel;
+                return this;
+            }
+
+            public Builder region(String region) {
+                this.region = region;
+                return this;
+            }
+
             public Builder timeout(Integer timeOut) {
                 this.timeOut = timeOut;
                 return this;
             }
 
             public ProducerPolicy create() {
-                return new ProducerPolicy(nearby, single, archive, weight,
+                ProducerPolicy producerPolicy = new ProducerPolicy(nearby, single, archive, weight,
                         blackList, timeOut);
+                producerPolicy.setQosLevel(qosLevel);
+                producerPolicy.setRegion(region);
+                return producerPolicy;
             }
         }
     }

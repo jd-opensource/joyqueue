@@ -53,6 +53,11 @@ public class ProducerConfig extends BaseNsrModel {
 
     private Integer timeout;
 
+    private Integer qosLevel;
+    private String region;
+
+    private Map<String, String> params;
+
     public String getProducerId() {
         return producerId;
     }
@@ -123,6 +128,30 @@ public class ProducerConfig extends BaseNsrModel {
 
     public void setTimeout(Integer timeout) {
         this.timeout = timeout;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
+    public Integer getQosLevel() {
+        return qosLevel;
+    }
+
+    public void setQosLevel(Integer qosLevel) {
+        this.qosLevel = qosLevel;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     /**

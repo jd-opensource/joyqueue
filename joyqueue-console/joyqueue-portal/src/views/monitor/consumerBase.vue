@@ -25,7 +25,7 @@
               @on-msg-preview="openMsgPreviewDialog" @on-msg-detail="openMsgDetailDialog" @on-config="openConfigDialog"
               @on-performance-chart="goPerformanceChart" @on-summary-chart="goSummaryChart" @on-compare-chart="goCompareChart"
               @on-rateLimit="openRateLimitDialog" @on-size-change="handleSizeChange" @on-cancel-subscribe="cancelSubscribe"
-              @on-offset="goOffsetChart"/>
+              @on-offset="goOffsetChart"  @on-consumer-policy="consumerPolicyDetail"/>
 
     <d-button class="right load-btn" v-if="showRestBtn" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
@@ -66,6 +66,14 @@
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
       <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"
                   :is-consumer="1"/>
+    </my-dialog>
+
+    <my-dialog :dialog="policyDialog" @on-dialog-confirm="policyConfirm" @on-dialog-cancel="dialogCancel('policyDialog')">
+      <d-form ref="policyMetadata" label-width="200px">
+        <d-form-item v-for="item in consumerPolicies" :key="item.key" :label="item.key + ':'">
+          <d-input v-model="item.value" style="width: 250px;"/>
+        </d-form-item>
+      </d-form>
     </my-dialog>
 
   </div>
@@ -153,6 +161,8 @@ export default {
       curIndex: 0,
       cacheList: [],
       subscribeGroup: '',
+      consumerPolicy: {},
+      consumerPolicies: [],
       urls: {
         search: `/consumer/search`,
         getMonitor: `/monitor/find`,
@@ -227,6 +237,12 @@ export default {
           id: '',
           code: ''
         }
+      },
+      policyDialog: {
+        visible: false,
+        title: '策略详情',
+        width: '500',
+        showFooter: true
       },
       msgDetailDialog: {
         visible: false,
@@ -351,6 +367,7 @@ export default {
     },
     dialogCancel (dialog) {
       this[dialog].visible = false
+      this.consumerPolicies = undefined
       this.getList()
     },
     goSummaryChart (item) {
@@ -588,6 +605,33 @@ export default {
       for (let i = 0; i < this.tableData.rowData.length; i++) {
         this.getMonitor(this.tableData.rowData[i], i)
       }
+    },
+    policyConfirm () {
+      if (this.consumerPolicies) {
+        for (let policy in this.consumerPolicies) {
+          if (this.consumerPolicies.hasOwnProperty(policy)) {
+            this.configData[this.consumerPolicies[policy].key] = this.consumerPolicies[policy].value
+          }
+        }
+      }
+      this.config(this.configData, 'policyDialog')
+    },
+    consumerPolicyDetail (item) {
+      this.configData = item.config || {}
+      this.configData['consumerId'] = item.id
+      this.consumerPolicies = []
+      if (item.config.region !== undefined) {
+        this.consumerPolicy.region = item.config.region
+      } else {
+        this.consumerPolicy.region = undefined
+      }
+      for (let policy in this.consumerPolicy) {
+        this.consumerPolicies.push({
+          key: policy,
+          value: this.consumerPolicy[policy]
+        })
+      }
+      this.policyDialog.visible = true
     }
   },
   mounted () {

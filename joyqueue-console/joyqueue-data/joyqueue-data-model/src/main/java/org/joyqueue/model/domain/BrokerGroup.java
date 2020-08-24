@@ -24,6 +24,9 @@ public class BrokerGroup extends LabelBaseModel {
     private String name;
     private String description;
 
+    private Long storeMaxTime;
+    private Boolean storeCleanKeepUnconsumed;
+
     public BrokerGroup() {
     }
 
@@ -61,4 +64,19 @@ public class BrokerGroup extends LabelBaseModel {
         this.description = description;
     }
 
+    public Long getStoreMaxTime() {
+        return storeMaxTime;
+    }
+
+    public void setStoreMaxTime(Long storeMaxTime) {
+        this.storeMaxTime = storeMaxTime;
+    }
+
+    public Boolean getStoreCleanKeepUnconsumed() {
+        return storeCleanKeepUnconsumed;
+    }
+
+    public void setStoreCleanKeepUnconsumed(Boolean storeCleanKeepUnconsumed) {
+        this.storeCleanKeepUnconsumed = storeCleanKeepUnconsumed;
+    }
 }

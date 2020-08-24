@@ -240,6 +240,11 @@ export default {
       ],
       operates: [
         {
+          txt: '生产者策略详情',
+          method: 'on-producer-policy',
+          isAdmin: true
+        },
+        {
           txt: '设置生产权重',
           method: 'on-weight',
           bindKey: 'canOperate',

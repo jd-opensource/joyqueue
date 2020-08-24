@@ -10,6 +10,8 @@
             `name`,
             code,
             labels,
+            store_max_time AS storeMaxTime,
+            keep_unconsumed AS storeCleanKeepUnconsumed,
             create_time,
             create_by as `createBy.id`,
             update_time,
@@ -24,6 +26,8 @@
             code,
             `name`,
             labels,
+            store_max_time,
+            keep_unconsumed,
             create_time,
             create_by,
             update_time,
@@ -33,6 +37,8 @@
             #{code},
             #{name},
             #{labels},
+            #{storeMaxTime},
+            #{storeCleanKeepUnconsumed},
             #{createTime},
             #{createBy.id},
             #{updateTime},
@@ -84,7 +90,9 @@
         SET
             update_time=#{updateTime},
             update_by=#{updateBy.id},
-            labels=#{labels}
+            labels=#{labels},
+            store_max_time =#{storeMaxTime},
+            keep_unconsumed =#{storeCleanKeepUnconsumed}
         WHERE
             id=#{id}
             AND status !=-1

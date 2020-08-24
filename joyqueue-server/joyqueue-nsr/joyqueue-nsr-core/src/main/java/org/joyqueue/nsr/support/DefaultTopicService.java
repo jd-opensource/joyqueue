@@ -479,14 +479,22 @@ public class DefaultTopicService implements TopicService {
     }
 
     protected List<Broker> getReplicas(PartitionGroup partitionGroup) {
-        return Lists.newArrayList(partitionGroup.getBrokers().values());
+        if (CollectionUtils.isNotEmpty(partitionGroup.getReplicas())) {
+            return Collections.emptyList();
+        }
+        return brokerInternalService.getByIds(Lists.newArrayList(partitionGroup.getReplicas()));
     }
 
     protected List<Broker> getReplicas(List<PartitionGroup> partitionGroups) {
-        Set<Broker> result = Sets.newHashSet();
+        List<Integer> brokerIds = Lists.newArrayList();
         for (PartitionGroup partitionGroup : partitionGroups) {
-            result.addAll(partitionGroup.getBrokers().values());
+            if (CollectionUtils.isNotEmpty(partitionGroup.getReplicas())) {
+                brokerIds.addAll(partitionGroup.getReplicas());
+            }
         }
-        return Lists.newArrayList(result);
+        if (CollectionUtils.isEmpty(brokerIds)) {
+            return Collections.emptyList();
+        }
+        return brokerInternalService.getByIds(brokerIds);
     }
 }

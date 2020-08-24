@@ -15,23 +15,40 @@
     <!--新建分组-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submit()" @on-dialog-cancel="addCancel()">
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">编码:</grid-col>
+        <grid-col :span="5" class="label">编码:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="addData.code" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">名称:</grid-col>
+        <grid-col :span="5" class="label">名称:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="addData.name" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">仅管理员:</grid-col>
+        <grid-col :span="5" class="label">存储最长天数:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
+          <d-input v-model.number="addData.storeMaxTimeDay" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">积压是否清消息:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
+          <d-radio-group v-model="addData.storeCleanKeepUnconsumed">
+            <d-radio :label="1">是</d-radio>
+            <d-radio :label="0">否</d-radio>
+          </d-radio-group>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">仅管理员:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-radio-group v-model="addData.status">
             <d-radio :label="2">是</d-radio>
             <d-radio :label="1">否</d-radio>
@@ -41,23 +58,40 @@
     </my-dialog>
     <my-dialog :dialog="editDialog" @on-dialog-confirm="editSubmit()" @on-dialog-cancel="editCancel()">
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">编码:</grid-col>
+        <grid-col :span="5" class="label">编码:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="editData.code" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">名称:</grid-col>
+        <grid-col :span="5" class="label">名称:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="editData.name" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">仅管理员:</grid-col>
+        <grid-col :span="5" class="label">存储最长天数:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
+          <d-input v-model.number="editData.storeMaxTimeDay" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">积压是否清消息:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
+          <d-radio-group v-model="editData.storeCleanKeepUnconsumed">
+            <d-radio :label="1">是</d-radio>
+            <d-radio :label="0">否</d-radio>
+          </d-radio-group>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">仅管理员:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-radio-group v-model="editData.status">
             <d-radio :label="2">是</d-radio>
             <d-radio :label="1">否</d-radio>
@@ -173,6 +207,25 @@ export default {
             key: 'name'
           },
           {
+            title: '存储最长天数',
+            key: 'storeMaxTime',
+            formatter (row) {
+              return row.storeMaxTime / (24 * 60 * 60 * 1000)
+            }
+          },
+          {
+            title: '是否清除积压消息',
+            key: 'storeCleanKeepUnconsumed',
+            formatter (row) {
+              if (row.storeCleanKeepUnconsumed === 1 || row.storeCleanKeepUnconsumed === true) {
+                return '是'
+              }
+              if (row.storeCleanKeepUnconsumed === 0 || row.storeCleanKeepUnconsumed === false) {
+                return '否'
+              }
+            }
+          },
+          {
             title: '仅管理员',
             key: 'status',
             formatter (row) {
@@ -218,6 +271,8 @@ export default {
       addData: {
         code: '',
         name: '',
+        storeCleanKeepUnconsumed: undefined,
+        storeMaxTimeDay: undefined,
         status: 1
       },
       editDialog: {
@@ -273,6 +328,9 @@ export default {
       if (!this.addData.name) {
         this.$Message.error('名称不能为空')
         return false
+      }
+      if (this.addData.storeMaxTimeDay !== undefined && this.addData.storeMaxTimeDay > 0) {
+        this.addData.storeMaxTime = this.addData.storeMaxTimeDay * 24 * 60 * 60 * 1000
       }
       this.addConfirm()
     },

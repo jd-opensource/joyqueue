@@ -263,6 +263,13 @@ export default {
           }
         },
         {
+          title: '过滤规则',
+          key: 'config.filters',
+          formatter (item) {
+            return item.config === undefined ? '' : item.config.filters
+          }
+        },
+        {
           title: '消费状态',
           key: 'paused',
           width: '5%',
@@ -335,6 +342,10 @@ export default {
         }
       ],
       operates: [
+        {
+          txt: '消费者策略详情',
+          method: 'on-consumer-policy'
+        },
         {
           txt: '消息预览',
           method: 'on-msg-preview',

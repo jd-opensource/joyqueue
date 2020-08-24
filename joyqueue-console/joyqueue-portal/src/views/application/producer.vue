@@ -43,8 +43,14 @@ export default {
       ],
       operates: [
         {
+          txt: '生产者策略详情',
+          method: 'on-producer-policy',
+          isAdmin: true
+        },
+        {
           txt: '设置生产权重',
-          method: 'on-weight'
+          method: 'on-weight',
+          isAdmin: true
         },
         {
           txt: '发送消息',
@@ -70,9 +76,6 @@ export default {
               },
               on: {
                 click: () => {
-                  console.log(123)
-                  console.log(topic)
-                  console.log(namespace)
                   this.$router.push({name: `/${this.$i18n.locale}/topic/detail`,
                     query: { id: topicId, topic: topic.code, namespace: topic.namespace.code || namespace.code, tab: 'producer' }})
                 },
@@ -106,7 +109,6 @@ export default {
               }
             })
             html.push(spin)
-            console.log(params)
             let connections = params.item.connections
             if (connections === undefined) {
               return h('div', {}, html)

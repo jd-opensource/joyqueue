@@ -26,6 +26,7 @@ import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
+import org.joyqueue.model.domain.BrokerGroup;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.model.domain.PartitionGroupMaster;
 import org.joyqueue.model.domain.PartitionGroupReplica;
@@ -35,7 +36,9 @@ import org.joyqueue.model.query.QTopic;
 import org.joyqueue.nsr.NameServerBase;
 import org.joyqueue.nsr.TopicNameServerService;
 import org.joyqueue.nsr.model.TopicQuery;
+import org.joyqueue.service.BrokerGroupService;
 import org.joyqueue.util.NullUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -66,6 +69,9 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
 
     private NsrTopicConverter nsrTopicConverter = new NsrTopicConverter();
 
+    @Autowired
+    private BrokerGroupService brokerGroupService;
+
     /**
      * 添加主题
      * @param
@@ -81,6 +87,17 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         nsrTopic.setName(CodeConverter.convertTopic(topic.getNamespace(),topic));
         nsrTopic.setType(org.joyqueue.domain.Topic.Type.valueOf((byte)topic.getType()));
         nsrTopic.setPartitions((short)topic.getPartitions());
+        if (topic.getBrokerGroup() != null && topic.getBrokerGroup().getId() != 0) {
+            BrokerGroup brokerGroup = brokerGroupService.findById(topic.getBrokerGroup().getId());
+            org.joyqueue.domain.Topic.TopicPolicy topicPolicy = new org.joyqueue.domain.Topic.TopicPolicy();
+            if (brokerGroup.getStoreCleanKeepUnconsumed() != null) {
+                topicPolicy.setStoreCleanKeepUnconsumed(brokerGroup.getStoreCleanKeepUnconsumed());
+            }
+            if (brokerGroup.getStoreMaxTime() != null) {
+                topicPolicy.setStoreMaxTime(brokerGroup.getStoreMaxTime());
+            }
+            nsrTopic.setPolicy(topicPolicy);
+        }
         List<PartitionGroup> nsrPartitionGroups = new ArrayList<>(partitionGroups.size());
         for(TopicPartitionGroup group : partitionGroups){
             PartitionGroup partitionGroup = new PartitionGroup();

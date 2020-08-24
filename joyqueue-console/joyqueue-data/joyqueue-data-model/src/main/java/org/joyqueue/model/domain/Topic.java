@@ -88,6 +88,8 @@ public class Topic extends BaseNsrModel {
      */
     private int replica = 3;
 
+    private org.joyqueue.domain.Topic.TopicPolicy policy;
+
     public Topic() {
 
     }
@@ -212,6 +214,14 @@ public class Topic extends BaseNsrModel {
 
     public void setDataCenters(List<String> dataCenters) {
         this.dataCenters = dataCenters;
+    }
+
+    public org.joyqueue.domain.Topic.TopicPolicy getPolicy() {
+        return policy;
+    }
+
+    public void setPolicy(org.joyqueue.domain.Topic.TopicPolicy policy) {
+        this.policy = policy;
     }
 
     @Override
