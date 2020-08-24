@@ -76,6 +76,8 @@
         SET
             code=#{code},
             `name`=#{name},
+            `store_max_time`=#{storeMaxTime},
+            `keep_unconsumed`=#{storeCleanKeepUnconsumed},
             update_time=#{updateTime},
             update_by=#{updateBy.id},
             status=#{status}

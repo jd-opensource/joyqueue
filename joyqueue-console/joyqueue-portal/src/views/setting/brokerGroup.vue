@@ -112,6 +112,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import addBroker from '../topic/addBroker.vue'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
+import {deepCopy} from '../../utils/assist'
 
 export default {
   name: 'broker-group',
@@ -283,6 +284,8 @@ export default {
       editData: {
         code: '',
         name: '',
+        storeCleanKeepUnconsumed: undefined,
+        storeMaxTimeDay: undefined,
         status: 1
       },
       addBrokerDialog: {
@@ -334,6 +337,19 @@ export default {
       }
       this.addConfirm()
     },
+    beforeEditData (item) {
+      if (item.storeCleanKeepUnconsumed !== undefined) {
+        if (item.storeCleanKeepUnconsumed) {
+          item.storeCleanKeepUnconsumed = 1
+        } else {
+          item.storeCleanKeepUnconsumed = 0
+        }
+      }
+      if (item.storeMaxTime !== undefined) {
+        item.storeMaxTimeDay = item.storeMaxTime / (24 * 60 * 60 * 1000)
+      }
+      return deepCopy(item)
+    },
     editSubmit () {
       if (!this.editData.code) {
         this.$Message.error('编码不能为空')
@@ -343,6 +359,9 @@ export default {
       if (!this.editData.name) {
         this.$Message.error('名称不能为空')
         return false
+      }
+      if (this.editData.storeMaxTimeDay !== undefined && this.editData.storeMaxTimeDay > 0) {
+        this.editData.storeMaxTime = this.editData.storeMaxTimeDay * 24 * 60 * 60 * 1000
       }
       this.editConfirm()
     },
