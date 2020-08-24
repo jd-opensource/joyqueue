@@ -46,11 +46,7 @@ public enum ElectionConfigKey implements PropertyDef {
     ENABLE_REPORT_LEADER_PERIODICALLY("election.enable.report.leader.periodically", true, Type.BOOLEAN),
     ENABLE_REPORT_LEADER_PERIODICALLY_FORCE("election.enable.report.leader.periodically.force", false, Type.BOOLEAN),
     ENABLE_ONLINE_NODE_PERIODICALLY("election.enable.onlineNode.periodically", true, Type.BOOLEAN),
-    OUTPUT_CONSUME_POS("election.consume.pos.output", false, Type.BOOLEAN),
-    CONNECTION_TIMEOUT("election.connection.timeout", 100 * 1, Type.INT),
-    CONNECTION_RETRY_DELAY("election.connection.retryDelay", 1000 * 15, Type.INT),
-
-    ;
+    OUTPUT_CONSUME_POS("election.consume.pos.output", false, Type.BOOLEAN);
 
     private String name;
     private Object value;

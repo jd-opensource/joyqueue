@@ -55,7 +55,7 @@ public class SimpleProducer {
 
         // 设置messageKey，非必填
         // 如果需要相对顺序消息，也可以使用messageKey作为key指定分区
-        message.extensionHeader().get().setMessageKey("test_key");
+//        message.extensionHeader().get().setMessageKey("test_key");
 
         // 自定义发送的partition
         // 最好根据元数据自定义分配，不要写死partitions

@@ -55,7 +55,6 @@ public class Broker implements Serializable {
      * 重试类型
      */
     protected String retryType = DEFAULT_RETRY_TYPE;
-
     /**
      * 权限
      * default FULL

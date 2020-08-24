@@ -149,14 +149,6 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.OUTPUT_CONSUME_POS);
     }
 
-    public int getConnectionTimeout() {
-        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.CONNECTION_TIMEOUT);
-    }
-
-    public int getConnectionRetryDelay() {
-        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.CONNECTION_RETRY_DELAY);
-    }
-
     public void setListenPort(String port) {
         listenPort = Integer.valueOf(port);
     }

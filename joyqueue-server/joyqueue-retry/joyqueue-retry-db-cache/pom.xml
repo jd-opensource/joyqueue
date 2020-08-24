@@ -20,6 +20,14 @@
             <artifactId>laf-extension-core</artifactId>
             <version>1.0.13</version>
         </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-retry-api</artifactId>
+        </dependency>
     </dependencies>
 
 

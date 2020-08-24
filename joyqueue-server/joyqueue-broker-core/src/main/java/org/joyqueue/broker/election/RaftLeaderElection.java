@@ -1266,7 +1266,7 @@ public class RaftLeaderElection extends LeaderElection  {
         TopicConfig topicConfig = clusterManager.getNameService().getTopicConfig(
                 TopicName.parse(topicPartitionGroup.getTopic()));
         PartitionGroup pg = topicConfig.getPartitionGroups().get(topicPartitionGroup.getPartitionGroupId());
-        if (pg == null || pg.getRecLeader() == null) {
+        if (pg.getRecLeader() == null) {
             return INVALID_NODE_ID;
         }
         return pg.getRecLeader();

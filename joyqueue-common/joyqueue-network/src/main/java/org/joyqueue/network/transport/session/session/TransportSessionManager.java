@@ -45,7 +45,7 @@ public class TransportSessionManager extends Service {
     private TransportClientFactory transportClientFactory;
     private ClientConfig clientConfig;
     private TransportClient client;
-    private Cache<String, TransportSession> sessions;
+    private Cache<Integer, TransportSession> sessions;
 
     public TransportSessionManager(TransportSessionConfig config, ClientConfig clientConfig, TransportClientFactory transportClientFactory) {
         this.config = config;
@@ -58,7 +58,7 @@ public class TransportSessionManager extends Service {
         client = transportClientFactory.create(clientConfig);
         sessions = CacheBuilder.newBuilder()
                 .expireAfterAccess(config.getSessionExpireTime(), TimeUnit.MILLISECONDS)
-                .removalListener((RemovalNotification<String, TransportSession>  notification) -> {
+                .removalListener((RemovalNotification<Integer, TransportSession>  notification) -> {
                     try {
                         TransportSession session = notification.getValue();
                         logger.info("create session, id: {}, ip: {}, port: {}", session.getId(), session.getHost(), session.getPort());
@@ -80,13 +80,21 @@ public class TransportSessionManager extends Service {
         }
     }
 
+    public TransportSession getSession(Broker broker) {
+        return getSession(broker.getId());
+    }
+
+    public TransportSession getSession(int brokerId) {
+        return sessions.getIfPresent(brokerId);
+    }
+
     public TransportSession getOrCreateSession(Broker broker) {
         return getOrCreateSession(broker.getId(), broker.getIp(), broker.getBackEndPort());
     }
 
     public TransportSession getOrCreateSession(int brokerId, String brokerHost, int brokerPort) {
         try {
-            return sessions.get(generateId(brokerId, brokerHost, brokerPort), () -> {
+            return sessions.get(brokerId, () -> {
                 logger.info("create session, id: {}, ip: {}, port: {}", brokerId, brokerHost, brokerPort);
                 return new TransportSession(brokerId, brokerHost, brokerPort, clientConfig, config, client);
             });
@@ -94,9 +102,5 @@ public class TransportSessionManager extends Service {
             throw new TransportException.ConnectionException(String.format("create session failed, broker: {id: %s, ip: %s, port: %s}",
                     brokerId, brokerHost, brokerPort), e);
         }
-    }
-
-    protected String generateId(int brokerId, String brokerHost, int brokerPort) {
-        return brokerHost + ":" + brokerPort;
     }
 }
