@@ -47,6 +47,8 @@ public interface JoyQueueConsumerBuiltinKeys extends OMSBuiltinKeys {
 
     String FAILOVER = "CONSUMER_FAILOVER";
 
+    String FORCE_ACK = "CONSUMER_FORCE_ACK";
+
     String LOADBALANCE = "CONSUMER_LOADBALANCE";
 
     String LOADBALANCE_TYPE = "CONSUMER_LOADBALANCE_TYPE";

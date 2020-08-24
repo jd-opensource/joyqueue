@@ -15,18 +15,18 @@
  */
 package io.openmessaging.joyqueue.config;
 
-import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
-import org.joyqueue.client.internal.nameserver.NameServerConfig;
-import org.joyqueue.client.internal.producer.config.ProducerConfig;
-import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import org.joyqueue.client.internal.transport.config.TransportConfig;
-import org.joyqueue.domain.QosLevel;
 import io.openmessaging.KeyValue;
 import io.openmessaging.joyqueue.domain.JoyQueueConsumerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueNameServerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueProducerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueTransportBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueTxFeedbackBuiltinKeys;
+import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
+import org.joyqueue.client.internal.nameserver.NameServerConfig;
+import org.joyqueue.client.internal.producer.config.ProducerConfig;
+import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import org.joyqueue.client.internal.transport.config.TransportConfig;
+import org.joyqueue.domain.QosLevel;
 
 /**
  * KeyValueConverter
@@ -109,6 +109,7 @@ public class KeyValueConverter {
         consumerConfig.setSessionTimeout(attributes.getLong(JoyQueueConsumerBuiltinKeys.SESSION_TIMEOUT, consumerConfig.getSessionTimeout()));
         consumerConfig.setThread(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.THREAD, consumerConfig.getThread()));
         consumerConfig.setFailover(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.FAILOVER, consumerConfig.isFailover()));
+        consumerConfig.setForceAck(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.FORCE_ACK, consumerConfig.isForceAck()));
         consumerConfig.setLoadBalance(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.LOADBALANCE, consumerConfig.isLoadBalance()));
         consumerConfig.setLoadBalanceType(KeyValueHelper.getString(attributes, JoyQueueConsumerBuiltinKeys.LOADBALANCE_TYPE, consumerConfig.getLoadBalanceType()));
         consumerConfig.setBroadcastGroup(KeyValueHelper.getString(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_GROUP, consumerConfig.getBroadcastGroup()));
