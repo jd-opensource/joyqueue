@@ -19,7 +19,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.archive.ArchiveManager;
 import org.joyqueue.broker.archive.ConsumeArchiveService;
 import org.joyqueue.broker.buffer.Serializer;
@@ -220,19 +219,19 @@ class PartitionConsumption extends Service {
             }
 
             List<ByteBuffer> byteBuffers = readResult.getBuffers();
-            if (StringUtils.isNotEmpty(consumer.getApp()) &&
-                    (!Consumer.ConsumeType.INTERNAL.equals(consumer.getType()) && !Consumer.ConsumeType.KAFKA.equals(consumer.getType()))) {
-
-                org.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-
-                if (consumerConfig != null) {
-                    // 过滤消息
-                    byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
-
-                    // 开启延迟消费，过滤未到消费时间的消息
-                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
-                }
-            }
+//            if (StringUtils.isNotEmpty(consumer.getApp()) &&
+//                    (!Consumer.ConsumeType.INTERNAL.equals(consumer.getType()) && !Consumer.ConsumeType.KAFKA.equals(consumer.getType()))) {
+//
+//                org.joyqueue.domain.Consumer consumerConfig = clusterManager.tryGetConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+//
+//                if (consumerConfig != null) {
+//                    // 过滤消息
+//                    byteBuffers = filterMessageSupport.filter(consumerConfig, byteBuffers, new FilterCallbackImpl(consumer));
+//
+//                    // 开启延迟消费，过滤未到消费时间的消息
+//                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+//                }
+//            }
 
             pullResult = new PullResult(consumer, partition, byteBuffers);
         } catch (PositionOverflowException overflow) {

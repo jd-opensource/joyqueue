@@ -15,16 +15,15 @@
  */
 package org.joyqueue.broker.consumer.filter;
 
+import com.google.common.collect.Lists;
+import com.jd.laf.extension.Extension;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
-import org.joyqueue.message.BrokerMessage;
-import com.jd.laf.extension.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -53,7 +52,7 @@ public class FlagFilter implements MessageFilter {
     public List<ByteBuffer> filter(List<ByteBuffer> byteBufferList, FilterCallback filterCallback) throws JoyQueueException {
         FilterResult filterResult = doFilter(byteBufferList, pattern);
         List<ByteBuffer> inValidList = filterResult.getInValidList();
-        if (null != filterCallback) {
+        if (inValidList != null && !inValidList.isEmpty() && filterCallback != null) {
             filterCallback.callback(inValidList);
         }
         return filterResult.getValidList();
@@ -73,14 +72,13 @@ public class FlagFilter implements MessageFilter {
      * @return
      */
     private FilterResult doFilter(List<ByteBuffer> messages, Pattern pattern) throws JoyQueueException {
-        List<ByteBuffer> validList = new ArrayList<>(); // 有效队列
-        List<ByteBuffer> inValidList = null; // 无效队列
+        List<ByteBuffer> validList = Lists.newLinkedList(); // 有效队列
+        List<ByteBuffer> inValidList = Lists.newLinkedList(); // 无效队列
         boolean /* 有效到无效 */ valid2InvalidFlag = false,
-                /* 无效到有效 */ invaild2ValidFlag = false;
+                /* 无效到有效 */ invalid2ValidFlag = false;
 
         for (int i = 0; i < messages.size(); i++) {
             ByteBuffer buffer = messages.get(i);
-            BrokerMessage message = null;
             short flag;
             try {
                 flag = Serializer.readFlag(buffer);
@@ -90,29 +88,29 @@ public class FlagFilter implements MessageFilter {
             }
 
             // 是否匹配
-            boolean matcher = pattern.matcher("" + flag).matches();
+            boolean isMatch = pattern.matcher("" + flag).matches();
 
-            if (i == 0 && !matcher) {
-                // 不是有效标签开头
-                inValidList = new ArrayList<>();
-            }
-
-            if (matcher && !valid2InvalidFlag) {
-                validList.add(buffer);
-                if (inValidList != null && inValidList.size() > 0) {
-                    invaild2ValidFlag = true;
-                }
-            } else if (inValidList != null && !invaild2ValidFlag) {
-                inValidList.add(buffer);
-                if (validList.size() > 0) {
+            if (isMatch) {
+                if (i == 0) {
                     valid2InvalidFlag = true;
                 }
+                validList.add(buffer);
+                if (invalid2ValidFlag) {
+                    break;
+                }
+            } else {
+                if (i == 0) {
+                    invalid2ValidFlag = true;
+                }
+                if (valid2InvalidFlag) {
+                    break;
+                }
+                inValidList.add(buffer);
             }
         }
 
         return new FilterResult(validList, inValidList);
     }
-
 
     /**
      * 过滤结果
