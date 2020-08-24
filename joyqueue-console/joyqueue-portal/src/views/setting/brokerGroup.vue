@@ -211,7 +211,9 @@ export default {
             title: '存储最长天数',
             key: 'storeMaxTime',
             formatter (row) {
-              return row.storeMaxTime / (24 * 60 * 60 * 1000)
+              if (row.storeMaxTime) {
+                return row.storeMaxTime / (24 * 60 * 60 * 1000)
+              }
             }
           },
           {
