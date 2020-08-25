@@ -29,10 +29,10 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="5" class="label">存储最长天数:</grid-col>
+        <grid-col :span="5" class="label">存储最长时间:</grid-col>
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
-          <d-input v-model.number="addData.storeMaxTimeDay" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
+          <d-input v-model.number="addData.storeMaxTime" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
@@ -72,10 +72,10 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="5" class="label">存储最长天数:</grid-col>
+        <grid-col :span="5" class="label">存储最长时间:</grid-col>
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
-          <d-input v-model.number="editData.storeMaxTimeDay" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
+          <d-input v-model.number="editData.storeMaxTime" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
@@ -197,40 +197,23 @@ export default {
         colData: [
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '20%'
           },
           {
             title: '编码',
-            key: 'code'
+            key: 'code',
+            width: '20%'
           },
           {
             title: '名称',
-            key: 'name'
-          },
-          {
-            title: '存储最长天数',
-            key: 'storeMaxTime',
-            formatter (row) {
-              if (row.storeMaxTime) {
-                return row.storeMaxTime / (24 * 60 * 60 * 1000)
-              }
-            }
-          },
-          {
-            title: '是否清除积压消息',
-            key: 'storeCleanKeepUnconsumed',
-            formatter (row) {
-              if (row.storeCleanKeepUnconsumed === true || row.storeCleanKeepUnconsumed === 'true') {
-                return '是'
-              }
-              if (row.storeCleanKeepUnconsumed === false || row.storeCleanKeepUnconsumed === 'false') {
-                return '否'
-              }
-            }
+            key: 'name',
+            width: '20%'
           },
           {
             title: '仅管理员',
             key: 'status',
+            width: '20%',
             formatter (row) {
               if (row.status === 2) {
                 return '是'
@@ -275,7 +258,7 @@ export default {
         code: '',
         name: '',
         storeCleanKeepUnconsumed: undefined,
-        storeMaxTimeDay: undefined,
+        storeMaxTime: undefined,
         status: 1
       },
       editDialog: {
@@ -287,7 +270,7 @@ export default {
         code: '',
         name: '',
         storeCleanKeepUnconsumed: undefined,
-        storeMaxTimeDay: undefined,
+        storeMaxTime: undefined,
         status: 1
       },
       addBrokerDialog: {
@@ -335,8 +318,8 @@ export default {
         return false
       }
       this.addData.policies = {}
-      if (this.addData.storeMaxTimeDay !== undefined && this.addData.storeMaxTimeDay > 0) {
-        this.addData.policies.storeMaxTime = this.addData.storeMaxTimeDay * 24 * 60 * 60 * 1000
+      if (this.addData.storeMaxTime !== undefined && this.addData.storeMaxTime > 0) {
+        this.addData.policies.storeMaxTime = this.addData.storeMaxTime
       }
       if (this.addData.storeCleanKeepUnconsumed !== undefined) {
         this.addData.policies.storeCleanKeepUnconsumed = this.addData.storeCleanKeepUnconsumed
@@ -346,7 +329,7 @@ export default {
     beforeEditData (item) {
       if (item.policies !== undefined) {
         if (item.policies.storeMaxTime !== undefined) {
-          item.storeMaxTimeDay = parseInt(item.policies.storeMaxTime) / (24 * 60 * 60 * 1000)
+          item.storeMaxTime = item.policies.storeMaxTime
         }
         if (item.policies.storeCleanKeepUnconsumed !== undefined) {
           let storeCleanKeepUnconsumed = item.policies.storeCleanKeepUnconsumed
@@ -370,8 +353,8 @@ export default {
         return false
       }
       this.editData.policies = {}
-      if (this.editData.storeMaxTimeDay !== undefined && this.editData.storeMaxTimeDay > 0) {
-        this.editData.policies.storeMaxTime = this.editData.storeMaxTimeDay * 24 * 60 * 60 * 1000
+      if (this.editData.storeMaxTime !== undefined && this.editData.storeMaxTime > 0) {
+        this.editData.policies.storeMaxTime = this.editData.storeMaxTime
       }
       if (this.editData.storeCleanKeepUnconsumed !== undefined) {
         this.editData.policies.storeCleanKeepUnconsumed = this.editData.storeCleanKeepUnconsumed
