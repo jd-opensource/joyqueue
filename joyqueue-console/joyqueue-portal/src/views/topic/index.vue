@@ -277,7 +277,7 @@ export default {
         value: item.policy.storeMaxTime
       })
       this.policies.push({
-        key: '清除未消费数据',
+        key: '保留未消费数据',
         value: item.policy.storeCleanKeepUnconsumed
       })
       for (let policy in this.policy) {

@@ -36,7 +36,7 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="5" class="label">清除未消费数据:</grid-col>
+        <grid-col :span="5" class="label">保留未消费数据:</grid-col>
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
           <d-radio-group v-model="addData.storeCleanKeepUnconsumed">
@@ -79,7 +79,7 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="5" class="label">清除未消费数据:</grid-col>
+        <grid-col :span="5" class="label">保留未消费数据:</grid-col>
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
           <d-radio-group v-model="editData.storeCleanKeepUnconsumed">
