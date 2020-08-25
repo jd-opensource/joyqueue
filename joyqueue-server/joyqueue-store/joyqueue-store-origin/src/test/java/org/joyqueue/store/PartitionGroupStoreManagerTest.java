@@ -95,6 +95,9 @@ public class PartitionGroupStoreManagerTest {
     }
 
 
+    /**
+     * 存储满会导致测试失败
+     **/
     @Test
     public void indexLengthTest() throws Exception {
         int count = 1024 * 1024;
@@ -621,7 +624,7 @@ public class PartitionGroupStoreManagerTest {
 
         QosStore qosStore = store.getQosStore(QosLevel.PERSISTENCE);
         // 写入消息
-        Future<WriteResult> future = qosStore.asyncWrite(QosLevel.REPLICATION,messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
+        Future<WriteResult> future = qosStore.asyncWrite(QosLevel.PERSISTENCE,messages.stream().map(b -> new WriteRequest(partition, b)).toArray(WriteRequest[]::new));
         // 等待写入完成
         WriteResult writeResult = future.get();
         Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
