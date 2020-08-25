@@ -61,7 +61,6 @@ import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.nsr.event.UpdateProducerEvent;
 import org.joyqueue.nsr.event.UpdateTopicEvent;
 import org.joyqueue.response.BooleanResponse;
-import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;

@@ -30,7 +30,8 @@ public enum ConfigDef {
     NAME_SERVER_JOURNAL_KEEPER_WORKING_DIR("nameserver.","journalkeeper.working.dir"," journalkeeper working dir "),
     NAME_SERVER_JOURNAL_KEEPER_NODES("nameserver.","journalkeeper.nodes","journal keeper cluster config"),
     NAME_SERVER_COMPENSATION_CACHE_ENABLE("nameservice.","compensation.cache.enable","name server cache"),
-
+    NAME_SERVER_ALL_METADATA_CACHE_EXPIRE_TIME("nameservice.","allmetadata.cache.expire.time","all metadata  cache expire time"),
+    NAME_SERVER_COMPENSATION_INTERVAL("nameservice.","compensation.interval","compensation interval time"),
     STORE_ENGINE("store.","engine","storage engine name");
     private  String region;
     private String name;

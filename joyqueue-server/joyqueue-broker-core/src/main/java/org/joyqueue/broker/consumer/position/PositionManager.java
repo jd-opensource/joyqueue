@@ -482,7 +482,7 @@ public class PositionManager extends Service {
             long rightIndex = store.getRightIndex(partition);
             return rightIndex;
         } catch (Exception e) {
-            logger.error("getMaxMsgIndex exception, topic: {}, partition: {}, groupId: {}", topic, partition, groupId);
+            logger.error("getMaxMsgIndex exception, topic: {}, partition: {}, groupId: {}", topic, partition, groupId,e);
             return 0;
         }
     }
