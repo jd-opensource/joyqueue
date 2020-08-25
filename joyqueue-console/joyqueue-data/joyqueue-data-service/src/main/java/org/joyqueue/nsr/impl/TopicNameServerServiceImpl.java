@@ -41,6 +41,7 @@ import org.joyqueue.util.NullUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,13 +94,35 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
             org.joyqueue.domain.Topic.TopicPolicy topicPolicy = new org.joyqueue.domain.Topic.TopicPolicy();
             if (brokerGroup.getPolicies() != null && brokerGroup.getPolicies().size() > 0) {
                 for (Map.Entry<String, String> entry: brokerGroup.getPolicies().entrySet()) {
-                    if ("storeCleanKeepUnconsumed".equalsIgnoreCase(entry.getKey())) {
-                        topicPolicy.setStoreCleanKeepUnconsumed(Boolean.parseBoolean(entry.getValue()));
-                        continue;
-                    }
-                    if ("storeMaxTime".equalsIgnoreCase(entry.getKey())) {
-                        topicPolicy.setStoreMaxTime(Long.parseLong(entry.getValue()));
-                    }
+                    try {
+                        Field field = topicPolicy.getClass().getDeclaredField(entry.getKey());
+                        field.setAccessible(true);
+                        switch (field.getType().getTypeName()) {
+                            case "java.lang.Integer": {
+                                field.set(topicPolicy, Integer.parseInt(entry.getValue()));
+                                break;
+                            }
+                            case "java.lang.Boolean": {
+                                field.set(topicPolicy, Boolean.parseBoolean(entry.getValue()));
+                                break;
+                            }
+                            case "java.lang.Long": {
+                                field.set(topicPolicy, Long.parseLong(entry.getValue()));
+                                break;
+                            }
+                            case "java.lang.Double": {
+                                field.set(topicPolicy, Double.parseDouble(entry.getValue()));
+                                break;
+                            }
+                            case "java.lang.Float": {
+                                field.set(topicPolicy, Float.parseFloat(entry.getValue()));
+                                break;
+                            }
+                            default: {
+                                field.set(topicPolicy, entry.getValue());
+                            }
+                        }
+                    } catch (NoSuchFieldException | IllegalAccessException ignore) { }
                 }
             }
             nsrTopic.setPolicy(topicPolicy);
