@@ -344,7 +344,8 @@ export default {
       operates: [
         {
           txt: '消费者策略详情',
-          method: 'on-consumer-policy'
+          method: 'on-consumer-policy',
+          isAdmin: true
         },
         {
           txt: '消息预览',
