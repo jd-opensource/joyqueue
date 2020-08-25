@@ -51,8 +51,8 @@ public class CompositionInternalServiceManager extends Service {
 
     private CompositionConfig config;
     private InternalServiceProvider serviceProvider;
-    private InternalServiceProvider igniteServiceProvider;
-    private InternalServiceProvider journalkeeperServiceProvider;
+    private InternalServiceProvider sourceServiceProvider;
+    private InternalServiceProvider targetServiceProvider;
 
     private CompositionAppTokenInternalService compositionAppTokenInternalService;
     private CompositionBrokerInternalService compositionBrokerInternalService;
@@ -67,40 +67,40 @@ public class CompositionInternalServiceManager extends Service {
     private CompositionTransactionInternalService compositionTransactionInternalService;
     private CompositionClusterInternalService compositionClusterInternalService;
 
-    public CompositionInternalServiceManager(CompositionConfig config, InternalServiceProvider serviceProvider, InternalServiceProvider igniteServiceProvider,
-                                             InternalServiceProvider journalkeeperServiceProvider) {
+    public CompositionInternalServiceManager(CompositionConfig config, InternalServiceProvider serviceProvider, InternalServiceProvider sourceServiceProvider,
+                                             InternalServiceProvider targetServiceProvider) {
         this.config = config;
         this.serviceProvider = serviceProvider;
-        this.igniteServiceProvider = igniteServiceProvider;
-        this.journalkeeperServiceProvider = journalkeeperServiceProvider;
+        this.sourceServiceProvider = sourceServiceProvider;
+        this.targetServiceProvider = targetServiceProvider;
     }
 
     @Override
     protected void validate() throws Exception {
-        compositionAppTokenInternalService = new CompositionAppTokenInternalService(config, igniteServiceProvider.getService(AppTokenInternalService.class),
-                journalkeeperServiceProvider.getService(AppTokenInternalService.class));
-        compositionBrokerInternalService = new CompositionBrokerInternalService(config, igniteServiceProvider.getService(BrokerInternalService.class),
-                journalkeeperServiceProvider.getService(BrokerInternalService.class));
-        compositionConfigInternalService = new CompositionConfigInternalService(config, igniteServiceProvider.getService(ConfigInternalService.class),
-                journalkeeperServiceProvider.getService(ConfigInternalService.class));
-        compositionConsumerInternalService = new CompositionConsumerInternalService(config, igniteServiceProvider.getService(ConsumerInternalService.class),
-                journalkeeperServiceProvider.getService(ConsumerInternalService.class));
-        compositionDataCenterInternalService = new CompositionDataCenterInternalService(config, igniteServiceProvider.getService(DataCenterInternalService.class),
-                journalkeeperServiceProvider.getService(DataCenterInternalService.class));
-        compositionNamespaceInternalService = new CompositionNamespaceInternalService(config, igniteServiceProvider.getService(NamespaceInternalService.class),
-                journalkeeperServiceProvider.getService(NamespaceInternalService.class));
-        compositionPartitionGroupInternalService = new CompositionPartitionGroupInternalService(config, igniteServiceProvider.getService(PartitionGroupInternalService.class),
-                journalkeeperServiceProvider.getService(PartitionGroupInternalService.class));
-        compositionPartitionGroupReplicaInternalService = new CompositionPartitionGroupReplicaInternalService(config, igniteServiceProvider.getService(PartitionGroupReplicaInternalService.class),
-                journalkeeperServiceProvider.getService(PartitionGroupReplicaInternalService.class));
-        compositionProducerInternalService = new CompositionProducerInternalService(config, igniteServiceProvider.getService(ProducerInternalService.class),
-                journalkeeperServiceProvider.getService(ProducerInternalService.class));
-        compositionTopicInternalService = new CompositionTopicInternalService(config, igniteServiceProvider.getService(TopicInternalService.class),
-                journalkeeperServiceProvider.getService(TopicInternalService.class));
-        compositionTransactionInternalService = new CompositionTransactionInternalService(config, igniteServiceProvider.getService(TransactionInternalService.class),
-                journalkeeperServiceProvider.getService(TransactionInternalService.class));
+        compositionAppTokenInternalService = new CompositionAppTokenInternalService(config, sourceServiceProvider.getService(AppTokenInternalService.class),
+                targetServiceProvider.getService(AppTokenInternalService.class));
+        compositionBrokerInternalService = new CompositionBrokerInternalService(config, sourceServiceProvider.getService(BrokerInternalService.class),
+                targetServiceProvider.getService(BrokerInternalService.class));
+        compositionConfigInternalService = new CompositionConfigInternalService(config, sourceServiceProvider.getService(ConfigInternalService.class),
+                targetServiceProvider.getService(ConfigInternalService.class));
+        compositionConsumerInternalService = new CompositionConsumerInternalService(config, sourceServiceProvider.getService(ConsumerInternalService.class),
+                targetServiceProvider.getService(ConsumerInternalService.class));
+        compositionDataCenterInternalService = new CompositionDataCenterInternalService(config, sourceServiceProvider.getService(DataCenterInternalService.class),
+                targetServiceProvider.getService(DataCenterInternalService.class));
+        compositionNamespaceInternalService = new CompositionNamespaceInternalService(config, sourceServiceProvider.getService(NamespaceInternalService.class),
+                targetServiceProvider.getService(NamespaceInternalService.class));
+        compositionPartitionGroupInternalService = new CompositionPartitionGroupInternalService(config, sourceServiceProvider.getService(PartitionGroupInternalService.class),
+                targetServiceProvider.getService(PartitionGroupInternalService.class));
+        compositionPartitionGroupReplicaInternalService = new CompositionPartitionGroupReplicaInternalService(config, sourceServiceProvider.getService(PartitionGroupReplicaInternalService.class),
+                targetServiceProvider.getService(PartitionGroupReplicaInternalService.class));
+        compositionProducerInternalService = new CompositionProducerInternalService(config, sourceServiceProvider.getService(ProducerInternalService.class),
+                targetServiceProvider.getService(ProducerInternalService.class));
+        compositionTopicInternalService = new CompositionTopicInternalService(config, sourceServiceProvider.getService(TopicInternalService.class),
+                targetServiceProvider.getService(TopicInternalService.class));
+        compositionTransactionInternalService = new CompositionTransactionInternalService(config, sourceServiceProvider.getService(TransactionInternalService.class),
+                targetServiceProvider.getService(TransactionInternalService.class));
         compositionClusterInternalService = new CompositionClusterInternalService(config, null,
-                journalkeeperServiceProvider.getService(ClusterInternalService.class));
+                targetServiceProvider.getService(ClusterInternalService.class));
     }
 
     public <T> T getService(Class<T> service) {

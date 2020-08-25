@@ -41,6 +41,10 @@
             <artifactId>joyqueue-network</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>joyqueue-client-loadbalance-adaptive</artifactId>
+        </dependency>
+        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>

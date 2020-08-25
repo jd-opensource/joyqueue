@@ -131,6 +131,9 @@ public class DefaultConsumerManageService implements ConsumerManageService {
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
                 if (partitionMetric.getPartition() == partition) {
+                    if (!clusterManager.isLeader(topic, partitionMetric.getPartition())) {
+                        continue;
+                    }
                     return setPartitionAckIndexByTime(topic, app, partitionGroupMetric.getPartitionGroup(), partitionMetric.getPartition(), timestamp);
                 }
             }
@@ -143,6 +146,9 @@ public class DefaultConsumerManageService implements ConsumerManageService {
         StoreManagementService.TopicMetric topicMetric = storeManagementService.topicMetric(topic);
         for (StoreManagementService.PartitionGroupMetric partitionGroupMetric : topicMetric.getPartitionGroupMetrics()) {
             for (StoreManagementService.PartitionMetric partitionMetric : partitionGroupMetric.getPartitionMetrics()) {
+                if (!clusterManager.isLeader(topic, partitionMetric.getPartition())) {
+                    continue;
+                }
                 setPartitionAckIndexByTime(topic, app, partitionGroupMetric.getPartitionGroup(), partitionMetric.getPartition(), timestamp);
             }
         }
@@ -180,7 +186,7 @@ public class DefaultConsumerManageService implements ConsumerManageService {
     }
 
     @Override
-    public String initConsumerAckIndexes() throws JoyQueueException {
+    public String initConsumerAckIndexes(boolean right) throws JoyQueueException {
         Map<String, List<String>> result = Maps.newHashMap();
         for (TopicConfig topicConfig : clusterManager.getTopics()) {
             List<String> apps = Lists.newLinkedList();
@@ -192,10 +198,18 @@ public class DefaultConsumerManageService implements ConsumerManageService {
             }
 
             for (PartitionGroup partitionGroup : clusterManager.getLocalPartitionGroups(topicConfig)) {
+                if (!clusterManager.isLeader(partitionGroup.getTopic(), partitionGroup.getGroup())) {
+                    continue;
+                }
+                PartitionGroupStore store = storeService.getStore(partitionGroup.getTopic().getFullName(), partitionGroup.getGroup());
+                if (store == null) {
+                    continue;
+                }
                 for (Short partition : partitionGroup.getPartitions()) {
                     for (org.joyqueue.domain.Consumer consumer : consumers) {
                         apps.add(consumer.getApp());
-                        consume.setAckIndex(new Consumer(consumer.getTopic().getFullName(), consumer.getApp()), partition, 0);
+                        consume.setAckIndex(new Consumer(consumer.getTopic().getFullName(), consumer.getApp()), partition,
+                                (right ? store.getRightIndex(partition) : store.getLeftIndex(partition)));
                     }
                 }
             }

@@ -51,7 +51,12 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -552,24 +557,27 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     private ReadMessagesResult readMessages(Consumer consumer, short partition, long index, int count) {
         // 初始化默认
         ReadMessagesResult readMessagesResult = new ReadMessagesResult();
-        PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
+        PullResult pullResult = new PullResult(consumer, partition, new ArrayList<>(0));
         try {
             int partitionGroup = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
             PartitionGroupStore store = storeService.getStore(consumer.getTopic(), partitionGroup);
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
             if (readRst.getCode() == JoyQueueCode.SUCCESS) {
-                List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
-                org.joyqueue.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-
-                if (consumerConfig != null) {
-                    // 过滤消息
-                    List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, readMessagesResult::setFilteredMessages);
-
-                    // 开启延迟消费，过滤未到消费时间的消息
-                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
-                    // 构建拉取结果
-                    pullResult = new PullResult(consumer, partition, byteBuffers);
+                if (readRst.getMessages() != null) {
+                    pullResult.setBuffers(Lists.newArrayList(readRst.getMessages()));
                 }
+//                List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
+//                org.joyqueue.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+//
+//                if (consumerConfig != null) {
+//                    // 过滤消息
+//                    List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, readMessagesResult::setFilteredMessages);
+//
+//                    // 开启延迟消费，过滤未到消费时间的消息
+//                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+//                    // 构建拉取结果
+//                    pullResult = new PullResult(consumer, partition, byteBuffers);
+//                }
             } else {
                 logger.error("read message error, error code[{}]", readRst.getCode());
             }
@@ -774,25 +782,14 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                // 如果确认的片段是滑动窗口的第一段，需要在分区上ack，并向尾部缩小滑动窗口
 
                while (!consumedMessagesMap.isEmpty() && (consumedMessages = consumedMessagesMap.firstEntry().getValue()).isAcked()) {
-                   long lastMsgAckIndex = positionManager.getLastMsgAckIndex(topic, app, partition);
                    consumedMessagesMap.remove(consumedMessages.getStartIndex());
-                   if (lastMsgAckIndex >= consumedMessages.getStartIndex() && lastMsgAckIndex < consumedMessages.getStartIndex() + consumedMessages.getCount()) {
-                       positionManager.updateLastMsgAckIndex(topic, app, partition,
-                               consumedMessages.getStartIndex() + consumedMessages.getCount(), false);
-                   } else {
-                       logger.warn("Ack index not match, topic: {}, partition: {}, ack: [{} - {}), currentAckIndex: {}!",
-                               topic.getFullName(),
-                               partition,
-                               Format.formatWithComma(consumedMessages.getStartIndex()),
-                               Format.formatWithComma(consumedMessages.getStartIndex() + consumedMessages.getCount()),
-                               Format.formatWithComma(lastMsgAckIndex)
-                       );
-                   }
+                   positionManager.updateLastMsgAckIndex(topic, app, partition,
+                           consumedMessages.getStartIndex() + consumedMessages.getCount(), false);
                }
                ret = true;
             }
             if(!ret) {
-                logger.warn("Concurrent cunsume ack failed, topic: {}, partition: {}, ack: [{} - {}), currentAckIndex: {}.",
+                logger.warn("Concurrent consume ack failed, topic: {}, partition: {}, ack: [{} - {}), currentAckIndex: {}.",
                         topic.getFullName(),
                         partition,
                         Format.formatWithComma(startIndex),

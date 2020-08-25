@@ -348,6 +348,11 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-client-loadbalance-adaptive</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -475,6 +480,11 @@
             <dependency>
                 <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-nsr-journalkeeper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-nsr-sql</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -18,6 +18,7 @@ package org.joyqueue.nsr.support;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.Topic;
@@ -39,7 +40,6 @@ import org.joyqueue.nsr.service.internal.BrokerInternalService;
 import org.joyqueue.nsr.service.internal.PartitionGroupInternalService;
 import org.joyqueue.nsr.service.internal.TopicInternalService;
 import org.joyqueue.nsr.service.internal.TransactionInternalService;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

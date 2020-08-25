@@ -16,7 +16,7 @@
 package org.joyqueue.client.internal.producer.config;
 
 import org.joyqueue.client.internal.common.compress.support.ZlibCompressor;
-import org.joyqueue.client.internal.producer.support.WeightedRoundRobinPartitionSelector;
+import org.joyqueue.client.internal.producer.support.WeightedPartitionSelector;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.toolkit.retry.RetryPolicy;
 
@@ -45,7 +45,7 @@ public class ProducerConfig {
 
     private boolean batch = true;
 
-    private String selectorType = WeightedRoundRobinPartitionSelector.NAME;
+    private String selectorType = WeightedPartitionSelector.NAME;
     private int businessIdLengthLimit = 100;
     private int bodyLengthLimit = 1024 * 1024 * 1;
     private int batchBodyLengthLimit = 1024 * 1024 * 4;

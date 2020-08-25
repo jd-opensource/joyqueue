@@ -46,6 +46,7 @@ public class ConsumerConfig {
     private long sessionTimeout = 1000 * 60 * 1;
     private int thread = NONE_THREAD;
     private boolean failover = true;
+    private boolean forceAck = false;
 
     private boolean loadBalance = true;
     private String loadBalanceType = RoundRobinBrokerLoadBalance.NAME;
@@ -72,6 +73,7 @@ public class ConsumerConfig {
         consumerConfig.setSessionTimeout(sessionTimeout);
         consumerConfig.setThread(thread);
         consumerConfig.setFailover(failover);
+        consumerConfig.setForceAck(forceAck);
         consumerConfig.setLoadBalance(loadBalance);
         consumerConfig.setLoadBalanceType(loadBalanceType);
         consumerConfig.setBroadcastGroup(broadcastGroup);
@@ -191,6 +193,14 @@ public class ConsumerConfig {
 
     public boolean isFailover() {
         return failover;
+    }
+
+    public void setForceAck(boolean forceAck) {
+        this.forceAck = forceAck;
+    }
+
+    public boolean isForceAck() {
+        return forceAck;
     }
 
     public void setLoadBalance(boolean loadBalance) {

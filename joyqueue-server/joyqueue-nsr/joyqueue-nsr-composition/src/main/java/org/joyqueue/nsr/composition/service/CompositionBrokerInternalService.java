@@ -36,54 +36,54 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
     protected static final Logger logger = LoggerFactory.getLogger(CompositionBrokerInternalService.class);
 
     private CompositionConfig config;
-    private BrokerInternalService igniteBrokerService;
-    private BrokerInternalService journalkeeperBrokerService;
+    private BrokerInternalService sourceBrokerService;
+    private BrokerInternalService targetBrokerService;
 
-    public CompositionBrokerInternalService(CompositionConfig config, BrokerInternalService igniteBrokerService,
-                                            BrokerInternalService journalkeeperBrokerService) {
+    public CompositionBrokerInternalService(CompositionConfig config, BrokerInternalService sourceBrokerService,
+                                            BrokerInternalService targetBrokerService) {
         this.config = config;
-        this.igniteBrokerService = igniteBrokerService;
-        this.journalkeeperBrokerService = journalkeeperBrokerService;
+        this.sourceBrokerService = sourceBrokerService;
+        this.targetBrokerService = targetBrokerService;
     }
 
     @Override
     public Broker getByIpAndPort(String brokerIp, Integer brokerPort) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.getByIpAndPort(brokerIp, brokerPort);
+        if (config.isReadSource()) {
+            return sourceBrokerService.getByIpAndPort(brokerIp, brokerPort);
         } else {
             try {
-                return journalkeeperBrokerService.getByIpAndPort(brokerIp, brokerPort);
+                return targetBrokerService.getByIpAndPort(brokerIp, brokerPort);
             } catch (Exception e) {
                 logger.error("getByIpAndPort exception, brokerIp: {}, brokerPort: {}", brokerIp, brokerPort, e);
-                return igniteBrokerService.getByIpAndPort(brokerIp, brokerPort);
+                return sourceBrokerService.getByIpAndPort(brokerIp, brokerPort);
             }
         }
     }
 
     @Override
     public List<Broker> getByRetryType(String retryType) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.getByRetryType(retryType);
+        if (config.isReadSource()) {
+            return sourceBrokerService.getByRetryType(retryType);
         } else {
             try {
-                return journalkeeperBrokerService.getByRetryType(retryType);
+                return targetBrokerService.getByRetryType(retryType);
             } catch (Exception e) {
                 logger.error("getByRetryType exception, retryType: {}", retryType, e);
-                return igniteBrokerService.getByRetryType(retryType);
+                return sourceBrokerService.getByRetryType(retryType);
             }
         }
     }
 
     @Override
     public List<Broker> getByIds(List<Integer> ids) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.getByIds(ids);
+        if (config.isReadSource()) {
+            return sourceBrokerService.getByIds(ids);
         } else {
             try {
-                return journalkeeperBrokerService.getByIds(ids);
+                return targetBrokerService.getByIds(ids);
             } catch (Exception e) {
                 logger.error("getByIds exception, ids: {}", ids, e);
-                return igniteBrokerService.getByIds(ids);
+                return sourceBrokerService.getByIds(ids);
             }
         }
     }
@@ -91,14 +91,14 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
     @Override
     public Broker update(Broker broker) {
         Broker result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteBrokerService.update(broker);
+        if (config.isWriteSource()) {
+            result = sourceBrokerService.update(broker);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperBrokerService.update(broker);
+                targetBrokerService.update(broker);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", broker, e);
+                logger.error("update exception, params: {}", broker, e);
             }
         }
         return result;
@@ -106,14 +106,14 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
 
     @Override
     public Broker getById(int id) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.getById(id);
+        if (config.isReadSource()) {
+            return sourceBrokerService.getById(id);
         } else {
             try {
-                return journalkeeperBrokerService.getById(id);
+                return targetBrokerService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id", id, e);
-                return igniteBrokerService.getById(id);
+                return sourceBrokerService.getById(id);
             }
         }
     }
@@ -121,14 +121,14 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
     @Override
     public Broker add(Broker broker) {
         Broker result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteBrokerService.add(broker);
+        if (config.isWriteSource()) {
+            result = sourceBrokerService.add(broker);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperBrokerService.add(broker);
+                targetBrokerService.add(broker);
             } catch (Exception e) {
-                logger.error("addOrUpdate journalkeeper exception, params: {}", broker, e);
+                logger.error("addOrUpdate exception, params: {}", broker, e);
             }
         }
         return result;
@@ -136,42 +136,42 @@ public class CompositionBrokerInternalService implements BrokerInternalService {
 
     @Override
     public void delete(int id) {
-        if (config.isWriteIgnite()) {
-            igniteBrokerService.delete(id);
+        if (config.isWriteSource()) {
+            sourceBrokerService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperBrokerService.delete(id);
+                targetBrokerService.delete(id);
             } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
+                logger.error("deleteById exception, params: {}", id, e);
             }
         }
     }
 
     @Override
     public List<Broker> getAll() {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.getAll();
+        if (config.isReadSource()) {
+            return sourceBrokerService.getAll();
         } else {
             try {
-                return journalkeeperBrokerService.getAll();
+                return targetBrokerService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return igniteBrokerService.getAll();
+                return sourceBrokerService.getAll();
             }
         }
     }
 
     @Override
     public PageResult<Broker> search(QPageQuery<BrokerQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteBrokerService.search(pageQuery);
+        if (config.isReadSource()) {
+            return sourceBrokerService.search(pageQuery);
         } else {
             try {
-                return journalkeeperBrokerService.search(pageQuery);
+                return targetBrokerService.search(pageQuery);
             } catch (Exception e) {
                 logger.error("search exception, pageQuery: {}", pageQuery, e);
-                return igniteBrokerService.search(pageQuery);
+                return sourceBrokerService.search(pageQuery);
             }
         }
     }
