@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -90,11 +91,16 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
         if (topic.getBrokerGroup() != null && topic.getBrokerGroup().getId() != 0) {
             BrokerGroup brokerGroup = brokerGroupService.findById(topic.getBrokerGroup().getId());
             org.joyqueue.domain.Topic.TopicPolicy topicPolicy = new org.joyqueue.domain.Topic.TopicPolicy();
-            if (brokerGroup.getStoreCleanKeepUnconsumed() != null) {
-                topicPolicy.setStoreCleanKeepUnconsumed(brokerGroup.getStoreCleanKeepUnconsumed());
-            }
-            if (brokerGroup.getStoreMaxTime() != null) {
-                topicPolicy.setStoreMaxTime(brokerGroup.getStoreMaxTime());
+            if (brokerGroup.getPolicies() != null && brokerGroup.getPolicies().size() > 0) {
+                for (Map.Entry<String, String> entry: brokerGroup.getPolicies().entrySet()) {
+                    if ("storeCleanKeepUnconsumed".equalsIgnoreCase(entry.getKey())) {
+                        topicPolicy.setStoreCleanKeepUnconsumed(Boolean.parseBoolean(entry.getValue()));
+                        continue;
+                    }
+                    if ("storeMaxTime".equalsIgnoreCase(entry.getKey())) {
+                        topicPolicy.setStoreMaxTime(Long.parseLong(entry.getValue()));
+                    }
+                }
             }
             nsrTopic.setPolicy(topicPolicy);
         }

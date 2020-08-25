@@ -40,8 +40,8 @@
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
           <d-radio-group v-model="addData.storeCleanKeepUnconsumed">
-            <d-radio :label="1">是</d-radio>
-            <d-radio :label="0">否</d-radio>
+            <d-radio :label="true">是</d-radio>
+            <d-radio :label="false">否</d-radio>
           </d-radio-group>
         </grid-col>
       </grid-row>
@@ -83,8 +83,8 @@
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
           <d-radio-group v-model="editData.storeCleanKeepUnconsumed">
-            <d-radio :label="1">是</d-radio>
-            <d-radio :label="0">否</d-radio>
+            <d-radio :label="true">是</d-radio>
+            <d-radio :label="false">否</d-radio>
           </d-radio-group>
         </grid-col>
       </grid-row>
@@ -220,10 +220,10 @@ export default {
             title: '是否清除积压消息',
             key: 'storeCleanKeepUnconsumed',
             formatter (row) {
-              if (row.storeCleanKeepUnconsumed === 1 || row.storeCleanKeepUnconsumed === true) {
+              if (row.storeCleanKeepUnconsumed === true || row.storeCleanKeepUnconsumed === 'true') {
                 return '是'
               }
-              if (row.storeCleanKeepUnconsumed === 0 || row.storeCleanKeepUnconsumed === false) {
+              if (row.storeCleanKeepUnconsumed === false || row.storeCleanKeepUnconsumed === 'false') {
                 return '否'
               }
             }
@@ -334,21 +334,28 @@ export default {
         this.$Message.error('名称不能为空')
         return false
       }
+      this.addData.policies = {}
       if (this.addData.storeMaxTimeDay !== undefined && this.addData.storeMaxTimeDay > 0) {
-        this.addData.storeMaxTime = this.addData.storeMaxTimeDay * 24 * 60 * 60 * 1000
+        this.addData.policies.storeMaxTime = this.addData.storeMaxTimeDay * 24 * 60 * 60 * 1000
+      }
+      if (this.addData.storeCleanKeepUnconsumed !== undefined) {
+        this.addData.policies.storeCleanKeepUnconsumed = this.addData.storeCleanKeepUnconsumed
       }
       this.addConfirm()
     },
     beforeEditData (item) {
-      if (item.storeCleanKeepUnconsumed !== undefined) {
-        if (item.storeCleanKeepUnconsumed) {
-          item.storeCleanKeepUnconsumed = 1
-        } else {
-          item.storeCleanKeepUnconsumed = 0
+      if (item.policies !== undefined) {
+        if (item.policies.storeMaxTime !== undefined) {
+          item.storeMaxTimeDay = parseInt(item.policies.storeMaxTime) / (24 * 60 * 60 * 1000)
         }
-      }
-      if (item.storeMaxTime !== undefined) {
-        item.storeMaxTimeDay = item.storeMaxTime / (24 * 60 * 60 * 1000)
+        if (item.policies.storeCleanKeepUnconsumed !== undefined) {
+          let storeCleanKeepUnconsumed = item.policies.storeCleanKeepUnconsumed
+          if (storeCleanKeepUnconsumed === true || storeCleanKeepUnconsumed === 'true') {
+            item.storeCleanKeepUnconsumed = true
+          } else {
+            item.storeCleanKeepUnconsumed = false
+          }
+        }
       }
       return deepCopy(item)
     },
@@ -362,8 +369,12 @@ export default {
         this.$Message.error('名称不能为空')
         return false
       }
+      this.editData.policies = {}
       if (this.editData.storeMaxTimeDay !== undefined && this.editData.storeMaxTimeDay > 0) {
-        this.editData.storeMaxTime = this.editData.storeMaxTimeDay * 24 * 60 * 60 * 1000
+        this.editData.policies.storeMaxTime = this.editData.storeMaxTimeDay * 24 * 60 * 60 * 1000
+      }
+      if (this.editData.storeCleanKeepUnconsumed !== undefined) {
+        this.editData.policies.storeCleanKeepUnconsumed = this.editData.storeCleanKeepUnconsumed
       }
       this.editConfirm()
     },
@@ -394,6 +405,39 @@ export default {
           }
         })
       }).catch(() => {
+      })
+    },
+    getList () {
+      this.showTablePin = true
+      let data = this.getSearchVal()
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        if (typeof (this.sortData) === 'function') {
+          data.data = this.sortData(data.data)
+        }
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        this.tableData.rowData = data.data
+        for (let i in this.tableData.rowData) {
+          if (this.tableData.rowData.hasOwnProperty(i)) {
+            if (this.tableData.rowData[i].policies) {
+              for (let key in this.tableData.rowData[i].policies) {
+                if (this.tableData.rowData[i].policies.hasOwnProperty(key)) {
+                  this.tableData.rowData[i][key] = this.tableData.rowData[i].policies[key]
+                }
+              }
+              this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+            }
+          }
+        }
+        this.showTablePin = false
       })
     }
   },

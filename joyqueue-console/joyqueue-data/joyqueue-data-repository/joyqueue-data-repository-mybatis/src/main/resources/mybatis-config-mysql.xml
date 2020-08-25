@@ -18,6 +18,9 @@
         <package name="org.joyqueue.model.query" />
         <package name="org.joyqueue.model" />
     </typeAliases>
+    <typeHandlers>
+        <typeHandler handler="org.joyqueue.repository.mybatis.handler.MapTypeHandler"/>
+    </typeHandlers>
     <plugins>
         <plugin interceptor="org.joyqueue.repository.mybatis.interceptor.PageStatementInterceptor"/>
         <plugin interceptor="org.joyqueue.repository.mybatis.interceptor.PageResultInterceptor"/>
