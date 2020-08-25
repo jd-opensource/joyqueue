@@ -1,0 +1,3 @@
+org.joyqueue.client.loadbalance.adaptive.judge.RegionScoreJudge
+org.joyqueue.client.loadbalance.adaptive.judge.TP99ScoreJudge
+org.joyqueue.client.loadbalance.adaptive.judge.AvailableScoreJudge

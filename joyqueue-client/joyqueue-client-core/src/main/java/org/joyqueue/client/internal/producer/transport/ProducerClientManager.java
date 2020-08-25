@@ -91,6 +91,7 @@ public class ProducerClientManager extends Service {
     @Override
     protected void validate() throws Exception {
         transportConfig = transportConfig.copy();
+        transportConfig.getRetryPolicy().setMaxRetrys(0);
         clientManager = new ClientManager(transportConfig, nameServerConfig);
     }
 

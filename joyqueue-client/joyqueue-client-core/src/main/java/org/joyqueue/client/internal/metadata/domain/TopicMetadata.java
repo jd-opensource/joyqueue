@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.metadata.domain;
 
+import com.google.common.collect.Maps;
 import org.joyqueue.domain.ConsumerPolicy;
 import org.joyqueue.domain.ProducerPolicy;
 import org.joyqueue.domain.TopicType;
@@ -24,6 +25,7 @@ import org.joyqueue.network.domain.BrokerNode;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * TopicMetadata
@@ -46,7 +48,11 @@ public class TopicMetadata implements Serializable {
     private Map<Integer, PartitionGroupMetadata> partitionGroupMap;
 
     private List<BrokerNode> brokers;
+    private List<BrokerNode> writableBrokers;
+    private List<BrokerNode> readableBrokers;
     private List<BrokerNode> nearbyBrokers;
+    private List<BrokerNode> writableNearbyBrokers;
+    private List<BrokerNode> readableNearbyBrokers;
     private Map<Integer, BrokerNode> brokerMap;
     private Map<Integer, List<PartitionMetadata>> brokerPartitions;
     private Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups;
@@ -55,6 +61,8 @@ public class TopicMetadata implements Serializable {
 
     @Deprecated
     private TopicMetadata unmodifiableTopicMetadata;
+
+    private ConcurrentMap<Object, Object> attachments = Maps.newConcurrentMap();
 
     public TopicMetadata() {
 
@@ -66,7 +74,8 @@ public class TopicMetadata implements Serializable {
 
     public TopicMetadata(String topic, ProducerPolicy producerPolicy, ConsumerPolicy consumerPolicy, TopicType type, List<PartitionGroupMetadata> partitionGroups,
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
-                         List<BrokerNode> nearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
+                         List<BrokerNode> writableBrokers, List<BrokerNode> readableBrokers, List<BrokerNode> nearbyBrokers, List<BrokerNode> writableNearbyBrokers,
+                         List<BrokerNode> readableNearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
                          Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JoyQueueCode code) {
         this.topic = topic;
         this.producerPolicy = producerPolicy;
@@ -77,37 +86,16 @@ public class TopicMetadata implements Serializable {
         this.partitionMap = partitionMap;
         this.partitionGroupMap = partitionGroupMap;
         this.brokers = brokers;
+        this.writableBrokers = writableBrokers;
+        this.readableBrokers = readableBrokers;
         this.nearbyBrokers = nearbyBrokers;
+        this.writableNearbyBrokers = writableNearbyBrokers;
+        this.readableNearbyBrokers = readableNearbyBrokers;
         this.brokerMap = brokerMap;
         this.brokerPartitions = brokerPartitions;
         this.brokerPartitionGroups = brokerPartitionGroups;
         this.allAvailable = allAvailable;
         this.code = code;
-    }
-
-    @Deprecated
-    public TopicMetadata clone() {
-        if (unmodifiableTopicMetadata != null) {
-            return unmodifiableTopicMetadata;
-        }
-
-        ProducerPolicy newProducerPolicy = null;
-        ConsumerPolicy newConsumerPolicy = null;
-
-        if (producerPolicy != null) {
-            newProducerPolicy = new ProducerPolicy(producerPolicy.getNearby(), producerPolicy.getSingle(), producerPolicy.getArchive(),
-                    producerPolicy.getWeight(), producerPolicy.getBlackList(), producerPolicy.getTimeOut());
-        }
-
-        if (consumerPolicy != null) {
-            newConsumerPolicy = new ConsumerPolicy(consumerPolicy.getNearby(), consumerPolicy.getPaused(), consumerPolicy.getArchive(), consumerPolicy.getRetry(), consumerPolicy.getSeq(),
-                    consumerPolicy.getAckTimeout(), consumerPolicy.getBatchSize(), consumerPolicy.getConcurrent(), consumerPolicy.getDelay(),
-                    consumerPolicy.getBlackList(), consumerPolicy.getErrTimes(), consumerPolicy.getMaxPartitionNum(), consumerPolicy.getReadRetryProbability(),null);
-        }
-
-        unmodifiableTopicMetadata = new UnmodifiableTopicMetadata(topic, newProducerPolicy, newConsumerPolicy, type, partitionGroups, partitions, partitionMap, partitionGroupMap, brokers,
-                nearbyBrokers, brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, code);
-        return unmodifiableTopicMetadata;
     }
 
     public String getTopic() {
@@ -138,8 +126,24 @@ public class TopicMetadata implements Serializable {
         return brokers;
     }
 
+    public List<BrokerNode> getWritableBrokers() {
+        return writableBrokers;
+    }
+
+    public List<BrokerNode> getReadableBrokers() {
+        return readableBrokers;
+    }
+
     public List<BrokerNode> getNearbyBrokers() {
         return nearbyBrokers;
+    }
+
+    public List<BrokerNode> getWritableNearbyBrokers() {
+        return writableNearbyBrokers;
+    }
+
+    public List<BrokerNode> getReadableNearbyBrokers() {
+        return readableNearbyBrokers;
     }
 
     public List<PartitionGroupMetadata> getBrokerPartitionGroups(int brokerId) {
@@ -168,6 +172,26 @@ public class TopicMetadata implements Serializable {
 
     public JoyQueueCode getCode() {
         return code;
+    }
+
+    public void setAttachments(ConcurrentMap<Object, Object> attachments) {
+        this.attachments = attachments;
+    }
+
+    public ConcurrentMap<Object, Object> getAttachments() {
+        return attachments;
+    }
+
+    public void putAttachment(Object key, Object value) {
+        attachments.put(key, value);
+    }
+
+    public <T> T putIfAbsentAttachment(Object key, Object value) {
+        return (T) attachments.putIfAbsent(key, value);
+    }
+
+    public <T> T getAttachment(Object key) {
+        return (T) attachments.get(key);
     }
 
     @Override
