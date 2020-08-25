@@ -72,7 +72,8 @@ export default {
         return [
           {
             txt: '策略',
-            method: 'on-policy'
+            method: 'on-policy',
+            isAdmin: true
           },
           {
             txt: '详情',
@@ -248,7 +249,7 @@ export default {
           this.topic.policy[this.policies[policy].key] = this.policies[policy].value
         }
       }
-      apiRequest.put(this.urlOrigin.edit + '/' + this.topic.id, {}, this.topic).then((data) => {
+      apiRequest.put(this.urlOrigin.edit + '/' + encodeURIComponent(this.topic.id), {}, this.topic).then((data) => {
         this.policyDialog.visible = false
         if (data.code === 200) {
           this.$Dialog.success({
