@@ -18,6 +18,7 @@ package org.joyqueue.handler.routing.command.topic;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.joyqueue.handler.annotation.PageQuery;
@@ -33,12 +34,15 @@ import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.PartitionGroupReplica;
 import org.joyqueue.model.query.QBroker;
 import org.joyqueue.model.query.QPartitionGroupReplica;
+import org.joyqueue.nsr.ReplicaServerService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.BrokerGroupService;
 import org.joyqueue.service.BrokerGroupRelatedService;
 import org.joyqueue.service.PartitionGroupReplicaService;
 import org.joyqueue.service.TopicPartitionGroupService;
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +54,9 @@ import java.util.List;
  * Created by wylixiaobin on 2018-10-19
  */
 public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGroupReplica, PartitionGroupReplicaService, QPartitionGroupReplica> {
+
+    private static final Logger logger = LoggerFactory.getLogger(PartitionGroupReplicaCommand.class);
+
     @Value(nullable = false)
     private BrokerService brokerService;
     @Value(nullable = false)
@@ -58,6 +65,8 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
     private BrokerGroupService brokerGroupService;
     @Value
     private BrokerGroupRelatedService brokerGroupRelatedService;
+    @Value
+    protected ReplicaServerService replicaServerService;
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QPartitionGroupReplica> qPageQuery) throws Exception {
@@ -235,5 +244,16 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
             throw new ConfigException(updateErrorCode());
         }
         return Responses.success();
+    }
+
+    @Path("findPartitionGroupReplica")
+    public Response findPartitionGroupReplica(@QueryParam("brokerId") Integer brokerId) {
+        try {
+            List<PartitionGroupReplica> partitionGroupReplica = replicaServerService.findPartitionGroupReplica(brokerId);
+            return Responses.success(partitionGroupReplica);
+        } catch (Exception e) {
+            logger.error("", e);
+            return Responses.error(500, e.getMessage());
+        }
     }
 }

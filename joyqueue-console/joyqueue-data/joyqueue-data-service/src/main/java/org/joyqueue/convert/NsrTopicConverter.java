@@ -28,6 +28,9 @@ public class NsrTopicConverter extends Converter<Topic, org.joyqueue.domain.Topi
         nsrTopic.setName(CodeConverter.convertTopic(topic.getNamespace(),new Topic(topic.getId(),topic.getCode())));
         nsrTopic.setType(org.joyqueue.domain.Topic.Type.valueOf((byte)topic.getType()));
         nsrTopic.setPartitions((short)topic.getPartitions());
+        if (topic.getPolicy()!=null) {
+            nsrTopic.setPolicy(topic.getPolicy());
+        }
         return nsrTopic;
     }
 
@@ -39,6 +42,9 @@ public class NsrTopicConverter extends Converter<Topic, org.joyqueue.domain.Topi
         topic.setType(nsrTopic.getType().code());
         topic.setNamespace(new Namespace(nsrTopic.getName().getNamespace()));
         topic.setCode(nsrTopic.getName().getCode());
+        if (nsrTopic.getPolicy() != null) {
+            topic.setPolicy(nsrTopic.getPolicy());
+        }
         return topic;
     }
 }

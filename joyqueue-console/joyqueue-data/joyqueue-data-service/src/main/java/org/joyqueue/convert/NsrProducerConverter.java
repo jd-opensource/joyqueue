@@ -47,8 +47,9 @@ public class NsrProducerConverter extends Converter<Producer, org.joyqueue.domai
                     .archive(producer.getConfig().isArchive())
                     .weight(producer.getConfig().getWeight())
                     .timeout(producer.getConfig().getTimeout())
+                    .qosLevel(producer.getConfig().getQosLevel())
+                    .region(producer.getConfig().getRegion())
                     .create());
-
             nsrProducer.setLimitPolicy(new org.joyqueue.domain.Producer.ProducerLimitPolicy(producer.getConfig().getLimitTps(), producer.getConfig().getLimitTraffic()));
         }
         return nsrProducer;
@@ -71,12 +72,16 @@ public class NsrProducerConverter extends Converter<Producer, org.joyqueue.domai
             producerConfig.setNearBy(producerPolicy.getNearby());
             producerConfig.setBlackList(StringUtils.join(producerPolicy.getBlackList(), ","));
             producerConfig.setArchive(producerPolicy.getArchive());
-//            producerConfig.setProducerId();
             producerConfig.setSingle(producerPolicy.isSingle());
+            producerConfig.setQosLevel(producerPolicy.getQosLevel());
+            producerConfig.setRegion(producerPolicy.getRegion());
             Map<String,Short> map = producerPolicy.getWeight();
             if (map != null) {
                 List<String> weightList = map.entrySet().stream().map(entry -> (entry.getKey()+":"+ entry.getValue()) ).collect(Collectors.toList());
                 producerConfig.setWeight(StringUtils.join(weightList,","));
+            }
+            if (producerPolicy.getParams() !=null) {
+                producerConfig.setParams(producerPolicy.getParams());
             }
         }
         if (limitPolicy != null) {

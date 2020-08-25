@@ -18,7 +18,7 @@
               @on-detail-chart="goDetailChart" @on-current-change="handleCurrentChange" @on-detail="openDetailTab"
               @on-config="openConfigDialog" @on-weight="openWeightDialog" @on-send-message="openSendMessageDialog"
               @on-cancel-subscribe="cancelSubscribe" @on-rateLimit="openRateLimitDialog" @on-compare-chart="goCompareChart"
-              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" />
+              @on-summary-chart="goSummaryChart" @on-performance-chart="goPerformanceChart" @on-producer-policy="producerPolicyDetail" />
     <d-button class="right load-btn" style="z-index: 2" v-if="this.curIndex < this.cacheList.length-1 && this.cacheList.length!==0" type="primary" @click="getRestList">加载更多
       <icon name="refresh-cw" style="margin-left: 3px;"></icon>
     </d-button>
@@ -47,7 +47,13 @@
     <my-dialog :dialog="rateLimitDialog" @on-dialog-confirm="rateLimitConfirm" @on-dialog-cancel="dialogCancel('rateLimitDialog')">
       <rate-limit ref="rateLimit" :limitTraffic="rateLimitDialog.limitTraffic" :limitTps="rateLimitDialog.limitTps"/>
     </my-dialog>
-
+    <my-dialog :dialog="policyDialog" @on-dialog-confirm="policyConfirm" @on-dialog-cancel="dialogCancel('policyDialog')">
+      <d-form ref="policyMetadata" label-width="200px">
+        <d-form-item v-for="item in producerPolicies" :key="item.key" :label="item.key + ':'">
+          <d-input v-model="item.value" style="width: 250px;"/>
+        </d-form-item>
+      </d-form>
+    </my-dialog>
   </div>
 </template>
 
@@ -127,6 +133,11 @@ export default {
     return {
       curIndex: 0,
       cacheList: [],
+      producerPolicy: {
+        qosLevel: undefined,
+        region: undefined
+      },
+      producerPolicies: [],
       urls: {
         search: `/producer/search`,
         getMonitor: `/monitor/find`,
@@ -159,6 +170,12 @@ export default {
         showFooter: true,
         limitTps: 0,
         limitTraffic: 0
+      },
+      policyDialog: {
+        visible: false,
+        title: '策略详情',
+        width: '500',
+        showFooter: true
       },
       type: this.$store.getters.producerType, // 1:生产， 2：消费
       subscribeDialog: {
@@ -270,7 +287,18 @@ export default {
     },
     dialogCancel (dialog) {
       this[dialog].visible = false
+      this.producerPolicies = undefined
       this.getList()
+    },
+    policyConfirm () {
+      if (this.producerPolicies) {
+        for (let policy in this.producerPolicies) {
+          if (this.producerPolicies.hasOwnProperty(policy)) {
+            this.configData[this.producerPolicies[policy].key] = this.producerPolicies[policy].value
+          }
+        }
+      }
+      this.config(this.configData, 'policyDialog')
     },
     configConfirm () {
       this.$refs.configForm.$refs.form.validate((valid) => {
@@ -483,6 +511,28 @@ export default {
           }
         }
       }
+    },
+    producerPolicyDetail (item) {
+      this.configData = item.config || {}
+      this.configData['producerId'] = item.id
+      this.producerPolicies = []
+      if (item.config.qosLevel !== undefined) {
+        this.producerPolicy.qosLevel = item.config.qosLevel
+      } else {
+        this.producerPolicy.qosLevel = undefined
+      }
+      if (item.config.region !== undefined) {
+        this.producerPolicy.region = item.config.region
+      } else {
+        this.producerPolicy.region = undefined
+      }
+      for (let policy in this.producerPolicy) {
+        this.producerPolicies.push({
+          key: policy,
+          value: this.producerPolicy[policy]
+        })
+      }
+      this.policyDialog.visible = true
     }
   },
   mounted () {

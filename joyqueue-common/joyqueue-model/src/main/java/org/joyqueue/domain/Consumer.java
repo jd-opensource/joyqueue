@@ -437,9 +437,18 @@ public class Consumer extends Subscription {
             //消息过滤规则
             private Map</*类型*/String, /*规则*/String> filters = new HashMap<>();
 
+            private String region;
+
+            private Map<String, String> params;
+
 
             public static Builder build() {
                 return new Builder();
+            }
+
+            public Builder region(String region) {
+                this.region = region;
+                return this;
             }
 
             public Builder nearby(Boolean nearby) {
@@ -526,9 +535,19 @@ public class Consumer extends Subscription {
                 return this;
             }
 
+            public Builder params(Map<String, String> params) {
+                this.params = params;
+                return this;
+            }
+
             public ConsumerPolicy create() {
-                return new ConsumerPolicy(nearby, paused, archive, retry, seq, ackTimeout, batchSize,concurrent, delay,
+                ConsumerPolicy consumerPolicy = new ConsumerPolicy(nearby, paused, archive, retry, seq, ackTimeout, batchSize, concurrent, delay,
                         blackList, errTimes, maxPartitionNum, retryReadProbability, filters);
+                consumerPolicy.setRegion(region);
+                if (this.params!=null && this.params.size() > 0) {
+                    consumerPolicy.setParams(this.params);
+                }
+                return consumerPolicy;
             }
         }
 

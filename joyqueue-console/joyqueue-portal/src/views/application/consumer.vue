@@ -44,6 +44,11 @@ export default {
       ],
       operates: [
         {
+          txt: '消费者策略详情',
+          method: 'on-consumer-policy',
+          isAdmin: true
+        },
+        {
           txt: '消息预览',
           method: 'on-msg-preview'
         },
@@ -294,6 +299,13 @@ export default {
           width: '4%',
           render: (h, params) => {
             return openOrCloseBtnRender(h, params.item.config === undefined ? undefined : params.item.config.archive)
+          }
+        },
+        {
+          title: '过滤规则',
+          key: 'config.filters',
+          formatter (item) {
+            return item.config === undefined ? '' : item.config.filters
           }
         },
         {

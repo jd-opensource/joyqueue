@@ -19,6 +19,7 @@ import org.joyqueue.model.domain.nsr.BaseNsrModel;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.Map;
 
 public class ConsumerConfig extends BaseNsrModel {
     /**
@@ -88,6 +89,8 @@ public class ConsumerConfig extends BaseNsrModel {
     @Min(0)
     private int retryDelay;
 
+    private String region;
+
     /**
      * 指数增加间隔时间
      **/
@@ -120,6 +123,8 @@ public class ConsumerConfig extends BaseNsrModel {
     private int limitTps;
 
     private int limitTraffic;
+
+    private Map<String, String> params;
 
 
     public boolean isNearBy() {
@@ -274,6 +279,14 @@ public class ConsumerConfig extends BaseNsrModel {
         return limitTraffic;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     public OffsetMode getOffsetMode() {
         return offsetMode;
     }
@@ -282,4 +295,11 @@ public class ConsumerConfig extends BaseNsrModel {
         this.offsetMode = offsetMode;
     }
 
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
 }
