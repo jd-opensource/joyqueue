@@ -37,6 +37,7 @@ import org.joyqueue.nsr.NameServerBase;
 import org.joyqueue.nsr.TopicNameServerService;
 import org.joyqueue.nsr.model.TopicQuery;
 import org.joyqueue.service.BrokerGroupService;
+import org.joyqueue.toolkit.util.ConvertUtils;
 import org.joyqueue.util.NullUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -97,32 +98,10 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
                     try {
                         Field field = topicPolicy.getClass().getDeclaredField(entry.getKey());
                         field.setAccessible(true);
-                        switch (field.getType().getTypeName()) {
-                            case "java.lang.Integer": {
-                                field.set(topicPolicy, Integer.parseInt(entry.getValue()));
-                                break;
-                            }
-                            case "java.lang.Boolean": {
-                                field.set(topicPolicy, Boolean.parseBoolean(entry.getValue()));
-                                break;
-                            }
-                            case "java.lang.Long": {
-                                field.set(topicPolicy, Long.parseLong(entry.getValue()));
-                                break;
-                            }
-                            case "java.lang.Double": {
-                                field.set(topicPolicy, Double.parseDouble(entry.getValue()));
-                                break;
-                            }
-                            case "java.lang.Float": {
-                                field.set(topicPolicy, Float.parseFloat(entry.getValue()));
-                                break;
-                            }
-                            default: {
-                                field.set(topicPolicy, entry.getValue());
-                            }
-                        }
-                    } catch (NoSuchFieldException | IllegalAccessException ignore) { }
+                        field.set(topicPolicy, ConvertUtils.convert(entry.getValue(), field.getType()));
+                    } catch (NoSuchFieldException | IllegalAccessException | UnsupportedOperationException e) {
+                        logger.error("", e);
+                    }
                 }
             }
             nsrTopic.setPolicy(topicPolicy);
