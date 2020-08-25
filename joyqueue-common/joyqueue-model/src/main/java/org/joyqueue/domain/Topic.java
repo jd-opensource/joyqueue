@@ -92,7 +92,8 @@ public class Topic implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof Topic)) return false;
+
         Topic topic = (Topic) o;
         return partitions == topic.partitions &&
                 Objects.equals(name, topic.name) &&

@@ -16,14 +16,13 @@
 package org.joyqueue.nsr.journalkeeper;
 
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.Extension;
 import io.journalkeeper.core.api.ClusterConfiguration;
 import io.journalkeeper.core.api.RaftServer;
 import io.journalkeeper.core.server.AbstractServer;
 import io.journalkeeper.core.server.Server;
 import io.journalkeeper.sql.client.SQLClient;
 import io.journalkeeper.sql.client.SQLClientAccessPoint;
-import io.journalkeeper.sql.client.SQLOperator;
-import io.journalkeeper.sql.client.support.DefaultSQLOperator;
 import io.journalkeeper.sql.server.SQLServer;
 import io.journalkeeper.sql.server.SQLServerAccessPoint;
 import io.journalkeeper.sql.state.config.SQLConfigs;
@@ -34,6 +33,8 @@ import org.joyqueue.nsr.InternalServiceProvider;
 import org.joyqueue.nsr.NsrPlugins;
 import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfig;
 import org.joyqueue.nsr.journalkeeper.config.JournalkeeperConfigKey;
+import org.joyqueue.nsr.journalkeeper.operator.JournalkeeperSQLOperator;
+import org.joyqueue.nsr.sql.operator.SQLOperator;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.config.PropertySupplierAware;
@@ -51,6 +52,7 @@ import java.util.concurrent.TimeUnit;
  * author: gaohaoxiang
  * date: 2019/8/12
  */
+@Extension(order = 100)
 public class JournalkeeperInternalServiceProvider extends Service implements InternalServiceProvider, PropertySupplierAware {
 
     protected static final Logger logger = LoggerFactory.getLogger(JournalkeeperInternalServiceProvider.class);
@@ -125,8 +127,8 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
             SQLClientAccessPoint clientAccessPoint = new SQLClientAccessPoint(journalkeeperProperties);
             this.sqlClient = clientAccessPoint.createClient(nodes);
         }
-        this.sqlOperator = new DefaultSQLOperator(this.sqlClient);
-        BatchOperationContext.init(sqlOperator);
+        this.sqlOperator = new JournalkeeperSQLOperator(this.sqlClient);
+        JournalkeeperBatchOperationContext.init(sqlOperator);
         this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator, this.tracer);
         this.journalkeeperInternalServiceManager.start();
     }

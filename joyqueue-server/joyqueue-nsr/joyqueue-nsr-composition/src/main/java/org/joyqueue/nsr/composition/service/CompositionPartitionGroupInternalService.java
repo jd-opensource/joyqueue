@@ -34,68 +34,68 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
     protected final Logger logger = LoggerFactory.getLogger(CompositionPartitionGroupInternalService.class);
 
     private CompositionConfig config;
-    private PartitionGroupInternalService ignitePartitionGroupService;
-    private PartitionGroupInternalService journalkeeperPartitionGroupService;
+    private PartitionGroupInternalService sourcePartitionGroupService;
+    private PartitionGroupInternalService targetPartitionGroupService;
 
-    public CompositionPartitionGroupInternalService(CompositionConfig config, PartitionGroupInternalService ignitePartitionGroupService,
-                                                    PartitionGroupInternalService journalkeeperPartitionGroupService) {
+    public CompositionPartitionGroupInternalService(CompositionConfig config, PartitionGroupInternalService sourcePartitionGroupService,
+                                                    PartitionGroupInternalService targetPartitionGroupService) {
         this.config = config;
-        this.ignitePartitionGroupService = ignitePartitionGroupService;
-        this.journalkeeperPartitionGroupService = journalkeeperPartitionGroupService;
+        this.sourcePartitionGroupService = sourcePartitionGroupService;
+        this.targetPartitionGroupService = targetPartitionGroupService;
     }
 
     @Override
     public PartitionGroup getByTopicAndGroup(TopicName topic, int group) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupService.getByTopicAndGroup(topic, group);
+        if (config.isReadSource()) {
+            return sourcePartitionGroupService.getByTopicAndGroup(topic, group);
         } else {
             try {
-                return journalkeeperPartitionGroupService.getByTopicAndGroup(topic, group);
+                return targetPartitionGroupService.getByTopicAndGroup(topic, group);
             } catch (Exception e) {
                 logger.error("getByTopicAndGroup exception, topic: {}, group: {}", topic, group, e);
-                return ignitePartitionGroupService.getByTopicAndGroup(topic, group);
+                return sourcePartitionGroupService.getByTopicAndGroup(topic, group);
             }
         }
     }
 
     @Override
     public List<PartitionGroup> getByTopic(TopicName topic) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupService.getByTopic(topic);
+        if (config.isReadSource()) {
+            return sourcePartitionGroupService.getByTopic(topic);
         } else {
             try {
-                return journalkeeperPartitionGroupService.getByTopic(topic);
+                return targetPartitionGroupService.getByTopic(topic);
             } catch (Exception e) {
                 logger.error("getByTopic exception, topic: {}", topic, e);
-                return ignitePartitionGroupService.getByTopic(topic);
+                return sourcePartitionGroupService.getByTopic(topic);
             }
         }
     }
 
     @Override
     public PartitionGroup getById(String id) {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupService.getById(id);
+        if (config.isReadSource()) {
+            return sourcePartitionGroupService.getById(id);
         } else {
             try {
-                return journalkeeperPartitionGroupService.getById(id);
+                return targetPartitionGroupService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id: {}", id, e);
-                return ignitePartitionGroupService.getById(id);
+                return sourcePartitionGroupService.getById(id);
             }
         }
     }
 
     @Override
     public List<PartitionGroup> getAll() {
-        if (config.isReadIgnite()) {
-            return ignitePartitionGroupService.getAll();
+        if (config.isReadSource()) {
+            return sourcePartitionGroupService.getAll();
         } else {
             try {
-                return journalkeeperPartitionGroupService.getAll();
+                return targetPartitionGroupService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return ignitePartitionGroupService.getAll();
+                return sourcePartitionGroupService.getAll();
             }
         }
     }
@@ -103,14 +103,14 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
     @Override
     public PartitionGroup add(PartitionGroup partitionGroup) {
         PartitionGroup result = null;
-        if (config.isWriteIgnite()) {
-            result = ignitePartitionGroupService.add(partitionGroup);
+        if (config.isWriteSource()) {
+            result = sourcePartitionGroupService.add(partitionGroup);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperPartitionGroupService.add(partitionGroup);
+                targetPartitionGroupService.add(partitionGroup);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", partitionGroup, e);
+                logger.error("add exception, params: {}", partitionGroup, e);
             }
         }
         return result;
@@ -119,14 +119,14 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
     @Override
     public PartitionGroup update(PartitionGroup partitionGroup) {
         PartitionGroup result = null;
-        if (config.isWriteIgnite()) {
-            result = ignitePartitionGroupService.update(partitionGroup);
+        if (config.isWriteSource()) {
+            result = sourcePartitionGroupService.update(partitionGroup);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperPartitionGroupService.update(partitionGroup);
+                targetPartitionGroupService.update(partitionGroup);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", partitionGroup, e);
+                logger.error("update exception, params: {}", partitionGroup, e);
             }
         }
         return result;
@@ -134,14 +134,14 @@ public class CompositionPartitionGroupInternalService implements PartitionGroupI
 
     @Override
     public void delete(String id) {
-        if (config.isWriteIgnite()) {
-            ignitePartitionGroupService.delete(id);
+        if (config.isWriteSource()) {
+            sourcePartitionGroupService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperPartitionGroupService.delete(id);
+                targetPartitionGroupService.delete(id);
             } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
+                logger.error("deleteById exception, params: {}", id, e);
             }
         }
     }

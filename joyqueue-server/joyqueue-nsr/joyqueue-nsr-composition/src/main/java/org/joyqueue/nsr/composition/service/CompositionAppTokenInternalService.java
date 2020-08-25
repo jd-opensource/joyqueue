@@ -33,68 +33,68 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
     protected static final Logger logger = LoggerFactory.getLogger(CompositionAppTokenInternalService.class);
 
     private CompositionConfig config;
-    private AppTokenInternalService igniteAppTokenService;
-    private AppTokenInternalService journalkeeperAppTokenService;
+    private AppTokenInternalService sourceAppTokenService;
+    private AppTokenInternalService targetAppTokenService;
 
-    public CompositionAppTokenInternalService(CompositionConfig config, AppTokenInternalService igniteAppTokenService,
-                                              AppTokenInternalService journalkeeperAppTokenService) {
+    public CompositionAppTokenInternalService(CompositionConfig config, AppTokenInternalService sourceAppTokenService,
+                                              AppTokenInternalService targetAppTokenService) {
         this.config = config;
-        this.igniteAppTokenService = igniteAppTokenService;
-        this.journalkeeperAppTokenService = journalkeeperAppTokenService;
+        this.sourceAppTokenService = sourceAppTokenService;
+        this.targetAppTokenService = targetAppTokenService;
     }
 
     @Override
     public List<AppToken> getByApp(String app) {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.getByApp(app);
+        if (config.isReadSource()) {
+            return sourceAppTokenService.getByApp(app);
         } else {
             try {
-                return journalkeeperAppTokenService.getByApp(app);
+                return targetAppTokenService.getByApp(app);
             } catch (Exception e) {
                 logger.error("getByApp exception, app: {}", app, e);
-                return igniteAppTokenService.getByApp(app);
+                return sourceAppTokenService.getByApp(app);
             }
         }
     }
 
     @Override
     public AppToken getByAppAndToken(String app, String token) {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.getByAppAndToken(app, token);
+        if (config.isReadSource()) {
+            return sourceAppTokenService.getByAppAndToken(app, token);
         } else {
             try {
-                return journalkeeperAppTokenService.getByAppAndToken(app, token);
+                return targetAppTokenService.getByAppAndToken(app, token);
             } catch (Exception e) {
                 logger.error("getByAppAndToken exception, app: {}, token: {}", app, token, e);
-                return igniteAppTokenService.getByAppAndToken(app, token);
+                return sourceAppTokenService.getByAppAndToken(app, token);
             }
         }
     }
 
     @Override
     public AppToken getById(long id) {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.getById(id);
+        if (config.isReadSource()) {
+            return sourceAppTokenService.getById(id);
         } else {
             try {
-                return journalkeeperAppTokenService.getById(id);
+                return targetAppTokenService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id: {}", id, e);
-                return igniteAppTokenService.getById(id);
+                return sourceAppTokenService.getById(id);
             }
         }
     }
 
     @Override
     public List<AppToken> getAll() {
-        if (config.isReadIgnite()) {
-            return igniteAppTokenService.getAll();
+        if (config.isReadSource()) {
+            return sourceAppTokenService.getAll();
         } else {
             try {
-                return journalkeeperAppTokenService.getAll();
+                return targetAppTokenService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return igniteAppTokenService.getAll();
+                return sourceAppTokenService.getAll();
             }
         }
     }
@@ -102,14 +102,14 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
     @Override
     public AppToken add(AppToken appToken) {
         AppToken result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteAppTokenService.add(appToken);
+        if (config.isWriteSource()) {
+            result = sourceAppTokenService.add(appToken);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                return journalkeeperAppTokenService.add(appToken);
+                return targetAppTokenService.add(appToken);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", appToken, e);
+                logger.error("add exception, params: {}", appToken, e);
             }
         }
         return result;
@@ -118,14 +118,14 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
     @Override
     public AppToken update(AppToken appToken) {
         AppToken result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteAppTokenService.update(appToken);
+        if (config.isWriteSource()) {
+            result = sourceAppTokenService.update(appToken);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                return journalkeeperAppTokenService.update(appToken);
+                return targetAppTokenService.update(appToken);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", appToken, e);
+                logger.error("update exception, params: {}", appToken, e);
             }
         }
         return result;
@@ -133,14 +133,14 @@ public class CompositionAppTokenInternalService implements AppTokenInternalServi
 
     @Override
     public void delete(long id) {
-        if (config.isWriteIgnite()) {
-            igniteAppTokenService.delete(id);
+        if (config.isWriteSource()) {
+            sourceAppTokenService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperAppTokenService.delete(id);
+                targetAppTokenService.delete(id);
             } catch (Exception e) {
-                logger.error("deleteById journalkeeper exception, params: {}", id, e);
+                logger.error("deleteById exception, params: {}", id, e);
             }
         }
     }

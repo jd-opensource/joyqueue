@@ -24,6 +24,12 @@ import org.joyqueue.toolkit.config.PropertyDef;
  */
 public enum CompositionConfigKey implements PropertyDef {
 
+    // 数据源
+    SOURCE("nameserver.composition.source", "ignite", PropertyDef.Type.STRING),
+
+    // 目标数据源
+    TARGET("nameserver.composition.target", "sql", PropertyDef.Type.STRING),
+
     // 读数据源
     READ_SOURCE("nameserver.composition.read.source", "ignite", PropertyDef.Type.STRING),
 

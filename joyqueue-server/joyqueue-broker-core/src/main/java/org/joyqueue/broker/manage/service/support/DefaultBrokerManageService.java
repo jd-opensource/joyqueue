@@ -113,8 +113,8 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
-    public String initConsumerAckIndexes() throws JoyQueueException {
-        return consumerManageService.initConsumerAckIndexes();
+    public String initConsumerAckIndexes(boolean right) throws JoyQueueException {
+        return consumerManageService.initConsumerAckIndexes(right);
     }
 
     @Override

@@ -30,54 +30,54 @@ public class CompositionTransactionInternalService implements TransactionInterna
     protected static final Logger logger = LoggerFactory.getLogger(CompositionTransactionInternalService.class);
 
     private CompositionConfig config;
-    private TransactionInternalService igniteTransactionInternalService;
-    private TransactionInternalService journalkeeperTransactionInternalService;
+    private TransactionInternalService sourceTransactionInternalService;
+    private TransactionInternalService targetTransactionInternalService;
 
-    public CompositionTransactionInternalService(CompositionConfig config, TransactionInternalService igniteTransactionInternalService,
-                                                 TransactionInternalService journalkeeperTransactionInternalService) {
+    public CompositionTransactionInternalService(CompositionConfig config, TransactionInternalService sourceTransactionInternalService,
+                                                 TransactionInternalService targetTransactionInternalService) {
         this.config = config;
-        this.igniteTransactionInternalService = igniteTransactionInternalService;
-        this.journalkeeperTransactionInternalService = journalkeeperTransactionInternalService;
+        this.sourceTransactionInternalService = sourceTransactionInternalService;
+        this.targetTransactionInternalService = targetTransactionInternalService;
     }
 
     @Override
     public void begin() {
-        if (config.isWriteIgnite()) {
-            igniteTransactionInternalService.begin();
+        if (config.isWriteSource()) {
+            sourceTransactionInternalService.begin();
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTransactionInternalService.begin();
+                targetTransactionInternalService.begin();
             } catch (Exception e) {
-                logger.info("journalkeeper transaction begin exception", e);
+                logger.info("transaction begin exception", e);
             }
         }
     }
 
     @Override
     public void commit() {
-        if (config.isWriteIgnite()) {
-            igniteTransactionInternalService.commit();
+        if (config.isWriteSource()) {
+            sourceTransactionInternalService.commit();
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTransactionInternalService.commit();
+                targetTransactionInternalService.commit();
             } catch (Exception e) {
-                logger.info("journalkeeper transaction commit exception", e);
+                logger.info("transaction commit exception", e);
             }
         }
     }
 
     @Override
     public void rollback() {
-        if (config.isWriteIgnite()) {
-            igniteTransactionInternalService.rollback();
+        if (config.isWriteSource()) {
+            sourceTransactionInternalService.rollback();
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTransactionInternalService.rollback();
+                targetTransactionInternalService.rollback();
             } catch (Exception e) {
-                logger.info("journalkeeper transaction rollback exception", e);
+                logger.info("transaction rollback exception", e);
             }
         }
     }
