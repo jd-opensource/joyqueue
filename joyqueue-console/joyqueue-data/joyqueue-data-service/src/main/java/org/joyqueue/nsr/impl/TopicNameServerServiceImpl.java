@@ -100,7 +100,7 @@ public class TopicNameServerServiceImpl extends NameServerBase implements TopicN
                         field.setAccessible(true);
                         field.set(topicPolicy, ConvertUtils.convert(entry.getValue(), field.getType()));
                     } catch (NoSuchFieldException | IllegalAccessException | UnsupportedOperationException e) {
-                        logger.error("", e);
+                        logger.error("{}", e.getMessage());
                     }
                 }
             }
