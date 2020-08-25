@@ -336,8 +336,10 @@ export default {
           let storeCleanKeepUnconsumed = item.policies.storeCleanKeepUnconsumed
           if (storeCleanKeepUnconsumed === true || storeCleanKeepUnconsumed === 'true') {
             item.storeCleanKeepUnconsumed = true
-          } else {
+          } else if (storeCleanKeepUnconsumed === false || storeCleanKeepUnconsumed === 'false') {
             item.storeCleanKeepUnconsumed = false
+          } else {
+            item.storeCleanKeepUnconsumed = ''
           }
         }
       }
