@@ -82,7 +82,7 @@
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
         <jackson-databind.version>2.10.0.pr1</jackson-databind.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
-        <hibernate-validator.version>5.3.5.Final</hibernate-validator.version>
+        <hibernate-validator.version>5.3.6.Final</hibernate-validator.version>
         <el.version>2.2.4</el.version>
         <guava.version>21.0</guava.version>
         <amq.core.version>5.6.0</amq.core.version>
