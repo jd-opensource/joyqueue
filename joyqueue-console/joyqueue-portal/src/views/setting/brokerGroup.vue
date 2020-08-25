@@ -36,7 +36,7 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="5" class="label">积压是否清消息:</grid-col>
+        <grid-col :span="5" class="label">清除未消费数据:</grid-col>
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
           <d-radio-group v-model="addData.storeCleanKeepUnconsumed">
@@ -79,12 +79,13 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="5" class="label">积压是否清消息:</grid-col>
+        <grid-col :span="5" class="label">清除未消费数据:</grid-col>
         <grid-col :span="1"/>
         <grid-col :span="14" class="val">
           <d-radio-group v-model="editData.storeCleanKeepUnconsumed">
             <d-radio :label="true">是</d-radio>
             <d-radio :label="false">否</d-radio>
+            <d-radio :label="''">置空</d-radio>
           </d-radio-group>
         </grid-col>
       </grid-row>
@@ -321,7 +322,7 @@ export default {
       if (this.addData.storeMaxTime !== undefined && this.addData.storeMaxTime > 0) {
         this.addData.policies.storeMaxTime = this.addData.storeMaxTime
       }
-      if (this.addData.storeCleanKeepUnconsumed !== undefined) {
+      if (this.addData.storeCleanKeepUnconsumed !== undefined && this.addData.storeCleanKeepUnconsumed !== '') {
         this.addData.policies.storeCleanKeepUnconsumed = this.addData.storeCleanKeepUnconsumed
       }
       this.addConfirm()
@@ -331,7 +332,7 @@ export default {
         if (item.policies.storeMaxTime !== undefined) {
           item.storeMaxTime = item.policies.storeMaxTime
         }
-        if (item.policies.storeCleanKeepUnconsumed !== undefined) {
+        if (item.policies.storeCleanKeepUnconsumed !== undefined && this.addData.storeCleanKeepUnconsumed !== '') {
           let storeCleanKeepUnconsumed = item.policies.storeCleanKeepUnconsumed
           if (storeCleanKeepUnconsumed === true || storeCleanKeepUnconsumed === 'true') {
             item.storeCleanKeepUnconsumed = true
@@ -356,7 +357,7 @@ export default {
       if (this.editData.storeMaxTime !== undefined && this.editData.storeMaxTime > 0) {
         this.editData.policies.storeMaxTime = this.editData.storeMaxTime
       }
-      if (this.editData.storeCleanKeepUnconsumed !== undefined) {
+      if (this.editData.storeCleanKeepUnconsumed !== undefined && this.addData.storeCleanKeepUnconsumed !== '') {
         this.editData.policies.storeCleanKeepUnconsumed = this.editData.storeCleanKeepUnconsumed
       }
       this.editConfirm()

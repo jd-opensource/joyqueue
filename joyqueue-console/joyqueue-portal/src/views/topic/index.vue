@@ -273,11 +273,11 @@ export default {
         this.topic.policy = {}
       }
       this.policies.push({
-        key: 'storeMaxTime',
+        key: '存储最长时间',
         value: item.policy.storeMaxTime
       })
       this.policies.push({
-        key: 'storeCleanKeepUnconsumed',
+        key: '清除未消费数据',
         value: item.policy.storeCleanKeepUnconsumed
       })
       for (let policy in this.policy) {
