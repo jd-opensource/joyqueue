@@ -18,6 +18,7 @@ package org.joyqueue.nsr.support;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.Topic;
@@ -39,7 +40,6 @@ import org.joyqueue.nsr.service.internal.BrokerInternalService;
 import org.joyqueue.nsr.service.internal.PartitionGroupInternalService;
 import org.joyqueue.nsr.service.internal.TopicInternalService;
 import org.joyqueue.nsr.service.internal.TransactionInternalService;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -479,14 +479,22 @@ public class DefaultTopicService implements TopicService {
     }
 
     protected List<Broker> getReplicas(PartitionGroup partitionGroup) {
-        return Lists.newArrayList(partitionGroup.getBrokers().values());
+        if (CollectionUtils.isNotEmpty(partitionGroup.getReplicas())) {
+            return Collections.emptyList();
+        }
+        return brokerInternalService.getByIds(Lists.newArrayList(partitionGroup.getReplicas()));
     }
 
     protected List<Broker> getReplicas(List<PartitionGroup> partitionGroups) {
-        Set<Broker> result = Sets.newHashSet();
+        List<Integer> brokerIds = Lists.newArrayList();
         for (PartitionGroup partitionGroup : partitionGroups) {
-            result.addAll(partitionGroup.getBrokers().values());
+            if (CollectionUtils.isNotEmpty(partitionGroup.getReplicas())) {
+                brokerIds.addAll(partitionGroup.getReplicas());
+            }
         }
-        return Lists.newArrayList(result);
+        if (CollectionUtils.isEmpty(brokerIds)) {
+            return Collections.emptyList();
+        }
+        return brokerInternalService.getByIds(brokerIds);
     }
 }
