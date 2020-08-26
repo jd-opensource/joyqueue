@@ -144,6 +144,7 @@ public class ClusterTestBase extends Service {
         args.append(ConfigDef.NAME_SERVER_COMPENSATION_INTERVAL.key(),"15000");
         if(engineName!=null)
             args.append(ConfigDef.STORE_ENGINE.key(),engineName);
+        System.setProperty("PreloadBufferPool.MaxMemory","30%");
         return args.build();
     }
 
