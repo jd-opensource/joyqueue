@@ -11,8 +11,8 @@ public class ClusterTest extends ClusterTestBase {
     @Before
     public  void setup() throws Exception{
         start();
-//        launchCluster(3);
-        launchJournalKeeperCluster(3);
+        launchCluster(3);
+//        launchJournalKeeperCluster(3);
     }
     /**
      * All broker

@@ -140,8 +140,8 @@ public class ClusterTestBase extends Service {
         args.append(ConfigDef.TRANSPORT_SERVER_PORT.key(),String.valueOf(port));
         args.append(ConfigDef.NAME_SERVER_JOURNAL_KEEPER_NODES.key(),journalKeeperNodes);
         args.append(ConfigDef.NAME_SERVER_COMPENSATION_CACHE_ENABLE.key(),"false");
-        args.append(ConfigDef.NAME_SERVER_ALL_METADATA_CACHE_EXPIRE_TIME.key(),"30000");
-        args.append(ConfigDef.NAME_SERVER_COMPENSATION_INTERVAL.key(),"30000");
+        args.append(ConfigDef.NAME_SERVER_ALL_METADATA_CACHE_EXPIRE_TIME.key(),"15000");
+        args.append(ConfigDef.NAME_SERVER_COMPENSATION_INTERVAL.key(),"15000");
         if(engineName!=null)
             args.append(ConfigDef.STORE_ENGINE.key(),engineName);
         return args.build();
