@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `broker` (
 	`data_center` varchar(255),
 	`retry_type` varchar(255),
 	`permission` varchar(255),
+	`external_ip` varchar(255),
 	PRIMARY KEY (`id`)
 );
 CREATE INDEX IF NOT EXISTS idx_ip_port ON broker(`ip`, `port`);

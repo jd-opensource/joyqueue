@@ -29,6 +29,12 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
+        <grid-col :span="8" class="label">对外IP:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-input v-model="editData.externalIp" oninput="value = value.trim()"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
         <grid-col :span="8" class="label">端口:</grid-col>
         <grid-col :span="16" class="val">
           <d-input v-model="editData.port" oninput="value = value.trim()"></d-input>
@@ -192,6 +198,11 @@ export default {
                 }
               }, `${ip}:${port}`)
             }
+          },
+          {
+            title: '对外Ip',
+            key: 'externalIp',
+            width: '15%'
           },
           {
             title: '机房 (编码/名称)',
@@ -420,6 +431,7 @@ export default {
           id: this.editData.id,
           brokerId: this.editData.brokerId,
           ip: this.editData.ip,
+          externalIp: this.editData.externalIp,
           port: this.editData.port,
           // dataCenter: this.editData['dataCenter'].id,
           retryType: this.editData.retryType,

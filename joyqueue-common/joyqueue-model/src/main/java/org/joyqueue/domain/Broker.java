@@ -59,8 +59,13 @@ public class Broker implements Serializable {
      * 权限
      * default FULL
      */
-
     protected PermissionEnum permission = PermissionEnum.FULL;
+
+    /**
+     * 对外IP,备用
+     */
+    protected String externalIp;
+
 
     public Integer getId() {
         return id;
@@ -226,5 +231,14 @@ public class Broker implements Serializable {
                 ", permission=" + permission +
                 '}';
     }
+
+    public String getExternalIp() {
+        return externalIp;
+    }
+
+    public void setExternalIp(String externalIp) {
+        this.externalIp = externalIp;
+    }
+
 }
 

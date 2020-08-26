@@ -41,6 +41,7 @@ public class BrokerConverter {
         brokerDTO.setDataCenter(broker.getDataCenter());
         brokerDTO.setRetryType(broker.getRetryType());
         brokerDTO.setPermission(broker.getPermission().getName());
+        brokerDTO.setExternalIp(broker.getExternalIp());
         return brokerDTO;
     }
 
@@ -55,6 +56,7 @@ public class BrokerConverter {
         broker.setDataCenter(brokerDTO.getDataCenter());
         broker.setRetryType(brokerDTO.getRetryType());
         broker.setPermission(Broker.PermissionEnum.value(brokerDTO.getPermission()));
+        broker.setExternalIp(brokerDTO.getExternalIp());
         return broker;
     }
 

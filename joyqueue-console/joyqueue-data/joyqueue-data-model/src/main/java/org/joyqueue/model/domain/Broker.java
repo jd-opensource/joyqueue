@@ -74,6 +74,8 @@ public class Broker extends BaseModel {
 
     private String permission=DEFAULT_PERMISSION;
 
+    private String externalIp;
+
     public Broker() {
         super();
     }
@@ -182,6 +184,14 @@ public class Broker extends BaseModel {
 
     public void setPermission(String permission) {
         this.permission = permission;
+    }
+
+    public String getExternalIp() {
+        return externalIp;
+    }
+
+    public void setExternalIp(String externalIp) {
+        this.externalIp = externalIp;
     }
 
     @Override

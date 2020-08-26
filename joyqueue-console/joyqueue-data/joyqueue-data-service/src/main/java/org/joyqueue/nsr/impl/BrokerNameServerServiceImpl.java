@@ -111,6 +111,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
             nsrBroker.setPermission(org.joyqueue.domain.Broker.PermissionEnum.value(broker.getPermission()));
         }
         nsrBroker.setId(Long.valueOf(broker.getId()).intValue());
+        nsrBroker.setExternalIp(broker.getExternalIp());
         //nsrBroker.setDataCenter(broker.getDataCenter().getCode());
         String result1 = postWithLog(UPDATE_BROKER, nsrBroker,OperLog.Type.BROKER.value(),OperLog.OperType.UPDATE.value(),String.valueOf(broker.getId()));
         return isSuccess(result1);
@@ -136,6 +137,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
             broker.setPort(nsrBroker.getPort());
             broker.setRetryType(nsrBroker.getRetryType());
             broker.setDataCenter(new Identity(0L,"UNKNOW"));
+            broker.setExternalIp(nsrBroker.getExternalIp());
             brokerList.add(broker);
         });
         return brokerList;
@@ -162,6 +164,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
             brokerQuery.setIp(query.getIp());
             brokerQuery.setKeyword(query.getKeyword());
             brokerQuery.setBrokerList(query.getInBrokerIds());
+            brokerQuery.setExternalIp(query.getExternalIp());
         }
         return brokerQuery;
     }

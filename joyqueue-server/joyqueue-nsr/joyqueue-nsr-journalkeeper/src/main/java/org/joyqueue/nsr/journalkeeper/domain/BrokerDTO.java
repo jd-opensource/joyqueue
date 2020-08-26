@@ -32,6 +32,8 @@ public class BrokerDTO extends BaseDTO {
     @Column(alias = "retry_type")
     private String retryType;
     private String permission;
+    @Column(alias = "external_ip")
+    private String externalIp;
 
     public Long getId() {
         return id;
@@ -79,5 +81,13 @@ public class BrokerDTO extends BaseDTO {
 
     public void setPermission(String permission) {
         this.permission = permission;
+    }
+
+    public String getExternalIp() {
+        return externalIp;
+    }
+
+    public void setExternalIp(String externalIp) {
+        this.externalIp = externalIp;
     }
 }

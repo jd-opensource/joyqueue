@@ -89,9 +89,14 @@ export default {
             }
           },
           {
+            title: '对外Ip',
+            key: 'externalIp',
+            width: '15%'
+          },
+          {
             title: '机房 [编码/名称]',
             key: 'dataCenter.code',
-            width: '15%',
+            width: '10%',
             formatter (item) {
               if (item.dataCenter) {
                 return item.dataCenter.code + '/' + item.dataCenter.name
@@ -106,12 +111,12 @@ export default {
           {
             title: '版本',
             key: 'startupInfo.version',
-            width: '12%'
+            width: '10%'
           },
           {
             title: '启动时间',
             key: 'startupInfo.startupTime',
-            width: '15%',
+            width: '10%',
             formatter (item) {
               if (item.startupInfo) {
                 return timeStampToString(item.startupInfo.startupTime)
