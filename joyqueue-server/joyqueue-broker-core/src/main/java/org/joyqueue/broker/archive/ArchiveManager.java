@@ -86,8 +86,8 @@ public class ArchiveManager extends Service {
             super.doStart();
             sendArchiveService.start();
             consumeArchiveService.start();
-            logger.info("archive manager started.");
         }
+        logger.info("Archive manager {} started.",archiveConfig.isStartArchive());
     }
 
     @Override

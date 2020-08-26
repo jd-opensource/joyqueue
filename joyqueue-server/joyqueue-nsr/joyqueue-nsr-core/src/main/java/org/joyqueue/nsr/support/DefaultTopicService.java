@@ -33,7 +33,7 @@ import org.joyqueue.nsr.event.RemoveTopicEvent;
 import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.nsr.event.UpdateTopicEvent;
 import org.joyqueue.nsr.exception.NsrException;
-import org.joyqueue.nsr.message.Messenger;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.model.TopicQuery;
 import org.joyqueue.nsr.service.TopicService;
 import org.joyqueue.nsr.service.internal.BrokerInternalService;

@@ -92,7 +92,7 @@ public abstract class DoubleCopy implements Closeable {
         doFlush();
         Close.close(raf);
         raf = null;
-        logger.info(getName() + " is stopped.");
+        logger.info(getName() + "is closed.");
     }
 
     /**

@@ -30,6 +30,8 @@ import org.joyqueue.network.transport.session.session.config.TransportSessionCon
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.service.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentMap;
 
@@ -40,13 +42,14 @@ import java.util.concurrent.ConcurrentMap;
  * date: 2018/12/4
  */
 public class CoordinatorService extends Service {
-
+    private static final Logger LOG= LoggerFactory.getLogger(CoordinatorService.class);
     private CoordinatorConfig config;
     private ClusterManager clusterManager;
     private NameService nameService;
 
     private CoordinatorInitializer coordinatorInitializer;
     private CoordinatorResolver coordinatorResolver;
+
     private TransportSessionManager coordinatorSessionManager;
     private Coordinator coordinator;
 
@@ -68,6 +71,7 @@ public class CoordinatorService extends Service {
     @Override
     protected void doStart() throws Exception {
         coordinatorInitializer.init();
+        LOG.info("Coordinator service started");
     }
 
     public Coordinator getCoordinator() {

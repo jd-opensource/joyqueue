@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 package org.joyqueue.broker.consumer;
+
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.model.OwnerShip;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.network.session.Consumer;
+
 import java.util.List;
 
 /**

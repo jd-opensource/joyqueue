@@ -46,11 +46,12 @@ public class TransactionSynchronizer extends Service {
     private KafkaConfig config;
     private TransactionIdManager transactionIdManager;
     private TransactionLog transactionLog;
+
     private TransportSessionManager sessionManager;
     private ClusterNameService clusterNameService;
-
     private TransactionCommitSynchronizer transactionCommitSynchronizer;
     private TransactionAbortSynchronizer transactionAbortSynchronizer;
+
 
     public TransactionSynchronizer(KafkaConfig config, TransactionIdManager transactionIdManager, TransactionLog transactionLog,
                                    TransportSessionManager sessionManager, ClusterNameService clusterNameService) {

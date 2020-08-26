@@ -338,7 +338,7 @@ public class JournalKeeperPartitionGroupStoreTest {
             Properties properties = new Properties();
             properties.setProperty("working_dir", groupBase.getAbsolutePath());
             JournalKeeperPartitionGroupStore store =
-                    new JournalKeeperPartitionGroupStore(
+                    new JournalKeeperPartitionGroupStore(null,
                             topic,
                             partitionGroup,
                             RaftServer.Roll.VOTER,

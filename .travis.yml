@@ -2,6 +2,6 @@ language: java
 jdk:
   - openjdk8
 script:
-  - mvn clean install
+  - mvn -q clean install
 after_success:
-  - mvn clean test jacoco:report coveralls:report
+  - mvn -q clean test jacoco:report coveralls:report

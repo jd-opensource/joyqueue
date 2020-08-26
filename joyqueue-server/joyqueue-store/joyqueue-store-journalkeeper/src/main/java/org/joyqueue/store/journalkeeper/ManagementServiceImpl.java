@@ -45,8 +45,12 @@ public class ManagementServiceImpl implements StoreManagementService {
         topicMetric.setPartitionGroupMetrics(
                 storeMap.entrySet().stream().map(entry -> {
                     JournalKeeperStore.TopicPartitionGroup group = entry.getKey();
-                    JournalKeeperPartitionGroupStore store = entry.getValue();
-                    return getPartitionGroupMetric(group, store);
+                    if(group.getTopic().equals(topic)) {
+                        JournalKeeperPartitionGroupStore store = entry.getValue();
+                        return getPartitionGroupMetric(group, store);
+                    }else{
+                        return null;
+                    }
                 }).filter(Objects::nonNull).toArray(PartitionGroupMetric[]::new)
         );
         return topicMetric;

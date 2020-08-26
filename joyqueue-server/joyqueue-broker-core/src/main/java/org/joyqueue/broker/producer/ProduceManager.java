@@ -277,7 +277,7 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
         String topic = producer.getTopic();
         List<Short> partitions = clusterManager.getLocalPartitions(TopicName.parse(topic));
         if (partitions == null || partitions.size() == 0) {
-            logger.error("no partitions available topic:%s", topic);
+            logger.error("no partitions available topic:{}", topic);
             throw new JoyQueueException(JoyQueueCode.CN_NO_PERMISSION);
         }
         long startTime = SystemClock.now();

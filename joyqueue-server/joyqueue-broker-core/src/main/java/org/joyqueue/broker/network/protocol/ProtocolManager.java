@@ -17,6 +17,8 @@ package org.joyqueue.broker.network.protocol;
 
 import com.google.common.collect.Lists;
 import com.jd.laf.extension.ExtensionManager;
+import com.jd.laf.extension.ExtensionPoint;
+import com.jd.laf.extension.SpiLoader;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.network.protocol.support.ProtocolServerWrapper;
@@ -25,6 +27,7 @@ import org.joyqueue.network.protocol.Protocol;
 import org.joyqueue.network.protocol.ProtocolException;
 import org.joyqueue.network.protocol.ProtocolServer;
 import org.joyqueue.network.protocol.ProtocolService;
+import org.joyqueue.plugin.ExtensionPointLazyExt;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
@@ -55,7 +58,11 @@ public class ProtocolManager extends Service {
     private List<Protocol> protocols = Lists.newLinkedList();
     private List<ProtocolService> protocolServices = Lists.newLinkedList();
     private List<ProtocolServer> protocolServers = Lists.newLinkedList();
-
+    /**
+     *
+     * Protocol service extensions loader
+     **/
+    private static ExtensionPoint<ProtocolService,String> protocolServiceExtensionPoint=new ExtensionPointLazyExt(ProtocolService.class, SpiLoader.INSTANCE,null,null);
     public ProtocolManager(BrokerContext brokerContext) {
         this.brokerContext = brokerContext;
         this.commonThreadPool = new ThreadPoolExecutor(brokerContext.getBrokerConfig().getServerCommonThreads(), brokerContext.getBrokerConfig().getServerCommonThreads(),
@@ -151,7 +158,7 @@ public class ProtocolManager extends Service {
     }
 
     protected List<ProtocolService> doGetProtocolServices() {
-        return Lists.newArrayList(ExtensionManager.getOrLoadExtensions(ProtocolService.class));
+        return Lists.newArrayList(protocolServiceExtensionPoint.extensions());
     }
 
     protected List<ProtocolServer> doGetProtocolServers() {

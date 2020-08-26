@@ -16,6 +16,8 @@
 package org.joyqueue.broker.handler;
 
 import org.joyqueue.broker.BrokerContext;
+import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.command.BooleanAck;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
@@ -23,6 +25,8 @@ import org.joyqueue.network.transport.command.Type;
 import org.joyqueue.network.transport.command.handler.CommandHandler;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.network.command.NsrCommandType;
+import org.joyqueue.nsr.network.command.UpdatePartitionGroup;
+import org.joyqueue.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +38,10 @@ import org.slf4j.LoggerFactory;
 public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
     private static Logger logger = LoggerFactory.getLogger(PartitionGroupLeaderChangeHandler.class);
     private NameServiceConfig config;
-
+    private StoreService storeService;
     public PartitionGroupLeaderChangeHandler(BrokerContext brokerContext){
         this.config = new NameServiceConfig(brokerContext.getPropertySupplier());
+        this.storeService = brokerContext.getStoreService();
     }
     @Override
     public int type() {
@@ -52,14 +57,14 @@ public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
             logger.error("PartitionGroupLeaderChangeHandler request command is null");
             return null;
         }
-//        UpdatePartitionGroup request = (UpdatePartitionGroup) command.getPayload();
-//        PartitionGroup group = request.getPartitionGroup();
-//        try {
-//            electionService.onLeaderChange(group.getTopic(),group.getGroup(),group.getLeader());
-//        } catch (Exception e) {
-//            logger.error(String.format("PartitionGroupLeaderChangeHandler request command[%s] error", command.getPayload()), e);
-//            return BooleanAck.build(JoyQueueCode.CN_UNKNOWN_ERROR, e.getMessage());
-//        }
+        UpdatePartitionGroup request = (UpdatePartitionGroup) command.getPayload();
+        PartitionGroup group = request.getPartitionGroup();
+        try {
+            storeService.updatePreferredLeader(group.getTopic().getFullName(),group.getGroup(),group.getLeader());
+        } catch (Exception e) {
+            logger.error(String.format("PartitionGroupLeaderChangeHandler request command[%s] error", command.getPayload()), e);
+            return BooleanAck.build(JoyQueueCode.CN_UNKNOWN_ERROR, e.getMessage());
+        }
         return BooleanAck.build();
     }
 }

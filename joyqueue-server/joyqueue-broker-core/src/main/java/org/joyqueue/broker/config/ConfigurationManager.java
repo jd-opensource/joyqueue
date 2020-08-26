@@ -56,17 +56,40 @@ public class ConfigurationManager extends Service implements EventListener<NameS
 
     private Configuration configuration;
     private String configPath = DEFAULT_CONFIG_PATH;
+    private String[] args;
+    private List<Property> overrideProperties;
 
     public ConfigurationManager(String[] args) {
-
+            this.args=args;
     }
     private void parseParams(Configuration configuration, String[] args) {
         //TODO 解析参数
+
     }
 
     public ConfigurationManager(String configPath) {
         if (configPath != null && !configPath.isEmpty()) {
             this.configPath = configPath;
+        }
+    }
+
+    /**
+     * Parse config from args
+     *
+     **/
+    private void parseConfigFromArgs() throws Exception{
+        if(args!=null&&args.length>0){
+           boolean containConfigFile= args[0].endsWith(".properties");
+           if(containConfigFile) {
+                this.configPath = args[0];
+                if (args.length > 1) {
+                    String[] overrideArgs = new String[args.length - 1];
+                    System.arraycopy(args, 1, overrideArgs, 0, overrideArgs.length);
+                    overrideProperties = OptionParser.parse(overrideArgs);
+                }
+            }else {
+                overrideProperties = OptionParser.parse(args);
+            }
         }
     }
 
@@ -79,6 +102,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
     protected void validate() throws Exception {
         super.validate();
         SystemConfigLoader.load();
+        parseConfigFromArgs();
         if (configuration == null) {
             this.configuration = buildConfiguration();
         }
@@ -113,6 +137,7 @@ public class ConfigurationManager extends Service implements EventListener<NameS
         } else {
             logger.info("No {} in classpath, using default.", this.configPath);
         }
+        overrideProperties(configuration);
         return configuration;
     }
 
@@ -137,6 +162,16 @@ public class ConfigurationManager extends Service implements EventListener<NameS
         logger.info("configuration manager is stopped");
     }
 
+    /**
+     * Override properties by args
+     **/
+    private void overrideProperties(Configuration config){
+        if(overrideProperties!=null){
+            for(Property pro:overrideProperties) {
+                config.addProperty(pro.getKey(),pro.getString());
+            }
+        }
+    }
 
     private void doUpdateConfig() {
         if (configProvider != null) {

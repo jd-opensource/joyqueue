@@ -43,6 +43,7 @@ import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.NsrPlugins;
 import org.joyqueue.nsr.config.NameServerConfig;
 import org.joyqueue.nsr.exception.NsrException;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.network.NsrTransportServerFactory;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -488,6 +489,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
                 .build();
         try {
             transportServer.start();
+            logger.info("Name Server on {} started",nameServerConfig.getServicePort());
         } catch (Exception e) {
             throw new NsrException(e);
         }
@@ -499,6 +501,11 @@ public class NameServer extends Service implements NameService, PropertySupplier
         serverConfig.setAcceptThreadName("joyqueue-nameserver-accept-eventLoop");
         serverConfig.setIoThreadName("joyqueue-nameserver-io-eventLoop");
         return transportServerFactory.bind(serverConfig, serverConfig.getHost(), serverConfig.getPort());
+    }
+
+    @Override
+    public Messenger messenger() {
+        return delegate.messenger();
     }
 
     @Override

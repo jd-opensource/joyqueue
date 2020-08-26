@@ -542,6 +542,7 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         return records;
     }
 
+
     /**
      * Build partition group replica lag
      *
@@ -585,21 +586,12 @@ public class DefaultConverter implements Converter<BrokerStatExt, List<MonitorRe
         String[] metrics = {PG_SLICE_ELECTION_TERM, PG_SLICE_ELECTION_TYPE, PG_SLICE_REPLICA_STAT};
         List<MonitorRecord> electionAndReplicaRecords = buildEmptyRecords(electionRecord, metrics);
         // compose value
-//        if (partitionGroupStat.getReplicationStat().getStat().getState() != null
-//                && partitionGroupStat.getElectionEventStat().getState() != null) {
-//            // term
-//            electionAndReplicaRecords.get(0).setValue(partitionGroupStat.getElectionEventStat().getTerm());
-//            // type
-//            electionAndReplicaRecords.get(1).setValue(partitionGroupStat.getElectionEventStat().getState().ordinal());
-//            electionAndReplicaRecords.get(2).setValue(partitionGroupStat.getReplicationStat().getStat().getState().ordinal());
-//        } else {
             electionAndReplicaRecords.get(0).setValue(0);
             electionAndReplicaRecords.get(1).setValue(0);
             electionAndReplicaRecords.get(2).setValue(0);
-//        }
+
         return electionAndReplicaRecords;
     }
-
     /**
      * Heap,non-heap, direct buffer size
      **/

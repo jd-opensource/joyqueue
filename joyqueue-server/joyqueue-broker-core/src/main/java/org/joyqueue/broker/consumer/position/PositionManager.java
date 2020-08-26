@@ -16,8 +16,8 @@
 package org.joyqueue.broker.consumer.position;
 
 import com.google.common.base.Preconditions;
-import com.jd.laf.extension.ExtensionManager;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.ConsumeConfig;
@@ -45,7 +45,6 @@ import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,7 +91,7 @@ public class PositionManager extends Service {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.config = consumeConfig;
-        this.consumePositionReplicator = new ConsumePositionReplicator(storeService, consume, brokerTransportManager, clusterManager);
+        this.consumePositionReplicator = new ConsumePositionReplicator(storeService, consume, brokerTransportManager, clusterManager,consumeConfig);
         Preconditions.checkArgument(this.config != null, "config can not be null");
     }
 
@@ -100,9 +99,8 @@ public class PositionManager extends Service {
     protected void validate() throws Exception {
         super.validate();
         Preconditions.checkArgument(clusterManager != null, "cluster manager can not be null");
-
         if (positionStore == null) {
-            positionStore = ExtensionManager.getOrLoadExtension(PositionStore.class);
+            positionStore= Plugins.POSITION_STORE.get();
             if (positionStore instanceof LocalFileStore) {
                 ((LocalFileStore) positionStore).setBasePath(config.getConsumePositionPath());
             }
@@ -123,9 +121,9 @@ public class PositionManager extends Service {
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(this::compensationPosition)
                 .build();
-
+        // 消费位置的复制
         this.replicationThread = LoopThread.builder()
-                .sleepTime(config.getReplicateConsumePosInterval(), config.getBroadcastIndexResetInterval())
+                .sleepTime(config.getReplicateConsumePosInterval(), config.getReplicateConsumePosInterval())
                 .name("Consume-Position-Replication-Thread")
                 .onException(e -> logger.error(e.getMessage(), e))
                 .doWork(consumePositionReplicator::replicateConsumePosition)
@@ -206,7 +204,9 @@ public class PositionManager extends Service {
                                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), element, partition);
                                 consumePartition.setPartitionGroup(partitionGroup);
                                 Position position = positionStore.get(consumePartition);
-                                consumeInfo.put(consumePartition, position);
+                                if(position!=null) {
+                                    consumeInfo.put(consumePartition, position);
+                                }
                             })
                     );
                     break;
@@ -270,7 +270,19 @@ public class PositionManager extends Service {
         Position position = positionStore.get(consumePartition);
         // 消费位置对象为空时，无此位置信息抛出异常
         if (position == null) {
-            throw new JoyQueueException(JoyQueueCode.CONSUME_POSITION_NULL, "topic=" + topic + ",app=" + app + ",partition=" + partition);
+            String infoMsg="topic=" + topic + ",app=" + app + ",partition=" + partition;
+            PartitionGroup pg=clusterManager.getPartitionGroup(topic,partition);
+            if(pg!=null) {
+               Map<ConsumePartition,Position> consumePartitionPositionMap=getConsumePosition(topic, app,pg.getGroup());
+               if(consumePartitionPositionMap!=null){
+                   logger.warn("consume position is for {},contain {}",topic,Arrays.toString(consumePartitionPositionMap.keySet().stream().map(ConsumePartition::getPartition).toArray()));
+               }else {
+                   logger.warn("consume position not init for {}", infoMsg);
+               }
+            }else{
+                logger.warn("Partition group not found for {},partition {}",topic,partition);
+            }
+            throw new JoyQueueException(JoyQueueCode.CONSUME_POSITION_NULL,infoMsg);
         }
         return position.getAckCurIndex();
     }
@@ -464,7 +476,6 @@ public class PositionManager extends Service {
      * @param partition 消费分区
      * @return 指定分区已经消费到的消息序号
      */
-
     private long getMaxMsgIndex(TopicName topic, short partition, int groupId) {
         try {
             PartitionGroupStore store = storeService.getStore(topic.getFullName(), groupId);
@@ -507,7 +518,7 @@ public class PositionManager extends Service {
             consumePartition.setPartitionGroup(partitionGroupId);
 
             // 获取当前（主题+分区）的最大消息序号
-            long currentIndex = getMaxMsgIndex(topic, partition, partitionGroupId);
+            long currentIndex = getMaxMsgIndex(topic, partition,partitionGroupId);
             currentIndex = Math.max(currentIndex, 0);
             // 为新订阅的应用初始化消费位置对象
             Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
@@ -576,26 +587,27 @@ public class PositionManager extends Service {
             long currentIndex = getMaxMsgIndex(topic, partition, partitionGroup.getGroup());
             long currentIndexVal = Math.max(currentIndex, 0);
 
+
             appList.stream().forEach(app -> {
                 ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
                 consumePartition.setPartitionGroup(partitionGroup.getGroup());
-
-                // 为新订阅的应用初始化消费位置对象
-                Position position = new Position(currentIndex, currentIndex, currentIndex, currentIndex);
+                long nextAckIndex=Math.max(currentIndex,0);
+                //为新订阅的应用初始化消费位置对象
+                Position position = new Position(nextAckIndex, nextAckIndex, nextAckIndex, nextAckIndex);
 
                 Position previous = positionStore.putIfAbsent(consumePartition, position);
 
                 //如果当前应答位置大于索引的最大位置，则将最大位置设置为应答位置（当移除PartitionGroup事件没有通知到的情况下可能会出现）
                 if (previous != null) {
                     long ackCurIndex = previous.getAckCurIndex();
-                    if (ackCurIndex > currentIndex) {
-                        previous.setAckCurIndex(currentIndex);
+                    if (ackCurIndex > nextAckIndex) {
+                        previous.setAckCurIndex(nextAckIndex);
                         changed.set(true);
-                        logger.warn("Update consume position topic:{}, app:{}, partition:{}, curIndex:{}, ackIndex:{}", topic.getFullName(), app, partition, currentIndex, ackCurIndex);
+                        logger.warn("Update consume position topic:{}, app:{}, partition:{}, new ackCurIndex:{}, old ackCurIndex:{}", topic.getFullName(), app, partition, nextAckIndex, ackCurIndex);
                     }
                 } else {
                     changed.set(true);
-                    logger.info("Add consume partition topic:{}, app:{}, partition:{}, curIndex:{}", topic.getFullName(), app, partition, currentIndex);
+                    logger.info("Add consume partition topic:{}, app:{}, partition:{},new ackCurIndex:{}", topic.getFullName(), app, partition, nextAckIndex);
                 }
 
             });
@@ -752,6 +764,7 @@ public class PositionManager extends Service {
                         if (StringUtils.equals(next.getTopic(), topic.getFullName()) && /* 不在最新分区集合中 */ !newPartitionSet.contains(next.getPartition())) {
                             // 缓存中的分区位置信息，不在最新的分区集合中，则删除
                             iterator.remove();
+                            logger.warn("{}/{} Consume position removed",topic.getFullName(),next.getPartition());
                         }
                     }
 

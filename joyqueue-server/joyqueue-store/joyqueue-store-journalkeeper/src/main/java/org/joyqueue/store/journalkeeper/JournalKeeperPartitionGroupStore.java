@@ -1,5 +1,7 @@
 package org.joyqueue.store.journalkeeper;
 
+import com.google.common.collect.Lists;
+import io.journalkeeper.core.BootStrap;
 import io.journalkeeper.core.api.AdminClient;
 import io.journalkeeper.core.api.ClusterConfiguration;
 import io.journalkeeper.core.api.JournalEntry;
@@ -11,18 +13,17 @@ import io.journalkeeper.exceptions.NotLeaderException;
 import io.journalkeeper.journalstore.JournalStoreClient;
 import io.journalkeeper.journalstore.JournalStoreServer;
 import io.journalkeeper.utils.event.EventWatcher;
+import org.joyqueue.store.*;
+import org.joyqueue.store.event.StoreNodeChangeEvent;
 import org.joyqueue.store.journalkeeper.entry.JoyQueueEntryParser;
 import org.joyqueue.store.journalkeeper.transaction.JournalKeeperTransactionStore;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
-import org.joyqueue.store.PartitionGroupStore;
-import org.joyqueue.store.ReadResult;
-import org.joyqueue.store.WriteRequest;
-import org.joyqueue.store.WriteResult;
 import org.joyqueue.store.message.MessageParser;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.service.Service;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -54,11 +51,11 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     private final int group;
     private final EventWatcher eventWatcher;
     private JournalStoreClient client;
-    private AdminClient adminClient;
+    private AdminClient localAdminClient;
     private TransactionStore transactionStore = null;
     private final ExecutorService asyncExecutor;
-
-    JournalKeeperPartitionGroupStore(
+    private final JournalKeeperStore store;
+    JournalKeeperPartitionGroupStore(JournalKeeperStore store,
             String topic,
             int group,
             RaftServer.Roll roll,
@@ -66,6 +63,7 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
             ExecutorService asyncExecutor,
             ScheduledExecutorService scheduledExecutor,
             Properties properties){
+        this.store=store;
         this.topic = topic;
         this.group = group;
         this.eventWatcher = eventWatcher;
@@ -84,12 +82,45 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
         super.doStart();
         server.start();
         this.client = server.createLocalClient();
-        this.adminClient = server.getLocalAdminClient();
+        this.localAdminClient = server.getLocalAdminClient();
         this.transactionStore = new JournalKeeperTransactionStore(client);
         if(null != eventWatcher) {
             this.client.watch(eventWatcher);
         }
+        logger.info("JournalKeeper partition group store {} started",this.getUri());
     }
+
+    /**
+     *  handle leader state change
+     **/
+    public void handleLeaderStateChange(int leaderNodeId,int term){
+        onStorageStateChange();
+    }
+
+    /**
+     * 存储节点(readable/writable)状态改变
+     **/
+    public void onStorageStateChange(){
+        CompletableFuture.runAsync(()->{
+            localAdminClient.getClusterConfiguration(server.serverUri()).thenAccept(config->{
+              List<URI> voters=config.getVoters();
+              if(voters!=null){
+                  URI leader=config.getLeader();
+                  List<StoreNode> nodes = Lists.newArrayListWithCapacity(voters.size());
+                  for(URI uri:voters){
+                      boolean isLeader=uri.equals(leader);
+                      nodes.add(new StoreNode(JoyQueueUriParser.getBrokerId(uri), isLeader, isLeader));
+                  }
+                  store.brokerContext().getEventBus().publishEvent(new StoreNodeChangeEvent(topic,group,new StoreNodes(nodes)));
+              }
+            }).exceptionally(e->{
+                logger.info("on storage state change exception",e);
+                return null;
+            });
+        });
+    }
+
+
 
     @Override
     protected void doStop() {
@@ -210,13 +241,14 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
     @Override
     public boolean readable() {
-        return writeable();
+        return writable();
     }
 
     @Override
-    public boolean writeable() {
+    public boolean writable() {
         try {
-            return adminClient.getServerStatus(getUri()).get().getVoterState() == VoterState.LEADER;
+            // 本地调用
+            return localAdminClient.getServerStatus(getUri()).get().getVoterState() == VoterState.LEADER;
         } catch (Throwable e) {
             return false;
         }
@@ -272,8 +304,21 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
 
     }
 
+    /**
+     *
+     * @param id  preferred broker id
+     */
+    void updatePreferredLeader(URI id) throws Exception{
+        try {
+            localAdminClient.setPreferredLeader(id).get();
+        }catch (Exception e){
+            logger.info("Update preferred leader exception {}",id,e);
+            throw e;
+        }
+    }
+
     private void rePartition(Collection<Short> partitions) {
-        adminClient.scalePartitions(partitions.stream().mapToInt(p -> (int) p).boxed().collect(Collectors.toSet()))
+        localAdminClient.scalePartitions(partitions.stream().mapToInt(p -> (int) p).boxed().collect(Collectors.toSet()))
                 .whenComplete((aVoid, exception) -> {
                     if(null != exception) {
                         if(exception instanceof NotLeaderException) {
@@ -290,20 +335,81 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
                 });
     }
 
+
     void maybeUpdateConfig(List<URI> newConfigs) {
-        adminClient
+        localAdminClient
             .getClusterConfiguration(server.serverUri())
             .thenAccept(clusterConfiguration -> {
-                if(!newConfigs.containsAll(clusterConfiguration.getVoters())) {
-                    updateConfig(newConfigs, clusterConfiguration);
+                List<URI> voters= Lists.newArrayList(clusterConfiguration.getVoters());
+                if(!(voters.containsAll(newConfigs)&&newConfigs.containsAll(voters))) {
+                    if(server.serverUri().equals(clusterConfiguration.getLeader())) {
+                        // leader
+                        updateConfig(newConfigs,voters);
+                        logger.info("Current leader {},local {} update cluster config.\n old {}\n new {}", clusterConfiguration.getLeader(), server.serverUri(),
+                                clusterConfiguration.getVoters(), newConfigs);
+                    }
+                }else{
+                    logger.warn("No difference,ignore new configs{}, old configs {} on {}",newConfigs,voters,server.serverUri());
                 }
+                mayWaitNewConfigReady(newConfigs,30,TimeUnit.SECONDS);
             });
 
     }
 
-    private void updateConfig(List<URI> newConfigs, ClusterConfiguration clusterConfiguration) {
-        adminClient
-            .updateVoters(clusterConfiguration.getVoters(), newConfigs)
+    /**
+     *
+     * 等待新的集群配置生效,目前只检查Leader节点是否已变更为最新配置
+     * 如果等待失败需要补偿
+     **/
+    public CompletableFuture<Boolean> mayWaitNewConfigReady(List<URI> newConfigs, long timeout, TimeUnit unit){
+        // 本节点被删除
+        logger.info("Start to waiting for new config {} on {}",newConfigs,server.serverUri());
+        CompletableFuture<Boolean> result=new CompletableFuture();
+        CompletableFuture.runAsync(()-> {
+            if (!newConfigs.contains(server.serverUri())) {
+                logger.info("Start to waiting for new config {} on {}",newConfigs,server.serverUri());
+                if(newConfigs.size()>0) {
+                    AdminClient newAdminClient = new BootStrap(newConfigs, new Properties()).getAdminClient();
+                    //轮询新集群的配置
+                    Set<URI> newConfigSet = new HashSet<>(newConfigs);
+                    long startMs = SystemClock.now();
+                    long finalTimeout = startMs + unit.toMillis(timeout);
+                    do {
+                        try {
+                            ClusterConfiguration clusterConfiguration = newAdminClient.getClusterConfiguration().get(100, TimeUnit.MILLISECONDS);
+                            Set<URI> leaderVoterSet = new HashSet<>(clusterConfiguration.getVoters());
+                            if (leaderVoterSet.size() == newConfigSet.size() && newConfigSet.containsAll(leaderVoterSet)) {
+                                store.removePartitionGroup(topic, group);
+                                result.complete(true);
+                                newAdminClient.stop();
+                                break;
+                            }
+                            if (SystemClock.now() > finalTimeout) {
+                                logger.warn("Failed to wait new config on {}", server.serverUri());
+                                result.complete(false);
+                                newAdminClient.stop();
+                                break;
+                            }
+                            Thread.sleep(100);
+                        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                            logger.warn("Wait new config exception ", e);
+                        }
+                    } while (true);
+                }else{
+                    logger.info("New config is empty,remove {}/{} right now!",topic,group);
+                    store.removePartitionGroup(topic, group);
+                }
+            }else{
+                logger.info("New config contain me {}",server.serverUri());
+            }
+        });
+        return result;
+    }
+
+
+    private void updateConfig(List<URI> newConfigs, List<URI> oldConfigs) {
+        localAdminClient
+            .updateVoters(oldConfigs, newConfigs)
             .whenComplete((success, exception) -> {
                 if(null != exception) {
                     if(exception instanceof NotLeaderException) {
@@ -323,6 +429,9 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
             });
     }
 
+    /**
+     * Local uri
+     **/
     URI getUri() {
         return server.serverUri();
     }
@@ -330,4 +439,6 @@ public class JournalKeeperPartitionGroupStore extends Service implements Partiti
     TransactionStore getTransactionStore() {
         return transactionStore;
     }
+
+
 }

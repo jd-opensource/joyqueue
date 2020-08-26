@@ -18,6 +18,7 @@ package org.joyqueue.nsr.nameservice;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.Type;
 import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.config.BrokerConfigKey;
@@ -54,6 +55,7 @@ import org.joyqueue.nsr.NameService;
 import org.joyqueue.nsr.NsrPlugins;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.exception.NsrException;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.network.NsrTransportClientFactory;
 import org.joyqueue.nsr.network.command.AddTopic;
 import org.joyqueue.nsr.network.command.GetAllBrokers;
@@ -97,6 +99,7 @@ import org.joyqueue.nsr.network.command.NsrCommandType;
 import org.joyqueue.nsr.network.command.NsrConnection;
 import org.joyqueue.nsr.network.command.Register;
 import org.joyqueue.nsr.network.command.RegisterAck;
+import org.joyqueue.plugin.ExtensionPointLazyExt;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -127,10 +130,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
 
     private NameServiceConfig nameServiceConfig;
     private PointTracer tracer;
-
+    private Messenger messenger;
     private ClientTransport clientTransport;
     private PropertySupplier propertySupplier;
     private Broker broker;
+    private final ExtensionPoint<Messenger, String> messengerExtensionPoint = new ExtensionPointLazyExt<>(Messenger.class);
     /**
      * 事件管理器
      */
@@ -157,6 +161,8 @@ public class ThinNameService extends Service implements NameService, PropertySup
                     .expireAfterWrite(nameServiceConfig.getThinCacheExpireTime(), TimeUnit.MILLISECONDS)
                     .build();
         }
+        // messenger for thin name service
+        this.messenger = messengerExtensionPoint.get(nameServiceConfig.getMessengerType());
         tracer = NsrPlugins.TRACERERVICE.get(PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE));
         clientTransport = new ClientTransport(nameServiceConfig,this);
         try {
@@ -165,6 +171,29 @@ public class ThinNameService extends Service implements NameService, PropertySup
         } catch (Exception e) {
             throw new NsrException(e);
         }
+    }
+
+    @Override
+    protected void doStart() throws Exception {
+        super.doStart();
+        // start and property
+        enrichIfNecessary(messenger);
+    }
+
+
+    protected  <T> T enrichIfNecessary(T obj) throws Exception {
+        if (obj instanceof LifeCycle) {
+            if (((LifeCycle) obj).isStarted()) {
+                return obj;
+            }
+        }
+        if (obj instanceof PropertySupplierAware) {
+            ((PropertySupplierAware) obj).setSupplier(propertySupplier);
+        }
+        if (obj instanceof LifeCycle) {
+            ((LifeCycle) obj).start();
+        }
+        return obj;
     }
 
     @Override
@@ -502,10 +531,16 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     @Override
+    public Messenger messenger() {
+        return messenger;
+    }
+
+    @Override
     protected void doStop() {
         super.doStop();
         Close.close(clientTransport);
         Close.close(eventBus);
+        Close.close(messenger);
         logger.info("name service stopped.");
     }
 

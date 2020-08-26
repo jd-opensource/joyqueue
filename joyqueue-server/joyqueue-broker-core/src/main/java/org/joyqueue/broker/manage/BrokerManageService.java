@@ -29,6 +29,8 @@ import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.service.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * brokermonitor
@@ -37,7 +39,7 @@ import org.joyqueue.toolkit.service.Service;
  * date: 2018/10/15
  */
 public class BrokerManageService extends Service {
-
+    private static final Logger LOG= LoggerFactory.getLogger(BrokerManageService.class);
     private BrokerManageConfig config;
     private BrokerManageServiceManager brokerManageServiceManager;
     private BrokerManageExporter brokerManageExporter;
@@ -65,6 +67,7 @@ public class BrokerManageService extends Service {
     protected void doStart() throws Exception {
         brokerManageServiceManager.start();
         brokerManageExporter.start();
+        LOG.info("Broker manage service started");
     }
 
     @Override

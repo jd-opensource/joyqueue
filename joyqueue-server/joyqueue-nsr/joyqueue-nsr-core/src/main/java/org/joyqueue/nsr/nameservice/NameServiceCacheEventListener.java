@@ -41,7 +41,7 @@ import org.joyqueue.nsr.event.UpdateConsumerEvent;
 import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.nsr.event.UpdateProducerEvent;
 import org.joyqueue.nsr.event.UpdateTopicEvent;
-import org.joyqueue.nsr.message.MessageListener;
+import org.joyqueue.nsr.messenger.MessageListener;
 import org.joyqueue.toolkit.concurrent.EventBus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

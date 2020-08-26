@@ -30,6 +30,7 @@ import org.joyqueue.domain.Topic;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.NameServerEvent;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.lang.LifeCycle;
 
@@ -253,6 +254,15 @@ public interface NameService extends LifeCycle {
      */
     void removeListener(EventListener<NameServerEvent> listener);
 
+    /**
+     *
+     * Receive message from other name service node
+     *
+     * @since 4.2.6
+     **/
+    default Messenger messenger(){
+        return null;
+    }
     /**
      * add event
      * @param event

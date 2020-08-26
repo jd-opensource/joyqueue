@@ -16,19 +16,16 @@
 package org.joyqueue.store;
 
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
-
 import org.joyqueue.store.transaction.TransactionStore;
-
+import org.joyqueue.toolkit.config.PropertySupplier;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-
 
 /**
  * Broker 存储元数据服务
  */
 public interface StoreService {
-
     /**
      * 获取事务消息使用的{@link TransactionStore}
      * @return 如果 {@link TransactionStore}存在则直接返回；
@@ -51,9 +48,20 @@ public interface StoreService {
     void removePartitionGroup(String topic, int partitionGroup);
 
     /**
-     * 从磁盘恢复partition group，系统启动时调用
+     * 从磁盘恢复或新建 partition group，系统启动时调用
+     * @param topic Topic
+     * @param partitionGroup Partition group
+     * @param partitions Partition
+     * @param brokers 所有副本（包含本节点）的BrokerId
+     * @param observers  观察者节点的BrokerId
+     * @param thisBrokerId 本节点的BrokerId
+     * @param extend  partition group extend properties
+     * @return See {@link PartitionGroupStore}
+     *
      */
-    PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId);
+
+    PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers,
+                                                      int thisBrokerId,PropertySupplier extend) throws Exception;
 
     /**
      * 创建PartitionGroup。仅当topic创建或者向topic中添加partitionGroup的时候调用，需要提供节点信息。
@@ -62,10 +70,13 @@ public interface StoreService {
      * @param partitionGroup Partition group
      * @param partitions Partition
      * @param brokers 所有副本（包含本节点）的BrokerId
+     * @param observers  观察者节点的BrokerId
      * @param thisBrokerId 本节点的BrokerId
+     * @param extend  partition group extend properties
      * @return See {@link PartitionGroupStore}
      */
-    PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId);
+    PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers,List<Integer> observers,
+                                             int thisBrokerId,PropertySupplier extend) throws Exception;
 
     /**
      * 停止Partition group
@@ -99,16 +110,25 @@ public interface StoreService {
      * @throws IOException 创建/删除Partition时读写文件异常时抛出
      * @param topic Topic
      * @param partitionGroup Partition group
-     * @param partitions 变更后的Partition数组
+     * @param expectPartitions 变更后的Partition数组
      */
-    void maybeRePartition(String topic, int partitionGroup, Collection<Short> partitions) throws IOException;
+    void maybeRePartition(String topic, int partitionGroup, Collection<Short> expectPartitions) throws IOException;
 
     /**
-     * 如果当前节点是Leader，执行配置变更
-     * @param newBrokerIds 变更后的新配置
+     * 如果当前节点是Leader，执行副本分布节点变更
+     * @param newReplicaBrokerIds 变更后的新配置
      */
-    void maybeUpdateConfig(String topic, int partitionGroup, Collection<Integer> newBrokerIds);
+    void maybeUpdateReplicas(String topic, int partitionGroup,Collection<Integer> newReplicaBrokerIds) throws Exception;
 
+    /**
+     * Expect leader evenly distributed on all nodes. And predefine leader node of the partition group.
+     * Update preferred leader of the partition group
+     * @param topic  topic full name
+     * @param partitionGroup
+     * @param brokerId  preferred leader broker id
+     *
+     **/
+    void updatePreferredLeader(String topic, int partitionGroup,int brokerId) throws Exception;
     /**
      * 获取管理接口 {@link StoreManagementService} 实例
      * @return {@link StoreManagementService} 实例
@@ -121,6 +141,17 @@ public interface StoreService {
      */
     BufferPoolMonitorInfo monitorInfo();
 
+    /**
+     * Topic Transaction store
+     * @param topic  topic
+     *
+     **/
     List<TransactionStore> getTransactionStores(String topic);
-}
 
+    /**
+     *
+     * Distinguished store engine name
+     *
+     **/
+    String name();
+}

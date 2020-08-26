@@ -25,11 +25,11 @@ import java.util.Objects;
 public class Position implements Cloneable {
     // 开始应答序号
     private volatile long ackStartIndex;
-    // 结束应答序号
+    // 结束应答序号+1,下次应答的位置序号
     private volatile long ackCurIndex;
     // 开始拉取序号
     private volatile long pullStartIndex;
-    // 结束拉取序号
+    // 下次拉取位置序号,非并行消费情况下，{@code ackCurIndex==pullCurIndex}
     private volatile long pullCurIndex;
     private volatile boolean ack = false;
 

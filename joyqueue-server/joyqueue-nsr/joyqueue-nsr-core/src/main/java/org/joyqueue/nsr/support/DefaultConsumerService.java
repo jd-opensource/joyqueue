@@ -27,7 +27,7 @@ import org.joyqueue.nsr.event.AddConsumerEvent;
 import org.joyqueue.nsr.event.RemoveConsumerEvent;
 import org.joyqueue.nsr.event.UpdateConsumerEvent;
 import org.joyqueue.nsr.exception.NsrException;
-import org.joyqueue.nsr.message.Messenger;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.service.ConsumerService;
 import org.joyqueue.nsr.service.internal.BrokerInternalService;
 import org.joyqueue.nsr.service.internal.ConsumerInternalService;

@@ -100,27 +100,31 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
     protected void doStart() throws Exception {
         Properties journalkeeperProperties = convertProperties(config, propertySupplier.getProperties());
         URI currentNode = URI.create(String.format("journalkeeper://%s:%s", config.getLocal(), config.getPort()));
-        List<URI> nodes = parseNodeUris(currentNode, config.getNodes());
-
+        List<URI> nodes = parseNodeUris(config.getNodes());
+        SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
         if (Server.Roll.VOTER.name().equals(config.getRole())
                 || RaftServer.Roll.OBSERVER.name().equals(config.getRole())) {
-
             Server.Roll role = Server.Roll.valueOf(config.getRole());
-            SQLServerAccessPoint serverAccessPoint = new SQLServerAccessPoint(journalkeeperProperties);
 
-            if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
-                joinCluster(currentNode, nodes, serverAccessPoint);
-                nodes.add(currentNode);
-            } else {
-                if (CollectionUtils.isEmpty(nodes)) {
-                    nodes.add(currentNode);
-                }
+//            if (CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
+//                //joinCluster(currentNode, nodes, serverAccessPoint);
+//                nodes.add(currentNode);
+//            } else {
+//                if (CollectionUtils.isEmpty(nodes)) {
+//                    nodes.add(currentNode);
+//                }
+//            }
+            List<URI> servers = Lists.newArrayList(nodes);
+            if (CollectionUtils.isNotEmpty(servers) && !servers.contains(currentNode)) {
+                servers.add(currentNode);
+            }else if(servers.isEmpty()){
+                servers.add(currentNode);
             }
-
-            this.sqlServer = serverAccessPoint.createServer(currentNode, nodes, role);
+            this.sqlServer = serverAccessPoint.createServer(currentNode,servers, role);
             this.sqlServer.tryStart();
+            // start local and retry to join cluster
             this.sqlServer.waitClusterReady(config.getWaitLeaderTimeout(), TimeUnit.MILLISECONDS);
-            this.sqlClient = this.sqlServer.getClient();
+            this.sqlClient= this.sqlServer.getClient();
         } else {
             SQLClientAccessPoint clientAccessPoint = new SQLClientAccessPoint(journalkeeperProperties);
             this.sqlClient = clientAccessPoint.createClient(nodes);
@@ -129,30 +133,43 @@ public class JournalkeeperInternalServiceProvider extends Service implements Int
         BatchOperationContext.init(sqlOperator);
         this.journalkeeperInternalServiceManager = new JournalkeeperInternalServiceManager(this.sqlServer, this.sqlClient, this.sqlOperator, this.tracer);
         this.journalkeeperInternalServiceManager.start();
+        if ((Server.Roll.VOTER.name().equals(config.getRole())|| RaftServer.Roll.OBSERVER.name().equals(config.getRole()))&&
+                CollectionUtils.isNotEmpty(nodes) && !nodes.contains(currentNode)) {
+            joinCluster(currentNode, nodes, serverAccessPoint);
+            //logger.info("{} join {} cluster finished",currentNode, Arrays.toString(nodes.toArray(new URI[0])));
+        }
+        logger.info("JournalKeeper name service {} started",currentNode);
     }
 
+
+
+    /**
+     *  从主上获取最新的集群Voter信息， 不包含当前节点{@code currentNode }，则加入集群
+     **/
     protected void joinCluster(URI currentNode, List<URI> nodes, SQLServerAccessPoint serverAccessPoint) throws Exception {
         SQLServer remoteServer = serverAccessPoint.createRemoteServer(currentNode, nodes);
-        ClusterConfiguration clusterConfiguration = remoteServer.getAdminClient().getClusterConfiguration().get();
-        logger.info("get journalkeeper cluster, leader: {}, voters: {}", clusterConfiguration.getLeader(), clusterConfiguration.getVoters());
-
-        List<URI> currentVoters = clusterConfiguration.getVoters();
-        if (!currentVoters.contains(currentNode)) {
-            List<URI> newVoters = Lists.newArrayList(currentVoters);
-            nodes.clear();
-            nodes.addAll(currentVoters);
-            newVoters.add(currentNode);
-            logger.info("update journalkeeper cluster, oldVoters: {}, newVoters: {}", currentVoters, newVoters);
+        int maxTries=3;
+        do {
             try {
-                remoteServer.getAdminClient().updateVoters(currentVoters, newVoters).get(1000 * 1, TimeUnit.MILLISECONDS);
+                ClusterConfiguration clusterConfiguration = remoteServer.getAdminClient().getClusterConfiguration().get();
+                logger.info("Join journalkeeper cluster,local {} ,current leader: {}, voters: {}",currentNode ,clusterConfiguration.getLeader(), clusterConfiguration.getVoters());
+                List<URI> currentVoters = clusterConfiguration.getVoters();
+                if (!currentVoters.contains(currentNode)) {
+                    List<URI> newVoters = Lists.newArrayList(currentVoters);
+                    newVoters.add(currentNode);
+                        remoteServer.getAdminClient().updateVoters(currentVoters, newVoters).get(3000 * 1, TimeUnit.MILLISECONDS);
+                        logger.info("Joined journalkeeper cluster, oldVoters: {}, newVoters: {}", currentVoters, newVoters);
+                        break;
+                }
             } catch (Exception e) {
-                logger.warn("update journalkeeper cluster exception, oldVoters: {}, newVoters: {}", currentVoters, newVoters, e);
+                logger.warn("Join journalkeeper cluster exception,current {}, nodes {}",currentNode,nodes,e);
+                Thread.sleep(1000);
             }
-        }
+        }while(maxTries-->0);
         remoteServer.stop();
     }
 
-    protected static List<URI> parseNodeUris(URI currentNode, List<String> nodes) {
+    protected static List<URI> parseNodeUris( List<String> nodes) {
         List<URI> nodesUri = Lists.newArrayList();
         for (String node : nodes) {
             String[] split = node.split(":");

@@ -28,7 +28,7 @@ import org.apache.ignite.lang.IgnitePredicate;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.nsr.ignite.dao.IgniteMessageDao;
 import org.joyqueue.nsr.ignite.model.IgniteMessage;
-import org.joyqueue.nsr.message.MessageListener;
+import org.joyqueue.nsr.messenger.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

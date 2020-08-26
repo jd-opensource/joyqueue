@@ -57,6 +57,7 @@ import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -165,9 +166,9 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
             logger.warn("archive manager is null.");
         }
         this.filterMessageSupport = new FilterMessageSupport(clusterManager);
-        this.positionManager = new PositionManager(clusterManager, storeService, this, brokerContext.brokerTransportManager(), consumeConfig);
         this.partitionManager = consumeConfig.useLegacyPartitionManager() ?
                 new LegacyPartitionManager(clusterManager, sessionManager): new CasPartitionManager(clusterManager, sessionManager);
+        this.positionManager = new PositionManager(clusterManager, storeService,brokerContext.getConsume(),brokerContext.brokerTransportManager() ,consumeConfig);
         this.brokerContext.positionManager(positionManager);
         this.partitionConsumption = new PartitionConsumption(clusterManager, storeService, partitionManager, positionManager, messageRetry, filterMessageSupport, archiveManager, consumeConfig);
         this.concurrentConsumption =

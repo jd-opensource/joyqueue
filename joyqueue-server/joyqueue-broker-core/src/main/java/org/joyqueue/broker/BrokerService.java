@@ -78,33 +78,33 @@ import java.util.Set;
  * BrokerService
  */
 public class BrokerService extends Service {
-    private static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
-    private static final String NAMESERVICE_NAME = "nameserver.nsr.name";
-    private static final String DEFAULT_NAMESERVICE_NAME = "server";
-    private BrokerConfig brokerConfig;
-    private SessionManager sessionManager;
-    private BrokerMonitorService brokerMonitorService;
-    private BrokerManageService brokerManageService;
-    private Authentication authentication;
-    private ProtocolManager protocolManager;
-    private BrokerServer brokerServer;
+    protected static final Logger logger = LoggerFactory.getLogger(BrokerService.class);
+    protected static final String NAMESERVICE_NAME = "nameserver.nsr.name";
+    protected static final String DEFAULT_NAMESERVICE_NAME = "server";
+    protected BrokerConfig brokerConfig;
+    protected SessionManager sessionManager;
+    protected BrokerMonitorService brokerMonitorService;
+    protected BrokerManageService brokerManageService;
+    protected Authentication authentication;
+    protected ProtocolManager protocolManager;
+    protected BrokerServer brokerServer;
+    protected ClusterManager clusterManager;
+    protected Produce produce;
+    protected Consume consume;
+    protected StoreService storeService;
+    protected StoreInitializer storeInitializer;
+    protected MessageRetry retryManager;
+    protected BrokerContext brokerContext;
+    protected ConfigurationManager configurationManager;
+    protected NameService nameService;
+    protected CoordinatorService coordinatorService;
+    protected ArchiveManager archiveManager;
+    protected MessageConvertSupport messageConvertSupport;
+    protected ExtensionManager extensionManager;
+    protected BrokerTransportManager brokerTransportManager;
+    protected String[] args;
     private ClusterNameService clusterNameService;
-    private ClusterManager clusterManager;
-    private Produce produce;
-    private Consume consume;
-    private StoreService storeService;
-    private StoreInitializer storeInitializer;
-    private MessageRetry retryManager;
-    private BrokerContext brokerContext;
-    private ConfigurationManager configurationManager;
-    private NameService nameService;
-    private CoordinatorService coordinatorService;
-    private ArchiveManager archiveManager;
-    private MessageConvertSupport messageConvertSupport;
-    private ExtensionManager extensionManager;
-    private BrokerTransportManager brokerTransportManager;
     private BrokerEventBus brokerEventBus;
-    private String[] args;
 
     public BrokerService() {
     }
@@ -134,7 +134,7 @@ public class BrokerService extends Service {
 
         // broker transport manager
         this.brokerTransportManager = new BrokerTransportManager(new BrokerTransportConfig(configuration));
-
+        this.brokerContext.brokerTransportManager(this.brokerTransportManager);
         this.extensionManager = new ExtensionManager(brokerContext);
         this.extensionManager.before();
 
@@ -176,6 +176,7 @@ public class BrokerService extends Service {
 
         // new coordinator service
         this.coordinatorService = new CoordinatorService(configuration, clusterManager, nameService);
+
         this.brokerContext.coordinnatorService(this.coordinatorService);
 
         this.messageConvertSupport = new MessageConvertSupport();
@@ -282,7 +283,6 @@ public class BrokerService extends Service {
         Property property = configuration.getProperty(NAMESERVICE_NAME);
         NameService nameService = Plugins.NAMESERVICE.get(property == null ? DEFAULT_NAMESERVICE_NAME : property.getString());
         Preconditions.checkArgument(nameService != null, "nameService not found!");
-
         CompensatedNameService compensatedNameService = new CompensatedNameService(nameService);
         enrichIfNecessary(nameService, brokerContext);
         enrichIfNecessary(compensatedNameService, brokerContext);
@@ -290,9 +290,20 @@ public class BrokerService extends Service {
     }
 
 
+    /**
+     * Init store service
+     **/
     private StoreService getStoreService(BrokerContext brokerContext) {
-        StoreService storeService = Plugins.STORE.get();
-        Preconditions.checkArgument(storeService != null, "store service not found!");
+        BrokerStoreConfig brokerStoreconfig=new BrokerStoreConfig(brokerContext.getPropertySupplier());
+        Iterable<StoreService> it = Plugins.STORE.extensions();
+        StoreService storeService=null;
+        for(StoreService ss:it) {
+            if (brokerStoreconfig.getStorageEngineName().equals(ss.name())) {
+                 storeService=ss;
+                 break;
+            }
+        }
+        Preconditions.checkArgument(storeService != null, String.format("store service named %s not found!",brokerStoreconfig.getStorageEngineName()));
         enrichIfNecessary(storeService, brokerContext);
         return storeService;
     }
@@ -340,13 +351,13 @@ public class BrokerService extends Service {
         startIfNecessary(brokerEventBus);
         startIfNecessary(clusterNameService);
         startIfNecessary(clusterManager);
-        startIfNecessary(storeService);
-        startIfNecessary(storeInitializer);
         startIfNecessary(sessionManager);
         startIfNecessary(retryManager);
         startIfNecessary(brokerMonitorService);
         startIfNecessary(produce);
         startIfNecessary(consume);
+        startIfNecessary(storeService);
+        startIfNecessary(storeInitializer);
         //must start after store manager
         startIfNecessary(extensionManager);
         startIfNecessary(protocolManager);
@@ -371,7 +382,7 @@ public class BrokerService extends Service {
         }
 
         logger.info(buffer.toString());
-        logger.info("broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServerManager port[{}]," +
+        logger.info("JoyQueue is started, broker.id[{}],ip[{}],frontPort[{}],backendPort[{}],monitorPort[{}],nameServerManager port[{}]," +
                         "nameServer port[{}],messenger port[{}],journalkeeper port[{}]",
                 brokerConfig.getBrokerId(),
                 clusterManager.getBroker().getIp(),

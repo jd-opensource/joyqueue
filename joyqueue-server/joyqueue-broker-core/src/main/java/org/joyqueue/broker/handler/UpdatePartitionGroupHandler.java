@@ -33,10 +33,6 @@ import org.joyqueue.store.StoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.TreeSet;
-
 /**
  * @author wylixiaobin
  * Date: 2018/10/8
@@ -72,17 +68,13 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
         PartitionGroup groupNew = request.getPartitionGroup();
         PartitionGroup groupOld = clusterManager.getNameService().getTopicConfig(groupNew.getTopic()).fetchPartitionGroupByGroup(groupNew.getGroup());
         try {
-            Set<Integer> replicasNew = new TreeSet<>(groupNew.getReplicas());
-            Set<Integer> replicasOld = new TreeSet<>(groupOld.getReplicas());
-            replicasNew.removeAll(groupOld.getReplicas());
-            replicasOld.removeAll(groupNew.getReplicas());
             Integer localBrokerId = clusterManager.getBrokerId();
-            logger.info("begin updatePartitionGroup topic[{}] from [{}] to [{}] addNode[{}] removeNode[{}] localNode[{}]",
-                    groupNew.getTopic(), JSON.toJSONString(groupOld), JSON.toJSONString(groupNew), Arrays.toString(replicasNew.toArray()), Arrays.toString(replicasOld.toArray()));
+            logger.info("begin updatePartitionGroup topic[{}] from [{}] to [{}]",
+                    groupNew.getTopic(), JSON.toJSONString(groupOld), JSON.toJSONString(groupNew));
             if (!request.isRollback()) {
-                commit(groupNew, groupOld, replicasNew, replicasOld, localBrokerId);
+                commit(groupNew, groupOld, localBrokerId);
             } else {
-                rollback(groupNew, groupOld, replicasNew, replicasOld, localBrokerId);
+                rollback(groupNew, groupOld, localBrokerId);
             }
             return BooleanAck.build();
         } catch (Exception e) {
@@ -92,9 +84,31 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
     }
 
 
-    private void commit(PartitionGroup groupNew, PartitionGroup groupOld, Set<Integer> nodeAdd, Set<Integer> nodeRemove, Integer localBrokerId) throws Exception {
+    private void commit(PartitionGroup groupNew, PartitionGroup groupOld, Integer localBrokerId) throws Exception {
+        logger.info("OnUpdatePartitionGroup, from: [{}] to [{}].", groupOld, groupNew);
+        if(groupOld.getReplicas().contains(localBrokerId) || groupNew.getReplicas().contains(localBrokerId)) {
+            // 先处理副本变更
+            if(!groupOld.getReplicas().equals(groupNew.getReplicas())) {
+                storeService.maybeUpdateReplicas(groupNew.getTopic().getFullName(), groupNew.getGroup(), groupNew.getReplicas());
+            }
+            // 再处理分区变更
+            if(!groupOld.getPartitions().equals(groupNew.getPartitions())) {
+                storeService.maybeRePartition(groupNew.getTopic().getFullName(), groupNew.getGroup(), groupNew.getPartitions());
+            }
+        }
     }
 
-    private void rollback(PartitionGroup groupNew, PartitionGroup groupOld, Set<Integer> nodeAdd, Set<Integer> nodeRemove, Integer localBrokerId) throws Exception {
+    private void rollback(PartitionGroup groupNew, PartitionGroup groupOld,Integer localBrokerId) throws Exception {
+        logger.info("On rollback PartitionGroup, from: [{}] to [{}].", groupOld, groupNew);
+        if(groupOld.getReplicas().contains(localBrokerId) || groupNew.getReplicas().contains(localBrokerId)) {
+            // 先处理副本变更
+            if(!groupOld.getReplicas().equals(groupNew.getReplicas())) {
+                storeService.maybeUpdateReplicas(groupOld.getTopic().getFullName(), groupOld.getGroup(), groupOld.getReplicas());
+            }
+            // 再处理分区变更
+            if(!groupOld.getPartitions().equals(groupNew.getPartitions())) {
+                storeService.maybeRePartition(groupOld.getTopic().getFullName(), groupOld.getGroup(), groupOld.getPartitions());
+            }
+        }
     }
 }

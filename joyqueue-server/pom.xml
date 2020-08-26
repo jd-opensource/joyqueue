@@ -41,6 +41,7 @@
         <module>joyqueue-retry</module>
         <module>joyqueue-store</module>
         <module>joyqueue-nsr</module>
+        <module>joyqueue-server-common</module>
     </modules>
 
     <dependencyManagement>

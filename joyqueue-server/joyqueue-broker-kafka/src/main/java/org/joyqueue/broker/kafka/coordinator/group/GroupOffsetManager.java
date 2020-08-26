@@ -41,6 +41,7 @@ import org.joyqueue.network.transport.session.session.TransportSessionManager;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -59,6 +60,7 @@ public class GroupOffsetManager extends Service {
     private KafkaConfig config;
     private ClusterNameService clusterNameService;
     private GroupMetadataManager groupMetadataManager;
+
     private TransportSessionManager sessionManager;
 
     public GroupOffsetManager(KafkaConfig config, ClusterNameService clusterNameService, GroupMetadataManager groupMetadataManager, TransportSessionManager sessionManager) {

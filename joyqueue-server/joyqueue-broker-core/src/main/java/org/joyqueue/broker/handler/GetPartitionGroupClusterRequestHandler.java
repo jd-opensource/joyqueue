@@ -9,6 +9,7 @@ import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.command.Command;
 import org.joyqueue.network.transport.command.Type;
+import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreNode;
 import org.joyqueue.store.StoreNodes;
 import org.joyqueue.store.StoreService;
@@ -24,9 +25,10 @@ import java.util.Map;
 public class GetPartitionGroupClusterRequestHandler implements Type, BrokerCommandHandler, BrokerContextAware {
 
     private StoreService storeService;
-
+    private BrokerContext brokerContext;
     @Override
     public void setBrokerContext(BrokerContext brokerContext) {
+        this.brokerContext=brokerContext;
         this.storeService = brokerContext.getStoreService();
     }
 
@@ -37,7 +39,7 @@ public class GetPartitionGroupClusterRequestHandler implements Type, BrokerComma
         for (Map.Entry<String, List<Integer>> entry : request.getGroups().entrySet()) {
             String topic = entry.getKey();
             for (Integer partitionGroup : entry.getValue()) {
-                StoreNodes nodes = null;//storeService.getNodes(topic, partitionGroup);
+                StoreNodes nodes = localStoreNode(topic,partitionGroup);
                 if (nodes == null) {
                     continue;
                 }
@@ -49,6 +51,19 @@ public class GetPartitionGroupClusterRequestHandler implements Type, BrokerComma
             }
         }
         return new Command(response);
+    }
+
+    /**
+     * 获取主题分组本地存储的读写状态
+     * @return  主题分组对应的读写状态
+     *          或 null 当partition group 不在本节点时
+     **/
+    public StoreNodes localStoreNode(String topic,int partitionGroup){
+          PartitionGroupStore pgs= storeService.getStore(topic,partitionGroup);
+          if(pgs!=null){
+             new StoreNodes(new StoreNode(brokerContext.getBroker().getId(),pgs.writable(),pgs.readable()));
+          }
+          return null;
     }
 
     @Override

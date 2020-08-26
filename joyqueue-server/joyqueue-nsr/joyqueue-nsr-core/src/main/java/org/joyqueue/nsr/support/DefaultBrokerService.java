@@ -21,7 +21,7 @@ import org.joyqueue.model.QPageQuery;
 import org.joyqueue.nsr.config.NameServiceConfig;
 import org.joyqueue.nsr.event.UpdateBrokerEvent;
 import org.joyqueue.nsr.exception.NsrException;
-import org.joyqueue.nsr.message.Messenger;
+import org.joyqueue.nsr.messenger.Messenger;
 import org.joyqueue.nsr.model.BrokerQuery;
 import org.joyqueue.nsr.service.BrokerService;
 import org.joyqueue.nsr.service.internal.BrokerInternalService;

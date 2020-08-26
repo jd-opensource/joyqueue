@@ -50,7 +50,6 @@ public class TransactionAbortSynchronizer extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionAbortSynchronizer.class);
 
     private KafkaConfig config;
-
     private TransportSessionManager sessionManager;
     private TransactionIdManager transactionIdManager;
 

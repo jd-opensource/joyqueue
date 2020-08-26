@@ -77,7 +77,6 @@ public abstract class TransportServerSupport extends Service implements Transpor
         ChannelHandler channelHandlerPipeline = newChannelHandlerPipeline();
         ServerBootstrap serverBootstrap = newBootstrap(channelHandlerPipeline, acceptEventGroup, ioEventGroup);
         Channel channel = doBind(serverBootstrap);
-
         this.acceptEventGroup = acceptEventGroup;
         this.ioEventGroup = ioEventGroup;
         this.serverBootstrap = serverBootstrap;

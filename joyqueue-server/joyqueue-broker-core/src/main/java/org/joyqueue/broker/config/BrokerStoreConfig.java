@@ -31,6 +31,11 @@ public class BrokerStoreConfig {
     public static final boolean DEFAULT_KEEP_UNCONSUMED = true;
     public static final int DEFAULT_STORE_DISK_USAGE_MAX= 80;
     public static final int DEFAULT_STORE_DISK_USAGE_SAFE=75;
+    /**
+     * Storage service may have different implementation,a default implementation called Joy
+     *
+     **/
+    public static final String DEFAULT_STORE_ENGINE="JoyQueue";
     private PropertySupplier propertySupplier;
 
 
@@ -39,6 +44,7 @@ public class BrokerStoreConfig {
     }
 
     public enum BrokerStoreConfigKey implements PropertyDef {
+        STORE_ENGINE("store.engine", DEFAULT_STORE_ENGINE, Type.STRING),
         MAX_STORE_SIZE("store.max.store.size", DEFAULT_MAX_STORE_SIZE, Type.LONG),
         MAX_STORE_TIME("store.max.store.time", DEFAULT_MAX_STORE_TIME, Type.LONG),
         MAX_STORE_TIME_TOPIC_PREFIX("store.max.store.time.", -1, Type.LONG),
@@ -154,5 +160,15 @@ public class BrokerStoreConfig {
     public String getApplicationDataPath(){
         return propertySupplier.getOrCreateProperty(APPLICATION_DATA_PATH).getString();
     }
+
+    /**
+     *
+     * Get storage engine name
+     *
+     **/
+    public String getStorageEngineName(){
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_ENGINE);
+    }
+
 }
 

@@ -6,6 +6,7 @@ import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.store.transaction.TransactionStore;
+import org.joyqueue.toolkit.config.PropertySupplier;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -22,6 +23,7 @@ public class StoreServiceStub implements StoreService {
     public StoreServiceStub(NameService nameService) {
         this.nameService = nameService;
     }
+
 
     @Override
     public List<TransactionStore> getAllTransactionStores() {
@@ -61,12 +63,12 @@ public class StoreServiceStub implements StoreService {
     }
 
     @Override
-    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId) {
+    public PartitionGroupStore restoreOrCreatePartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, List<Integer> observers, int thisBrokerId, PropertySupplier extend) throws Exception {
         return null;
     }
 
     @Override
-    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, int thisBrokerId) {
+    public PartitionGroupStore createPartitionGroup(String topic, int partitionGroup, short[] partitions, List<Integer> brokers, List<Integer> observers, int thisBrokerId, PropertySupplier extend) throws Exception {
         return null;
     }
 
@@ -81,17 +83,27 @@ public class StoreServiceStub implements StoreService {
     }
 
     @Override
-    public void maybeRePartition(String topic, int partitionGroup, Collection<Short> partitions) throws IOException {
+    public void maybeRePartition(String topic, int partitionGroup, Collection<Short> expectPartitions) throws IOException {
 
     }
 
     @Override
-    public void maybeUpdateConfig(String topic, int partitionGroup, Collection<Integer> newBrokerIds) {
+    public void maybeUpdateReplicas(String topic, int partitionGroup, Collection<Integer> newReplicaBrokerIds) throws Exception {
+
+    }
+
+    @Override
+    public void updatePreferredLeader(String topic, int partitionGroup, int brokerId) throws Exception {
 
     }
 
     @Override
     public List<TransactionStore> getTransactionStores(String topic) {
+        return null;
+    }
+
+    @Override
+    public String name() {
         return null;
     }
 }

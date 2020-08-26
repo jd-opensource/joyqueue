@@ -59,10 +59,10 @@ public class TransactionCommitSynchronizer extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(TransactionCommitSynchronizer.class);
 
     private KafkaConfig config;
+
     private TransportSessionManager sessionManager;
     private TransactionIdManager transactionIdManager;
     private ClusterNameService clusterNameService;
-
 
     public TransactionCommitSynchronizer(KafkaConfig config, TransportSessionManager sessionManager, TransactionIdManager transactionIdManager, ClusterNameService clusterNameService) {
         this.config = config;
@@ -87,7 +87,6 @@ public class TransactionCommitSynchronizer extends Service {
                         prepare.getTransactionId(), prepare.getProducerId(), prepare.getProducerEpoch());
                 txIds.add(txId);
             }
-
 
             TransportSession session = sessionManager.getOrCreateSession(broker);
             TransactionCommitRequest transactionCommitRequest = new TransactionCommitRequest(brokerPrepare.getTopic(), brokerPrepare.getApp(), txIds);
@@ -129,6 +128,7 @@ public class TransactionCommitSynchronizer extends Service {
             Map<String, Map<Integer, IndexAndMetadata>> saveOffsetParam = buildSaveOffsetParam(entry.getValue());
 
             try {
+
                 TransportSession session = sessionManager.getOrCreateSession(broker);
                 ConsumeIndexStoreRequest indexStoreRequest = new ConsumeIndexStoreRequest(transactionMetadata.getApp(), saveOffsetParam);
                 Command request = new JoyQueueCommand(indexStoreRequest);

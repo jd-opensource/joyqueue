@@ -17,8 +17,8 @@ package org.joyqueue.service.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.ServiceException;

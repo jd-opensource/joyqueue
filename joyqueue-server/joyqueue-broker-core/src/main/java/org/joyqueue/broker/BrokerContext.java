@@ -23,7 +23,6 @@ import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.position.PositionManager;
 import org.joyqueue.broker.coordinator.CoordinatorService;
-
 import org.joyqueue.broker.event.BrokerEventBus;
 import org.joyqueue.broker.manage.BrokerManageService;
 import org.joyqueue.broker.monitor.BrokerMonitor;
@@ -66,7 +65,6 @@ public class BrokerContext {
     private MessageConvertSupport messageConvertSupport;
     private BrokerTransportManager brokerTransportManager;
     private BrokerEventBus brokerEventBus;
-
     public BrokerContext() {
     }
 
@@ -287,7 +285,6 @@ public class BrokerContext {
     public BrokerEventBus getEventBus() {
         return brokerEventBus;
     }
-
 
     public Broker getBroker() {
         return null==clusterManager?null:clusterManager.getBroker();
