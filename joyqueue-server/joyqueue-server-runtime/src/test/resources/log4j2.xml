@@ -12,7 +12,7 @@
         <root level="INFO">
             <appender-ref ref="Console"/>
         </root>
-        <logger name="org.joyqueue.store.ha.election.RaftLeaderElection" level="INFO"/>
+        <!--<logger name="org.joyqueue.store.ha.election.RaftLeaderElection" level="INFO"/>-->
     </loggers>
 
 </configuration>
