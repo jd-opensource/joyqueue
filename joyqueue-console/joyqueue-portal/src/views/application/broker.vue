@@ -79,7 +79,13 @@ export default {
           {
             title: '对外Ip',
             key: 'externalIp',
-            width: '15%'
+            width: '15%',
+            formatter (row) {
+              if (row.externalIp) {
+                return row.externalIp + ':' + row.port
+              }
+              return row.externalIp
+            }
           },
           {
             title: '机房 (编码/名称)',

@@ -167,7 +167,7 @@ export default {
           {
             title: 'Broker分组编码',
             key: 'group.code',
-            width: '15%'
+            width: '8%'
           },
           {
             title: 'IP:端口',
@@ -202,7 +202,13 @@ export default {
           {
             title: '对外Ip',
             key: 'externalIp',
-            width: '15%'
+            width: '15%',
+            formatter (row) {
+              if (row.externalIp) {
+                return row.externalIp + ':' + row.port
+              }
+              return row.externalIp
+            }
           },
           {
             title: '机房 (编码/名称)',
