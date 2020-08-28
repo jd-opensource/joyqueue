@@ -520,7 +520,7 @@ public class Consumer extends Subscription {
             }
             public Builder filters(String filtersStr) {
                 if (filtersStr != null && !"".equals(filtersStr.trim())) {
-                    String[] filterArray=filtersStr.split(",");
+                    String[] filterArray=filtersStr.split(";");
                     Map<String,String> map = new HashMap<>();
                     for (String filter:filterArray) {
                         map.put(filter.split(":")[0],filter.split(":")[1]);
