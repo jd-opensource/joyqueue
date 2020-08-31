@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     private ArchiveManager archiveManager;
     private ConsumeConfig consumeConfig;
 
-    private static final long CLEAN_INTERVAL_SEC = 600L;
+    private static final long CLEAN_INTERVAL_SEC = 60L;
 
     private final Map<ConsumePartition, SlideWindow> slideWindowMap = new ConcurrentHashMap<>();
 
@@ -133,19 +134,24 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     protected void doStart() throws Exception {
         super.doStart();
         // 定时清理已关闭并行消费或者已经失效的主题
-        scheduledExecutorService.scheduleAtFixedRate(
-                () -> slideWindowMap.entrySet().removeIf(entry -> {
-                    ConsumePartition consumePartition = entry.getKey();
-                    try {
-                        org.joyqueue.domain.Consumer.ConsumerPolicy policy = clusterManager.getConsumerPolicy(TopicName.parse(consumePartition.getTopic()), consumePartition.getApp());
-                        return !policy.isConcurrent();
-                    } catch (Exception e) {
-                        logger.warn("Clean expire error: {}", e.getMessage());
-                    }
-                    return false;
-                }),
-                CLEAN_INTERVAL_SEC + 32, CLEAN_INTERVAL_SEC, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::clearSlideWindow, CLEAN_INTERVAL_SEC + 32, CLEAN_INTERVAL_SEC, TimeUnit.SECONDS);
         logger.info("SlideWindowConcurrentConsumer is started.");
+    }
+
+    protected void clearSlideWindow() {
+        Iterator<Map.Entry<ConsumePartition, SlideWindow>> iterator = slideWindowMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<ConsumePartition, SlideWindow> entry = iterator.next();
+            ConsumePartition consumePartition = entry.getKey();
+
+            boolean isLeader = clusterManager.isLeader(consumePartition.getTopic(), consumePartition.getPartition());
+            org.joyqueue.domain.Consumer.ConsumerPolicy policy = clusterManager.tryGetConsumerPolicy(TopicName.parse(consumePartition.getTopic()), consumePartition.getApp());
+            if (policy != null && policy.isConcurrent() && isLeader) {
+                continue;
+            }
+
+            iterator.remove();
+        }
     }
 
     @Override
@@ -480,7 +486,9 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             }
             // 更新最新拉取位置，即下次开始拉取的序号
             long newPullIndex = pullIndex + msgCount;
-            logger.debug("set new pull index:{}, topic:{}, app:{}, partition:{}", newPullIndex, consumer.getTopic(), consumer.getApp(), partition);
+            if (logger.isDebugEnabled()) {
+                logger.debug("set new pull index:{}, topic:{}, app:{}, partition:{}", newPullIndex, consumer.getTopic(), consumer.getApp(), partition);
+            }
             positionManager.updateLastMsgPullIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, newPullIndex);
             return true;
         } else {
@@ -536,7 +544,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                 pullIndex = lastAckIndex;
             }
 
-            logger.info("init concurrent pull index [{}]", pullIndex);
+            logger.info("init concurrent pull topic {}, app {}, partition {}, index [{}]", consumer.getTopic(), consumer.getApp(), partition, pullIndex);
         }
 
         return pullIndex;
@@ -759,11 +767,13 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             this.nextPullIndex += count;
             consumedMessagesMap.put(nextPullIndex, consumedMessages);
             return consumedMessages;
-    }
+        }
 
         CasLock getAppendLock() {
             return appendLock;
         }
+
+        private AtomicInteger counter = new AtomicInteger(0);
 
         boolean ack(TopicName topic, String app, short partition, long startIndex, int count, PositionManager positionManager) throws JoyQueueException {
             List<ConsumedMessages> toBeAcked = new LinkedList<>();
@@ -782,9 +792,25 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                // 如果确认的片段是滑动窗口的第一段，需要在分区上ack，并向尾部缩小滑动窗口
 
                while (!consumedMessagesMap.isEmpty() && (consumedMessages = consumedMessagesMap.firstEntry().getValue()).isAcked()) {
+                   long lastMsgAckIndex = positionManager.getLastMsgAckIndex(topic, app, partition);
                    consumedMessagesMap.remove(consumedMessages.getStartIndex());
-                   positionManager.updateLastMsgAckIndex(topic, app, partition,
-                           consumedMessages.getStartIndex() + consumedMessages.getCount(), false);
+                   if (!consumedMessages.isExpired()) {
+                       positionManager.updateLastMsgAckIndex(topic, app, partition,
+                               consumedMessages.getStartIndex() + consumedMessages.getCount(), false);
+
+//                       if (lastMsgAckIndex >= consumedMessages.getStartIndex() && lastMsgAckIndex < consumedMessages.getStartIndex() + consumedMessages.getCount()) {
+//                           positionManager.updateLastMsgAckIndex(topic, app, partition,
+//                                   consumedMessages.getStartIndex() + consumedMessages.getCount(), false);
+//                       } else {
+//                           logger.warn("Ack index not match, topic: {}, partition: {}, ack: [{} - {}), currentAckIndex: {}!",
+//                                   topic.getFullName(),
+//                                   partition,
+//                                   Format.formatWithComma(consumedMessages.getStartIndex()),
+//                                   Format.formatWithComma(consumedMessages.getStartIndex() + consumedMessages.getCount()),
+//                                   Format.formatWithComma(lastMsgAckIndex)
+//                           );
+//                       }
+                   }
                }
                ret = true;
             }
@@ -818,7 +844,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         ConsumedMessages(long startIndex, int count, long timeoutMs) {
             this.startIndex = startIndex;
             this.count = count;
-            expireTime = SystemClock.now() + timeoutMs;
+            this.expireTime = SystemClock.now() + timeoutMs;
         }
 
         int getCount() {
