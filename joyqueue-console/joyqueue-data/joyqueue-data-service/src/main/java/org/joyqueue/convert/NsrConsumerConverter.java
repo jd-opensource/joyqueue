@@ -108,7 +108,7 @@ public class NsrConsumerConverter extends Converter<Consumer, org.joyqueue.domai
             Map<String,String> map = consumerPolicy.getFilters();
             if (map !=null) {
                 List<String> filterList = map.entrySet().stream().map(entry -> (entry.getKey() + ":" + entry.getValue())).collect(Collectors.toList());
-                consumerConfig.setFilters(StringUtils.join(filterList, ","));
+                consumerConfig.setFilters(StringUtils.join(filterList, ";"));
             }
         }
 
