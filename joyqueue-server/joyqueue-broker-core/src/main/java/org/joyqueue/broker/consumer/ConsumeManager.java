@@ -174,7 +174,8 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         this.concurrentConsumption =
                 consumeConfig.useLegacyConcurrentConsumer() ?
                     new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager):
-                    new SlideWindowConcurrentConsumer(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, consumeConfig)
+                    new SlideWindowConcurrentConsumer(clusterManager, storeService, partitionManager, messageRetry, positionManager,
+                            filterMessageSupport, archiveManager, consumeConfig, brokerContext.getEventBus());
         ;
         this.resetBroadcastIndexTimer = new Timer("joyqueuue-consume-reset-broadcast-index-timer");
     }

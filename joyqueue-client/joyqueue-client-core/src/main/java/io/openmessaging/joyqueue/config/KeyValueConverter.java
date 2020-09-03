@@ -60,9 +60,10 @@ public class KeyValueConverter {
         transportConfig.setHeartbeatInterval(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.HEARTBEAT_INTERVAL, transportConfig.getHeartbeatInterval()));
         transportConfig.setHeartbeatTimeout(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.HEARTBEAT_TIMEOUT, transportConfig.getHeartbeatTimeout()));
         transportConfig.setSoLinger(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SO_LINGER, transportConfig.getSoLinger()));
-        transportConfig.setTcpNoDelay(attributes.getBoolean(JoyQueueTransportBuiltinKeys.CONNECTIONS, transportConfig.isTcpNoDelay()));
+        transportConfig.setTcpNoDelay(attributes.getBoolean(JoyQueueTransportBuiltinKeys.TCP_NO_DELAY, transportConfig.isTcpNoDelay()));
         transportConfig.setKeepAlive(attributes.getBoolean(JoyQueueTransportBuiltinKeys.KEEPALIVE, transportConfig.isKeepAlive()));
         transportConfig.setSoTimeout(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SO_TIMEOUT, transportConfig.getSoTimeout()));
+        transportConfig.setSendTimeout(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SEND_TIMEOUT, transportConfig.getSoTimeout()));
         transportConfig.setSocketBufferSize(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SOCKET_BUFFER_SIZE, transportConfig.getSocketBufferSize()));
         transportConfig.setMaxOneway(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.MAX_ONEWAY, transportConfig.getMaxOneway()));
         transportConfig.setMaxAsync(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.MAX_ASYNC, transportConfig.getMaxAsync()));
