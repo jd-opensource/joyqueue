@@ -230,10 +230,10 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         }
         if (pullResult == null || pullResult.isEmpty()) {
             List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
-//            if (partitionManager.isRetry(consumer)) {
-//                partitionList = new ArrayList<>(partitionList);
-//                partitionList.add(Partition.RETRY_PARTITION_ID);
-//            }
+            if (partitionManager.isRetry(consumer)) {
+                partitionList = new ArrayList<>(partitionList);
+                partitionList.add(Partition.RETRY_PARTITION_ID);
+            }
             pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes, concurrent);
         }
         return pullResult;
@@ -348,15 +348,6 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             }
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex + i, accessTimes);
             short partition = partitionList.get(listIndex);
-            if(partition==Partition.RETRY_PARTITION_ID){
-                // Try read once message from retry queue
-                pullResult = getRetryMessages(consumer, (short) 1);
-                if(!pullResult.isEmpty()){
-                    break;
-                }
-                // 重试队列没有消息，继续轮询剩余队列
-                continue;
-            }
             ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);
             SlideWindow slideWindow = slideWindowMap.computeIfAbsent(consumePartition,
                     k -> {
@@ -378,12 +369,21 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             }
 
             //超过并行度取下一个Partition
-            if(slideWindow.concurrentCount() >= concurrent) {
+            if (slideWindow.concurrentCount() >= concurrent) {
                 continue;
             }
 
             if(slideWindow.getAppendLock().tryLock()) {
                 try {
+                    if (partition == Partition.RETRY_PARTITION_ID) {
+                        pullResult = getRetryMessages(consumer, (short) 1);
+                        if (pullResult != null && !pullResult.isEmpty()) {
+                            return pullResult;
+                        } else {
+                            continue;
+                        }
+                    }
+
                     // 获取消息拉取位置
                     long pullIndex = getPullIndex(consumer, partition);
 
