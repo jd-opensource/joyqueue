@@ -54,7 +54,7 @@ public class PrometheusConvert implements Converter<BrokerStatExt, StringRespons
         response.addHeader("Date", new Date(time * 1000).toString());
         response.addHeader("Transfer-Encoding", "chunked");
 
-        logger.info("Report Prometheus Convert");
+        logger.debug("Report Prometheus Convert");
 
         return response;
     }
@@ -103,6 +103,6 @@ public class PrometheusConvert implements Converter<BrokerStatExt, StringRespons
 
     @Override
     public String type() {
-        return "prometheus";
+        return "Prometheus";
     }
 }
