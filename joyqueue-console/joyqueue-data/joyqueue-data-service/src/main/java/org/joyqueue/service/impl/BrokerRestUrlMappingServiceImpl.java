@@ -61,6 +61,8 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String appConnectionDetailPath = "/monitor/connections/detail";
     //    /manage/topic/:topic/partitionGroup/:partitionGroup/store/metric
     private String partitiongroupIndexPath="/manage/topic/%s/partitionGroup/%s/store/metric";
+    private String consumerInfosPath = "/monitor/consumers?page=%s&pageSize=%s";
+    private String producerInfosPath = "/monitor/producers?page=%s&pageSize=%s";
 
     /** offset management*/
     private String removeProducersConnectionsPath= "/manage/topic/%s/app/%s/producers";

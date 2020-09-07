@@ -246,7 +246,11 @@ export default {
       this.topic.policy = {}
       for (let policy in this.policies) {
         if (this.policies.hasOwnProperty(policy)) {
-          this.topic.policy[this.policies[policy].key] = this.policies[policy].value
+          if (this.policies[policy].key === 'storeMaxTime') {
+            this.topic.policy[this.policies[policy].key] = this.policies[policy].value * (1000 * 60 * 60)
+          } else {
+            this.topic.policy[this.policies[policy].key] = this.policies[policy].value
+          }
         }
       }
       apiRequest.put(this.urlOrigin.edit + '/' + encodeURIComponent(this.topic.id), {}, this.topic).then((data) => {
@@ -274,7 +278,7 @@ export default {
       }
       this.policies.push({
         key: '存储最长时间',
-        value: item.policy.storeMaxTime
+        value: item.policy.storeMaxTime / (1000 * 60 * 60)
       })
       this.policies.push({
         key: '保留未消费数据',
