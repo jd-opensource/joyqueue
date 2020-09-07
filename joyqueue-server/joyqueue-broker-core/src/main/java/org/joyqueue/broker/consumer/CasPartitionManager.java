@@ -233,10 +233,6 @@ public class CasPartitionManager implements PartitionManager {
         } else if (!masterPartitionList.contains((short) 0)) {
             return false;
         }
-        /*if (!retry.booleanValue() || !masterPartitionList.contains((short) 0)) {
-            logger.debug("retry enable is false.");
-            return false;
-        }*/
 
         int val = random.nextInt(randomBound);
         // 重试管理中获取从重试分区消费的概率
