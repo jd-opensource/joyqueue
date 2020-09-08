@@ -514,7 +514,19 @@ public class ManageServer extends Service {
                 routingContext.fail(e);
             }
         });
-
+        router.post("/broker/updateExternalIpByIp").handler(routingContext -> {
+            try {
+                BrokerQuery query = JSONObject.parseObject(routingContext.getBodyAsString(), new TypeReference<BrokerQuery>(){});
+                Broker broker = brokerService.getByIpAndPort(query.getIp(), query.getPort());
+                broker.setExternalIp(query.getExternalIp());
+                broker.setExternalPort(query.getExternalPort());
+                brokerService.update(broker);
+                routingContext.response().end("success");
+            }catch (Exception e){
+                logger.error("broker updateExternalIpByIp error", routingContext.getBodyAsString(),e);
+                routingContext.fail(e);
+            }
+        });
         /**   apptoken    **/
         router.post("/apptoken/getById").handler(routingContext -> {
             try{

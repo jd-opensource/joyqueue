@@ -16,6 +16,7 @@
 package org.joyqueue.domain;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.helper.PortHelper;
 
 import javax.validation.constraints.Max;
@@ -65,6 +66,11 @@ public class Broker implements Serializable {
      * 对外IP,备用
      */
     protected String externalIp;
+
+    /**
+     * 对外Port，备用
+     */
+    protected int externalPort;
 
 
     public Integer getId() {
@@ -238,6 +244,28 @@ public class Broker implements Serializable {
 
     public void setExternalIp(String externalIp) {
         this.externalIp = externalIp;
+    }
+
+    public int getExternalPort() {
+        return externalPort;
+    }
+
+    public void setExternalPort(int externalPort) {
+        this.externalPort = externalPort;
+    }
+
+    public String getRealIp() {
+        if (StringUtils.isBlank(externalIp)) {
+            return ip;
+        }
+        return externalIp;
+    }
+
+    public int getRealPort() {
+        if (externalPort > 0) {
+            return port;
+        }
+        return externalPort;
     }
 
 }

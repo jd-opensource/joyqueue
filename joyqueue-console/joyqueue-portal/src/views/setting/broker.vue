@@ -200,14 +200,14 @@ export default {
             }
           },
           {
-            title: '对外Ip',
+            title: '对外Ip:端口',
             key: 'externalIp',
             width: '15%',
             formatter (row) {
               if (row.externalIp) {
-                return row.externalIp + ':' + row.port
+                return row.externalIp + ':' + row.externalPort
               }
-              return row.externalIp
+              return ''
             }
           },
           {
@@ -439,6 +439,7 @@ export default {
           ip: this.editData.ip,
           externalIp: this.editData.externalIp,
           port: this.editData.port,
+          externalPort: this.editData.externalPort,
           // dataCenter: this.editData['dataCenter'].id,
           retryType: this.editData.retryType,
           permission: this.editData.permission

@@ -34,6 +34,8 @@ public class BrokerDTO extends BaseDTO {
     private String permission;
     @Column(alias = "external_ip")
     private String externalIp;
+    @Column(alias = "external_port")
+    private Integer externalPort;
 
     public Long getId() {
         return id;
@@ -89,5 +91,13 @@ public class BrokerDTO extends BaseDTO {
 
     public void setExternalIp(String externalIp) {
         this.externalIp = externalIp;
+    }
+
+    public Integer getExternalPort() {
+        return externalPort;
+    }
+
+    public void setExternalPort(Integer externalPort) {
+        this.externalPort = externalPort;
     }
 }

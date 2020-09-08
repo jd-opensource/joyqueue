@@ -94,9 +94,9 @@ export default {
             width: '15%',
             formatter (row) {
               if (row.externalIp) {
-                return row.externalIp + ':' + row.port
+                return row.externalIp + ':' + row.externalPort
               }
-              return row.externalIp
+              return ''
             }
           },
           {

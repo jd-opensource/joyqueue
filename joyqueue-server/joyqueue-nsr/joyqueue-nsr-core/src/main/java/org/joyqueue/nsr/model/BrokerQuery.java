@@ -45,6 +45,11 @@ public class BrokerQuery implements Query {
      */
     private String externalIp;
 
+    /**
+     * 对外端口
+     */
+    private int externalPort;
+
     private List<Integer> brokerList;
 
     public String getIp() {
@@ -101,5 +106,13 @@ public class BrokerQuery implements Query {
 
     public void setExternalIp(String externalIp) {
         this.externalIp = externalIp;
+    }
+
+    public int getExternalPort() {
+        return externalPort;
+    }
+
+    public void setExternalPort(int externalPort) {
+        this.externalPort = externalPort;
     }
 }

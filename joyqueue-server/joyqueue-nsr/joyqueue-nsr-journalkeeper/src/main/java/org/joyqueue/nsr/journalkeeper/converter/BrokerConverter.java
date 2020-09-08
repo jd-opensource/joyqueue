@@ -42,6 +42,7 @@ public class BrokerConverter {
         brokerDTO.setRetryType(broker.getRetryType());
         brokerDTO.setPermission(broker.getPermission().getName());
         brokerDTO.setExternalIp(broker.getExternalIp());
+        brokerDTO.setExternalPort(broker.getExternalPort());
         return brokerDTO;
     }
 

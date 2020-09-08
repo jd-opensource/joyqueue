@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `broker` (
 	`retry_type` varchar(255),
 	`permission` varchar(255),
 	`external_ip` varchar(255),
+	`external_port` int(11),
 	PRIMARY KEY (`id`)
 );
 CREATE INDEX IF NOT EXISTS idx_ip_port ON broker(`ip`, `port`);
