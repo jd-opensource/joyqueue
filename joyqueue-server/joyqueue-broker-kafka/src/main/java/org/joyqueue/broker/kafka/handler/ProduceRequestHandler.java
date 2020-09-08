@@ -42,6 +42,7 @@ import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Producer;
@@ -241,7 +242,7 @@ public class ProduceRequestHandler extends AbstractKafkaCommandHandler implement
         }
 
         BooleanResponse checkResult = clusterManager.checkWritable(topic, producer.getApp(), clientIp, (short) partitionRequest.getPartition());
-        if (!checkResult.isSuccess()) {
+        if (!checkResult.isSuccess() && !checkResult.getJoyQueueCode().equals(JoyQueueCode.FW_BROKER_NOT_WRITABLE)) {
             logger.warn("checkWritable failed, transport: {}, topic: {}, partition: {}, app: {}, code: {}",
                     transport, topic, partitionRequest.getPartition(), producer.getApp(), checkResult.getJoyQueueCode());
             return CheckResultConverter.convertProduceCode(checkResult.getJoyQueueCode());

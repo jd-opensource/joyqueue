@@ -867,15 +867,7 @@ public class ClusterManager extends Service {
     }
 
     public List<Producer> getLocalProducersByTopic(TopicName topic) {
-        Map<String, MetaDataLocalCache.CacheProducer> producers = localCache.getTopicProducers(topic);
-        if (MapUtils.isEmpty(producers)) {
-            return Collections.emptyList();
-        }
-        List<Producer> result = Lists.newLinkedList();
-        for (Map.Entry<String, MetaDataLocalCache.CacheProducer> entry : producers.entrySet()) {
-            result.add(entry.getValue().getProducer());
-        }
-        return result;
+        return Lists.newArrayList(nameService.getProducerByTopic(topic));
     }
 
     public List<Consumer> getLocalConsumersByTopic(TopicName topic) {

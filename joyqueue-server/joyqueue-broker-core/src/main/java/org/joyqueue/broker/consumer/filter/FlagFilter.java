@@ -88,7 +88,7 @@ public class FlagFilter implements MessageFilter {
             }
 
             // 是否匹配
-            boolean isMatch = pattern.matcher("" + flag).matches();
+            boolean isMatch = (flag == 0 || pattern.matcher("" + flag).matches());
 
             if (isMatch) {
                 if (i == 0) {

@@ -534,10 +534,10 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             if (logger.isDebugEnabled()) {
                 logger.debug("set new pull index:{}, topic:{}, app:{}, partition:{}", newPullIndex, consumer.getTopic(), consumer.getApp(), partition);
             }
-            positionManager.updateLastMsgPullIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, newPullIndex);
             if (consumedMessages.isReset()) {
-                positionManager.updateLastMsgAckIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, consumedMessages.getStartIndex(), false);
+                positionManager.updateLastMsgAckIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, pullIndex);
             }
+            positionManager.updateLastMsgPullIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, newPullIndex);
             return true;
         } else {
             return false;
@@ -566,6 +566,9 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
      * @return 消息序号
      */
     private long getPullIndex(Consumer consumer, short partition) throws JoyQueueException {
+        if (partition == Partition.RETRY_PARTITION_ID) {
+            return 0;
+        }
         // 本次拉取消息的位置，默认从0开始ack
         long pullIndex = 0;
         String topic = consumer.getTopic();
@@ -930,7 +933,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             return status.get() == ACKED;
         }
 
-        public boolean isReset() {
+        boolean isReset() {
             return reset;
         }
     }
