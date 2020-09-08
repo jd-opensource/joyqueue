@@ -156,6 +156,6 @@ public class FlagFilterTest {
             }
         });
 
-        Assert.assertEquals(0, filter.size());
+        Assert.assertEquals(1, filter.size());
     }
 }
