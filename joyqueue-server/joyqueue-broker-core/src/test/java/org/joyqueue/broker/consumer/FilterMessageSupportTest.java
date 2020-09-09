@@ -68,6 +68,6 @@ public class FilterMessageSupportTest {
             }
         });
 
-        Assert.assertEquals(1, filter.size());
+        Assert.assertEquals(3, filter.size());
     }
 }

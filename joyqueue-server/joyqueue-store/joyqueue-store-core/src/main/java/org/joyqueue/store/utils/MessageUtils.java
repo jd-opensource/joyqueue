@@ -55,6 +55,20 @@ public class MessageUtils {
         }).collect(Collectors.toList());
     }
 
+    public static List<ByteBuffer> buildBatch(short count, int bodyLength) {
+        byte[] body = new byte[bodyLength];
+        return IntStream.range(0, count).mapToObj(i -> {
+            Arrays.fill(body, (byte) (i % Byte.MAX_VALUE));
+            byte[][] varAtts = {body, bid, prop, expand, app};
+            ByteBuffer byteBuffer = MessageParser.build(varAtts);
+            CRC32 crc32 = new CRC32();
+            crc32.update(body);
+            MessageParser.setLong(byteBuffer, MessageParser.CRC, crc32.getValue());
+            MessageParser.setShort(byteBuffer, MessageParser.FLAG, count);
+            return byteBuffer;
+        }).collect(Collectors.toList());
+    }
+
     public static ByteBuffer[] build1024(int count) {
 
         return IntStream.range(0, count).parallel().mapToObj(i -> ByteBuffer.wrap(Arrays.copyOf(b1024, b1024.length))).toArray(ByteBuffer[]::new);
