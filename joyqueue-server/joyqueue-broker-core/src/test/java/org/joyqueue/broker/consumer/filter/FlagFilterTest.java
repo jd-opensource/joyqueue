@@ -62,7 +62,7 @@ public class FlagFilterTest {
         flagFilter.setRule("[9]");
 
         List<ByteBuffer> byteBufferList = new LinkedList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i < 10; i++) {
             ByteBuffer allocate = ByteBuffer.allocate(100);
             allocate.position(59);
             allocate.putShort((short) i);
@@ -92,7 +92,7 @@ public class FlagFilterTest {
         flagFilter.setRule("[5, 9]");
 
         List<ByteBuffer> byteBufferList = new LinkedList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i < 10; i++) {
             ByteBuffer allocate = ByteBuffer.allocate(100);
             allocate.position(59);
             allocate.putShort((short) i);
