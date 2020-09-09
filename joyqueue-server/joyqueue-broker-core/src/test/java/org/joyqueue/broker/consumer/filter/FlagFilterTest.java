@@ -75,9 +75,9 @@ public class FlagFilterTest {
         List<ByteBuffer> filter = flagFilter.filter(byteBufferList, new FilterCallback() {
             @Override
             public void callback(List<ByteBuffer> list) throws JoyQueueException {
-                Assert.assertEquals(9, list.size());
-                for (int i = 0; i < 9; i++) {
-                    Assert.assertEquals(i, Serializer.readFlag(list.get(i)));
+                Assert.assertEquals(8, list.size());
+                for (int i = 0; i < 8; i++) {
+                    Assert.assertEquals(i + 1, Serializer.readFlag(list.get(i)));
                 }
                 inCallback[0] = true;
             }
@@ -106,9 +106,9 @@ public class FlagFilterTest {
             @Override
             public void callback(List<ByteBuffer> list) throws JoyQueueException {
                 inCallback[0]++;
-                Assert.assertEquals(5, list.size());
-                for (int i = 0; i < 5; i++) {
-                    Assert.assertEquals(i, Serializer.readFlag(list.get(i)));
+                Assert.assertEquals(4, list.size());
+                for (int i = 0; i < 4; i++) {
+                    Assert.assertEquals(i + 1, Serializer.readFlag(list.get(i)));
                 }
             }
         });
@@ -117,13 +117,13 @@ public class FlagFilterTest {
         Assert.assertEquals(5, Serializer.readFlag(filter1.get(0)));
         Assert.assertEquals(1, inCallback[0]);
 
-        List<ByteBuffer> filter2 = flagFilter.filter(byteBufferList.subList(6, 10), new FilterCallback() {
+        List<ByteBuffer> filter2 = flagFilter.filter(byteBufferList.subList(6, 9), new FilterCallback() {
             @Override
             public void callback(List<ByteBuffer> list) throws JoyQueueException {
                 inCallback[0]++;
-                Assert.assertEquals(3, list.size());
-                for (int i = 0; i < 3; i++) {
-                    Assert.assertEquals(i + 6, Serializer.readFlag(list.get(i)));
+                Assert.assertEquals(2, list.size());
+                for (int i = 0; i < 2; i++) {
+                    Assert.assertEquals(i + 7, Serializer.readFlag(list.get(i)));
                 }
             }
         });
@@ -156,6 +156,6 @@ public class FlagFilterTest {
             }
         });
 
-        Assert.assertEquals(0, filter.size());
+        Assert.assertEquals(1, filter.size());
     }
 }

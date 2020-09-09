@@ -17,6 +17,8 @@ package org.joyqueue.store;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.store.file.Checkpoint;
@@ -91,6 +93,83 @@ public class PartitionGroupStoreManagerTest {
         before();
         writeReadTest(QosLevel.ALL);
 
+    }
+
+//    @Test
+    public void batchWriteReadTest() throws Exception {
+        short partition = partitions[0];
+        int timeout = 1000 * 60 * 10;
+
+        LoopThread commitThread = LoopThread.builder()
+                .name(String.format("CommitThread-%s-%d", topic, partitionGroup))
+                .doWork(()-> store.commit(store.rightPosition()))
+                .sleepTime(0L, 10L)
+                .onException(e -> logger.warn("Commit Exception: ", e))
+                .build();
+        commitThread.start();
+
+        try {
+            new Thread(() -> {
+                while (true) {
+                    List<ByteBuffer> messages = null;
+                    if (RandomUtils.nextInt(0, 100) >= 50) {
+                        messages = MessageUtils.build(RandomUtils.nextInt(1, 30), RandomUtils.nextInt(100, 2048));
+                    } else {
+                        messages = MessageUtils.buildBatch((short) RandomUtils.nextInt(1, 30), RandomUtils.nextInt(100, 2048));
+                    }
+
+                    EventFuture<WriteResult> future = new EventFuture<>();
+                    store.asyncWrite(QosLevel.RECEIVE, future, new WriteRequest(partition, messages.get(0)));
+                    WriteResult writeResult = null;
+                    try {
+                        writeResult = future.get();
+                    } catch (InterruptedException e) {
+                    }
+                    Assert.assertEquals(JoyQueueCode.SUCCESS, writeResult.getCode());
+                }
+            }).start();
+
+            new Thread(() -> {
+                long index = 0;
+                while (true) {
+                    try {
+                        ReadResult readResult = null;
+                        try {
+                            readResult = store.read(partition, index, 10, 0);
+                        } catch (IOException e) {
+                        }
+                        Assert.assertEquals(JoyQueueCode.SUCCESS, readResult.getCode());
+
+                        if (ArrayUtils.isNotEmpty(readResult.getMessages())) {
+                            Assert.assertEquals(index, MessageParser.getLong(readResult.getMessages()[0], MessageParser.INDEX));
+
+                            for (ByteBuffer readBuffer : readResult.getMessages()) {
+                                if (MessageParser.getShort(readBuffer, MessageParser.FLAG) == 0) {
+                                    index += 1;
+                                } else {
+                                    index += MessageParser.getShort(readBuffer, MessageParser.FLAG);
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println(e.toString());
+                        try {
+                            Thread.currentThread().sleep(1000 * 1);
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                }
+            }).start();
+
+            long startTime = SystemClock.now();
+            while (true) {
+                if (SystemClock.now() - startTime > timeout) {
+                    Thread.currentThread().sleep(1000 * 1);
+                }
+            }
+        } finally {
+            commitThread.stop();
+        }
     }
 
 
@@ -361,6 +440,7 @@ public class PartitionGroupStoreManagerTest {
         this.store.start();
         this.store.enable();
     }
+
     @Test
     public void changeFileSizeTest() throws Exception {
         int count = 1024;

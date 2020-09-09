@@ -37,9 +37,11 @@ public class CheckResultConverter {
 //                return KafkaErrorCode.TOPIC_AUTHORIZATION_FAILED.getCode();
                 return KafkaErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode();
             }
-            case FW_PUT_MESSAGE_TOPIC_NOT_WRITE:
-            case FW_BROKER_NOT_WRITABLE: {
+            case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
                 return KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
+            }
+            case FW_BROKER_NOT_WRITABLE: {
+                return KafkaErrorCode.KAFKA_STORAGE_ERROR.getCode();
             }
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER:
             case FW_TOPIC_NO_PARTITIONGROUP: {
