@@ -223,8 +223,14 @@ public class CasPartitionManager implements PartitionManager {
 
         Boolean retry = clusterManager.getConsumerPolicy(TopicName.parse(consumer.getTopic()), consumer.getApp()).getRetry();
         List<Short> masterPartitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
-        if (!retry.booleanValue() || !masterPartitionList.contains((short) 0)) {
+
+        if (!retry) {
             logger.debug("retry enable is false.");
+            return false;
+        }
+        if (randomBound == 1) {
+            return true;
+        } else if (!masterPartitionList.contains((short) 0)) {
             return false;
         }
 
