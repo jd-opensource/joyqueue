@@ -34,7 +34,6 @@
         <module>joyqueue-broker-protocol</module>
         <module>joyqueue-broker-kafka</module>
         <module>joyqueue-broker-mqtt</module>
-        <module>jmq-broker-jmq2</module>
         <module>joyqueue-broker-monitor-pth</module>
         <module>joyqueue-server-runtime</module>
 
