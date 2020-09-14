@@ -15,6 +15,7 @@
  */
 package org.joyqueue.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.manage.PartitionGroupMetric;
 import org.joyqueue.model.PageResult;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -135,35 +137,15 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
      */
     @Override
     public PageResult<BrokerTopicMonitor> queryTopicsMointor(QPageQuery<QMonitor> qPageQuery) {
-
-        PageResult<BrokerTopicMonitor> pageResult = new PageResult<>();
         try {
             Pagination pagination = qPageQuery.getPagination();
             QMonitor qMonitor = qPageQuery.getQuery();
             Broker broker = brokerService.findById(Integer.valueOf(String.valueOf(qMonitor.getBrokerId())));
-            List<String> toplicList = queryTopicList(broker);
-            pagination.setTotalRecord(toplicList.size());
-            int fromIndx = pagination.getStart() + pagination.getSize();
-            if (fromIndx > pagination.getTotalRecord()) {
-                fromIndx = pagination.getTotalRecord();
-            }
-
-            List<BrokerTopicMonitor> brokerTopicMonitors = new ArrayList<>(pagination.getSize());
-
-            for (String topic : toplicList.subList(pagination.getStart(), fromIndx)) {
-                List<String> appList = getAppByTopic(qMonitor.getType(), topic);
-
-                BrokerTopicMonitor brokerTopicMonitor = getMonitorByAppAndTopic(topic, appList, broker, qMonitor.getType());
-                if (brokerTopicMonitor.getBrokerTopicMonitorRecordList().size() > 0) {
-                    brokerTopicMonitors.add(brokerTopicMonitor);
-                }
-            }
-            pageResult.setPagination(pagination);
-            pageResult.setResult(brokerTopicMonitors);
+            return getMonitorByBrokerPage(broker, qMonitor.getType(), pagination.getPage(), pagination.getSize());
         } catch (Exception e) {
             logger.error("queryTopicsMointor exception", e);
         }
-        return pageResult;
+        return new PageResult<>();
     }
 
     /**
@@ -222,6 +204,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                     brokerTopicMonitorRecord.setConnections(consumerMonitorInfo.getConnections());
                     brokerTopicMonitorRecord.setCount(consumerMonitorInfo.getDeQueue().getCount());
                     brokerTopicMonitorRecord.setTotalSize(consumerMonitorInfo.getDeQueue().getTotalSize());
+                    brokerTopicMonitorRecord.setTraffic(consumerMonitorInfo.getDeQueue().getTraffic());
                 }
             } else if (type == SubscribeType.PRODUCER) {
                 ProducerMonitorInfo producerMonitorInfo = null;
@@ -234,16 +217,85 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                     brokerTopicMonitorRecord.setConnections(producerMonitorInfo.getConnections());
                     brokerTopicMonitorRecord.setCount(producerMonitorInfo.getEnQueue().getCount());
                     brokerTopicMonitorRecord.setTotalSize(producerMonitorInfo.getEnQueue().getTotalSize());
+                    brokerTopicMonitorRecord.setTraffic(producerMonitorInfo.getEnQueue().getTraffic());
                     brokerTopicMonitorRecord.setTps(producerMonitorInfo.getEnQueue().getTps());
                 }
             }
             brokerTopicMonitorRecord.setApp(app);
             brokerMonitorRecordList.add(brokerTopicMonitorRecord);
         }
+        brokerMonitorRecordList.sort(Comparator.comparingLong(BrokerTopicMonitorRecord::getBacklog));
         brokerTopicMonitor.setBrokerTopicMonitorRecordList(brokerMonitorRecordList);
         brokerTopicMonitor.setTopic(topic);
         return brokerTopicMonitor;
     }
+
+    private PageResult<BrokerTopicMonitor> getMonitorByBrokerPage(Broker broker, SubscribeType type, int page, int pageSize) throws Exception {
+        Pagination pagination = new Pagination();
+        pagination.setPage(page);
+        pagination.setSize(pageSize);
+        PageResult<BrokerTopicMonitor> pageResult = new PageResult<>();
+        List<BrokerTopicMonitor> brokerTopicMonitors = new ArrayList<>();
+        if (type == SubscribeType.CONSUMER) {
+            JSONObject map = queryMonitorConsumers(broker, page, pageSize);
+            pagination.setTotalRecord(Integer.parseInt(map.getOrDefault("total", 0).toString()));
+            List<ConsumerMonitorInfo> consumerMonitorInfos = map.getJSONArray("data").toJavaList(ConsumerMonitorInfo.class);
+            for (ConsumerMonitorInfo consumerMonitorInfo: consumerMonitorInfos) {
+                BrokerTopicMonitor brokerTopicMonitor = new BrokerTopicMonitor();
+                BrokerTopicMonitorRecord brokerTopicMonitorRecord = new BrokerTopicMonitorRecord();
+                if (consumerMonitorInfo.getRetry() != null) {
+                    brokerTopicMonitorRecord.setRetryCount(consumerMonitorInfo.getRetry().getCount());
+                    brokerTopicMonitorRecord.setRetryTps(consumerMonitorInfo.getRetry().getCurrent());
+                }
+                if (consumerMonitorInfo.getPending() != null) {
+                    brokerTopicMonitorRecord.setBacklog(consumerMonitorInfo.getPending().getCount());
+                }
+                brokerTopicMonitorRecord.setConnections(consumerMonitorInfo.getConnections());
+                brokerTopicMonitorRecord.setCount(consumerMonitorInfo.getDeQueue().getCount());
+                brokerTopicMonitorRecord.setTotalSize(consumerMonitorInfo.getDeQueue().getTotalSize());
+                brokerTopicMonitorRecord.setTraffic(consumerMonitorInfo.getDeQueue().getTraffic());
+                brokerTopicMonitorRecord.setApp(consumerMonitorInfo.getApp());
+                List<BrokerTopicMonitorRecord> brokerMonitorRecordList = new ArrayList<>();
+                brokerMonitorRecordList.add(brokerTopicMonitorRecord);
+                brokerTopicMonitor.setBrokerTopicMonitorRecordList(brokerMonitorRecordList);
+                brokerTopicMonitor.setTopic(consumerMonitorInfo.getTopic());
+                brokerTopicMonitors.add(brokerTopicMonitor);
+            }
+            brokerTopicMonitors.sort((o1, o2) -> {
+                BrokerTopicMonitorRecord brokerTopicMonitorRecord1 = o1.getBrokerTopicMonitorRecordList().get(0);
+                BrokerTopicMonitorRecord brokerTopicMonitorRecord2 = o2.getBrokerTopicMonitorRecordList().get(0);
+                return Long.compare(brokerTopicMonitorRecord2.getBacklog(), brokerTopicMonitorRecord1.getBacklog());
+            });
+        } else if (type == SubscribeType.PRODUCER) {
+            JSONObject map = queryMonitorProducers(broker, page, pageSize);
+            pagination.setTotalRecord(Integer.parseInt(map.getOrDefault("total", 0).toString()));
+            List<ProducerMonitorInfo> producerMonitorInfos = map.getJSONArray("data").toJavaList(ProducerMonitorInfo.class);
+            for (ProducerMonitorInfo producerMonitorInfo: producerMonitorInfos) {
+                BrokerTopicMonitor brokerTopicMonitor = new BrokerTopicMonitor();
+                BrokerTopicMonitorRecord brokerTopicMonitorRecord = new BrokerTopicMonitorRecord();
+                brokerTopicMonitorRecord.setConnections(producerMonitorInfo.getConnections());
+                brokerTopicMonitorRecord.setCount(producerMonitorInfo.getEnQueue().getCount());
+                brokerTopicMonitorRecord.setTotalSize(producerMonitorInfo.getEnQueue().getTotalSize());
+                brokerTopicMonitorRecord.setTraffic(producerMonitorInfo.getEnQueue().getTraffic());
+                brokerTopicMonitorRecord.setTps(producerMonitorInfo.getEnQueue().getTps());
+                brokerTopicMonitorRecord.setApp(producerMonitorInfo.getApp());
+                List<BrokerTopicMonitorRecord> brokerMonitorRecordList = new ArrayList<>();
+                brokerMonitorRecordList.add(brokerTopicMonitorRecord);
+                brokerTopicMonitor.setBrokerTopicMonitorRecordList(brokerMonitorRecordList);
+                brokerTopicMonitor.setTopic(producerMonitorInfo.getTopic());
+                brokerTopicMonitors.add(brokerTopicMonitor);
+            }
+            brokerTopicMonitors.sort((o1, o2) -> {
+                BrokerTopicMonitorRecord brokerTopicMonitorRecord1 = o1.getBrokerTopicMonitorRecordList().get(0);
+                BrokerTopicMonitorRecord brokerTopicMonitorRecord2 = o2.getBrokerTopicMonitorRecordList().get(0);
+                return Long.compare(brokerTopicMonitorRecord2.getCount(), brokerTopicMonitorRecord1.getCount());
+            });
+        }
+        pageResult.setResult(brokerTopicMonitors);
+        pageResult.setPagination(pagination);
+        return pageResult;
+    }
+
 
     private List<String> getAppByTopic(SubscribeType subscribeType, String topic) throws Exception {
         if (subscribeType == SubscribeType.CONSUMER) {
@@ -281,6 +333,34 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             return restResponse.getData();
         }
         return null;
+    }
+
+    private JSONObject queryMonitorConsumers(Broker broker, int page, int pageSize) {
+        String path = "consumerInfos";
+        String[] args = new String[4];
+        args[0] = broker.getIp();
+        args[1] = String.valueOf(broker.getMonitorPort());
+        args[2] = String.valueOf(page);
+        args[3] = String.valueOf(pageSize);
+        RestResponse<JSONObject> restResponse = httpRestService.get(path, JSONObject.class, false, args);
+        if (restResponse != null && restResponse.getData() != null) {
+            return restResponse.getData();
+        }
+        return new JSONObject();
+    }
+
+    private JSONObject queryMonitorProducers(Broker broker, int page, int pageSize) {
+        String path = "producerInfos";
+        String[] args = new String[4];
+        args[0] = broker.getIp();
+        args[1] = String.valueOf(broker.getMonitorPort());
+        args[2] = String.valueOf(page);
+        args[3] = String.valueOf(pageSize);
+        RestResponse<JSONObject> restResponse = httpRestService.get(path, JSONObject.class, false, args);
+        if (restResponse != null && restResponse.getData() != null) {
+            return restResponse.getData();
+        }
+        return new JSONObject();
     }
 
     /**

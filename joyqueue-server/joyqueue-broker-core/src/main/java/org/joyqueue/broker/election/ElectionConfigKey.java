@@ -31,7 +31,7 @@ public enum ElectionConfigKey implements PropertyDef {
     TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 10, Type.INT),
     HEARTBEAT_TIMEOUT("election.heartbeat.timeout", 1000, Type.INT),
     SEND_COMMAND_TIMEOUT("election.send.command.timeout", 1000 * 5, Type.INT),
-    MAX_BATCH_REPLICATE_SIZE("election.max.replicate.length", 1024 * 1024, Type.INT),
+    MAX_BATCH_REPLICATE_SIZE("election.max.replicate.length", 1024 * 1024 * 3, Type.INT),
     DISABLE_STORE_TIMEOUT("election.disable.store.timeout", 1000 * 5, Type.INT),
     LISTEN_PORT("election.listen.port", 18001, Type.INT),
     TRANSFER_LEADER_TIMEOUT("election.transfer.leader.timeout", 1000 * 10, Type.INT),
@@ -48,7 +48,8 @@ public enum ElectionConfigKey implements PropertyDef {
     ENABLE_ONLINE_NODE_PERIODICALLY("election.enable.onlineNode.periodically", true, Type.BOOLEAN),
     OUTPUT_CONSUME_POS("election.consume.pos.output", false, Type.BOOLEAN),
     CONNECTION_TIMEOUT("election.connection.timeout", 100 * 1, Type.INT),
-    CONNECTION_RETRY_DELAY("election.connection.retryDelay", 1000 * 15, Type.INT),
+    CONNECTION_RETRY_DELAY("election.connection.retryDelay", 1000 * 10, Type.INT),
+    ENABLE_SHARED_HEARTBEAT("election.enable.shared.heartbeat", false, Type.BOOLEAN),
 
     ;
 

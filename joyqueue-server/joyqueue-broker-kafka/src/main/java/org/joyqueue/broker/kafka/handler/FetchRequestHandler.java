@@ -167,13 +167,23 @@ public class FetchRequestHandler extends AbstractKafkaCommandHandler implements 
 
     private FetchResponse.PartitionResponse fetchMessage(Transport transport, Consumer consumer, org.joyqueue.domain.Consumer.ConsumerPolicy consumerPolicy,
                                                          TopicName topic, int partition, String clientId, long offset, int maxBytes) {
-        long minIndex = consume.getMinIndex(consumer, (short) partition);
-        long maxIndex = consume.getMaxIndex(consumer, (short) partition);
 
-        if (offset < minIndex || offset > maxIndex) {
-            logger.warn("fetch message exception, index out of range, transport: {}, consumer: {}, partition: {}, offset: {}, minOffset: {}, maxOffset: {}",
-                    transport, consumer, partition, offset, minIndex, maxIndex);
-            return new FetchResponse.PartitionResponse(partition, KafkaErrorCode.OFFSET_OUT_OF_RANGE.getCode());
+
+        long minIndex = 0;
+        long maxIndex = 0;
+        try {
+            minIndex = consume.getMinIndex(consumer, (short) partition);
+            maxIndex = consume.getMaxIndex(consumer, (short) partition);
+
+            if (offset < minIndex || offset > maxIndex) {
+                logger.warn("fetch message exception, index out of range, transport: {}, consumer: {}, partition: {}, offset: {}, minOffset: {}, maxOffset: {}",
+                        transport, consumer, partition, offset, minIndex, maxIndex);
+                return new FetchResponse.PartitionResponse(partition, KafkaErrorCode.OFFSET_OUT_OF_RANGE.getCode());
+            }
+        } catch (Exception e) {
+            logger.error("fetch message exception, check index error, transport: {}, consumer: {}, partition: {}, offset: {}",
+                    transport, consumer, partition, offset, e);
+            return new FetchResponse.PartitionResponse(partition, KafkaErrorCode.NONE.getCode());
         }
 
         List<KafkaBrokerMessage> kafkaBrokerMessages = Lists.newLinkedList();

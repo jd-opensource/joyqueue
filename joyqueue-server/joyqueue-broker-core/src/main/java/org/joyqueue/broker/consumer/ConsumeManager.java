@@ -174,7 +174,8 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         this.concurrentConsumption =
                 consumeConfig.useLegacyConcurrentConsumer() ?
                     new ConcurrentConsumption(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, sessionManager):
-                    new SlideWindowConcurrentConsumer(clusterManager, storeService, partitionManager, messageRetry, positionManager, filterMessageSupport, archiveManager, consumeConfig)
+                    new SlideWindowConcurrentConsumer(clusterManager, storeService, partitionManager, messageRetry, positionManager,
+                            filterMessageSupport, archiveManager, consumeConfig, brokerContext.getEventBus());
         ;
         this.resetBroadcastIndexTimer = new Timer("joyqueuue-consume-reset-broadcast-index-timer");
     }
@@ -618,7 +619,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         String topic = consumer.getTopic();
         Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(topic), partition);
         PartitionGroupStore store = storeService.getStore(topic, partitionGroupId);
-        return store.getLeftIndex(partition);
+        return store.getLeftIndexAndCheck(partition);
     }
 
     @Override
@@ -626,7 +627,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         String topic = consumer.getTopic();
         Integer partitionGroupId = clusterManager.getPartitionGroupId(TopicName.parse(topic), partition);
         PartitionGroupStore store = storeService.getStore(topic, partitionGroupId);
-        return store.getRightIndex(partition);
+        return store.getRightIndexAndCheck(partition);
     }
 
     /**

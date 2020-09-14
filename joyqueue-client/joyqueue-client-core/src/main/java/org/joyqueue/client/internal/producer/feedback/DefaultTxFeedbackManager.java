@@ -118,7 +118,7 @@ public class DefaultTxFeedbackManager extends Service implements TxFeedbackManag
 
         TxFeedbackScheduler txFeedbackScheduler = txCallback.get(topicFullName);
         if (txFeedbackScheduler == null) {
-            throw new IllegalArgumentException(String.format("%s feedback is not exist", topic));
+            throw new IllegalArgumentException(String.format("%s feedback does not exist", topic));
         }
 
         if (txFeedbackScheduler.isStarted()) {
@@ -130,10 +130,10 @@ public class DefaultTxFeedbackManager extends Service implements TxFeedbackManag
     protected TopicMetadata checkTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getApp());
         if (topicMetadata == null) {
-            throw new ProducerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ProducerException(String.format("topic %s does not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getProducerPolicy() == null) {
-            throw new ProducerException(String.format("topic %s producer %s is not exist", topic, config.getApp()), JoyQueueCode.FW_PRODUCER_NOT_EXISTS.getCode());
+            throw new ProducerException(String.format("topic %s producer %s does not exist", topic, config.getApp()), JoyQueueCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

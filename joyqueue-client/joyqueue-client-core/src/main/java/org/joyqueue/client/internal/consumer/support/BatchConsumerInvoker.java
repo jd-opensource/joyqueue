@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.consumer.BatchMessageListener;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.converter.ConsumeMessageConverter;
@@ -27,7 +28,6 @@ import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.domain.ConsumerPolicy;
 import org.joyqueue.network.command.RetryType;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,11 @@ public class BatchConsumerInvoker implements ConsumerInvoker {
                 if (logger.isDebugEnabled()) {
                     logger.debug("execute batchMessageListener, ignore ack, topic: {}, messages: {}, listeners: {}", topicMetadata.getTopic(), messages, listeners);
                 }
-                retryType = RetryType.OTHER;
+                if (config.isForceAck()) {
+                    retryType = RetryType.OTHER;
+                } else {
+                    retryType = RetryType.NONE;
+                }
             } else {
                 logger.error("execute batchMessageListener exception, topic: {}, messages: {}, listeners: {}", topicMetadata.getTopic(), messages, listeners, e);
                 retryType = RetryType.EXCEPTION;

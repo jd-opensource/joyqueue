@@ -207,9 +207,9 @@ public class MessagePollerInner extends Service {
             };
 
             if (index == FETCH_PARTITION_NONE_INDEX) {
-                messageFetcher.fetchPartitionAsync(brokerNode, topic, app, partition, index, batchSize, timeout, partitionFetchListenerAdapter);
-            } else {
                 messageFetcher.fetchPartitionAsync(brokerNode, topic, app, partition, batchSize, timeout, partitionFetchListenerAdapter);
+            } else {
+                messageFetcher.fetchPartitionAsync(brokerNode, topic, app, partition, index, batchSize, timeout, partitionFetchListenerAdapter);
             }
             return null;
         }
@@ -250,7 +250,6 @@ public class MessagePollerInner extends Service {
             }
             case FW_BROKER_NOT_READABLE: {
                 logger.debug("fetch message error, broker not readable, topic: {}", topic);
-                clusterManager.updateTopicMetadata(topic, app);
                 break;
             }
             default: {
@@ -332,10 +331,10 @@ public class MessagePollerInner extends Service {
     public TopicMetadata getAndCheckTopicMetadata(String topic) {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(getTopicFullName(topic), config.getAppFullName());
         if (topicMetadata == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s does not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, config.getAppFullName()), JoyQueueCode.FW_CONSUMER_NOT_EXISTS.getCode());
+            throw new ConsumerException(String.format("topic %s consumer %s does not exist", topic, config.getAppFullName()), JoyQueueCode.FW_CONSUMER_NOT_EXISTS.getCode());
         }
         return topicMetadata;
     }

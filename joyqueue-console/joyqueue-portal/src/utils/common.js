@@ -1,5 +1,8 @@
 import apiRequest from './apiRequest.js'
 import apiUrl from './apiUrl.js'
+import Vue from 'vue'
+
+let VInstance = new Vue()
 
 export function getTopicCode (topic, namespace) {
   let topicCode = (topic || {}).code
@@ -268,6 +271,48 @@ export function clientTypeSelectRender (h, params, subscribeRef) {
     }
   },
   clientTypeOptions().map((item) => {
+    return h('d-option', {
+      props: {
+        value: item.value,
+        label: item.txt
+      }
+    })
+  }))
+}
+
+export function clientTypeSelectRender2 (h, params, type) {
+  return h('d-select', {
+    props: {
+      value: params.item.clientType
+    },
+    on: {
+      'on-change': (newValue) => {
+        params.item['clientType'] = newValue
+        let url = ''
+        if (type === 'producer') {
+          url = apiUrl.common.updateProducer
+        } else {
+          url = apiUrl.common.updateConsumer
+        }
+        let id = ''
+        if (params.item.id.indexOf('/') !== -1) {
+          id = encodeURIComponent(params.item.id)
+        } else {
+          id = params.item.id
+        }
+        apiRequest.put(url + '/' + id, {}, params.item).then((data) => {
+          if (data.code === 200) {
+            VInstance.$Message.info('update success')
+          } else {
+            VInstance.$Message.error('failed to update clientType')
+          }
+        })
+      },
+      input: (event) => {
+        params.item.clientType = event.clientType
+      }
+    }
+  }, clientTypeOptions().map((item) => {
     return h('d-option', {
       props: {
         value: item.value,

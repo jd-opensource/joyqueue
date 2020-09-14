@@ -16,6 +16,7 @@
 package org.joyqueue.domain;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -42,6 +43,11 @@ public class Topic implements Serializable {
      * 优先级队列
      */
     protected Set<Short> priorityPartitions = new TreeSet();
+
+    /**
+     * 策略
+     */
+    protected TopicPolicy policy;
 
     public TopicName getName() {
         return name;
@@ -75,20 +81,82 @@ public class Topic implements Serializable {
         this.priorityPartitions = priorityPartitions;
     }
 
+    public void setPolicy(TopicPolicy policy) {
+        this.policy = policy;
+    }
+
+    public TopicPolicy getPolicy() {
+        return policy;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || !(o instanceof Topic)) return false;
+
         Topic topic = (Topic) o;
         return partitions == topic.partitions &&
                 Objects.equals(name, topic.name) &&
                 type == topic.type &&
-                Objects.equals(priorityPartitions, topic.priorityPartitions);
+                Objects.equals(priorityPartitions, topic.priorityPartitions) &&
+                Objects.equals(policy, topic.policy);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, partitions, type, priorityPartitions);
+        return Objects.hash(name, partitions, type, priorityPartitions, policy);
+    }
+
+    public static class TopicPolicy implements Serializable {
+        private Long storeMaxTime;
+        private Boolean storeCleanKeepUnconsumed;
+        private Map<String, String> params;
+
+        public Long getStoreMaxTime() {
+            return storeMaxTime;
+        }
+
+        public void setStoreMaxTime(Long storeMaxTime) {
+            this.storeMaxTime = storeMaxTime;
+        }
+
+        public void setStoreCleanKeepUnconsumed(Boolean storeCleanKeepUnconsumed) {
+            this.storeCleanKeepUnconsumed = storeCleanKeepUnconsumed;
+        }
+
+        public Boolean getStoreCleanKeepUnconsumed() {
+            return storeCleanKeepUnconsumed;
+        }
+
+        public void setParams(Map<String, String> params) {
+            this.params = params;
+        }
+
+        public Map<String, String> getParams() {
+            return params;
+        }
+
+        public String getParam(String key) {
+            if (params == null) {
+                return null;
+            }
+            return params.get(key);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TopicPolicy that = (TopicPolicy) o;
+            return Objects.equals(storeMaxTime, that.storeMaxTime) &&
+                    Objects.equals(storeCleanKeepUnconsumed, that.storeCleanKeepUnconsumed) &&
+                    Objects.equals(params, that.params);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(storeMaxTime, storeCleanKeepUnconsumed, params);
+        }
     }
 
     /**

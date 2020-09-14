@@ -4,12 +4,27 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.joyqueue.repository.BrokerGroupRepository">
+
+    <resultMap id="baseResultMap" type="BrokerGroup">
+        <result property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="policies" column="policies" jdbcType="VARCHAR" typeHandler="org.joyqueue.repository.mybatis.handler.MapTypeHandler"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="labels" column="labels" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="createBy.id" column="create_by" jdbcType="BIGINT"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="updateBy.id" column="update_by" jdbcType="BIGINT"/>
+    </resultMap>
+
     <sql id="select">
         SELECT
             id,
             `name`,
             code,
             labels,
+            policies,
+            description,
             create_time,
             create_by as `createBy.id`,
             update_time,
@@ -24,6 +39,8 @@
             code,
             `name`,
             labels,
+            policies,
+            description,
             create_time,
             create_by,
             update_time,
@@ -33,6 +50,8 @@
             #{code},
             #{name},
             #{labels},
+            #{policies},
+            #{description},
             #{createTime},
             #{createBy.id},
             #{updateTime},
@@ -70,6 +89,8 @@
         SET
             code=#{code},
             `name`=#{name},
+            `policies`=#{policies},
+            `description`=#{description},
             update_time=#{updateTime},
             update_by=#{updateBy.id},
             status=#{status}
@@ -84,7 +105,8 @@
         SET
             update_time=#{updateTime},
             update_by=#{updateBy.id},
-            labels=#{labels}
+            labels=#{labels},
+            policies =#{policies},
         WHERE
             id=#{id}
             AND status !=-1

@@ -69,13 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -103,6 +97,43 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
 
     @Autowired
     private BrokerRestUrlMappingService urlMappingService;
+
+    @Override
+    public boolean removeBrokerMonitorConnections(Subscribe subscribe,Integer brokerId) {
+        this.checkArgument(subscribe);
+        List<Broker> brokers=new ArrayList<>();
+        if(subscribe.getType().value()==PRODUCER_TYPE){
+            Future<Map<String,String >> resultFuture= brokerCluster.asyncDeleteOnBroker(brokerId,subscribe, new RetrieveProvider<Subscribe>() {
+                @Override
+                public String getKey(Broker broker, PartitionGroup partitionGroup,short partition , Subscribe condition) {
+                    brokers.add(broker);
+                    return broker.getIp()+":"+broker.getPort();
+                }
+                 @Override
+                 public String getPath(String pathTemplate, PartitionGroup partitionGroup,short partition ,Subscribe condition) {
+                     return String.format(pathTemplate, UrlEncoderUtil.encodeParam(CodeConverter.convertTopic(subscribe.getNamespace(),subscribe.getTopic()).getFullName(),
+                             CodeConverter.convertApp(subscribe.getApp(),subscribe.getSubscribeGroup())));
+                 }
+            },"removeProducersConnections","monitor on broker");
+        }
+        else if(subscribe.getType().value()==CONSUMER_TYPE){
+            Future<Map<String,String >> resultFuture= brokerCluster.asyncDeleteOnBroker(brokerId,subscribe, new RetrieveProvider<Subscribe>() {
+                @Override
+                public String getKey(Broker broker, PartitionGroup partitionGroup,short partition , Subscribe condition) {
+                    brokers.add(broker);
+                    return broker.getIp()+":"+broker.getPort();
+                }
+                @Override
+                public String getPath(String pathTemplate, PartitionGroup partitionGroup,short partition ,Subscribe condition) {
+                    return String.format(pathTemplate, UrlEncoderUtil.encodeParam(CodeConverter.convertTopic(subscribe.getNamespace(),subscribe.getTopic()).getFullName(),
+                            CodeConverter.convertApp(subscribe.getApp(),subscribe.getSubscribeGroup())));
+                }
+            },"removeConsumersConnections","monitor on broker");
+            Map<String/*request key*/, String/*response*/> resultMap= brokerCluster.get(resultFuture,TIMEOUT,TimeUnit.MILLISECONDS);
+        }
+        return brokers.size()>0;
+    }
+
     @Override
     public List<BrokerMonitorRecord> findMonitorOnBroker(Subscribe subscribe) {
         this.checkArgument(subscribe);
@@ -163,7 +194,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         return monitorRecords;
     }
@@ -185,6 +216,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             return find(subscribe);
         }
     }
+
 
     /**
      *
@@ -259,7 +291,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info(" parse connection info exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         //mock large size result
 //        if(clients.size()>0){
@@ -337,7 +369,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         if(!NullUtil.isEmpty(monitorRecords)){
             monitorRecords.sort(Comparator.comparing(e->e.getPartition()));
@@ -498,7 +530,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
             }
         }catch (Exception e){
             logger.info("broker asyncQueryOnBroker occurs parse exception.", e);
-            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage());
+            throw new ServiceException(INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         return  monitorRecords;
     }
@@ -600,6 +632,7 @@ public class BrokerMonitorServiceImpl implements BrokerMonitorService {
                 connectionMonitorInfoWithIp.setConsumer(con.getConsumer());
                 connectionMonitorInfoWithIp.setProducer(con.getProducer());
                 connectionMonitorInfoWithIp.setTotal(con.getTotal());
+                connectionMonitorInfoWithIp.setId(b.getId());
                 connectionRecords.add(connectionMonitorInfoWithIp);
             }
             //Future

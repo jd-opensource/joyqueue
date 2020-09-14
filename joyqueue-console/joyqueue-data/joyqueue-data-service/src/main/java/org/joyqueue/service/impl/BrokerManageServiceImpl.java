@@ -23,6 +23,8 @@ import org.joyqueue.service.BrokerManageService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.toolkit.io.Directory;
 import org.joyqueue.util.UrlEncoderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +41,8 @@ public class BrokerManageServiceImpl implements BrokerManageService {
     private HttpRestService httpRestService;
     @Autowired
     protected BrokerService brokerService;
+
+    private static final Logger logger = LoggerFactory.getLogger(BrokerManageServiceImpl.class);
     @Override
     public Directory storeTreeView(int brokerId,boolean recursive) {
         try {
@@ -54,7 +58,8 @@ public class BrokerManageServiceImpl implements BrokerManageService {
                 return directory;
             }
         }catch (Exception e){
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR,e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         return null;
     }
@@ -74,7 +79,8 @@ public class BrokerManageServiceImpl implements BrokerManageService {
                 return restResponse.getData();
             }
         }catch (Exception e){
-            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR,e.getMessage());
+            logger.error("", e);
+            throw new ServiceException(ServiceException.INTERNAL_SERVER_ERROR,e.getMessage(), e);
         }
         return false;
     }

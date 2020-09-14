@@ -16,6 +16,7 @@
 package org.joyqueue.toolkit.retry;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -42,6 +43,7 @@ public class RetryPolicy implements Serializable {
     private Double backOffMultiplier;
     // 过期时间（默认3天）
     private Integer expireTime;
+    private Integer randomBound;
 
     public RetryPolicy() {
     }
@@ -186,46 +188,31 @@ public class RetryPolicy implements Serializable {
         this.expireTime = expireTime;
     }
 
+    public void setRandomBound(Integer randomBound) {
+        this.randomBound = randomBound;
+    }
+
+    public Integer getRandomBound() {
+        return randomBound;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         RetryPolicy that = (RetryPolicy) o;
-
-        if (backOffMultiplier != null ? !backOffMultiplier
-                .equals(that.backOffMultiplier) : that.backOffMultiplier != null) {
-            return false;
-        }
-        if (expireTime != null ? !expireTime.equals(that.expireTime) : that.expireTime != null) {
-            return false;
-        }
-        if (maxRetryDelay != null ? !maxRetryDelay.equals(that.maxRetryDelay) : that.maxRetryDelay != null) {
-            return false;
-        }
-        if (maxRetrys != null ? !maxRetrys.equals(that.maxRetrys) : that.maxRetrys != null) {
-            return false;
-        }
-        if (retryDelay != null ? !retryDelay.equals(that.retryDelay) : that.retryDelay != null) {
-            return false;
-        }
-        return useExponentialBackOff != null ? useExponentialBackOff
-                .equals(that.useExponentialBackOff) : that.useExponentialBackOff == null;
+        return Objects.equals(maxRetrys, that.maxRetrys) &&
+                Objects.equals(maxRetryDelay, that.maxRetryDelay) &&
+                Objects.equals(retryDelay, that.retryDelay) &&
+                Objects.equals(useExponentialBackOff, that.useExponentialBackOff) &&
+                Objects.equals(backOffMultiplier, that.backOffMultiplier) &&
+                Objects.equals(expireTime, that.expireTime) &&
+                Objects.equals(randomBound, that.randomBound);
     }
 
     @Override
     public int hashCode() {
-        int result = maxRetrys != null ? maxRetrys.hashCode() : 0;
-        result = 31 * result + (maxRetryDelay != null ? maxRetryDelay.hashCode() : 0);
-        result = 31 * result + (retryDelay != null ? retryDelay.hashCode() : 0);
-        result = 31 * result + (useExponentialBackOff != null ? useExponentialBackOff.hashCode() : 0);
-        result = 31 * result + (backOffMultiplier != null ? backOffMultiplier.hashCode() : 0);
-        result = 31 * result + (expireTime != null ? expireTime.hashCode() : 0);
-        return result;
+        return Objects.hash(maxRetrys, maxRetryDelay, retryDelay, useExponentialBackOff, backOffMultiplier, expireTime, randomBound);
     }
 
     @Override
@@ -237,6 +224,7 @@ public class RetryPolicy implements Serializable {
         sb.append(", useExponentialBackOff=").append(useExponentialBackOff);
         sb.append(", backOffMultiplier=").append(backOffMultiplier);
         sb.append(", expireTime=").append(expireTime);
+        sb.append(", randomBound=").append(randomBound);
         sb.append('}');
         return sb.toString();
     }

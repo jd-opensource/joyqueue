@@ -16,6 +16,8 @@
 package org.joyqueue.async;
 
 
+import org.joyqueue.model.domain.Subscribe;
+
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +29,16 @@ import java.util.concurrent.TimeUnit;
  **/
 public interface BrokerClusterQuery<C> {
 
-
-
+    /**
+     *用于DELETE方法
+     * @param brokerIp   关闭的brokerIp
+     * @param condition  查询条件
+     * @param provider   provider path and result key
+     * @param pathKey    获取路径的key, 用于从 urlMappingService 查询 path template
+     * @param logKey     for log trace
+     * @return  a map with String,String, broker 维度
+     */
+    Future<Map<String, String>> asyncDeleteOnBroker(Integer brokerId,Subscribe condition, RetrieveProvider<Subscribe> provider, String pathKey, String logKey);
     /**
      * 查询所有信息
      * @param namespace

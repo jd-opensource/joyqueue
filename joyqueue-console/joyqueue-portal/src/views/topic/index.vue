@@ -25,16 +25,24 @@
 
     <my-table :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange"
               @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange" @on-view-detail="goDetail"
-              @on-add-brokerGroup="addBrokerGroup" @on-del="del" :operation-column-width="operationColumnWidth">
+              @on-add-brokerGroup="addBrokerGroup" @on-del="del" @on-policy="handlePolicy" :operation-column-width="operationColumnWidth">
     </my-table>
     <!--添加-->
-    <my-dialog :dialog="addDialog" class="add-dialog" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
+    <my-dialog :dialog="addDialog" class="add-dialog maxDialogHeight" @on-dialog-cancel="dialogCancel('addDialog')" :styles="{top: '40px'}">
       <topic-form @on-dialog-cancel="dialogCancel('addDialog')" :type="$store.getters.addFormType"
                   :addBrokerUrls="addBrokerUrls" :addBrokerColData="addBrokerColData"/>
     </my-dialog>
     <!--添加分组-->
     <my-dialog :dialog="addBrokerGroupDialog" @on-dialog-confirm="addBrokerGroupConfirm()" @on-dialog-cancel="addBrokerGroupCancel()">
       <add-broker-group :data="addBrokerGroupData" @on-choosed-brokerGroup="choosedBrokerGroup"></add-broker-group>
+    </my-dialog>
+
+    <my-dialog :dialog="policyDialog" @on-dialog-confirm="policyConfirm" @on-dialog-cancel="dialogCancel('policyDialog')">
+      <d-form ref="policyMetadata" label-width="200px">
+        <d-form-item v-for="item in policies" :key="item.key" :label="item.key + ':'">
+          <d-input v-model="item.value" style="width: 250px;"/>
+        </d-form-item>
+      </d-form>
     </my-dialog>
   </div>
 </template>
@@ -62,6 +70,11 @@ export default {
       type: Array,
       default () {
         return [
+          {
+            txt: '策略',
+            method: 'on-policy',
+            isAdmin: true
+          },
           {
             txt: '详情',
             method: 'on-view-detail'
@@ -120,6 +133,9 @@ export default {
         keyword: '',
         command: 1
       },
+      topic: {},
+      policy: {},
+      policies: [],
       tableData: {
         rowData: [],
         colData: [
@@ -185,6 +201,12 @@ export default {
         width: 800,
         showFooter: false
       },
+      policyDialog: {
+        visible: false,
+        title: '策略详情',
+        width: '500',
+        showFooter: true
+      },
       addData: {},
       addBrokerGroupDialog: {
         visible: false,
@@ -220,14 +242,63 @@ export default {
         this.getList()
       })
     },
+    policyConfirm () {
+      this.topic.policy = {}
+      for (let policy in this.policies) {
+        if (this.policies.hasOwnProperty(policy)) {
+          if (this.policies[policy].key === 'storeMaxTime') {
+            this.topic.policy[this.policies[policy].key] = this.policies[policy].value * (1000 * 60 * 60)
+          } else {
+            this.topic.policy[this.policies[policy].key] = this.policies[policy].value
+          }
+        }
+      }
+      apiRequest.put(this.urlOrigin.edit + '/' + encodeURIComponent(this.topic.id), {}, this.topic).then((data) => {
+        this.policyDialog.visible = false
+        if (data.code === 200) {
+          this.$Dialog.success({
+            content: '更新成功'
+          })
+        }
+        this.getList()
+        this.policies = undefined
+      })
+    },
     addBrokerGroupCancel () {
       this.addBrokerGroupDialog.visible = false
     },
     choosedBrokerGroup (val) {
       this.addBrokerGroupData.brokerGroupsAdd = val
     },
+    handlePolicy (item) {
+      this.topic = item
+      this.policies = []
+      if (!this.topic.policy) {
+        this.topic.policy = {}
+      }
+      this.policies.push({
+        key: '存储最长时间',
+        value: item.policy.storeMaxTime / (1000 * 60 * 60)
+      })
+      this.policies.push({
+        key: '保留未消费数据',
+        value: item.policy.storeCleanKeepUnconsumed
+      })
+      for (let policy in this.policy) {
+        this.policies.push({
+          key: policy,
+          value: this.policy[policy]
+        })
+      }
+      this.policyDialog.visible = true
+    },
     isAdmin (item) {
       return this.$store.getters.isAdmin
+    },
+    dialogCancel (dialogName) {
+      this[dialogName].visible = false
+      this.policies = undefined
+      this.getList()
     },
     // 删除
     del (item, index) {
@@ -287,4 +358,7 @@ export default {
 }
 .hint{color: #f00;}
 .star{color: #f00;}
+.maxDialogHeight /deep/ .dui-dialog__body {
+  height: 650px;
+}
 </style>

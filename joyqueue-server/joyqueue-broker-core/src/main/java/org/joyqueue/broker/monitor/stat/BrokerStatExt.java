@@ -25,7 +25,7 @@ import java.util.Map;
  **/
 public class BrokerStatExt implements Serializable {
 
-    private BrokerStat brokerStat;
+    private transient BrokerStat brokerStat;
     private Integer brokerId;
     private Map<String/*topic*/, TopicPendingStat> topicPendingStatMap = new HashMap<>();
     private MemoryUsage heap;

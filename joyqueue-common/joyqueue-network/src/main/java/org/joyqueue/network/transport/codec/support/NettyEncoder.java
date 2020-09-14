@@ -15,11 +15,12 @@
  */
 package org.joyqueue.network.transport.codec.support;
 
-import org.joyqueue.network.transport.codec.Codec;
-import org.joyqueue.network.transport.exception.TransportException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import org.joyqueue.network.transport.codec.Codec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * NettyEncoder
@@ -28,6 +29,8 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * date: 2018/8/14
  */
 public class NettyEncoder extends MessageToByteEncoder {
+
+    protected static final Logger logger = LoggerFactory.getLogger(NettyEncoder.class);
 
     private Codec codec;
 
@@ -40,11 +43,8 @@ public class NettyEncoder extends MessageToByteEncoder {
         try {
             codec.encode(msg, out);
         } catch (Exception e) {
-            if (e instanceof TransportException.CodecException) {
-                throw e;
-            } else {
-                throw new TransportException.CodecException(e.getMessage());
-            }
+            logger.error("encode exception, ctx: {}, msg: {}", ctx, msg, e);
+            ctx.channel().close();
         }
     }
 }

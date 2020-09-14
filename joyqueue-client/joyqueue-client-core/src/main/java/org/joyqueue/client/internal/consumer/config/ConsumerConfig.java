@@ -29,6 +29,9 @@ public class ConsumerConfig {
     public static final int NONE_BATCH_SIZE = -1;
     public static final long NONE_ACK_TIMEOUT = -1;
     public static final int NONE_BROADCAST_INDEX_EXPIRE_TIME = -1;
+    public static final int BROADCAST_AUTO_RESET_LEFT_INDEX = 0;
+    public static final int BROADCAST_AUTO_RESET_RIGHT_INDEX = 1;
+    public static final int BROADCAST_AUTO_RESET_CURRENT_INDEX = 2;
     public static final int NONE_THREAD = -1;
 
     private String app;
@@ -37,12 +40,13 @@ public class ConsumerConfig {
     private long ackTimeout = NONE_ACK_TIMEOUT;
     private long timeout = 1000 * 10;
     private long pollTimeout = 1000 * 10;
-    private long longPollTimeout = 1000 * 5;
+    private long longPollTimeout = 1000 * 1;
     private long interval = 0;
     private long idleInterval = 1000 * 1;
     private long sessionTimeout = 1000 * 60 * 1;
     private int thread = NONE_THREAD;
     private boolean failover = true;
+    private boolean forceAck = false;
 
     private boolean loadBalance = true;
     private String loadBalanceType = RoundRobinBrokerLoadBalance.NAME;
@@ -51,6 +55,7 @@ public class ConsumerConfig {
     private String broadcastLocalPath;
     private int broadcastPersistInterval = 1000 * 10;
     private int broadcastIndexExpireTime = NONE_BROADCAST_INDEX_EXPIRE_TIME;
+    private int broadcastIndexAutoReset = BROADCAST_AUTO_RESET_RIGHT_INDEX;
 
     private volatile String appFullName;
 
@@ -68,12 +73,14 @@ public class ConsumerConfig {
         consumerConfig.setSessionTimeout(sessionTimeout);
         consumerConfig.setThread(thread);
         consumerConfig.setFailover(failover);
+        consumerConfig.setForceAck(forceAck);
         consumerConfig.setLoadBalance(loadBalance);
         consumerConfig.setLoadBalanceType(loadBalanceType);
         consumerConfig.setBroadcastGroup(broadcastGroup);
         consumerConfig.setBroadcastLocalPath(broadcastLocalPath);
         consumerConfig.setBroadcastPersistInterval(broadcastPersistInterval);
         consumerConfig.setBroadcastIndexExpireTime(broadcastIndexExpireTime);
+        consumerConfig.setBroadcastIndexAutoReset(broadcastIndexAutoReset);
         return consumerConfig;
     }
 
@@ -188,6 +195,14 @@ public class ConsumerConfig {
         return failover;
     }
 
+    public void setForceAck(boolean forceAck) {
+        this.forceAck = forceAck;
+    }
+
+    public boolean isForceAck() {
+        return forceAck;
+    }
+
     public void setLoadBalance(boolean loadBalance) {
         this.loadBalance = loadBalance;
     }
@@ -234,5 +249,13 @@ public class ConsumerConfig {
 
     public void setBroadcastIndexExpireTime(int broadcastIndexExpireTime) {
         this.broadcastIndexExpireTime = broadcastIndexExpireTime;
+    }
+
+    public void setBroadcastIndexAutoReset(int broadcastIndexAutoReset) {
+        this.broadcastIndexAutoReset = broadcastIndexAutoReset;
+    }
+
+    public int getBroadcastIndexAutoReset() {
+        return broadcastIndexAutoReset;
     }
 }

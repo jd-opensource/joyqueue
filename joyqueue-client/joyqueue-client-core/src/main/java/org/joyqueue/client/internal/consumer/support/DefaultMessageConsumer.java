@@ -343,6 +343,41 @@ public class DefaultMessageConsumer extends Service implements MessageConsumer {
     }
 
     @Override
+    public JoyQueueCode commitIndex(short partition, long index) {
+        checkState();
+        checkSubscribe();
+        return topicMessageConsumer.getMessagePoller().commitIndex(subscribeTopic, partition, index);
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex() {
+        checkState();
+        checkSubscribe();
+        return topicMessageConsumer.getMessagePoller().commitMaxIndex(subscribeTopic);
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex(short partition) {
+        checkState();
+        checkSubscribe();
+        return topicMessageConsumer.getMessagePoller().commitMaxIndex(subscribeTopic, partition);
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex() {
+        checkState();
+        checkSubscribe();
+        return topicMessageConsumer.getMessagePoller().commitMinIndex(subscribeTopic);
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex(short partition) {
+        checkState();
+        checkSubscribe();
+        return topicMessageConsumer.getMessagePoller().commitMinIndex(subscribeTopic, partition);
+    }
+
+    @Override
     public FetchIndexData fetchIndex(short partition) {
         checkState();
         checkSubscribe();

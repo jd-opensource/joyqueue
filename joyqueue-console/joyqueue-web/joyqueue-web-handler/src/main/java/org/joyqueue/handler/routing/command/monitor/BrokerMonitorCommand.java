@@ -96,6 +96,17 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     }
 
     /**
+     *关闭生产者或消费者broker的连接
+     *
+     */
+    @Path("removeConnections")
+    public Response removeConnections(@Body Subscribe subscribe, @QueryParam("id") Long id) {
+        Integer brokerId = id.intValue();
+        if(brokerMonitorService.removeBrokerMonitorConnections(subscribe,brokerId))
+            return Responses.success("success");
+        return Responses.error(500,"broker not found, operation error");
+    }
+    /**
      * topic and app 生产或者消费监控汇总信息
      *
      */

@@ -17,7 +17,7 @@
       <slot name="extendBtn"></slot>
     </div>
     <my-table :optional="true" :data="tableData" :showPin="showTablePin" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
-              @on-edit="edit" @on-del="del" @on-detail="detail" @on-archiveMonitor="archiveMonitor">
+              @on-edit="edit" @on-del="del" @on-archiveMonitor="archiveMonitor">
     </my-table>
 
     <!--编辑Broker-->
@@ -95,6 +95,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import crud from '../../mixins/crud.js'
 import BrokerMonitor from './brokerMonitor'
 import {timeStampToString} from '../../utils/dateTimeUtils'
+import {brokerRetryTypeRender, brokerPermissionTypeRender, bytesToSize} from '../../utils/common.js'
 
 export default {
   name: 'application',
@@ -122,13 +123,14 @@ export default {
           del: '/broker/delete',
           edit: '/broker/update',
           archiveMonitor: '/monitor/archive',
+          findDetail: '/monitor/broker/findBrokerDetail/',
           telnet: '/broker',
           startInfo: '/monitor/start',
           batchBrokerGroupSearch: '/brokerGroup/mvBatchBrokerGroup'
         }
       }
     },
-    btns: {
+    operates: {
       type: Array,
       default: function () {
         return [
@@ -143,10 +145,6 @@ export default {
           {
             txt: '归档监控',
             method: 'on-archiveMonitor'
-          },
-          {
-            txt: '详情',
-            method: 'on-detail'
           }
         ]
       }
@@ -158,38 +156,234 @@ export default {
           {
             title: 'ID',
             key: 'id',
-            width: '10%'
+            width: '9%'
           },
           {
             title: 'Broker分组编码',
             key: 'group.code',
-            width: '15%'
+            width: '5%'
           },
           {
-            title: 'IP',
+            title: 'IP:端口',
             key: 'ip',
-            width: '15%'
+            width: '12%',
+            render: (h, params) => {
+              const ip = params.item.ip
+              const port = params.item.port
+              return h('label', {
+                style: {
+                  color: '#3366FF'
+                },
+                on: {
+                  click: () => {
+                    let route = this.$router.resolve({
+                      path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
+                      query: {
+                        brokerId: params.item.id,
+                        brokerIp: ip,
+                        brokerPort: port
+                      }
+                    })
+                    window.open(route.href, '_blank')
+                  },
+                  mousemove: (event) => {
+                    event.target.style.cursor = 'pointer'
+                  }
+                }
+              }, `${ip}:${port}`)
+            }
           },
           {
-            title: '端口',
-            key: 'port',
-            width: '10%'
+            title: '机房 (编码/名称)',
+            key: 'dataCenter.code',
+            width: '9%',
+            formatter (item) {
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
+            }
           },
           {
-            title: '启动时间',
-            key: 'startupTime',
-            width: '15%'
+            title: '内存/存储', // bufferPoolMonitorInfo.used%bufferPoolMonitorInfo.maxMemorySize  store.freeSpace%store.totalSpace
+            key: 'bufferPoolMonitorInfo.maxMemorySize',
+            width: '12%',
+            formatter (item) {
+              if (item.bufferPoolMonitorInfo) {
+                let res1 = 0
+                let res2 = 0
+                let maxMemorySize = item.bufferPoolMonitorInfo.maxMemorySize
+                let used = item.bufferPoolMonitorInfo.used
+                let a = parseFloat(maxMemorySize)
+                let b = parseFloat(used)
+                // 统一转换为MB
+                if (maxMemorySize.indexOf('KB') !== -1) {
+                  a = a / 1024
+                } else if (maxMemorySize.indexOf('GB') !== -1) {
+                  a = a * 1024
+                } else if (maxMemorySize.indexOf('TB') !== -1) {
+                  a = a * 1024 * 1024
+                }
+                if (used.indexOf('KB') !== -1) {
+                  b = b / 1024
+                } else if (used.indexOf('GB') !== -1) {
+                  b = b * 1024
+                } else if (used.indexOf('TB') !== -1) {
+                  b = b * 1024 * 1024
+                }
+                res1 = Number(b / a * 100).toFixed(1)
+                let totalSpace = item.store.totalSpace
+                let freeSpace = item.store.freeSpace
+                a = parseFloat(totalSpace)
+                b = parseFloat(freeSpace)
+                if (totalSpace.indexOf('KB') !== -1) {
+                  a = a / 1024
+                } else if (totalSpace.indexOf('GB') !== -1) {
+                  a = a * 1024
+                } else if (totalSpace.indexOf('TB') !== -1) {
+                  a = a * 1024 * 1024
+                }
+                if (freeSpace.indexOf('KB') !== -1) {
+                  b = b / 1024
+                } else if (freeSpace.indexOf('GB') !== -1) {
+                  b = b * 1024
+                } else if (freeSpace.indexOf('TB') !== -1) {
+                  b = b * 1024 * 1024
+                }
+                res2 = Number((a - b) / a * 100).toFixed(1)
+                return res1 + '% / ' + res2 + '%'
+              }
+            }
           },
           {
-            title: '重试方式',
+            title: '出队/入队',
+            key: 'enQueue.tps',
+            width: '20%',
+            render: (h, params) => {
+              let condition = ''
+              if (params.item.enQueue && params.item.deQueue) {
+                let deQueuetraffic = parseFloat(params.item.deQueue.traffic)
+                let enQeueutraffic = parseFloat(params.item.enQueue.traffic)
+                let html = []
+                condition = 'tps:' + params.item.deQueue.tps + '/' + params.item.enQueue.tps
+                let target = ''
+                if (condition.length > 100) {
+                  target = condition.substring(0, 100) + ' ...'
+                } else {
+                  target = condition
+                }
+                var p = h('d-tooltip', {
+                  attrs: {
+                    content: condition
+                  }
+                }, [h('span', {
+                }, target)])
+                html.push(p)
+                html.push(h('br'))
+                condition = 'traffic:' + bytesToSize(deQueuetraffic, 2, true) + '/' + bytesToSize(enQeueutraffic, 2, true)
+                target = ''
+                if (condition.length > 100) {
+                  target = condition.substring(0, 100) + ' ...'
+                } else {
+                  target = condition
+                }
+                p = h('d-tooltip', {
+                  attrs: {
+                    content: condition
+                  }
+                }, [h('span', {
+                }, target)])
+                html.push(p)
+                return html
+              }
+            }
+          },
+          {
+            title: '启动时间/版本',
+            key: 'startupInfo.version',
+            width: '15%',
+            render: (h, params) => {
+              let html = []
+              let spin = h('d-spin', {
+                attrs: {
+                  size: 'small'
+                },
+                style: {
+                  display: (params.item.startupInfo.startupTime !== undefined) ? 'none' : 'inline-block'
+                }
+              })
+              html.push(spin)
+              let text = ''
+              if (params.item.startupInfo) {
+                if (params.item.startupInfo.startupTime === 'UNKNOWN') {
+                  let error = h('icon', {
+                    style: {
+                      color: 'red'
+                    },
+                    props: {
+                      name: 'x-circle'
+                    }
+                  })
+                  html.push(error)
+                } else {
+                  text = timeStampToString(params.item.startupInfo.startupTime)
+                  let textSpan = h('span', {
+                    style: {
+                      position: 'relative',
+                      display: (params.item.startupInfo.startupTime === undefined) ? 'none' : 'inline-block'
+                    }
+                  }, text)
+                  html.push(textSpan)
+                }
+              }
+              html.push(' / ')
+              spin = h('d-spin', {
+                attrs: {
+                  size: 'small'
+                },
+                style: {
+                  display: (params.item.startupInfo.version !== undefined) ? 'none' : 'inline-block'
+                }
+              })
+              html.push(spin)
+              text = params.item.startupInfo.version
+              if (text === 'UNKNOWN') {
+                let error = h('icon', {
+                  style: {
+                    color: 'red'
+                  },
+                  props: {
+                    name: 'x-circle'
+                  }
+                })
+                html.push(error)
+              } else {
+                let textSpan = h('span', {
+                  style: {
+                    position: 'relative',
+                    display: (params.item.startupInfo.version === undefined) ? 'none' : 'inline-block'
+                  }
+                }, text)
+                html.push(textSpan)
+              }
+              return h('div', {}, html)
+            }
+          },
+          {
+            title: '重试方式/权限',
             key: 'retryType',
-            width: '10%'
-          },
-          {
+            width: '20%', // 10
+            render: (h, params) => {
+              return h('div', [brokerRetryTypeRender(h, params.item.retryType), brokerPermissionTypeRender(h, params.item.permission)])
+            }
+          }
+          /*          {
             title: '权限',
             key: 'permission',
-            width: '10%'
-          }
+            width: '8%',
+            render: (h, params) => {
+              return brokerPermissionTypeRender(h, params.item.permission)
+            }
+          } */
         ]
       }
     }
@@ -203,7 +397,7 @@ export default {
       tableData: {
         rowData: [],
         colData: this.colData,
-        btns: this.btns
+        operates: this.operates
       },
       brokerId: -1,
       multipleSelection: [],
@@ -270,7 +464,11 @@ export default {
         this.page.size = data.pagination.size
         this.tableData.rowData = data.data
         for (let i = 0; i < this.tableData.rowData.length; i++) {
+          if (!this.tableData.rowData[i].startupInfo) {
+            this.tableData.rowData[i].startupInfo = {}
+          }
           this.getBrokerStatus(this.tableData.rowData, i)
+          this.getDetail(this.tableData.rowData[i], i)
         }
         this.showTablePin = false
       })
@@ -285,6 +483,19 @@ export default {
         this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
       })
     },
+    getDetail (row, index) {
+      apiRequest.getBase(this.urls.findDetail + row.id, {}, false)
+        .then((data) => {
+          if (data.code === 200) {
+            this.tableData.rowData[index] = Object.assign(row, data.data || [])
+          } else {
+            this.tableData.rowData[index].startupInfo = {}
+            this.tableData.rowData[index].startupInfo.startupTime = 'UNKNOWN'
+            this.tableData.rowData[index].startupInfo.version = 'UNKNOWN'
+          }
+          this.$set(this.tableData.rowData, index, this.tableData.rowData[index])
+        })
+    },
     archiveMonitor (item) {
       let broker = {
         ip: item.ip,
@@ -294,17 +505,6 @@ export default {
         data.data = data.data || {}
         this.archiveMonitorData = data.data
         this.openDialog('archiveMonitorDialog')
-      })
-    },
-    detail (item) {
-      this.brokerId = item.id
-      this.$router.push({
-        path: '/' + this.$i18n.locale + '/setting/brokerMonitor',
-        query: {
-          brokerId: item.id,
-          brokerIp: item.ip,
-          brokerPort: item.port
-        }
       })
     },
     beforeEdit () {

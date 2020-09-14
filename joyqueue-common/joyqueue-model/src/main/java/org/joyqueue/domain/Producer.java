@@ -153,7 +153,7 @@ public class Producer extends Subscription {
             this.nearby = false;
             this.single = false;
             this.archive = false;
-            this.timeOut = 10000;
+            this.timeOut = 1000 * 2;
         }
 
         // 就近发送
@@ -169,6 +169,9 @@ public class Producer extends Subscription {
          */
         private Set<String> blackList;
         private Integer timeOut;
+        private Integer qosLevel;
+        private String region;
+        private Map<String, String> params;
 
         public ProducerPolicy(Boolean nearby, boolean single, Boolean archive, Map<String, Short> weight, Set<String> blackList, Integer timeOut) {
             this.nearby = nearby;
@@ -228,6 +231,37 @@ public class Producer extends Subscription {
             this.timeOut = timeOut;
         }
 
+        public void setQosLevel(Integer qosLevel) {
+            this.qosLevel = qosLevel;
+        }
+
+        public Integer getQosLevel() {
+            return qosLevel;
+        }
+
+        public void setRegion(String region) {
+            this.region = region;
+        }
+
+        public String getRegion() {
+            return region;
+        }
+
+        public void setParams(Map<String, String> params) {
+            this.params = params;
+        }
+
+        public Map<String, String> getParams() {
+            return params;
+        }
+
+        public String getParam(String key) {
+            if (params == null) {
+                return null;
+            }
+            return params.get(key);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -238,13 +272,16 @@ public class Producer extends Subscription {
                     Objects.equals(archive, that.archive) &&
                     Objects.equals(weight, that.weight) &&
                     Objects.equals(blackList, that.blackList) &&
-                    Objects.equals(timeOut, that.timeOut);
+                    Objects.equals(timeOut, that.timeOut) &&
+                    Objects.equals(qosLevel, that.qosLevel) &&
+                    Objects.equals(region, that.region) &&
+                    Objects.equals(params, that.params);
         }
 
         @Override
         public int hashCode() {
 
-            return Objects.hash(nearby, single, archive, weight, blackList, timeOut);
+            return Objects.hash(nearby, single, archive, weight, blackList, timeOut, qosLevel, params);
         }
 
         public static class Builder {
@@ -260,8 +297,11 @@ public class Producer extends Subscription {
              * 黑名单
              */
             private Set<String> blackList;
-            // 默认生产超时时间 5秒钟
-            private Integer timeOut = 1000 * 5;
+            // 默认生产超时时间 2秒钟
+            private Integer timeOut = 1000 * 2;
+
+            private Integer qosLevel;
+            private String region;
 
             public static Builder build() {
                 return new Builder();
@@ -302,14 +342,27 @@ public class Producer extends Subscription {
                 return this;
             }
 
+            public Builder qosLevel(Integer qosLevel) {
+                this.qosLevel = qosLevel;
+                return this;
+            }
+
+            public Builder region(String region) {
+                this.region = region;
+                return this;
+            }
+
             public Builder timeout(Integer timeOut) {
                 this.timeOut = timeOut;
                 return this;
             }
 
             public ProducerPolicy create() {
-                return new ProducerPolicy(nearby, single, archive, weight,
+                ProducerPolicy producerPolicy = new ProducerPolicy(nearby, single, archive, weight,
                         blackList, timeOut);
+                producerPolicy.setQosLevel(qosLevel);
+                producerPolicy.setRegion(region);
+                return producerPolicy;
             }
         }
     }

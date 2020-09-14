@@ -277,7 +277,12 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
         if(resultMap.size()==brokers.size()){
             for(String content:resultMap.values()){
                 RestResponse<Boolean>  restResponse= JSONParser.parse(content,RestResponse.class,Boolean.class,false);
-                if(restResponse.getData()==false) {
+                logger.info("content: {}", content);
+                if (restResponse == null || restResponse.getData() == null) {
+                    logger.error("reset by time failed, content: {}", content);
+                    return false;
+                }
+                if(!restResponse.getData()) {
                     logger.info("reset by time failed,{}",restResponse.getMessage());
                     return false;
                 }
@@ -312,6 +317,7 @@ public class ConsumeOffsetServiceImpl implements ConsumeOffsetService {
                 try {
                     put.setEntity(new StringEntity(String.valueOf(offset.getOffset())));
                 }catch (UnsupportedEncodingException e){
+                    logger.error("", e);
                     throw new IllegalStateException(e);
                 }
                 AsyncHttpClient.AsyncRequest(put, new AsyncHttpClient.ConcurrentHttpResponseHandler(url, SystemClock.now(),latch,String.valueOf(offset.getPartition()),resultMap));

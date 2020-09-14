@@ -354,7 +354,6 @@ export default {
   methods: {
     handleTabChange (data) {
       if (this.$route.query.consumerDetailVisible === '1') {
-        console.log('cd')
         let name = data.name
         this.$refs[name].search.app.code = this.$route.query.app || ''
         this.$refs[name].search.topic.code = this.$route.query.topic || ''
@@ -394,7 +393,6 @@ export default {
   watch: {
     '$route' (to, from) {
       if (to.query.tab === 'consumerDetail') {
-        console.log('cd')
         this.subTab = to.query.subTab || this.subTab
       }
     }

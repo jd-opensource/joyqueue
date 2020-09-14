@@ -61,8 +61,12 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
     private String appConnectionDetailPath = "/monitor/connections/detail";
     //    /manage/topic/:topic/partitionGroup/:partitionGroup/store/metric
     private String partitiongroupIndexPath="/manage/topic/%s/partitionGroup/%s/store/metric";
+    private String consumerInfosPath = "/monitor/consumers?page=%s&pageSize=%s";
+    private String producerInfosPath = "/monitor/producers?page=%s&pageSize=%s";
 
     /** offset management*/
+    private String removeProducersConnectionsPath= "/manage/topic/%s/app/%s/producers";
+    private String removeConsumersConnectionsPath= "/manage/topic/%s/app/%s/consumers";
     private String appConsumeOffsetMonitorPath="/manage/topic/%s/app/%s/acks"; // topic|app
     private String appPartitionOffsetMonitorPath="/manage/topic/%s/app/%s/partition/%s/ack";// topic|app|partition,method=get|put
     private String resetAppPartitionOffsetPath="/manage/topic/%s/app/%s/partition/%s/ack?index=%s";// topic|app|partition,method=get|put
@@ -128,7 +132,8 @@ public class BrokerRestUrlMappingServiceImpl implements BrokerRestUrlMappingServ
         try {
             loadUrlMapping();
         }catch (IllegalAccessException e){
-            throw new IllegalStateException("parse broker routing config file failure!");
+            logger.error("", e);
+            throw new IllegalStateException("parse broker routing config file failure!", e);
         }
     }
 

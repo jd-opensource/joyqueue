@@ -147,6 +147,7 @@ public class TopicMsgFilterCommand implements Command<Response>, Poolable {
         msgFilter.setToken(filter.getToken());
         msgFilter.setMsgFormat(filter.getMsgFormat());
         msgFilter.setQueryCount(filter.getQueryCount());
+        msgFilter.setTotalCount(filter.getTotalCount());
         msgFilter.setTopic(filter.getTopic());
         msgFilter.setFilter(filter.getFilter());
         msgFilter.setCreateTime(new Date());

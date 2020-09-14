@@ -31,8 +31,8 @@ import java.util.List;
  */
 public interface StoreService {
     /**
-     * Partition group 是否存在。
-     * 以Store内存中的元数据为准，有可能和磁盘上的文件不一致。
+     * 判断Partition group 目录是否存在，
+     * 以磁盘上的Partition group目录为准。
      * @param topic Topic
      * @param partitionGroup Partition group
      * @return 存在返回true， 否则返回false
@@ -40,8 +40,8 @@ public interface StoreService {
     boolean partitionGroupExists(String topic, int partitionGroup);
 
     /**
-     * Topic 是否存在
-     * 以Store内存中的元数据为准，有可能和磁盘上的文件不一致。
+     * 判断Topic 目录是否存在，
+     * 以磁盘上的Partition group目录为准。
      * @param topic Topic
      * @return 存在返回true， 否则返回false
      */
@@ -136,8 +136,8 @@ public interface StoreService {
     StoreManagementService getManageService();
 
     /**
-     * 获取内存监控
-     * @return
+     * 获取内存监控信息。
+     * @return 内存监控对象。
      */
     BufferPoolMonitorInfo monitorInfo();
 

@@ -59,6 +59,7 @@ public class NsrConsumerConverter extends Converter<Consumer, org.joyqueue.domai
                     .paused(consumer.getConfig().isPaused())
                     .retry(consumer.getConfig().isRetry())
                     .filters(consumer.getConfig().getFilters())
+                    .region(consumer.getConfig().getRegion())
                     .create());
             nsrConsumer.setRetryPolicy(RetryPolicy.Builder.build()
                     .maxRetrys(consumer.getConfig().getMaxRetrys())
@@ -103,10 +104,11 @@ public class NsrConsumerConverter extends Converter<Consumer, org.joyqueue.domai
             consumerConfig.setDelay(consumerPolicy.getDelay());
             consumerConfig.setPaused(consumerPolicy.getPaused());
             consumerConfig.setRetry(consumerPolicy.getRetry());
+            consumerConfig.setRegion(consumerPolicy.getRegion());
             Map<String,String> map = consumerPolicy.getFilters();
             if (map !=null) {
                 List<String> filterList = map.entrySet().stream().map(entry -> (entry.getKey() + ":" + entry.getValue())).collect(Collectors.toList());
-                consumerConfig.setFilters(StringUtils.join(filterList, ","));
+                consumerConfig.setFilters(StringUtils.join(filterList, ";"));
             }
         }
 

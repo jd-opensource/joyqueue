@@ -526,22 +526,22 @@ class ConcurrentConsumption extends Service implements ConcurrentConsumer {
             int partitionGroup = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
             PartitionGroupStore store = storeService.getStore(consumer.getTopic(), partitionGroup);
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
-            if (readRst.getCode() == JoyQueueCode.SUCCESS) {
-                List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
-                org.joyqueue.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-
-                if (consumerConfig != null) {
-                    // 过滤消息
-                    List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, new FilterCallbackImpl(consumer));
-
-                    // 开启延迟消费，过滤未到消费时间的消息
-                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
-                    // 构建拉取结果
-                    pullResult = new PullResult(consumer, partition, byteBuffers);
-                }
-            } else {
-                logger.error("read message error, error code[{}]", readRst.getCode());
-            }
+//            if (readRst.getCode() == JoyQueueCode.SUCCESS) {
+//                List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
+//                org.joyqueue.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+//
+//                if (consumerConfig != null) {
+//                    // 过滤消息
+//                    List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, new FilterCallbackImpl(consumer));
+//
+//                    // 开启延迟消费，过滤未到消费时间的消息
+//                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+//                    // 构建拉取结果
+//                    pullResult = new PullResult(consumer, partition, byteBuffers);
+//                }
+//            } else {
+//                logger.error("read message error, error code[{}]", readRst.getCode());
+//            }
         } catch (PositionOverflowException e) {
             if(e.getRight() < index) {
                 pullResult.setCode(JoyQueueCode.SE_INDEX_OVERFLOW);

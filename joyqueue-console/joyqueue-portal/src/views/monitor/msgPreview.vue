@@ -28,7 +28,12 @@ export default {
     //   type: Boolean,
     //   default: false
     // },
-    messageTypes: Array, // 支持的消息格式
+    messageTypes: {
+      type: Array,
+      default: [
+        'UTF8 TEXT'
+      ]
+    }, // 支持的消息格式
     messageType: String,
     app: {
       id: 0,
@@ -106,10 +111,7 @@ export default {
       },
       page: {
         total: 0
-      },
-      messageTypes: [
-        'UTF8 TEXT'
-      ]
+      }
     }
   },
   watch: {

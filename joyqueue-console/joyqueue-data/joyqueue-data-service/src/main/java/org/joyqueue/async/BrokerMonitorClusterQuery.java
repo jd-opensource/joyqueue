@@ -16,6 +16,7 @@
 package org.joyqueue.async;
 
 
+import org.apache.http.client.methods.HttpDelete;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.domain.Broker;
@@ -101,6 +102,30 @@ public class BrokerMonitorClusterQuery implements BrokerClusterQuery<Subscribe> 
             AsyncHttpClient.AsyncRequest(new HttpGet(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
                     SystemClock.now(), latch, provider.getKey(b, null, (short) -1, condition), resultMap));
         }
+        return new DefaultBrokerInfoFuture(latch, resultMap, logKey);
+    }
+
+    @Override
+    public Future<Map<String, String>> asyncDeleteOnBroker(Integer brokerId, Subscribe condition, RetrieveProvider<Subscribe> provider, String pathKey, String logKey) {
+        Broker broker;
+        try {
+            broker = brokerService.findById(brokerId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        String pathTemplate = urlMappingService.pathTemplate(pathKey);
+        if (NullUtil.isEmpty(broker) || NullUtil.isEmpty(pathTemplate)) {
+            throw new IllegalStateException("this Broker not found");
+        }
+        String path = provider.getPath(pathTemplate, null, (short) -1, condition);
+        CountDownLatch latch = new CountDownLatch(1);
+        Map<String/*request key*/, String/*response*/> resultMap = new ConcurrentHashMap<>(1);
+        String url;
+        //monitorUrl+ path with parameter
+        url = urlMappingService.monitorUrl(broker) + path;
+        logger.info(String.format("start sync request,%s", url));
+        AsyncHttpClient.AsyncRequest(new HttpDelete(url), new AsyncHttpClient.ConcurrentHttpResponseHandler(url,
+                SystemClock.now(), latch, provider.getKey(broker, null, (short) -1, condition), resultMap));
         return new DefaultBrokerInfoFuture(latch, resultMap, logKey);
     }
 

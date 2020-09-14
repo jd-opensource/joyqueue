@@ -24,7 +24,7 @@
     <d-tabs>
       <d-tab-pane label="Broker" name="name2" icon="file-text">
       <broker ref="broker" :searchData="brokerSearchData" :urls="brokerUrls" :colData="brokerColData"
-              :btns="brokerBtns"></broker>
+              :operates="brokerBtns"></broker>
       </d-tab-pane>
     </d-tabs>
   </div>
@@ -57,7 +57,8 @@ export default {
       brokerUrls: {
         search: `/broker/search`,
         removeBroker: `/brokerGroup/updateBroker`,
-        startInfo: '/monitor/start'
+        startInfo: '/monitor/start',
+        findDetail: '/monitor/broker/findBrokerDetail/'
       },
       brokerBtns: [
         {

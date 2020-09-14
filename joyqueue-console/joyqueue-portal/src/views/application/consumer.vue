@@ -10,7 +10,7 @@
 <script>
 import Vue from 'vue'
 import consumerBase from '../monitor/consumerBase.vue'
-import { getAppCode, openOrCloseBtnRender, clientTypeSelectRender,
+import { getAppCode, openOrCloseBtnRender, clientTypeSelectRender, clientTypeSelectRender2,
   clientTypeBtnRender, topicTypeBtnRender, baseBtnRender, subscribeGroupAutoCompleteRender, getTopicCodeByCode } from '../../utils/common.js'
 
 export default {
@@ -43,6 +43,11 @@ export default {
         }
       ],
       operates: [
+        {
+          txt: '消费者策略详情',
+          method: 'on-consumer-policy',
+          isAdmin: true
+        },
         {
           txt: '消息预览',
           method: 'on-msg-preview'
@@ -297,6 +302,13 @@ export default {
           }
         },
         {
+          title: '过滤规则',
+          key: 'config.filters',
+          formatter (item) {
+            return item.config === undefined ? '' : item.config.filters
+          }
+        },
+        {
           title: '消费状态',
           key: 'config.paused',
           width: '5%',
@@ -321,7 +333,11 @@ export default {
           key: 'clientType',
           width: '5%',
           render: (h, params) => {
-            return clientTypeBtnRender(h, params.item.clientType)
+            if (this.$store.getters.isAdmin) {
+              return clientTypeSelectRender2(h, params, 'consumer')
+            } else {
+              return clientTypeBtnRender(h, params.item.clientType)
+            }
           }
         },
         {

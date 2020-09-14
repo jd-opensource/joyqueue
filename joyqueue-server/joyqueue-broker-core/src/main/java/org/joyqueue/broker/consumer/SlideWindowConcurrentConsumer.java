@@ -24,7 +24,9 @@ import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.model.PullResult;
 import org.joyqueue.broker.consumer.position.PositionManager;
+import org.joyqueue.broker.event.BrokerEventBus;
 import org.joyqueue.domain.Partition;
+import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
@@ -39,7 +41,9 @@ import org.joyqueue.store.PositionOverflowException;
 import org.joyqueue.store.PositionUnderflowException;
 import org.joyqueue.store.ReadResult;
 import org.joyqueue.store.StoreService;
+import org.joyqueue.store.event.StoreNodeChangeEvent;
 import org.joyqueue.toolkit.concurrent.CasLock;
+import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.format.Format;
 import org.joyqueue.toolkit.lang.Close;
@@ -52,10 +56,12 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -107,16 +113,17 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     // 消费归档服务
     private ArchiveManager archiveManager;
     private ConsumeConfig consumeConfig;
+    private BrokerEventBus brokerEventBus;
 
-    private static final long CLEAN_INTERVAL_SEC = 600L;
+    private static final long CLEAN_INTERVAL_SEC = 60L;
 
     private final Map<ConsumePartition, SlideWindow> slideWindowMap = new ConcurrentHashMap<>();
 
     private final ScheduledExecutorService scheduledExecutorService;
 
     SlideWindowConcurrentConsumer(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
-                                  MessageRetry messageRetry, PositionManager positionManager,
-                                  FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager, ConsumeConfig consumeConfig) {
+                                  MessageRetry messageRetry, PositionManager positionManager, FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager,
+                                  ConsumeConfig consumeConfig, BrokerEventBus brokerEventBus) {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.partitionManager = partitionManager;
@@ -126,25 +133,70 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         this.archiveManager = archiveManager;
         this.consumeConfig = consumeConfig;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("ConcurrentConsumerClearExecutor", true));
+        this.brokerEventBus = brokerEventBus;
     }
 
     @Override
     protected void doStart() throws Exception {
         super.doStart();
         // 定时清理已关闭并行消费或者已经失效的主题
-        scheduledExecutorService.scheduleAtFixedRate(
-                () -> slideWindowMap.entrySet().removeIf(entry -> {
-                    ConsumePartition consumePartition = entry.getKey();
-                    try {
-                        org.joyqueue.domain.Consumer.ConsumerPolicy policy = clusterManager.getConsumerPolicy(TopicName.parse(consumePartition.getTopic()), consumePartition.getApp());
-                        return !policy.isConcurrent();
-                    } catch (Exception e) {
-                        logger.warn("Clean expire error: {}", e.getMessage());
-                    }
-                    return false;
-                }),
-                CLEAN_INTERVAL_SEC + 32, CLEAN_INTERVAL_SEC, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::clearSlideWindow, CLEAN_INTERVAL_SEC + 32, CLEAN_INTERVAL_SEC, TimeUnit.MILLISECONDS);
+        brokerEventBus.addListener(new EventListener() {
+            @Override
+            public void onEvent(Object event) {
+                if (event instanceof StoreNodeChangeEvent) {
+                    onNodeChangeEvent((StoreNodeChangeEvent) event);
+                }
+            }
+        });
         logger.info("SlideWindowConcurrentConsumer is started.");
+    }
+
+    protected void onNodeChangeEvent(StoreNodeChangeEvent event) {
+        if (event.getNodes().getRWNode() == null || event.getNodes().getRWNode().getId() != clusterManager.getBrokerId()) {
+            clearSlideWindow(event.getTopic(), event.getGroup());
+        }
+    }
+
+    protected void clearSlideWindow() {
+        Iterator<Map.Entry<ConsumePartition, SlideWindow>> iterator = slideWindowMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<ConsumePartition, SlideWindow> entry = iterator.next();
+            ConsumePartition consumePartition = entry.getKey();
+
+            if (clearSlideWindow(consumePartition)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    protected void clearSlideWindow(String topic, int group) {
+        PartitionGroup partitionGroup = clusterManager.getPartitionGroupByGroup(TopicName.parse(topic), group);
+        if (partitionGroup == null) {
+            return;
+        }
+        Set<Short> partitions = partitionGroup.getPartitions();
+        Iterator<Map.Entry<ConsumePartition, SlideWindow>> iterator = slideWindowMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<ConsumePartition, SlideWindow> entry = iterator.next();
+            ConsumePartition consumePartition = entry.getKey();
+
+            if (consumePartition.getTopic().equals(topic) && partitions.contains(consumePartition.getPartition())) {
+                if (clearSlideWindow(consumePartition)) {
+                    iterator.remove();
+                }
+            }
+        }
+    }
+
+    protected boolean clearSlideWindow(ConsumePartition consumePartition) {
+        boolean isLeader = clusterManager.isLeader(consumePartition.getTopic(), consumePartition.getPartition());
+        org.joyqueue.domain.Consumer.ConsumerPolicy policy = clusterManager.tryGetConsumerPolicy(TopicName.parse(consumePartition.getTopic()), consumePartition.getApp());
+        if (policy != null && policy.isConcurrent() && isLeader) {
+            return false;
+        }
+        resetPullPositionFlag.remove(consumePartition);
+        return true;
     }
 
     @Override
@@ -157,13 +209,10 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     /**
      * 读取消息
      * <br>
-     * 首先尝试从过期未应答队列读取分区段消费
+     *   首先尝试消费高优先级队列消息
      * <br>
-     * 再消费重试消息
+     *   再轮询消费(普通+重试(optional)）队列
      * <br>
-     * 接着消费高优先级消息
-     * <br>
-     * 最后尝试从分区读
      *
      * @param consumer    消费者信息
      * @param count       消息条数
@@ -173,22 +222,20 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     @Override
     public PullResult getMessage(Consumer consumer, int count, long ackTimeout, long accessTimes, int concurrent) throws JoyQueueException {
         // 消费普通分区消息
-        List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
-        PullResult pullResult;
-
-        if (partitionManager.isRetry(consumer)) {
-            pullResult = getRetryMessages(consumer, (short) count);
-        } else {
-            List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
-            if (priorityPartitionList.size() > 0) {
-                // 高优先级分区消费
-                pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes, concurrent);
-            } else {
-                pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes, concurrent);
-            }
+        PullResult pullResult = null;
+        List<Short> priorityPartitionList = partitionManager.getPriorityPartition(TopicName.parse(consumer.getTopic()));
+        if (priorityPartitionList.size() > 0) {
+            // 高优先级分区消费
+            pullResult = getFromPartition(consumer, priorityPartitionList, count, ackTimeout, accessTimes, concurrent);
         }
-
-
+        if (pullResult == null || pullResult.isEmpty()) {
+            List<Short> partitionList = clusterManager.getLocalPartitions(TopicName.parse(consumer.getTopic()));
+            if (partitionManager.isRetry(consumer)) {
+                partitionList = new ArrayList<>(partitionList);
+                partitionList.add(Partition.RETRY_PARTITION_ID);
+            }
+            pullResult = getFromPartition(consumer, partitionList, count, ackTimeout, accessTimes, concurrent);
+        }
         return pullResult;
     }
 
@@ -279,7 +326,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     }
 
     /**
-     * 从本地磁盘分区消费消息
+     * 从本地磁盘分区并行(不锁队列)消费消息，优先消费超时未ack的消息块
      *
      * @param consumer      消费者信息
      * @param partitionList 分区集合
@@ -299,7 +346,6 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             if (i == retryMax) {
                 break;
             }
-
             listIndex = partitionManager.selectPartitionIndex(partitionSize, listIndex + i, accessTimes);
             short partition = partitionList.get(listIndex);
             ConsumePartition consumePartition = new ConsumePartition(consumer.getTopic(), consumer.getApp(), partition);
@@ -323,12 +369,21 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             }
 
             //超过并行度取下一个Partition
-            if(slideWindow.concurrentCount() >= concurrent) {
+            if (slideWindow.concurrentCount() >= concurrent) {
                 continue;
             }
 
             if(slideWindow.getAppendLock().tryLock()) {
                 try {
+                    if (partition == Partition.RETRY_PARTITION_ID) {
+                        pullResult = getRetryMessages(consumer, (short) 1);
+                        if (pullResult != null && !pullResult.isEmpty()) {
+                            return pullResult;
+                        } else {
+                            continue;
+                        }
+                    }
+
                     // 获取消息拉取位置
                     long pullIndex = getPullIndex(consumer, partition);
 
@@ -476,7 +531,12 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
             }
             // 更新最新拉取位置，即下次开始拉取的序号
             long newPullIndex = pullIndex + msgCount;
-            logger.debug("set new pull index:{}, topic:{}, app:{}, partition:{}", newPullIndex, consumer.getTopic(), consumer.getApp(), partition);
+            if (logger.isDebugEnabled()) {
+                logger.debug("set new pull index:{}, topic:{}, app:{}, partition:{}", newPullIndex, consumer.getTopic(), consumer.getApp(), partition);
+            }
+            if (consumedMessages.isReset()) {
+                positionManager.updateLastMsgAckIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, pullIndex);
+            }
             positionManager.updateLastMsgPullIndex(TopicName.parse(consumer.getTopic()), consumer.getApp(), partition, newPullIndex);
             return true;
         } else {
@@ -506,6 +566,9 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
      * @return 消息序号
      */
     private long getPullIndex(Consumer consumer, short partition) throws JoyQueueException {
+        if (partition == Partition.RETRY_PARTITION_ID) {
+            return 0;
+        }
         // 本次拉取消息的位置，默认从0开始ack
         long pullIndex = 0;
         String topic = consumer.getTopic();
@@ -532,7 +595,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                 pullIndex = lastAckIndex;
             }
 
-            logger.info("init concurrent pull index [{}]", pullIndex);
+            logger.info("init concurrent pull topic {}, app {}, partition {}, index [{}]", consumer.getTopic(), consumer.getApp(), partition, pullIndex);
         }
 
         return pullIndex;
@@ -553,24 +616,27 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     private ReadMessagesResult readMessages(Consumer consumer, short partition, long index, int count) {
         // 初始化默认
         ReadMessagesResult readMessagesResult = new ReadMessagesResult();
-        PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
+        PullResult pullResult = new PullResult(consumer, partition, new ArrayList<>(0));
         try {
             int partitionGroup = clusterManager.getPartitionGroupId(TopicName.parse(consumer.getTopic()), partition);
             PartitionGroupStore store = storeService.getStore(consumer.getTopic(), partitionGroup);
             ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
             if (readRst.getCode() == JoyQueueCode.SUCCESS) {
-                List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
-                org.joyqueue.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
-
-                if (consumerConfig != null) {
-                    // 过滤消息
-                    List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, readMessagesResult::setFilteredMessages);
-
-                    // 开启延迟消费，过滤未到消费时间的消息
-                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
-                    // 构建拉取结果
-                    pullResult = new PullResult(consumer, partition, byteBuffers);
+                if (readRst.getMessages() != null) {
+                    pullResult.setBuffers(Lists.newArrayList(readRst.getMessages()));
                 }
+//                List<ByteBuffer> byteBufferList = Lists.newArrayList(readRst.getMessages());
+//                org.joyqueue.domain.Consumer consumerConfig = clusterManager.getConsumer(TopicName.parse(consumer.getTopic()), consumer.getApp());
+//
+//                if (consumerConfig != null) {
+//                    // 过滤消息
+//                    List<ByteBuffer> byteBuffers = filterMessageSupport.filter(consumerConfig, byteBufferList, readMessagesResult::setFilteredMessages);
+//
+//                    // 开启延迟消费，过滤未到消费时间的消息
+//                    byteBuffers = delayHandler.handle(consumerConfig.getConsumerPolicy(), byteBuffers);
+//                    // 构建拉取结果
+//                    pullResult = new PullResult(consumer, partition, byteBuffers);
+//                }
             } else {
                 logger.error("read message error, error code[{}]", readRst.getCode());
             }
@@ -739,6 +805,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         }
 
         ConsumedMessages appendUnsafe(String topic, short partition, long nextPullIndex, int count, long timeoutMs) {
+            boolean isReset = false;
             if(this.nextPullIndex != nextPullIndex) { // 如果不相等，有可能是重置了消费位置，以新的消费位置为准
                 logger.warn("Reset concurrent consumer pull index from {} to {}, topic: {}, partition: {}.",
                         this.nextPullIndex,
@@ -747,16 +814,19 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                         partition);
                 consumedMessagesMap.clear();
                 this.nextPullIndex = nextPullIndex;
+                isReset = true;
             }
-            ConsumedMessages consumedMessages = new ConsumedMessages(nextPullIndex, count, timeoutMs);
+            ConsumedMessages consumedMessages = new ConsumedMessages(nextPullIndex, count, timeoutMs, isReset);
             this.nextPullIndex += count;
             consumedMessagesMap.put(nextPullIndex, consumedMessages);
             return consumedMessages;
-    }
+        }
 
         CasLock getAppendLock() {
             return appendLock;
         }
+
+        private AtomicInteger counter = new AtomicInteger(0);
 
         boolean ack(TopicName topic, String app, short partition, long startIndex, int count, PositionManager positionManager) throws JoyQueueException {
             List<ConsumedMessages> toBeAcked = new LinkedList<>();
@@ -781,7 +851,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                        positionManager.updateLastMsgAckIndex(topic, app, partition,
                                consumedMessages.getStartIndex() + consumedMessages.getCount(), false);
                    } else {
-                       logger.warn("Ack index not match, topic: {}, partition: {}, ack: [{} - {}), currentAckIndex: {}!",
+                       logger.warn("Ack index not match, topic: {}, partition: {}, ack: [{} - {}], currentAckIndex: {}!",
                                topic.getFullName(),
                                partition,
                                Format.formatWithComma(consumedMessages.getStartIndex()),
@@ -793,7 +863,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                ret = true;
             }
             if(!ret) {
-                logger.warn("Concurrent cunsume ack failed, topic: {}, partition: {}, ack: [{} - {}), currentAckIndex: {}.",
+                logger.warn("Concurrent consume ack failed, topic: {}, partition: {}, ack: [{} - {}), currentAckIndex: {}.",
                         topic.getFullName(),
                         partition,
                         Format.formatWithComma(startIndex),
@@ -815,14 +885,16 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         private final long startIndex;
         private final int count;
         private long expireTime;
+        private boolean reset;
 
 
         // 这段消息的状态
         private AtomicInteger status = new AtomicInteger(LOCKED);
-        ConsumedMessages(long startIndex, int count, long timeoutMs) {
+        ConsumedMessages(long startIndex, int count, long timeoutMs, boolean reset) {
             this.startIndex = startIndex;
             this.count = count;
-            expireTime = SystemClock.now() + timeoutMs;
+            this.expireTime = SystemClock.now() + timeoutMs;
+            this.reset = reset;
         }
 
         int getCount() {
@@ -859,6 +931,10 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
 
         boolean isAcked() {
             return status.get() == ACKED;
+        }
+
+        boolean isReset() {
+            return reset;
         }
     }
 }

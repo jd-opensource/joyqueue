@@ -22,6 +22,7 @@ import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.OMS;
 import io.openmessaging.OMSBuiltinKeys;
 import io.openmessaging.exception.OMSRuntimeException;
+import io.openmessaging.extension.ExtensionHeader;
 import io.openmessaging.extension.QueueMetaData;
 import io.openmessaging.joyqueue.JoyQueueBuiltinKeys;
 import io.openmessaging.joyqueue.consumer.ExtensionConsumer;
@@ -58,6 +59,7 @@ import org.joyqueue.service.ConsumerService;
 import org.joyqueue.service.MessagePreviewService;
 import org.joyqueue.service.TopicMsgFilterService;
 import org.joyqueue.service.UserService;
+import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,7 +210,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
             apps = consumerService.findByTopic(topicName.getCode(), topicName.getNamespace()).stream().map(consumer -> consumer.getApp().getCode()).collect(Collectors.toList());
         } catch (NullPointerException e) {
             logger.error("topic not found or doesn't have related app");
-            throw new NotFoundException("topic not found or doesn't have related app");
+            throw new NotFoundException("topic not found or doesn't have related app", e);
         }
         if (CollectionUtils.isNotEmpty(apps)) {
             updateMsgFilterStatus(filter, TopicMsgFilter.FilterStatus.RUNNING, null, "");
@@ -304,6 +306,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
         }
         builder.append("UserId: ").append(msgFilter.getCreateBy().getId()).append('\n');
         builder.append("UserCode: ").append(msgFilter.getCreateBy().getCode()).append('\n');
+        builder.append("executeHost: ").append(IpUtil.getLocalIp()).append('\n');
         builder.append("CreateTime: ").append(msgFilter.getCreateTime()).append('\n');
         builder.append("---------------------------------------------------------------------").append('\n');
         return builder.toString();
@@ -390,8 +393,15 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
                         if (topicMessageFilterSupport.match(content, msgFilter.getFilter())) {
                             hitCount++;
                             filterClock = SystemClock.now();
-                            strBuilder.append("bornTime:").append(dateFormat.format(new Date(message.header().getBornTimestamp())))
-                                    .append('\n');
+                            strBuilder.append("partition:").append(partition.partitionId()).append(',');
+                            if (message.extensionHeader().isPresent()) {
+                                ExtensionHeader extensionHeader = message.extensionHeader().get();
+                                if (extensionHeader.getMessageKey() != null) {
+                                    strBuilder.append("messageKey:").append(extensionHeader.getMessageKey()).append(',');
+                                }
+                                strBuilder.append("offset:").append(message.extensionHeader().get().getOffset()).append(',');
+                            }
+                            strBuilder.append("bornTime:").append(dateFormat.format(new Date(message.header().getBornTimestamp()))).append('\n');
                             strBuilder.append(content).append('\n');
                             appendCount++;
                             // 每1w行追加一次
@@ -452,7 +462,7 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
     }
 
     private boolean consumerCondition(TopicMsgFilter msgFilter, int totalCount, Map<Integer, Long> maxIndexMap) {
-        if (totalCount >= maxItemSize) {
+        if (totalCount >= Math.max(msgFilter.getTotalCount(), maxItemSize)) {
             return false;
         }
         if (msgFilter.getOffsetStartTime() != null) {
@@ -579,6 +589,12 @@ public class TopicMsgFilterServiceImpl extends PageServiceSupport<TopicMsgFilter
 
     @Override
     public PageResult<TopicMsgFilter> findTopicMsgFilters(QPageQuery<QTopicMsgFilter> query) {
-        return repository.findTopicMsgFiltersByQuery(query);
+        PageResult<TopicMsgFilter> pageResult = repository.findTopicMsgFiltersByQuery(query);
+        for (int i=0;i<pageResult.getResult().size();i++) {
+            Long id = pageResult.getResult().get(i).getCreateBy().getId();
+            User user = userService.findById(id);
+            pageResult.getResult().get(i).setCreateBy(new Identity(id, user.getCode()));
+        }
+        return pageResult;
     }
 }

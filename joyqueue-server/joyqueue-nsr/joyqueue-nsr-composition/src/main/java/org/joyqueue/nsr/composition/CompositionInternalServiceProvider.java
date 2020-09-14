@@ -38,8 +38,8 @@ public class CompositionInternalServiceProvider extends Service implements Inter
 
     private PropertySupplier propertySupplier;
     private InternalServiceProvider serviceProvider;
-    private InternalServiceProvider igniteServiceProvider;
-    private InternalServiceProvider journalkeeperServiceProvider;
+    private InternalServiceProvider sourceServiceProvider;
+    private InternalServiceProvider targetServiceProvider;
     private CompositionInternalServiceManager compositionInternalServiceManager;
 
     private CompositionConfig config;
@@ -56,31 +56,31 @@ public class CompositionInternalServiceProvider extends Service implements Inter
         for (InternalServiceProvider extension : extensions) {
             if (extension.getClass().equals(CompositionInternalServiceProvider.class)) {
                 continue;
-            } else if (extension.getClass().getName().contains("ignite")) {
-                igniteServiceProvider = extension;
-            } else if (extension.getClass().getName().contains("journalkeeper")) {
-                journalkeeperServiceProvider = extension;
+            } else if (extension.getClass().getName().contains(config.getSource())) {
+                sourceServiceProvider = extension;
+            } else if (extension.getClass().getName().contains(config.getTarget())) {
+                targetServiceProvider = extension;
             }
             serviceProvider = extension;
         }
         Preconditions.checkArgument(serviceProvider != null, "serviceProvider not exist");
-        this.compositionInternalServiceManager = new CompositionInternalServiceManager(config, serviceProvider, igniteServiceProvider, journalkeeperServiceProvider);
+        this.compositionInternalServiceManager = new CompositionInternalServiceManager(config, serviceProvider, sourceServiceProvider, targetServiceProvider);
     }
 
     @Override
     protected void doStart() throws Exception {
-        if (igniteServiceProvider != null && journalkeeperServiceProvider != null) {
-            if (journalkeeperServiceProvider instanceof PropertySupplierAware) {
-                ((PropertySupplierAware) journalkeeperServiceProvider).setSupplier(propertySupplier);
+        if (sourceServiceProvider != null && targetServiceProvider != null) {
+            if (targetServiceProvider instanceof PropertySupplierAware) {
+                ((PropertySupplierAware) targetServiceProvider).setSupplier(propertySupplier);
             }
-            if (journalkeeperServiceProvider instanceof LifeCycle) {
-                ((LifeCycle) journalkeeperServiceProvider).start();
+            if (targetServiceProvider instanceof LifeCycle) {
+                ((LifeCycle) targetServiceProvider).start();
             }
-            if (igniteServiceProvider instanceof PropertySupplierAware) {
-                ((PropertySupplierAware) igniteServiceProvider).setSupplier(propertySupplier);
+            if (sourceServiceProvider instanceof PropertySupplierAware) {
+                ((PropertySupplierAware) sourceServiceProvider).setSupplier(propertySupplier);
             }
-            if (igniteServiceProvider instanceof LifeCycle) {
-                ((LifeCycle) igniteServiceProvider).start();
+            if (sourceServiceProvider instanceof LifeCycle) {
+                ((LifeCycle) sourceServiceProvider).start();
             }
             compositionInternalServiceManager.start();
         } else {
@@ -95,12 +95,12 @@ public class CompositionInternalServiceProvider extends Service implements Inter
 
     @Override
     protected void doStop() {
-        if (igniteServiceProvider != null && journalkeeperServiceProvider != null) {
-            if (journalkeeperServiceProvider instanceof LifeCycle) {
-                ((LifeCycle) journalkeeperServiceProvider).stop();
+        if (sourceServiceProvider != null && targetServiceProvider != null) {
+            if (targetServiceProvider instanceof LifeCycle) {
+                ((LifeCycle) targetServiceProvider).stop();
             }
-            if (igniteServiceProvider instanceof LifeCycle) {
-                ((LifeCycle) igniteServiceProvider).stop();
+            if (sourceServiceProvider instanceof LifeCycle) {
+                ((LifeCycle) sourceServiceProvider).stop();
             }
         } else {
             if (serviceProvider instanceof LifeCycle) {
@@ -112,7 +112,7 @@ public class CompositionInternalServiceProvider extends Service implements Inter
 
     @Override
     public <T> T getService(Class<T> service) {
-        if (igniteServiceProvider != null && journalkeeperServiceProvider != null) {
+        if (sourceServiceProvider != null && targetServiceProvider != null) {
             return compositionInternalServiceManager.getService(service);
         } else {
             return serviceProvider.getService(service);

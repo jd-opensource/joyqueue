@@ -17,6 +17,9 @@ package org.joyqueue.client.internal.consumer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.cluster.ClusterClientManager;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.consumer.BrokerLoadBalance;
@@ -41,13 +44,13 @@ import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,7 +76,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     private MessageFetcher messageFetcher;
     private ConsumerIndexManager consumerIndexManager;
     private MessagePollerInner messagePollerInner;
-    private BrokerAssignmentsHolder brokerAssignmentCache;
+    private ConcurrentMap<String, BrokerAssignmentsHolder> brokerAssignmentCacheMap = Maps.newConcurrentMap();
 
     public DefaultMessagePoller(ConsumerConfig config, NameServerConfig nameServerConfig, ClusterManager clusterManager,
                                 ClusterClientManager clusterClientManager, ConsumerClientManager consumerClientManager) {
@@ -284,8 +287,9 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
     }
 
     protected BrokerAssignments fetchBrokerAssignment(TopicMetadata topicMetadata) {
-        if (brokerAssignmentCache != null && !brokerAssignmentCache.isExpired(config.getSessionTimeout())) {
-            return brokerAssignmentCache.getBrokerAssignments();
+        BrokerAssignmentsHolder brokerAssignmentsHolder = brokerAssignmentCacheMap.get(topicMetadata.getTopic());
+        if (brokerAssignmentsHolder != null && !brokerAssignmentsHolder.isExpired(config.getSessionTimeout())) {
+            return brokerAssignmentsHolder.getBrokerAssignments();
         }
 
         BrokerAssignments brokerAssignments = null;
@@ -305,7 +309,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
         brokerAssignments = messagePollerInner.filterRegionBrokers(topicMetadata, brokerAssignments);
 
         if (topicMetadata.isAllAvailable()) {
-            brokerAssignmentCache = new BrokerAssignmentsHolder(brokerAssignments, SystemClock.now());
+            brokerAssignmentCacheMap.put(topicMetadata.getTopic(), new BrokerAssignmentsHolder(brokerAssignments, SystemClock.now()));
         }
         return brokerAssignments;
     }
@@ -322,7 +326,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
 
         JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, config.getAppFullName(), config.getTimeout());
         if (!result.equals(JoyQueueCode.SUCCESS)) {
-            logger.warn("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
+            logger.error("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
         }
         return result;
     }
@@ -339,6 +343,73 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
 
         TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
         return consumerIndexManager.fetchIndex(topicMetadata.getTopic(), config.getAppFullName(), partition, config.getTimeout());
+    }
+
+    @Override
+    public JoyQueueCode commitIndex(String topic, short partition, long index) {
+        checkState();
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
+
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
+
+        PartitionMetadata partitionMetadata = topicMetadata.getPartition(partition);
+        Preconditions.checkArgument(partitionMetadata != null, "partition does not exist");
+
+        return consumerIndexManager.commitIndex(topic, config.getAppFullName(), partition, index, config.getTimeout());
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex(String topic, short partition) {
+        return commitIndex(topic, partition, ConsumerIndexManager.MAX_INDEX);
+    }
+
+    @Override
+    public JoyQueueCode commitMaxIndex(String topic) {
+        checkState();
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
+
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
+        Map<Short, Long> partitionMap = Maps.newHashMap();
+
+        for (PartitionMetadata partition : topicMetadata.getPartitions()) {
+            partitionMap.put(partition.getId(), ConsumerIndexManager.MAX_INDEX);
+        }
+
+        Map<Short, JoyQueueCode> result = consumerIndexManager.batchCommitIndex(topic, config.getAppFullName(), partitionMap, config.getTimeout());
+
+        for (Map.Entry<Short, JoyQueueCode> entry : result.entrySet()) {
+            if (!entry.getValue().equals(JoyQueueCode.SUCCESS)) {
+                return entry.getValue();
+            }
+        }
+        return JoyQueueCode.SUCCESS;
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex(String topic, short partition) {
+        return commitIndex(topic, partition, ConsumerIndexManager.MIN_INDEX);
+    }
+
+    @Override
+    public JoyQueueCode commitMinIndex(String topic) {
+        checkState();
+        Preconditions.checkArgument(StringUtils.isNotBlank(topic), "topic not blank");
+
+        TopicMetadata topicMetadata = messagePollerInner.getAndCheckTopicMetadata(topic);
+        Map<Short, Long> partitionMap = Maps.newHashMap();
+
+        for (PartitionMetadata partition : topicMetadata.getPartitions()) {
+            partitionMap.put(partition.getId(), ConsumerIndexManager.MIN_INDEX);
+        }
+
+        Map<Short, JoyQueueCode> result = consumerIndexManager.batchCommitIndex(topic, config.getAppFullName(), partitionMap, config.getTimeout());
+
+        for (Map.Entry<Short, JoyQueueCode> entry : result.entrySet()) {
+            if (!entry.getValue().equals(JoyQueueCode.SUCCESS)) {
+                return entry.getValue();
+            }
+        }
+        return JoyQueueCode.SUCCESS;
     }
 
     @Override

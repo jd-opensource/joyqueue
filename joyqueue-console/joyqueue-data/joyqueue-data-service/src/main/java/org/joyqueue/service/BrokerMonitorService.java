@@ -37,6 +37,7 @@ import java.util.List;
  **/
 public interface BrokerMonitorService {
 
+    boolean removeBrokerMonitorConnections(Subscribe subscribe,Integer brokerid);
 
     /**
      * Find monitor info of a producer or consumer 汇总信息

@@ -270,13 +270,11 @@ public class ClusterManager extends Service {
      * @return
      */
     public List<TopicConfig> getTopics() {
-        List<TopicConfig> result = Lists.newLinkedList();
-        for (Map.Entry<String, TopicConfig> entry : localCache.getTopicConfigCache().entrySet()) {
-            if (entry.getValue().isReplica(getBrokerId())) {
-                result.add(entry.getValue());
-            }
+        Map<TopicName, TopicConfig> topics = nameService.getTopicConfigByBroker(getBrokerId());
+        if (MapUtils.isEmpty(topics)) {
+            return Collections.emptyList();
         }
-        return result;
+        return Lists.newArrayList(topics.values());
     }
 
     /**
@@ -869,27 +867,11 @@ public class ClusterManager extends Service {
     }
 
     public List<Producer> getLocalProducersByTopic(TopicName topic) {
-        Map<String, MetaDataLocalCache.CacheProducer> producers = localCache.getTopicProducers(topic);
-        if (MapUtils.isEmpty(producers)) {
-            return Collections.emptyList();
-        }
-        List<Producer> result = Lists.newLinkedList();
-        for (Map.Entry<String, MetaDataLocalCache.CacheProducer> entry : producers.entrySet()) {
-            result.add(entry.getValue().getProducer());
-        }
-        return result;
+        return Lists.newArrayList(nameService.getProducerByTopic(topic));
     }
 
     public List<Consumer> getLocalConsumersByTopic(TopicName topic) {
-        Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topic);
-        if (MapUtils.isEmpty(consumers)) {
-            return Collections.emptyList();
-        }
-        List<Consumer> result = Lists.newLinkedList();
-        for (Map.Entry<String, MetaDataLocalCache.CacheConsumer> entry : consumers.entrySet()) {
-            result.add(entry.getValue().getConsumer());
-        }
-        return result;
+        return Lists.newArrayList(nameService.getConsumerByTopic(topic));
     }
 
     public AppToken getAppToken(String app, String token) {
@@ -972,6 +954,10 @@ public class ClusterManager extends Service {
         Date now = Calendar.getInstance().getTime();
         AppToken appToken = nameService.getAppToken(app, token);
         return null != appToken && appToken.getEffectiveTime().before(now) && appToken.getExpirationTime().after(now);
+    }
+
+    public TopicConfig rebuildTopicConfigCache(TopicName topicName) {
+        return localCache.buildTopicConfigCache(topicName);
     }
 
     public NameService getNameService() {
@@ -1092,7 +1078,7 @@ public class ClusterManager extends Service {
 
         protected Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
             if (!consumerCache.containsKey(topic.getFullName())) {
-                logger.warn("topic {} is not exist on this broker", topic.getFullName());
+                logger.warn("topic {} does not exist on this broker", topic.getFullName());
                 return null;
             }
             CacheConsumer consumer = consumerCache.get(topic.getFullName()).get(app);
@@ -1106,7 +1092,7 @@ public class ClusterManager extends Service {
 
         protected Producer getProducerByTopicAndApp(TopicName topic, String app) {
             if (!producerCache.containsKey(topic.getFullName())) {
-                logger.warn("topic {} is not exist on this broker", topic.getFullName());
+                logger.warn("topic {} does not exist on this broker", topic.getFullName());
                 return null;
             }
             CacheProducer producer = producerCache.get(topic.getFullName()).get(app);

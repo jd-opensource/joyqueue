@@ -63,7 +63,7 @@ public class AddProducerRequestHandler implements JoyQueueCommandHandler, Type, 
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(addProducerRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, addProducerRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, addProducerRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

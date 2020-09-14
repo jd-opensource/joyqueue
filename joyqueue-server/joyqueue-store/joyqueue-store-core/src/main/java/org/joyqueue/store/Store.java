@@ -56,21 +56,18 @@ import java.util.stream.Collectors;
 public class Store extends Service implements StoreService, Closeable, PropertySupplierAware {
 
     private static final Logger logger = LoggerFactory.getLogger(Store.class);
-    private static final int SCHEDULE_EXECUTOR_THREADS = 16;
-
-
+    // 所有topic目录，子目录就是topic名称
     private static final String TOPICS_DIR = "topics";
     private static final String TX_DIR = "tx";
     private static final String DEL_PREFIX = ".d.";
-    /**
-     * key: [topic]/[group index]，例如：order/1
-     */
-    private final Map<String, PartitionGroupStoreManager> storeMap = new HashMap<>();
+
+    private final Map<String /* Partition Group，格式为：[topic]/[group index] */, PartitionGroupStoreManager> storeMap = new HashMap<>();
     private final Map<String, TransactionStoreManager> txStoreMap = new HashMap<>();
     private StoreConfig config;
     private PreloadBufferPool bufferPool;
     private File base;
     private PropertySupplier propertySupplier;
+    // 文件锁，防止同一Store目录被多个进程读写
     private StoreLock storeLock;
 
     public Store() {
@@ -95,6 +92,8 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             storeLock = new StoreLock(new File(base, "lock"));
             storeLock.lock();
         }
+
+        // 初始化文件缓存页
         if (bufferPool == null) {
             System.setProperty(PreloadBufferPool.PRINT_METRIC_INTERVAL_MS_KEY, String.valueOf(config.getPrintMetricIntervalMs()));
             this.bufferPool = PreloadBufferPool.getInstance();
@@ -114,7 +113,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             if (!manger.isStarted()) manger.start();
         }
 
-        started.set(true);
+        started.set(true); // FixMe: 这条语句是否应该删除？
         logger.info("Store started.");
     }
 
@@ -379,7 +378,6 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
 
-    // TODO: 在哪儿调用呢？
     @Override
     public void close() throws IOException {
         for (PartitionGroupStoreManager p : storeMap.values()) {

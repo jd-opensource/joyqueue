@@ -24,15 +24,15 @@ import org.joyqueue.broker.monitor.stat.BrokerStat;
 import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
 import org.joyqueue.broker.monitor.stat.PartitionStat;
 import org.joyqueue.broker.monitor.stat.ProducerStat;
-import org.joyqueue.broker.monitor.stat.TopicStat;
+import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.model.Pager;
 import org.joyqueue.monitor.ProducerMonitorInfo;
 import org.joyqueue.monitor.ProducerPartitionGroupMonitorInfo;
 import org.joyqueue.monitor.ProducerPartitionMonitorInfo;
 import org.joyqueue.store.StoreManagementService;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * ProducerMonitorService
@@ -60,15 +60,18 @@ public class DefaultProducerMonitorService implements ProducerMonitorService {
         int index = 0;
         List<ProducerMonitorInfo> data = Lists.newArrayListWithCapacity(pageSize);
 
-        for (Map.Entry<String, TopicStat> topicStatEntry : brokerStat.getTopicStats().entrySet()) {
-            for (Map.Entry<String, AppStat> appStatEntry : topicStatEntry.getValue().getAppStats().entrySet()) {
-                if (index >= startIndex && index < endIndex) {
-                    data.add(convertProducerMonitorInfo(appStatEntry.getValue().getProducerStat()));
-                }
-                index ++;
+        for (TopicConfig topic : clusterManager.getTopics()) {
+            List<org.joyqueue.domain.Producer> producers = clusterManager.getLocalProducersByTopic(topic.getName());
+            for (org.joyqueue.domain.Producer producer : producers) {
+                AppStat appStat = brokerStat.getOrCreateTopicStat(topic.getName().getFullName()).getOrCreateAppStat(producer.getApp());
+                data.add(convertProducerMonitorInfo(appStat.getProducerStat()));
             }
-            total += topicStatEntry.getValue().getAppStats().size();
         }
+
+        Collections.sort(data, (o1, o2) -> {
+            return Long.compare(o2.getEnQueue().getCount(), o1.getEnQueue().getCount());
+        });
+
         return new Pager<>(page, pageSize, total, data);
     }
 

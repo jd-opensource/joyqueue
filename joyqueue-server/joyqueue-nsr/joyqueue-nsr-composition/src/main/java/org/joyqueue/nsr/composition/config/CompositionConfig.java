@@ -34,6 +34,14 @@ public class CompositionConfig {
         this.propertySupplier = propertySupplier;
     }
 
+    public String getSource() {
+        return PropertySupplier.getValue(propertySupplier, CompositionConfigKey.SOURCE);
+    }
+
+    public String getTarget() {
+        return PropertySupplier.getValue(propertySupplier, CompositionConfigKey.TARGET);
+    }
+
     public String getReadSource() {
         return PropertySupplier.getValue(propertySupplier, CompositionConfigKey.READ_SOURCE);
     }
@@ -46,19 +54,19 @@ public class CompositionConfig {
         return getWriteSource().equalsIgnoreCase("all");
     }
 
-    public boolean isReadIgnite() {
-        return getReadSource().equalsIgnoreCase("ignite");
+    public boolean isReadSource() {
+        return getReadSource().equalsIgnoreCase(getSource());
     }
 
-    public boolean isWriteIgnite() {
-        return isWriteAll() || getWriteSource().equalsIgnoreCase("ignite");
+    public boolean isWriteSource() {
+        return isWriteAll() || getWriteSource().equalsIgnoreCase(getSource());
     }
 
-    public boolean isReadJournalkeeper() {
-        return getReadSource().equalsIgnoreCase("journalkeeper");
+    public boolean isReadTarget() {
+        return getReadSource().equalsIgnoreCase(getTarget());
     }
 
-    public boolean isWriteJournalkeeper() {
-        return isWriteAll() || getReadSource().equalsIgnoreCase("journalkeeper");
+    public boolean isWriteTarget() {
+        return isWriteAll() || getReadSource().equalsIgnoreCase(getTarget());
     }
 }

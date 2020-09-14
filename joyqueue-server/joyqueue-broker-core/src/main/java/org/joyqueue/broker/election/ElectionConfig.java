@@ -157,6 +157,10 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.CONNECTION_RETRY_DELAY);
     }
 
+    public boolean enableSharedHeartbeat() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_SHARED_HEARTBEAT);
+    }
+
     public void setListenPort(String port) {
         listenPort = Integer.valueOf(port);
     }

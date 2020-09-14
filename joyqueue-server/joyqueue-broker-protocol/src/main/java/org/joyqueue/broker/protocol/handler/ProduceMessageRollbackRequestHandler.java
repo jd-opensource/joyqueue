@@ -64,7 +64,7 @@ public class ProduceMessageRollbackRequestHandler implements JoyQueueCommandHand
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(produceMessageRollbackRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessageRollbackRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, produceMessageRollbackRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 

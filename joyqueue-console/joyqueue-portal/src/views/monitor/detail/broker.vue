@@ -1,7 +1,8 @@
 <template>
   <div>
     <my-table :data="tableData" :showPin="showTablePin" :showPagination=false
-              :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"/>
+              :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange"
+              @on-disconnect="disconnectBroker"/>
     <label >共 {{page.total}} 条记录</label>
   </div>
 </template>
@@ -50,7 +51,9 @@ export default {
             title: '机房 [编码/名称]',
             key: 'dataCenter',
             formatter (item) {
-              return item.dataCenter.code + '/' + item.dataCenter.name
+              if (item.dataCenter) {
+                return item.dataCenter.code + '/' + item.dataCenter.name
+              }
             }
           },
           {
@@ -71,11 +74,19 @@ export default {
   data () {
     return {
       urls: {
+        disconnect: `/monitor/remove/connections`,
         getMonitor: `/monitor/find/connection`
       },
       tableData: {
         rowData: [],
-        colData: this.colData
+        colData: this.colData,
+        btns: [
+          {
+            txt: '关闭连接',
+            method: 'on-disconnect',
+            isAdmin: 1
+          }
+        ]
       },
       page: {
         total: 0
@@ -84,6 +95,21 @@ export default {
     }
   },
   methods: {
+    isAdmin (item) {
+      return this.$store.getters.isAdmin
+    },
+    disconnectBroker (item, index) {
+      let params = '?id=' + item.id
+      apiRequest.postBase(this.urls.disconnect + params, {}, this.search, true).then((data) => {
+        data.data = data.data
+        if (data.data === 'success') {
+          this.$Message.success('断开成功')
+          this.getList()
+        } else {
+          this.$Message.error('断开失败')
+        }
+      })
+    },
     getList () {
       this.showTablePin = true
       apiRequest.postBase(this.urls.getMonitor, {}, this.search, false).then((data) => {

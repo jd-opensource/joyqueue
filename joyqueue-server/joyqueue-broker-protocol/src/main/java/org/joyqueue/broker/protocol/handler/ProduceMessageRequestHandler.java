@@ -30,7 +30,6 @@ import org.joyqueue.broker.protocol.JoyQueueContext;
 import org.joyqueue.broker.protocol.JoyQueueContextAware;
 import org.joyqueue.broker.protocol.command.ProduceMessageResponse;
 import org.joyqueue.broker.protocol.config.JoyQueueConfig;
-import org.joyqueue.broker.protocol.converter.CheckResultConverter;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueCode;
@@ -84,52 +83,61 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
     }
 
     @Override
-    public Command handle(Transport transport, Command command) {
-        ProduceMessageRequest produceMessageRequest = (ProduceMessageRequest) command.getPayload();
+    public Command handle(Transport transport, Command request) {
+        ProduceMessageRequest produceMessageRequest = (ProduceMessageRequest) request.getPayload();
         Connection connection = SessionHelper.getConnection(transport);
+        String app = produceMessageRequest.getApp();
 
-        if (connection == null || !connection.isAuthorized(produceMessageRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessageRequest.getApp());
+        if (connection == null || !connection.isAuthorized(app)) {
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, app);
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
-        QosLevel qosLevel = command.getHeader().getQosLevel();
-        boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
+        QosLevel qosLevel = request.getHeader().getQosLevel();
         CountDownLatch latch = new CountDownLatch(produceMessageRequest.getData().size());
         Map<String, ProduceMessageAckData> resultData = Maps.newConcurrentMap();
-        Traffic traffic = new Traffic(produceMessageRequest.getApp());
+        Traffic traffic = new Traffic(app);
+        boolean isNeedAck = !qosLevel.equals(QosLevel.ONE_WAY);
+        boolean singleTopic = produceMessageRequest.getData().size() == 1;
 
         for (Map.Entry<String, ProduceMessageData> entry : produceMessageRequest.getData().entrySet()) {
             String topic = entry.getKey();
             ProduceMessageData produceMessageData = entry.getValue();
 
-            // 校验
             try {
                 checkAndFillMessage(connection, produceMessageData);
-            } catch (JoyQueueException e) {
-                logger.warn("checkMessage error, transport: {}, topic: {}, app: {}", transport, topic, produceMessageRequest.getApp(), e);
-                resultData.put(topic, buildResponse(produceMessageData, JoyQueueCode.valueOf(e.getCode())));
-                latch.countDown();
-                continue;
-            }
+                checkWritable(connection, topic, app, produceMessageData);
 
-            BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), produceMessageRequest.getApp(),
-                    connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
-            if (!checkResult.isSuccess()) {
-                logger.warn("checkWritable failed, transport: {}, topic: {}, app: {}, code: {}", transport, topic, produceMessageRequest.getApp(), checkResult.getJoyQueueCode());
-                resultData.put(topic, buildResponse(produceMessageData, CheckResultConverter.convertProduceCode(command.getHeader().getVersion(), checkResult.getJoyQueueCode())));
-                latch.countDown();
-                continue;
-            }
+                produceMessage(connection, topic, app, produceMessageData, (data) -> {
+                    resultData.put(topic, data);
+                    traffic.record(topic, produceMessageData.getTraffic(), produceMessageData.getSize());
+                    latch.countDown();
 
-            produceMessage(connection, topic, produceMessageRequest.getApp(), produceMessageData, (data) -> {
-                resultData.put(topic, data);
-                traffic.record(topic, produceMessageData.getTraffic(), produceMessageData.getSize());
+                    if (isNeedAck && singleTopic) {
+                        transport.acknowledge(request, generateResponse(traffic, resultData));
+                    }
+                });
+            } catch (Exception e) {
+                logger.warn("produce message error, transport: {}, topic: {}, app: {}", transport, topic, app, e);
+                ProduceMessageAckData produceMessageAckData = null;
+
+                if (e instanceof JoyQueueException) {
+                    produceMessageAckData = buildResponse(produceMessageData, JoyQueueCode.valueOf(((JoyQueueException) e).getCode()));
+                } else {
+                    produceMessageAckData = buildResponse(produceMessageData, JoyQueueCode.CN_UNKNOWN_ERROR);
+                }
+
                 latch.countDown();
-            });
+                resultData.put(topic, produceMessageAckData);
+
+                if (isNeedAck && singleTopic) {
+                    transport.acknowledge(request, generateResponse(traffic, resultData));
+                    return null;
+                }
+            }
         }
 
-        if (!isNeedAck) {
+        if (!isNeedAck || singleTopic) {
             return null;
         }
 
@@ -142,6 +150,10 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
             logger.error("wait produce exception, transport: {}", transport.remoteAddress(), e);
         }
 
+        return generateResponse(traffic, resultData);
+    }
+
+    protected Command generateResponse(Traffic traffic, Map<String, ProduceMessageAckData> resultData) {
         ProduceMessageResponse produceMessageResponse = new ProduceMessageResponse();
         produceMessageResponse.setTraffic(traffic);
         produceMessageResponse.setData(resultData);
@@ -166,6 +178,13 @@ public class ProduceMessageRequestHandler implements JoyQueueCommandHandler, Typ
         } catch (Exception e) {
             logger.error("produceMessage exception, transport: {}, topic: {}, app: {}", connection.getTransport().remoteAddress(), topic, app, e);
             listener.onEvent(buildResponse(produceMessageData, JoyQueueCode.CN_UNKNOWN_ERROR));
+        }
+    }
+
+    protected void checkWritable(Connection connection, String topic, String app, ProduceMessageData produceMessageData) throws JoyQueueException {
+        BooleanResponse checkResult = clusterManager.checkWritable(TopicName.parse(topic), app, connection.getHost(), produceMessageData.getMessages().get(0).getPartition());
+        if (!checkResult.isSuccess()) {
+            throw new JoyQueueException(checkResult.getJoyQueueCode());
         }
     }
 

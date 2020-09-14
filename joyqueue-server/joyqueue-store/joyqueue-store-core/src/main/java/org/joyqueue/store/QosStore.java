@@ -15,8 +15,10 @@
  */
 package org.joyqueue.store;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.store.file.PositioningStore;
+import org.joyqueue.store.message.MessageParser;
 import org.joyqueue.toolkit.concurrent.EventFuture;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.slf4j.Logger;
@@ -61,8 +63,18 @@ public class QosStore implements PartitionGroupStore {
     }
 
     @Override
+    public long getLeftIndexAndCheck(short partition) {
+        return store.getLeftIndexAndCheck(partition);
+    }
+
+    @Override
     public long getRightIndex(short partition) {
         return store.getRightIndex(partition);
+    }
+
+    @Override
+    public long getRightIndexAndCheck(short partition) {
+        return store.getRightIndexAndCheck(partition);
     }
 
     @Override
@@ -103,7 +115,20 @@ public class QosStore implements PartitionGroupStore {
 
     @Override
     public ReadResult read(short partition, long index, int count, long maxSize) throws IOException {
+        // TODO 临时重试
+        int retry = 0;
+        long readIndex = 0;
+        ReadResult readResult = store.read(partition, index, count, maxSize);
 
-        return store.read(partition, index, count, maxSize);
+        while (retry < 3 && readResult != null && ArrayUtils.isNotEmpty(readResult.getMessages())
+                && (readIndex = MessageParser.getLong(readResult.getMessages()[0], MessageParser.INDEX)) != index) {
+
+            retry++;
+            readResult = store.read(partition, index, count, maxSize);
+            if (logger.isDebugEnabled()) {
+                logger.debug("retry read store, partition: {}, index: {}, readIndex: {}", partition, index, readIndex);
+            }
+        }
+        return readResult;
     }
 }

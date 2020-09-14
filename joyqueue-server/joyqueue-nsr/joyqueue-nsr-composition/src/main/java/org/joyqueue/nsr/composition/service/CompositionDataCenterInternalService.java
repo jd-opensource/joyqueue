@@ -33,26 +33,26 @@ public class CompositionDataCenterInternalService implements DataCenterInternalS
     protected final Logger logger = LoggerFactory.getLogger(CompositionDataCenterInternalService.class);
 
     private CompositionConfig config;
-    private DataCenterInternalService igniteDataCenterService;
-    private DataCenterInternalService journalkeeperDataCenterService;
+    private DataCenterInternalService sourceDataCenterService;
+    private DataCenterInternalService targetDataCenterService;
 
-    public CompositionDataCenterInternalService(CompositionConfig config, DataCenterInternalService igniteDataCenterService,
-                                                DataCenterInternalService journalkeeperDataCenterService) {
+    public CompositionDataCenterInternalService(CompositionConfig config, DataCenterInternalService sourceDataCenterService,
+                                                DataCenterInternalService targetDataCenterService) {
         this.config = config;
-        this.igniteDataCenterService = igniteDataCenterService;
-        this.journalkeeperDataCenterService = journalkeeperDataCenterService;
+        this.sourceDataCenterService = sourceDataCenterService;
+        this.targetDataCenterService = targetDataCenterService;
     }
 
     @Override
     public DataCenter getById(String id) {
-        if (config.isReadIgnite()) {
-            return igniteDataCenterService.getById(id);
+        if (config.isReadSource()) {
+            return sourceDataCenterService.getById(id);
         } else {
             try {
-                return journalkeeperDataCenterService.getById(id);
+                return targetDataCenterService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id: {}", id, e);
-                return igniteDataCenterService.getById(id);
+                return sourceDataCenterService.getById(id);
             }
         }
     }
@@ -60,14 +60,14 @@ public class CompositionDataCenterInternalService implements DataCenterInternalS
     @Override
     public DataCenter add(DataCenter dataCenter) {
         DataCenter result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteDataCenterService.add(dataCenter);
+        if (config.isWriteSource()) {
+            result = sourceDataCenterService.add(dataCenter);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperDataCenterService.add(dataCenter);
+                targetDataCenterService.add(dataCenter);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", dataCenter, e);
+                logger.error("add exception, params: {}", dataCenter, e);
             }
         }
         return result;
@@ -76,14 +76,14 @@ public class CompositionDataCenterInternalService implements DataCenterInternalS
     @Override
     public DataCenter update(DataCenter dataCenter) {
         DataCenter result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteDataCenterService.update(dataCenter);
+        if (config.isWriteSource()) {
+            result = sourceDataCenterService.update(dataCenter);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperDataCenterService.update(dataCenter);
+                targetDataCenterService.update(dataCenter);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", dataCenter, e);
+                logger.error("update exception, params: {}", dataCenter, e);
             }
         }
         return result;
@@ -91,28 +91,28 @@ public class CompositionDataCenterInternalService implements DataCenterInternalS
 
     @Override
     public void delete(String id) {
-        if (config.isWriteIgnite()) {
-            igniteDataCenterService.delete(id);
+        if (config.isWriteSource()) {
+            sourceDataCenterService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperDataCenterService.delete(id);
+                targetDataCenterService.delete(id);
             } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", id, e);
+                logger.error("delete exception, params: {}", id, e);
             }
         }
     }
 
     @Override
     public List<DataCenter> getAll() {
-        if (config.isReadIgnite()) {
-            return igniteDataCenterService.getAll();
+        if (config.isReadSource()) {
+            return sourceDataCenterService.getAll();
         } else {
             try {
-                return journalkeeperDataCenterService.getAll();
+                return targetDataCenterService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return igniteDataCenterService.getAll();
+                return sourceDataCenterService.getAll();
             }
         }
     }

@@ -283,6 +283,9 @@
         <route inherit="post"
                path="/v1/partitionGroupReplica/leader" handlers="partitionGroupReplica#leader render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/broker/findPartitionGroupReplica/:brokerId" handlers="partitionGroupReplica#findPartitionGroupReplica render"
+               errors="error"/>
 
         <!-- producer post-id -->
         <route inherit="post"
@@ -360,6 +363,10 @@
                errors="error"/>
 
         <!-- monitor -->
+        <route inherit="post"
+               path="/v1/monitor/remove/connections" handlers="brokerMonitor#removeConnections render"
+               errors="error"/>
+
         <route inherit="post"
                path="/v1/monitor/find" handlers="brokerMonitor#find render"
                errors="error"/>

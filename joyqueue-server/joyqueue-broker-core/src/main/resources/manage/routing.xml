@@ -126,6 +126,8 @@
         <!-- metadata -->
         <route path="/monitor/topic/:topic/metadata" inherit="get"
                handlers="brokerMonitorService.getTopicMetadata"/>
+        <route path="/monitor/topic/:topic/metadata" inherit="put"
+               handlers="brokerMonitorService.rebuildTopicMetadata"/>
         <route path="/monitor/topic/:topic/app/:app/readable" inherit="get"
                handlers="brokerMonitorService.getReadableResult"/>
         <route path="/monitor/topic/:topic/app/:app/writable" inherit="get"
@@ -194,7 +196,7 @@
             handlers="brokerManageService.getTopicAckIndexByTime"/>
         <route path="/manage/topic/:topic/app/:app/ackByTime" inherit="put"
                handlers="brokerManageService.setAckIndexesByTime"/>
-        <route path="/manage/consumer/ack/init" inherit="post"
+        <route path="/manage/consumers/ack/init" inherit="post"
                handlers="brokerManageService.initConsumerAckIndexes"/>
 
         <!-- store -->

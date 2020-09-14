@@ -15,9 +15,11 @@
  */
 package org.joyqueue.client.internal.producer.support;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
-import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import org.joyqueue.client.internal.metadata.domain.PartitionNode;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.client.internal.producer.MessageSender;
@@ -31,8 +33,6 @@ import org.joyqueue.client.internal.producer.exception.ProducerException;
 import org.joyqueue.client.internal.producer.helper.ProducerHelper;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.domain.BrokerNode;
-import com.google.common.base.Preconditions;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
     private MessageSender messageSender;
     private MessageProducerInner messageProducerInner;
 
-    private PartitionMetadata transactionPartition;
+    private PartitionNode transactionPartitionNode;
     private SendPrepareResult prepare;
     private JoyQueueCode commit;
     private JoyQueueCode rollback;
@@ -89,7 +89,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JoyQueueCode commit = messageSender.commit(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        JoyQueueCode commit = messageSender.commit(transactionPartitionNode.getPartitionMetadata().getLeader(), transactionPartitionNode.getPartitionMetadata().getTopic(),
+                config.getApp(), prepare.getTxId(), config.getTimeout());
         if (!commit.equals(JoyQueueCode.SUCCESS)) {
             throw new ProducerException(commit.getMessage(), commit.getCode());
         }
@@ -101,7 +102,8 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         checkPrepare();
         checkState();
 
-        JoyQueueCode rollback = messageSender.rollback(transactionPartition.getLeader(), transactionPartition.getTopic(), config.getApp(), prepare.getTxId(), config.getTimeout());
+        JoyQueueCode rollback = messageSender.rollback(transactionPartitionNode.getPartitionMetadata().getLeader(), transactionPartitionNode.getPartitionMetadata().getTopic(),
+                config.getApp(), prepare.getTxId(), config.getTimeout());
         if (!rollback.equals(JoyQueueCode.SUCCESS)) {
             throw new ProducerException(rollback.getMessage(), rollback.getCode());
         }
@@ -140,22 +142,20 @@ public class DefaultTransactionMessageProducer implements TransactionMessageProd
         TopicMetadata topicMetadata = messageProducerInner.getAndCheckTopicMetadata(messages.get(0).getTopic());
 
         if (prepare == null) {
-            List<BrokerNode> brokers = messageProducerInner.getRegionBrokers(topicMetadata);
-            brokers = messageProducerInner.filterNotAvailableBrokers(brokers);
-            List<PartitionMetadata> partitions = messageProducerInner.getBrokerPartitions(topicMetadata, brokers);
-            transactionPartition = messageProducerInner.dispatchPartitions(messages, topicMetadata, partitions, null);
-            prepare = doPrepare(transactionPartition);
+            List<BrokerNode> brokerNodes = messageProducerInner.getAvailableBrokers(topicMetadata);
+            transactionPartitionNode = messageProducerInner.dispatchPartitions(messages, topicMetadata, brokerNodes);
+            prepare = doPrepare(transactionPartitionNode);
         } else {
-            Preconditions.checkArgument(messages.get(0).getTopic().equals(transactionPartition.getTopic()), "transaction message must be single partition");
-            ProducerHelper.setPartitions(messages, transactionPartition.getId());
+            Preconditions.checkArgument(messages.get(0).getTopic().equals(transactionPartitionNode.getPartitionMetadata().getTopic()), "transaction message must be single partition");
+            ProducerHelper.setPartitions(messages, transactionPartitionNode.getPartitionMetadata().getId());
         }
 
-        return messageProducerInner.doBatchSend(messages, topicMetadata, transactionPartition, null,
+        return messageProducerInner.doBatchSend(messages, topicMetadata, Lists.newArrayList(transactionPartitionNode.getPartitionMetadata().getLeader()),
                 prepare.getTxId(), timeout, timeoutUnit, false, false, null);
     }
 
-    protected SendPrepareResult doPrepare(PartitionMetadata partition) {
-        SendPrepareResult sendPrepareResult = messageSender.prepare(partition.getLeader(), partition.getTopic(), config.getApp(),
+    protected SendPrepareResult doPrepare(PartitionNode partitionNode) {
+        SendPrepareResult sendPrepareResult = messageSender.prepare(partitionNode.getPartitionMetadata().getLeader(), partitionNode.getPartitionMetadata().getTopic(), config.getApp(),
                 transactionId, sequence, timeoutUnit.toMillis(timeout), config.getTimeout());
 
         if (!sendPrepareResult.getCode().equals(JoyQueueCode.SUCCESS)) {

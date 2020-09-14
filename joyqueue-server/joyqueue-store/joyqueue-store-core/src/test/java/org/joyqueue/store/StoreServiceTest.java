@@ -23,6 +23,7 @@ import org.joyqueue.toolkit.time.SystemClock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author liyue25
  * Date: 2018/9/10
  */
+@Ignore
 public class StoreServiceTest {
     private static final Logger logger = LoggerFactory.getLogger(StoreServiceTest.class);
     private String topic = "raven_topic";

@@ -72,14 +72,14 @@ public class ProduceMessagePrepareRequestHandler implements JoyQueueCommandHandl
         Connection connection = SessionHelper.getConnection(transport);
 
         if (connection == null || !connection.isAuthorized(produceMessagePrepareRequest.getApp())) {
-            logger.warn("connection is not exists, transport: {}, app: {}", transport, produceMessagePrepareRequest.getApp());
+            logger.warn("connection does not exist, transport: {}, app: {}", transport, produceMessagePrepareRequest.getApp());
             return BooleanAck.build(JoyQueueCode.FW_CONNECTION_NOT_EXISTS.getCode());
         }
 
         String producerId = connection.getProducer(produceMessagePrepareRequest.getTopic(), produceMessagePrepareRequest.getApp());
         Producer producer = (StringUtils.isBlank(producerId) ? null : sessionManager.getProducerById(producerId));
         if (producer == null) {
-            logger.warn("producer is not exists, transport: {}", transport);
+            logger.warn("producer does not exist, transport: {}", transport);
             return BooleanAck.build(JoyQueueCode.FW_PRODUCER_NOT_EXISTS.getCode());
         }
 
