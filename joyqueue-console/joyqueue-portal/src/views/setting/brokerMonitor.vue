@@ -22,6 +22,9 @@
         <my-table :data="tableData" :showPin="showTablePin" style="overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
+        <d-button class="right load-btn" style="margin-right: 10px;" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
       </d-tab-pane>
       <d-tab-pane label="消费者详情" name="consumer">
         <d-button type="primary" class="right" style="margin-right: 20px" @click="getList">刷新
@@ -30,6 +33,9 @@
         <my-table :data="tableData" :showPin="showTablePin" style="overflow-y:auto" :page="page" @on-size-change="handleSizeChange" @on-current-change="handleCurrentChange" @on-selection-change="handleSelectionChange"
                   @on-edit="edit">
         </my-table>
+        <d-button class="right load-btn" style="margin-right: 10px;" v-if="this.curIndex < this.cacheList.length-1" type="primary" @click="getRestList">加载更多
+          <icon name="refresh-cw" style="margin-left: 3px;"></icon>
+        </d-button>
       </d-tab-pane>
       <d-tab-pane label="连接信息" name="brokerConnectionMonitor">
         <grid-row>
@@ -120,6 +126,9 @@ export default {
       },
       searchRules: {
       },
+      appIdMap: new Map(),
+      curIndex: 0,
+      cacheList: [],
       tableData: {
         rowData: [],
         colData: [
@@ -314,6 +323,23 @@ export default {
             }
           },
           {
+            title: '入队实时流量',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  if (list[i].traffic !== undefined) {
+                    let p = h('div', bytesToSize(list[i].traffic, 2, false))
+                    html.push(p)
+                  }
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
             title: '入队TPS',
             key: 'brokerTopicMonitorRecordList',
             render: (h, params) => {
@@ -362,7 +388,7 @@ export default {
                 for (let i = 0; i < list.length; i++) {
                   let p = h('div', '')
                   if (list[i].id) {
-                      p = h('router-link', {
+                    p = h('router-link', {
                       style: {
                         'text-decoration': 'underline',
                         color: 'dodgerblue'
@@ -423,6 +449,23 @@ export default {
                 for (let i = 0; i < list.length; i++) {
                   let p = h('div', bytesToSize(list[i].totalSize, 2, true))
                   html.push(p)
+                }
+              }
+              return h('div', html)
+            }
+          },
+          {
+            title: '出队实时流量',
+            key: 'brokerTopicMonitorRecordList',
+            render: (h, params) => {
+              let list = params.item.brokerTopicMonitorRecordList
+              let html = []
+              if (list !== undefined) {
+                for (let i = 0; i < list.length; i++) {
+                  if (list[i].traffic !== undefined) {
+                    let p = h('div', bytesToSize(list[i].traffic, 2, false))
+                    html.push(p)
+                  }
                 }
               }
               return h('div', html)
@@ -515,6 +558,21 @@ export default {
         this.$refs[item.name].getList()
       }
     },
+    getSearchVal () {
+      let obj = {
+        pagination: {
+          page: 1,
+          size: 10000
+        },
+        query: {}
+      }
+      for (let key in this.searchData) {
+        if (this.searchData.hasOwnProperty(key)) {
+          obj.query[key] = this.searchData[key]
+        }
+      }
+      return obj
+    },
     getList () {
       this.showTablePin = true
       let data = this.getSearchVal()
@@ -526,10 +584,15 @@ export default {
         data.pagination = data.pagination || {
           totalRecord: data.data.length
         }
-        this.page.total = data.pagination.totalRecord
-        this.page.page = data.pagination.page
-        this.page.size = data.pagination.size
-        this.tableData.rowData = data.data
+
+        if (data.data.length > this.page.size) {
+          this.tableData.rowData = data.data.slice(0, this.page.size)
+          this.curIndex = this.page.size - 1
+        } else {
+          this.tableData.rowData = data.data
+          this.curIndex = data.data.length - 1
+        }
+        this.cacheList = data.data
         for (let i in this.tableData.rowData) {
           if (this.tableData.rowData.hasOwnProperty(i)) {
             if (this.tableData.rowData[i].brokerTopicMonitorRecordList) {
@@ -540,10 +603,16 @@ export default {
                   if (idx !== -1) {
                     app = app.substring(0, idx)
                   }
-                  apiRequest.get('/application/getByCode/' + app, {}).then((data) => {
-                    this.tableData.rowData[i].brokerTopicMonitorRecordList[j].id = data.data.id
+                  if (this.appIdMap.has(app)) {
+                    this.tableData.rowData[i].brokerTopicMonitorRecordList[j].id = this.appIdMap.get(app)
                     this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
-                  })
+                  } else {
+                    apiRequest.get('/application/getByCode/' + app, {}).then((data) => {
+                      this.tableData.rowData[i].brokerTopicMonitorRecordList[j].id = data.data.id
+                      this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+                      this.appIdMap.set(app, data.data.id)
+                    })
+                  }
                 }
               }
             }
@@ -551,6 +620,47 @@ export default {
         }
         this.showTablePin = false
       })
+    },
+    // 滚动事件触发下拉加载
+    getRestList () {
+      let index = this.curIndex
+      if (this.curIndex < this.cacheList.length - 1) {
+        for (let i = 0; i < this.page.size; i++) {
+          if (this.curIndex < this.cacheList.length - 1) {
+            this.curIndex += 1
+            if (!this.tableData.rowData.includes(this.cacheList[this.curIndex])) {
+              this.tableData.rowData.push(this.cacheList[this.curIndex])
+            }
+          } else {
+            break
+          }
+        }
+      }
+      for (let i = index; i < this.tableData.rowData.length; i++) {
+        if (this.tableData.rowData.hasOwnProperty(i)) {
+          if (this.tableData.rowData[i].brokerTopicMonitorRecordList) {
+            for (let j in this.tableData.rowData[i].brokerTopicMonitorRecordList) {
+              if (this.tableData.rowData[i].brokerTopicMonitorRecordList.hasOwnProperty(j)) {
+                let app = this.tableData.rowData[i].brokerTopicMonitorRecordList[j].app
+                let idx = app.indexOf('.')
+                if (idx !== -1) {
+                  app = app.substring(0, idx)
+                }
+                if (this.appIdMap.has(app)) {
+                  this.tableData.rowData[i].brokerTopicMonitorRecordList[j].id = this.appIdMap.get(app)
+                  this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+                } else {
+                  apiRequest.get('/application/getByCode/' + app, {}).then((data) => {
+                    this.tableData.rowData[i].brokerTopicMonitorRecordList[j].id = data.data.id
+                    this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+                    this.appIdMap.set(app, data.data.id)
+                  })
+                }
+              }
+            }
+          }
+        }
+      }
     },
   },
   mounted () {

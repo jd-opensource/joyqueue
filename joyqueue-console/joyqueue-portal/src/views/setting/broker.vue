@@ -173,7 +173,7 @@ export default {
           {
             title: 'Broker分组编码',
             key: 'group.code',
-            width: '15%'
+            width: '5%'
           },
           {
             title: 'IP:端口',

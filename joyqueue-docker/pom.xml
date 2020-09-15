@@ -19,14 +19,14 @@
     <parent>
         <artifactId>joyqueue</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.7.RC3</version>
+        <version>4.2.7.TPAAS</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>joyqueue-docker</artifactId>
     <name>JoyQueue-Docker-Image</name>
     <modules>
-        <module>web</module>
-        <module>server</module>
+        <module>docker-web</module>
+        <module>docker-server</module>
     </modules>
     <packaging>pom</packaging>
     <properties>

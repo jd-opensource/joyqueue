@@ -20,7 +20,7 @@
     <parent>
         <artifactId>joyqueue-docker</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.7.RC3</version>
+        <version>4.2.7.TPAAS</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>docker-web</artifactId>
@@ -55,8 +55,8 @@
                                     <goal>tag</goal>
                                 </goals>
                                 <configuration>
-                                <repository>${docker.organization}/joyqueue-web</repository>
-                                <tag>latest</tag>
+                                    <repository>${docker.organization}/joyqueue-web</repository>
+                                    <tag>latest</tag>
                                 </configuration>
                             </execution>
                         </executions>
