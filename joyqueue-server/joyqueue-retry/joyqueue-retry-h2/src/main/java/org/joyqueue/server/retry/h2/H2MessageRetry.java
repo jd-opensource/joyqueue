@@ -145,7 +145,7 @@ public class H2MessageRetry implements MessageRetry<Long> {
 
             consumeRetry.setExpireTime(getExpireTime(retryPolicy, SystemClock.now()));
             consumeRetry.setRetryTime(getRetryTime(retryPolicy, SystemClock.now(), 1));
-            consumeRetry.setRetryCount((short) 0);
+            consumeRetry.setRetryCount(0);
             consumeRetry.setData(retryMessageModel.getBrokerMessage());
             consumeRetry.setException(retryMessageModel.getException());
             consumeRetry.setCreateTime(SystemClock.now());
