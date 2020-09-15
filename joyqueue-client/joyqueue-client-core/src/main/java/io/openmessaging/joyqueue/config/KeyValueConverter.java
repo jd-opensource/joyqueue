@@ -15,18 +15,18 @@
  */
 package io.openmessaging.joyqueue.config;
 
-import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
-import org.joyqueue.client.internal.nameserver.NameServerConfig;
-import org.joyqueue.client.internal.producer.config.ProducerConfig;
-import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import org.joyqueue.client.internal.transport.config.TransportConfig;
-import org.joyqueue.domain.QosLevel;
 import io.openmessaging.KeyValue;
 import io.openmessaging.joyqueue.domain.JoyQueueConsumerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueNameServerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueProducerBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueTransportBuiltinKeys;
 import io.openmessaging.joyqueue.domain.JoyQueueTxFeedbackBuiltinKeys;
+import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
+import org.joyqueue.client.internal.nameserver.NameServerConfig;
+import org.joyqueue.client.internal.producer.config.ProducerConfig;
+import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import org.joyqueue.client.internal.transport.config.TransportConfig;
+import org.joyqueue.domain.QosLevel;
 
 /**
  * KeyValueConverter
@@ -60,9 +60,10 @@ public class KeyValueConverter {
         transportConfig.setHeartbeatInterval(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.HEARTBEAT_INTERVAL, transportConfig.getHeartbeatInterval()));
         transportConfig.setHeartbeatTimeout(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.HEARTBEAT_TIMEOUT, transportConfig.getHeartbeatTimeout()));
         transportConfig.setSoLinger(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SO_LINGER, transportConfig.getSoLinger()));
-        transportConfig.setTcpNoDelay(attributes.getBoolean(JoyQueueTransportBuiltinKeys.CONNECTIONS, transportConfig.isTcpNoDelay()));
+        transportConfig.setTcpNoDelay(attributes.getBoolean(JoyQueueTransportBuiltinKeys.TCP_NO_DELAY, transportConfig.isTcpNoDelay()));
         transportConfig.setKeepAlive(attributes.getBoolean(JoyQueueTransportBuiltinKeys.KEEPALIVE, transportConfig.isKeepAlive()));
         transportConfig.setSoTimeout(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SO_TIMEOUT, transportConfig.getSoTimeout()));
+        transportConfig.setSendTimeout(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SEND_TIMEOUT, transportConfig.getSoTimeout()));
         transportConfig.setSocketBufferSize(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.SOCKET_BUFFER_SIZE, transportConfig.getSocketBufferSize()));
         transportConfig.setMaxOneway(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.MAX_ONEWAY, transportConfig.getMaxOneway()));
         transportConfig.setMaxAsync(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.MAX_ASYNC, transportConfig.getMaxAsync()));
@@ -109,12 +110,14 @@ public class KeyValueConverter {
         consumerConfig.setSessionTimeout(attributes.getLong(JoyQueueConsumerBuiltinKeys.SESSION_TIMEOUT, consumerConfig.getSessionTimeout()));
         consumerConfig.setThread(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.THREAD, consumerConfig.getThread()));
         consumerConfig.setFailover(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.FAILOVER, consumerConfig.isFailover()));
+        consumerConfig.setForceAck(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.FORCE_ACK, consumerConfig.isForceAck()));
         consumerConfig.setLoadBalance(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.LOADBALANCE, consumerConfig.isLoadBalance()));
         consumerConfig.setLoadBalanceType(KeyValueHelper.getString(attributes, JoyQueueConsumerBuiltinKeys.LOADBALANCE_TYPE, consumerConfig.getLoadBalanceType()));
         consumerConfig.setBroadcastGroup(KeyValueHelper.getString(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_GROUP, consumerConfig.getBroadcastGroup()));
         consumerConfig.setBroadcastLocalPath(KeyValueHelper.getString(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_LOCAL_PATH, consumerConfig.getBroadcastLocalPath()));
         consumerConfig.setBroadcastPersistInterval(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_PERSIST_INTERVAL, consumerConfig.getBroadcastPersistInterval()));
         consumerConfig.setBroadcastIndexExpireTime(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_INDEX_EXPIRE_TIME, consumerConfig.getBroadcastIndexExpireTime()));
+        consumerConfig.setBroadcastIndexAutoReset(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_INDEX_AUTO_RESET, consumerConfig.getBroadcastIndexAutoReset()));
         return consumerConfig;
     }
 

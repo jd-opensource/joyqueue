@@ -38,109 +38,109 @@ public class CompositionTopicInternalService implements TopicInternalService {
     protected static final Logger logger = LoggerFactory.getLogger(CompositionTopicInternalService.class);
 
     private CompositionConfig config;
-    private TopicInternalService igniteTopicService;
-    private TopicInternalService journalkeeperTopicService;
+    private TopicInternalService sourceTopicService;
+    private TopicInternalService targetTopicService;
 
-    public CompositionTopicInternalService(CompositionConfig config, TopicInternalService igniteTopicService, TopicInternalService journalkeeperTopicService) {
+    public CompositionTopicInternalService(CompositionConfig config, TopicInternalService sourceTopicService, TopicInternalService targetTopicService) {
         this.config = config;
-        this.igniteTopicService = igniteTopicService;
-        this.journalkeeperTopicService = journalkeeperTopicService;
+        this.sourceTopicService = sourceTopicService;
+        this.targetTopicService = targetTopicService;
     }
 
     @Override
     public Topic getTopicByCode(String namespace, String topic) {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.getTopicByCode(namespace, topic);
+        if (config.isReadSource()) {
+            return sourceTopicService.getTopicByCode(namespace, topic);
         } else {
             try {
-                return journalkeeperTopicService.getTopicByCode(namespace, topic);
+                return targetTopicService.getTopicByCode(namespace, topic);
             } catch (Exception e) {
                 logger.error("getTopicByCode exception, namespace: {}, topic: {}", namespace, topic, e);
-                return igniteTopicService.getTopicByCode(namespace, topic);
+                return sourceTopicService.getTopicByCode(namespace, topic);
             }
         }
     }
 
     @Override
     public PageResult<Topic> search(QPageQuery<TopicQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.search(pageQuery);
+        if (config.isReadSource()) {
+            return sourceTopicService.search(pageQuery);
         } else {
             try {
-                return journalkeeperTopicService.search(pageQuery);
+                return targetTopicService.search(pageQuery);
             } catch (Exception e) {
                 logger.error("search exception, pageQuery: {}", pageQuery, e);
-                return igniteTopicService.search(pageQuery);
+                return sourceTopicService.search(pageQuery);
             }
         }
     }
 
     @Override
     public PageResult<Topic> findUnsubscribedByQuery(QPageQuery<TopicQuery> pageQuery) {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.findUnsubscribedByQuery(pageQuery);
+        if (config.isReadSource()) {
+            return sourceTopicService.findUnsubscribedByQuery(pageQuery);
         } else {
             try {
-                return journalkeeperTopicService.findUnsubscribedByQuery(pageQuery);
+                return targetTopicService.findUnsubscribedByQuery(pageQuery);
             } catch (Exception e) {
                 logger.error("findUnsubscribedByQuery exception, pageQuery: {}", pageQuery, e);
-                return igniteTopicService.findUnsubscribedByQuery(pageQuery);
+                return sourceTopicService.findUnsubscribedByQuery(pageQuery);
             }
         }
     }
 
     @Override
     public void addTopic(Topic topic, List<PartitionGroup> partitionGroups) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.addTopic(topic, partitionGroups);
+        if (config.isWriteSource()) {
+            sourceTopicService.addTopic(topic, partitionGroups);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.addTopic(topic, partitionGroups);
+                targetTopicService.addTopic(topic, partitionGroups);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}, {}", topic, partitionGroups, e);
+                logger.error("add exception, params: {}, {}", topic, partitionGroups, e);
             }
         }
     }
 
     @Override
     public void removeTopic(Topic topic) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.removeTopic(topic);
+        if (config.isWriteSource()) {
+            sourceTopicService.removeTopic(topic);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.removeTopic(topic);
+                targetTopicService.removeTopic(topic);
             } catch (Exception e) {
-                logger.error("removeTopic journalkeeper exception, params: {}", topic, e);
+                logger.error("removeTopic exception, params: {}", topic, e);
             }
         }
     }
 
     @Override
     public void addPartitionGroup(PartitionGroup group) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.addPartitionGroup(group);
+        if (config.isWriteSource()) {
+            sourceTopicService.addPartitionGroup(group);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.addPartitionGroup(group);
+                targetTopicService.addPartitionGroup(group);
             } catch (Exception e) {
-                logger.error("addPartitionGroup journalkeeper exception, params: {}", group, e);
+                logger.error("addPartitionGroup exception, params: {}", group, e);
             }
         }
     }
 
     @Override
     public void removePartitionGroup(PartitionGroup group) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.removePartitionGroup(group);
+        if (config.isWriteSource()) {
+            sourceTopicService.removePartitionGroup(group);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.removePartitionGroup(group);
+                targetTopicService.removePartitionGroup(group);
             } catch (Exception e) {
-                logger.error("removePartitionGroup journalkeeper exception, params: {}", group, e);
+                logger.error("removePartitionGroup exception, params: {}", group, e);
             }
         }
     }
@@ -148,14 +148,14 @@ public class CompositionTopicInternalService implements TopicInternalService {
     @Override
     public Collection<Integer> updatePartitionGroup(PartitionGroup group) {
         Collection<Integer> result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteTopicService.updatePartitionGroup(group);
+        if (config.isWriteSource()) {
+            result = sourceTopicService.updatePartitionGroup(group);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                result = journalkeeperTopicService.updatePartitionGroup(group);
+                result = targetTopicService.updatePartitionGroup(group);
             } catch (Exception e) {
-                logger.error("updatePartitionGroup journalkeeper exception, params: {}", group, e);
+                logger.error("updatePartitionGroup exception, params: {}", group, e);
             }
         }
         return result;
@@ -163,52 +163,52 @@ public class CompositionTopicInternalService implements TopicInternalService {
 
     @Override
     public void leaderReport(PartitionGroup group) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.leaderReport(group);
+        if (config.isWriteSource()) {
+            sourceTopicService.leaderReport(group);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.leaderReport(group);
+                targetTopicService.leaderReport(group);
             } catch (Exception e) {
-                logger.error("leaderReport journalkeeper exception, params: {}", group, e);
+                logger.error("leaderReport exception, params: {}", group, e);
             }
         }
     }
 
     @Override
     public void leaderChange(PartitionGroup group) {
-        if (config.isWriteIgnite()) {
-            igniteTopicService.leaderChange(group);
+        if (config.isWriteSource()) {
+            sourceTopicService.leaderChange(group);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.leaderChange(group);
+                targetTopicService.leaderChange(group);
             } catch (Exception e) {
-                logger.error("leaderChange journalkeeper exception, params: {}", group, e);
+                logger.error("leaderChange exception, params: {}", group, e);
             }
         }
     }
 
     @Override
     public List<PartitionGroup> getPartitionGroup(String namespace, String topic, Object[] groups) {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.getPartitionGroup(namespace, topic, groups);
+        if (config.isReadSource()) {
+            return sourceTopicService.getPartitionGroup(namespace, topic, groups);
         } else {
-            return journalkeeperTopicService.getPartitionGroup(namespace, topic, groups);
+            return targetTopicService.getPartitionGroup(namespace, topic, groups);
         }
     }
 
     @Override
     public Topic add(Topic topic) {
         Topic result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteTopicService.add(topic);
+        if (config.isWriteSource()) {
+            result = sourceTopicService.add(topic);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.add(topic);
+                targetTopicService.add(topic);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", topic, e);
+                logger.error("add exception, params: {}", topic, e);
             }
         }
         return result;
@@ -217,14 +217,14 @@ public class CompositionTopicInternalService implements TopicInternalService {
     @Override
     public Topic update(Topic topic) {
         Topic result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteTopicService.update(topic);
+        if (config.isWriteSource()) {
+            result = sourceTopicService.update(topic);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperTopicService.update(topic);
+                targetTopicService.update(topic);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", topic, e);
+                logger.error("update exception, params: {}", topic, e);
             }
         }
         return result;
@@ -232,28 +232,28 @@ public class CompositionTopicInternalService implements TopicInternalService {
 
     @Override
     public Topic getById(String id) {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.getById(id);
+        if (config.isReadSource()) {
+            return sourceTopicService.getById(id);
         } else {
             try {
-                return journalkeeperTopicService.getById(id);
+                return targetTopicService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id: {}", id, e);
-                return igniteTopicService.getById(id);
+                return sourceTopicService.getById(id);
             }
         }
     }
 
     @Override
     public List<Topic> getAll() {
-        if (config.isReadIgnite()) {
-            return igniteTopicService.getAll();
+        if (config.isReadSource()) {
+            return sourceTopicService.getAll();
         } else {
             try {
-                return journalkeeperTopicService.getAll();
+                return targetTopicService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return igniteTopicService.getAll();
+                return sourceTopicService.getAll();
             }
         }
     }

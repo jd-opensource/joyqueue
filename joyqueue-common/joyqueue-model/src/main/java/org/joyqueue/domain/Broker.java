@@ -255,17 +255,17 @@ public class Broker implements Serializable {
     }
 
     public String getRealIp() {
-        if (StringUtils.isBlank(externalIp)) {
-            return ip;
+        if (StringUtils.isNotBlank(externalIp)) {
+            return externalIp;
         }
-        return externalIp;
+        return ip;
     }
 
     public int getRealPort() {
         if (externalPort > 0) {
-            return port;
+            return externalPort;
         }
-        return externalPort;
+        return port;
     }
 
 }

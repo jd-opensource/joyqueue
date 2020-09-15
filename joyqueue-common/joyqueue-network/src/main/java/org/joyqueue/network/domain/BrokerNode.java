@@ -15,7 +15,11 @@
  */
 package org.joyqueue.network.domain;
 
+import com.google.common.collect.Maps;
+
 import java.io.Serializable;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * BrokerNode
@@ -34,6 +38,8 @@ public class BrokerNode implements Serializable {
 
     private int sysCode;
     private int permission;
+
+    private ConcurrentMap<Object, Object> attachments = Maps.newConcurrentMap();
 
     public BrokerNode() {
     }
@@ -132,17 +138,39 @@ public class BrokerNode implements Serializable {
         return BrokerPermission.isWritable(permission);
     }
 
+    public void setAttachments(ConcurrentMap<Object, Object> attachments) {
+        this.attachments = attachments;
+    }
+
+    public ConcurrentMap<Object, Object> getAttachments() {
+        return attachments;
+    }
+
+    public void putAttachment(Object key, Object value) {
+        attachments.put(key, value);
+    }
+
+    public <T> T putIfAbsentAttachment(Object key, Object value) {
+        return (T) attachments.putIfAbsent(key, value);
+    }
+
+    public <T> T getAttachment(Object key) {
+        return (T) attachments.get(key);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrokerNode that = (BrokerNode) o;
-        return id == that.getId();
+        return id == that.id &&
+                port == that.port &&
+                host.equals(that.host);
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return Objects.hash(id, host, port);
     }
 
     @Override

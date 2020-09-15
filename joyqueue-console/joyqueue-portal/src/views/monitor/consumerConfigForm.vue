@@ -82,6 +82,14 @@
         </d-form-item>
       </grid-col>
     </grid-row>
+    <grid-row>
+      <grid-col span="8">
+        <d-form-item label="过滤规则:">
+          <d-input type="textarea" rows="1" v-model="formData.filters"
+                   placeholder="格式如下:key1:value1, key2:value2"/>
+        </d-form-item>
+      </grid-col>
+    </grid-row>
     <d-form-item label="禁止消费IP" prop="blackList">
       <d-input
         type="textarea"
@@ -263,21 +271,21 @@ export default {
           return false
         }
       })
-    },
-    mounted () {
-      this.formData = this.data
+    }
+  },
+  mounted () {
+    this.formData = this.data
 
-      if (!this.data.maxRetrys) {
-        this.formData.maxRetrysStr = ''
-      } else {
-        this.formData.maxRetrysStr = this.data.maxRetrys.toString()
-      }
+    if (!this.data.maxRetrys) {
+      this.formData.maxRetrysStr = ''
+    } else {
+      this.formData.maxRetrysStr = this.data.maxRetrys.toString()
+    }
 
-      if (!this.formData.maxRetrys) {
-        this.formData.expireTimeStr = ''
-      } else {
-        this.formData.expireTimeStr = this.data.expireTime.toString()
-      }
+    if (!this.formData.maxRetrys) {
+      this.formData.expireTimeStr = ''
+    } else {
+      this.formData.expireTimeStr = this.data.expireTime.toString()
     }
   }
 }

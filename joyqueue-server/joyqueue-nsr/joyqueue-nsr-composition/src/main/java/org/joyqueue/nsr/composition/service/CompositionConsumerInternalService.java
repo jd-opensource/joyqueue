@@ -34,68 +34,68 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
     protected static final Logger logger = LoggerFactory.getLogger(CompositionConsumerInternalService.class);
 
     private CompositionConfig config;
-    private ConsumerInternalService igniteConsumerService;
-    private ConsumerInternalService journalkeeperConsumerService;
+    private ConsumerInternalService sourceConsumerService;
+    private ConsumerInternalService targetConsumerService;
 
-    public CompositionConsumerInternalService(CompositionConfig config, ConsumerInternalService igniteConsumerService,
-                                              ConsumerInternalService journalkeeperConsumerService) {
+    public CompositionConsumerInternalService(CompositionConfig config, ConsumerInternalService sourceConsumerService,
+                                              ConsumerInternalService targetConsumerService) {
         this.config = config;
-        this.igniteConsumerService = igniteConsumerService;
-        this.journalkeeperConsumerService = journalkeeperConsumerService;
+        this.sourceConsumerService = sourceConsumerService;
+        this.targetConsumerService = targetConsumerService;
     }
 
     @Override
     public Consumer getByTopicAndApp(TopicName topic, String app) {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.getByTopicAndApp(topic, app);
+        if (config.isReadSource()) {
+            return sourceConsumerService.getByTopicAndApp(topic, app);
         } else {
             try {
-                return journalkeeperConsumerService.getByTopicAndApp(topic, app);
+                return targetConsumerService.getByTopicAndApp(topic, app);
             } catch (Exception e) {
                 logger.error("getByTopicAndApp exception, topic: {}, app: {}", topic, app, e);
-                return igniteConsumerService.getByTopicAndApp(topic, app);
+                return sourceConsumerService.getByTopicAndApp(topic, app);
             }
         }
     }
 
     @Override
     public List<Consumer> getByTopic(TopicName topic) {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.getByTopic(topic);
+        if (config.isReadSource()) {
+            return sourceConsumerService.getByTopic(topic);
         } else {
             try {
-                return journalkeeperConsumerService.getByTopic(topic);
+                return targetConsumerService.getByTopic(topic);
             } catch (Exception e) {
                 logger.error("getByTopic exception, topic: {}", topic, e);
-                return igniteConsumerService.getByTopic(topic);
+                return sourceConsumerService.getByTopic(topic);
             }
         }
     }
 
     @Override
     public List<Consumer> getByApp(String app) {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.getByApp(app);
+        if (config.isReadSource()) {
+            return sourceConsumerService.getByApp(app);
         } else {
             try {
-                return journalkeeperConsumerService.getByApp(app);
+                return targetConsumerService.getByApp(app);
             } catch (Exception e) {
                 logger.error("getByApp exception, app: {}", app, e);
-                return igniteConsumerService.getByApp(app);
+                return sourceConsumerService.getByApp(app);
             }
         }
     }
 
     @Override
     public List<Consumer> getAll() {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.getAll();
+        if (config.isReadSource()) {
+            return sourceConsumerService.getAll();
         } else {
             try {
-                return journalkeeperConsumerService.getAll();
+                return targetConsumerService.getAll();
             } catch (Exception e) {
                 logger.error("getAll exception", e);
-                return igniteConsumerService.getAll();
+                return sourceConsumerService.getAll();
             }
         }
     }
@@ -103,14 +103,14 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
     @Override
     public Consumer add(Consumer consumer) {
         Consumer result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteConsumerService.add(consumer);
+        if (config.isWriteSource()) {
+            result = sourceConsumerService.add(consumer);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperConsumerService.add(consumer);
+                targetConsumerService.add(consumer);
             } catch (Exception e) {
-                logger.error("add journalkeeper exception, params: {}", consumer, e);
+                logger.error("add exception, params: {}", consumer, e);
             }
         }
         return result;
@@ -119,14 +119,14 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
     @Override
     public Consumer update(Consumer consumer) {
         Consumer result = null;
-        if (config.isWriteIgnite()) {
-            result = igniteConsumerService.update(consumer);
+        if (config.isWriteSource()) {
+            result = sourceConsumerService.update(consumer);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperConsumerService.update(consumer);
+                targetConsumerService.update(consumer);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", consumer, e);
+                logger.error("update exception, params: {}", consumer, e);
             }
         }
         return result;
@@ -134,28 +134,28 @@ public class CompositionConsumerInternalService implements ConsumerInternalServi
 
     @Override
     public void delete(String id) {
-        if (config.isWriteIgnite()) {
-            igniteConsumerService.delete(id);
+        if (config.isWriteSource()) {
+            sourceConsumerService.delete(id);
         }
-        if (config.isWriteJournalkeeper()) {
+        if (config.isWriteTarget()) {
             try {
-                journalkeeperConsumerService.delete(id);
+                targetConsumerService.delete(id);
             } catch (Exception e) {
-                logger.error("delete journalkeeper exception, params: {}", id, e);
+                logger.error("delete exception, params: {}", id, e);
             }
         }
     }
 
     @Override
     public Consumer getById(String id) {
-        if (config.isReadIgnite()) {
-            return igniteConsumerService.getById(id);
+        if (config.isReadSource()) {
+            return sourceConsumerService.getById(id);
         } else {
             try {
-                return journalkeeperConsumerService.getById(id);
+                return targetConsumerService.getById(id);
             } catch (Exception e) {
                 logger.error("getById exception, id: {}", id, e);
-                return igniteConsumerService.getById(id);
+                return sourceConsumerService.getById(id);
             }
         }
     }

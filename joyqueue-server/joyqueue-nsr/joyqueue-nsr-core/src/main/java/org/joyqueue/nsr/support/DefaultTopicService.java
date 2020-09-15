@@ -18,6 +18,7 @@ package org.joyqueue.nsr.support;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.Topic;
@@ -39,7 +40,6 @@ import org.joyqueue.nsr.service.internal.BrokerInternalService;
 import org.joyqueue.nsr.service.internal.PartitionGroupInternalService;
 import org.joyqueue.nsr.service.internal.TopicInternalService;
 import org.joyqueue.nsr.service.internal.TransactionInternalService;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +142,7 @@ public class DefaultTopicService implements TopicService {
     public void removeTopic(Topic topic) {
         topic = topicInternalService.getTopicByCode(topic.getName().getNamespace(), topic.getName().getCode());
         if (topic == null) {
-            throw new NsrException(String.format("topic: %s is not exist", topic.getName()));
+            throw new NsrException(String.format("topic: %s does not exist", topic.getName()));
         }
 
         logger.info("removeTopic, topic: {}", topic);
@@ -175,10 +175,10 @@ public class DefaultTopicService implements TopicService {
     @Override
     public void addPartitionGroup(PartitionGroup partitionGroup) {
         if (topicInternalService.getTopicByCode(partitionGroup.getTopic().getNamespace(), partitionGroup.getTopic().getCode()) == null) {
-            throw new NsrException(String.format("topic: %s is not exist", partitionGroup.getTopic()));
+            throw new NsrException(String.format("topic: %s does not exist", partitionGroup.getTopic()));
         }
         if (partitionGroupInternalService.getByTopicAndGroup(partitionGroup.getTopic(), partitionGroup.getGroup()) != null) {
-            throw new NsrException(String.format("topic: %s, group: %s is not exist", partitionGroup.getTopic(), partitionGroup.getGroup()));
+            throw new NsrException(String.format("topic: %s, group: %s does not exist", partitionGroup.getTopic(), partitionGroup.getGroup()));
         }
 
         logger.info("addPartitionGroup, topic: {}, partitionGroup: {}", partitionGroup.getTopic(), partitionGroup);
@@ -214,12 +214,12 @@ public class DefaultTopicService implements TopicService {
     @Override
     public void removePartitionGroup(PartitionGroup partitionGroup) {
         if (topicInternalService.getTopicByCode(partitionGroup.getTopic().getNamespace(), partitionGroup.getTopic().getCode()) == null) {
-            throw new NsrException(String.format("topic: %s is not exist", partitionGroup.getTopic()));
+            throw new NsrException(String.format("topic: %s does not exist", partitionGroup.getTopic()));
         }
 
         PartitionGroup oldPartitionGroup = partitionGroupInternalService.getByTopicAndGroup(partitionGroup.getTopic(), partitionGroup.getGroup());
         if (oldPartitionGroup == null) {
-            throw new NsrException(String.format("topic: %s, group: %s is not exist", partitionGroup.getTopic(), partitionGroup.getGroup()));
+            throw new NsrException(String.format("topic: %s, group: %s does not exist", partitionGroup.getTopic(), partitionGroup.getGroup()));
         }
 
         logger.info("removePartitionGroup, topic: {}, partitionGroup: {}", partitionGroup.getTopic(), partitionGroup);
@@ -252,7 +252,7 @@ public class DefaultTopicService implements TopicService {
     public Collection<Integer> updatePartitionGroup(PartitionGroup partitionGroup) {
         Topic oldTopic = topicInternalService.getTopicByCode(partitionGroup.getTopic().getNamespace(), partitionGroup.getTopic().getCode());
         if (oldTopic == null) {
-            throw new NsrException(String.format("topic: %s is not exist", partitionGroup.getTopic()));
+            throw new NsrException(String.format("topic: %s does not exist", partitionGroup.getTopic()));
         }
 
         PartitionGroup oldPartitionGroup = partitionGroupInternalService.getByTopicAndGroup(partitionGroup.getTopic(), partitionGroup.getGroup());
@@ -306,7 +306,7 @@ public class DefaultTopicService implements TopicService {
     public void leaderReport(PartitionGroup group) {
         PartitionGroup oldPartitionGroup = partitionGroupInternalService.getById(group.getId());
         if (oldPartitionGroup == null) {
-            throw new NsrException(String.format("topic: %s, group: %s is not exist", oldPartitionGroup.getTopic(), oldPartitionGroup.getGroup()));
+            throw new NsrException(String.format("topic: %s, group: %s does not exist", oldPartitionGroup.getTopic(), oldPartitionGroup.getGroup()));
         }
 
         if (oldPartitionGroup.getLeader().equals(group.getLeader()) && oldPartitionGroup.getTerm().equals(group.getTerm())) {
@@ -347,23 +347,23 @@ public class DefaultTopicService implements TopicService {
     @Override
     public void leaderChange(PartitionGroup group) {
         if (topicInternalService.getTopicByCode(group.getTopic().getNamespace(), group.getTopic().getCode()) == null) {
-            throw new NsrException(String.format("topic: %s is not exist", group.getTopic()));
+            throw new NsrException(String.format("topic: %s does not exist", group.getTopic()));
         }
 
         PartitionGroup oldPartitionGroup = partitionGroupInternalService.getByTopicAndGroup(group.getTopic(), group.getGroup());
         if (oldPartitionGroup == null) {
-            throw new NsrException(String.format("topic: %s, group: %s is not exist", group.getTopic(), group.getGroup()));
+            throw new NsrException(String.format("topic: %s, group: %s does not exist", group.getTopic(), group.getGroup()));
         }
 
         Broker leader = brokerInternalService.getById(group.getLeader());
         if (leader == null) {
-            throw new NsrException(String.format("topic: %s, group: %s, broker: {} is not exist", group.getTopic(), group.getGroup(), group.getLeader()));
+            throw new NsrException(String.format("topic: %s, group: %s, broker: {} does not exist", group.getTopic(), group.getGroup(), group.getLeader()));
         }
 
         logger.info("leaderChange, topic: {}, partitionGroup: {}", group.getTopic(), group);
         Broker oldLeader = brokerInternalService.getById(oldPartitionGroup.getLeader());
         if (oldLeader == null) {
-            throw new NsrException(String.format("topic: %s, group: %s, broker: {} is not exist", group.getTopic(), group.getGroup(), group.getLeader()));
+            throw new NsrException(String.format("topic: %s, group: %s, broker: {} does not exist", group.getTopic(), group.getGroup(), group.getLeader()));
         }
 
         try {
@@ -396,7 +396,7 @@ public class DefaultTopicService implements TopicService {
     public Topic update(Topic topic) {
         Topic oldTopic = topicInternalService.getTopicByCode(topic.getName().getNamespace(), topic.getName().getCode());
         if (oldTopic == null) {
-            throw new NsrException(String.format("topic: %s is not exist", topic.getName()));
+            throw new NsrException(String.format("topic: %s does not exist", topic.getName()));
         }
 
         logger.info("update, topic: {}", topic);
@@ -479,14 +479,22 @@ public class DefaultTopicService implements TopicService {
     }
 
     protected List<Broker> getReplicas(PartitionGroup partitionGroup) {
-        return Lists.newArrayList(partitionGroup.getBrokers().values());
+        if (CollectionUtils.isNotEmpty(partitionGroup.getReplicas())) {
+            return Collections.emptyList();
+        }
+        return brokerInternalService.getByIds(Lists.newArrayList(partitionGroup.getReplicas()));
     }
 
     protected List<Broker> getReplicas(List<PartitionGroup> partitionGroups) {
-        Set<Broker> result = Sets.newHashSet();
+        List<Integer> brokerIds = Lists.newArrayList();
         for (PartitionGroup partitionGroup : partitionGroups) {
-            result.addAll(partitionGroup.getBrokers().values());
+            if (CollectionUtils.isNotEmpty(partitionGroup.getReplicas())) {
+                brokerIds.addAll(partitionGroup.getReplicas());
+            }
         }
-        return Lists.newArrayList(result);
+        if (CollectionUtils.isEmpty(brokerIds)) {
+            return Collections.emptyList();
+        }
+        return brokerInternalService.getByIds(brokerIds);
     }
 }

@@ -17,9 +17,11 @@ package org.joyqueue.client.internal.producer.support;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.exception.ClientException;
 import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import org.joyqueue.client.internal.metadata.domain.PartitionNode;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.metadata.exception.MetadataException;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
@@ -52,7 +54,6 @@ import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.network.domain.BrokerNode;
 import org.joyqueue.toolkit.retry.RetryPolicy;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,22 +124,20 @@ public class MessageProducerInner extends Service {
 
     public List<SendResult> doBatchSend(List<ProduceMessage> messages, String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
         TopicMetadata topicMetadata = getAndCheckTopicMetadata(messages.get(0).getTopic());
-        List<BrokerNode> brokers = getRegionBrokers(topicMetadata);
-        brokers = filterNotAvailableBrokers(brokers);
-        List<PartitionMetadata> partitions = getBrokerPartitions(topicMetadata, brokers);
+        List<BrokerNode> brokerNodes = getAvailableBrokers(topicMetadata);
 
-        return doBatchSend(messages, topicMetadata, null, partitions,
+        return doBatchSend(messages, topicMetadata, brokerNodes,
                 txId, timeout, timeoutUnit, isOneway, failover, callback);
     }
 
-    public List<SendResult> doBatchSend(List<ProduceMessage> messages, TopicMetadata topicMetadata, PartitionMetadata partition, List<PartitionMetadata> partitions,
+    public List<SendResult> doBatchSend(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<BrokerNode> brokers,
                                         String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
 
         try {
             return new ProducerInvocation(config, nameServerConfig, topicMetadata, messages, producerInterceptorManager, new ProducerInvoker() {
                 @Override
                 public List<SendResult> invoke(ProduceContext context) {
-                    return doBatchSendInternal(messages, topicMetadata, partition, partitions, txId, timeout, timeoutUnit, isOneway, failover, callback);
+                    return doBatchSendInternal(messages, topicMetadata, brokers, txId, timeout, timeoutUnit, isOneway, failover, callback);
                 }
 
                 @Override
@@ -155,10 +154,9 @@ public class MessageProducerInner extends Service {
         }
     }
 
-    protected List<SendResult> doBatchSendInternal(List<ProduceMessage> messages, TopicMetadata topicMetadata, PartitionMetadata partition, List<PartitionMetadata> partitions,
+    protected List<SendResult> doBatchSendInternal(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes,
                                                    String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
 
-        List<PartitionMetadata> blackPartitionList = null;
         ProducerPolicy producerPolicy = topicMetadata.getProducerPolicy();
 
         String topic = topicMetadata.getTopic();
@@ -170,40 +168,43 @@ public class MessageProducerInner extends Service {
         RetryPolicy retryPolicy = config.getRetryPolicy();
         int retryTimes = 0;
         int retryLimit = (failover ? retryPolicy.getMaxRetrys() : 0);
+        PartitionNode partitionNode = dispatchPartitions(messages, topicMetadata, brokerNodes);
         Exception lastException = null;
         List<SendResult> result = null;
 
-        if (partition == null) {
-            partition = dispatchPartitions(messages, topicMetadata, partitions, blackPartitionList);
-        }
-
         for (int i = 0; i <= retryLimit; i++) {
             if (retryTimes != 0 && failover) {
-                if (blackPartitionList == null) {
-                    blackPartitionList = Lists.newLinkedList();
+                if (retryTimes == 1) {
+                    brokerNodes = Lists.newArrayList(brokerNodes);
                 }
-                blackPartitionList.add(partition);
                 ProducerHelper.clearPartitions(messages);
-                partition = dispatchPartitions(messages, topicMetadata, partitions, blackPartitionList);
+                brokerNodes.remove(partitionNode.getPartitionMetadata().getLeader());
+                partitionNode = dispatchPartitions(messages, topicMetadata, brokerNodes);
             }
 
+            PartitionNode.PartitionNodeTracer partitionTracer = partitionNode.begin();
             try {
-                result = doSendBatchMessage(partition.getLeader(), topic, app, messages, txId, config.getQosLevel(), produceTimeout, timeout, isOneway, callback);
+                result = doSendBatchMessage(partitionNode.getPartitionMetadata().getLeader(), topic, app, messages, txId, config.getQosLevel(), produceTimeout, timeout, isOneway, callback);
+                partitionTracer.end();
                 break;
             } catch (MetadataException e) {
                 lastException = e;
                 retryTimes++;
                 topicMetadata = getAndCheckTopicMetadata(topicMetadata.getTopic());
+                partitionTracer.error();
                 logger.debug("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
             } catch (NeedRetryException e) {
                 lastException = new ProducerException(e.getMessage(), e.getCode(), e.getCause());
                 retryTimes++;
+                partitionTracer.error();
                 logger.debug("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
             } catch (ClientException e) {
                 lastException = e;
                 retryTimes++;
+                partitionTracer.error();
                 logger.debug("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
             } catch (Exception e) {
+                partitionTracer.error();
                 logger.error("send message exception, topic: {}, app:{}, messages: {}", topic, app, messages, e);
                 if (e instanceof ProducerException) {
                     throw (ProducerException) e;
@@ -220,7 +221,7 @@ public class MessageProducerInner extends Service {
             throw new ProducerException(lastException);
         }
         if (retryTimes != 0) {
-            logger.warn("send message success, retry {} times, topic: {}, app: {}, partitions: {}, error: {}", retryTimes, topic, app, blackPartitionList, lastException.getMessage());
+            logger.warn("send message success, retry {} times, topic: {}, app: {}, error: {}", retryTimes, topic, app, lastException.getMessage());
         }
         return result;
     }
@@ -288,7 +289,6 @@ public class MessageProducerInner extends Service {
             }
             case FW_BROKER_NOT_WRITABLE: {
                 logger.debug("send message error, broker not writable, topic: {}", topic);
-                clusterManager.updateTopicMetadata(topic, app);
                 break;
             }
             default: {
@@ -316,9 +316,9 @@ public class MessageProducerInner extends Service {
 
     public List<BrokerNode> getRegionBrokers(TopicMetadata topicMetadata) {
         if (topicMetadata.getProducerPolicy().getNearby()) {
-            return topicMetadata.getNearbyBrokers();
+            return topicMetadata.getWritableNearbyBrokers();
         } else {
-            return topicMetadata.getBrokers();
+            return topicMetadata.getWritableBrokers();
         }
     }
 
@@ -343,6 +343,11 @@ public class MessageProducerInner extends Service {
         return newBrokerNodes;
     }
 
+    public List<BrokerNode> getAvailableBrokers(TopicMetadata topicMetadata) {
+        List<BrokerNode> brokers = getRegionBrokers(topicMetadata);
+        return filterNotAvailableBrokers(brokers);
+    }
+
     public List<PartitionMetadata> getBrokerPartitions(TopicMetadata topicMetadata, List<BrokerNode> brokerNodes) {
         if (topicMetadata.getBrokers().equals(brokerNodes)) {
             return topicMetadata.getPartitions();
@@ -357,37 +362,19 @@ public class MessageProducerInner extends Service {
         return result;
     }
 
-    public PartitionMetadata dispatchPartitions(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<PartitionMetadata> partitions) {
-        return dispatchPartitions(messages, topicMetadata, partitions, null);
-    }
-
-    public PartitionMetadata dispatchPartitions(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<PartitionMetadata> partitions, List<PartitionMetadata> blackPartitionList) {
-        if (CollectionUtils.isEmpty(partitions)) {
-            throw new ProducerException(String.format("no partitions available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
-        }
-        if (blackPartitionList != null) {
-            partitions = ProducerHelper.filterBlackList(partitions, blackPartitionList);
-        }
-        if (CollectionUtils.isEmpty(partitions)) {
-            throw new ProducerException(String.format("no partitions available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
+    public PartitionNode dispatchPartitions(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes) {
+        if (CollectionUtils.isEmpty(brokerNodes)) {
+            throw new ProducerException(String.format("no broker available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
 
         PartitionSelector partitionSelector = partitionSelectorManager.getPartitionSelector(topicMetadata.getTopic(), config.getSelectorType());
-        PartitionMetadata partition = ProducerHelper.dispatchPartitions(messages, topicMetadata, partitions, partitionSelector);
+        PartitionNode partitionNode = ProducerHelper.dispatchPartitions(messages, topicMetadata, brokerNodes, partitionSelector);
 
-        if (partition == null) {
+        if (partitionNode == null || partitionNode.getPartitionMetadata().getLeader() == null) {
             throw new ProducerException(String.format("partition not available, topic: %s, messages: %s", topicMetadata.getTopic(), messages), JoyQueueCode.FW_TOPIC_NO_PARTITIONGROUP.getCode());
         }
-
-        if (partition.getLeader() == null || !partition.getLeader().isWritable()) {
-            if (blackPartitionList == null) {
-                blackPartitionList = Lists.newArrayList();
-            }
-            blackPartitionList.add(partition);
-            return dispatchPartitions(messages, topicMetadata, partitions, blackPartitionList);
-        }
-        ProducerHelper.setPartitions(messages, partition.getId());
-        return partition;
+        ProducerHelper.setPartitions(messages, partitionNode.getPartitionMetadata().getId());
+        return partitionNode;
     }
 
     public boolean isFailover(List<ProduceMessage> messages) {

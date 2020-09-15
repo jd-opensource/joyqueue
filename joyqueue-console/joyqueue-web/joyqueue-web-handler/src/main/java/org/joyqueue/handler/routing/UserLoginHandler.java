@@ -64,19 +64,25 @@ public class UserLoginHandler extends RemoteIpHandler {
             return;
         }
 
-        JsonObject requestBody = context.getBodyAsJson();
-        if (requestBody != null && requestBody.containsKey("username") && requestBody.containsKey("password")) {
-            String username = requestBody.getString("username");
-            String password = requestBody.getString("password");
-            User user = userService.findUserByNameAndPassword(username, password);
-            if (user != null) {
-                session.put(userSessionKey, user);
-                context.put(USER_KEY, user);
-                context.next();
-            } else {
-                context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Login Error - username or password incorrect."));
+        JsonObject requestBody;
+        try {
+            requestBody = context.getBodyAsJson();
+            if (requestBody != null && requestBody.containsKey("username") && requestBody.containsKey("password")) {
+                String username = requestBody.getString("username");
+                String password = requestBody.getString("password");
+                User user = userService.findUserByNameAndPassword(username, password);
+                if (user != null) {
+                    session.put(userSessionKey, user);
+                    context.put(USER_KEY, user);
+                    context.next();
+                } else {
+                    context.fail(new HttpStatusException(HTTP_FORBIDDEN, "Login Error - username or password incorrect."));
+                }
+                return;
             }
-        } else {
+        } catch (Exception e) {
+            logger.warn("Get body as json error. ", e);
+        } finally {
             User user = session.get(userSessionKey);
             if (user != null) {
                 //存放用户上下文信息

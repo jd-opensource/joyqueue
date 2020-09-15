@@ -24,7 +24,6 @@ import org.joyqueue.store.file.DiskFullException;
 import org.joyqueue.store.file.PositioningStore;
 import org.joyqueue.store.file.RollBackException;
 import org.joyqueue.store.file.StoreMessageSerializer;
-import org.joyqueue.store.file.WriteException;
 import org.joyqueue.store.index.IndexItem;
 import org.joyqueue.store.index.IndexSerializer;
 import org.joyqueue.store.message.BatchMessageParser;
@@ -63,7 +62,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -137,6 +138,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
     static final String CHECKPOINT_FILE= "checkpoint.json";
     private int lastEntryTerm = -1; // 最新一条消息的term
     private final CasLock flushLock = new CasLock(); // 刷盘锁，刷盘、回滚的时候需要持有这个锁。
+    private final ReadWriteLock rollbackLock = new ReentrantReadWriteLock();
 
     public PartitionGroupStoreManager(String topic, int partitionGroup, File base, Config config,
                                       PreloadBufferPool bufferPool) {
@@ -1180,14 +1182,25 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         writeLoopThread.stop();
     }
 
-    long getLeftIndex(short partition) {
+    public long getLeftIndex(short partition) {
         long index = -1;
         Partition p = partitionMap.get(partition);
         if (null != p) {
             index = p.store.left() / IndexItem.STORAGE_SIZE;
         }
-
         return index;
+    }
+
+    public long getLeftIndexAndCheck(short partition) {
+        rollbackLock.readLock().lock();
+        try {
+            if (!enabled.get()) {
+                throw new ReadException(String.format("Store disabled! topic: %s, partitionGroup: %d.", topic, partitionGroup));
+            }
+            return getLeftIndex(partition);
+        } finally {
+            rollbackLock.readLock().unlock();
+        }
     }
 
     public long getRightIndex(short partition) {
@@ -1196,8 +1209,19 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         if (null != p) {
             index = p.store.right() / IndexItem.STORAGE_SIZE;
         }
-
         return index;
+    }
+
+    public long getRightIndexAndCheck(short partition) {
+        rollbackLock.readLock().lock();
+        try {
+            if (!enabled.get()) {
+                throw new ReadException(String.format("Store disabled! topic: %s, partitionGroup: %d.", topic, partitionGroup));
+            }
+            return getRightIndex(partition);
+        } finally {
+            rollbackLock.readLock().unlock();
+        }
     }
 
     /**
@@ -1251,26 +1275,31 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
 
     private void rollback(long position) throws IOException {
-        if(indexPosition > position) {
-            indexPosition = position;
-            flushCheckpoint();
-        }
-        boolean clearIndexStore = position <= leftPosition() || position > rightPosition();
-
-        // 如果store整个删除干净了，需要把index也删干净
-        // FIXME: 考虑这种情况：FOLLOWER被rollback后，所有文件都被删除了，但它有一个非零的writePosition，index是0，
-        //  如果被选为LEADER，index是不正确的。
-        if (clearIndexStore) {
-            for (Partition partition : partitionMap.values()) {
-                partition.store.setRight(0L);
+        rollbackLock.writeLock().lock();
+        try {
+            if(indexPosition > position) {
+                indexPosition = position;
+                flushCheckpoint();
             }
-        } else {
-            rollbackPartitions(position);
+            boolean clearIndexStore = position <= leftPosition() || position > rightPosition();
+
+            // 如果store整个删除干净了，需要把index也删干净
+            // FIXME: 考虑这种情况：FOLLOWER被rollback后，所有文件都被删除了，但它有一个非零的writePosition，index是0，
+            //  如果被选为LEADER，index是不正确的。
+            if (clearIndexStore) {
+                for (Partition partition : partitionMap.values()) {
+                    partition.store.setRight(0L);
+                }
+            } else {
+                rollbackPartitions(position);
+            }
+
+            store.setRight(position);
+
+            resetLastEntryTerm();
+        } finally {
+            rollbackLock.writeLock().unlock();
         }
-
-        store.setRight(position);
-
-        resetLastEntryTerm();
     }
 
     private void flushCheckpointPeriodically() throws IOException {

@@ -15,13 +15,12 @@
  */
 package org.joyqueue.client.internal.producer.helper;
 
-import com.google.common.collect.Lists;
-import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
+import org.joyqueue.client.internal.metadata.domain.PartitionNode;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.PartitionSelector;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
+import org.joyqueue.network.domain.BrokerNode;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -49,23 +48,7 @@ public class ProducerHelper {
         message.setPartitionKey(ProduceMessage.NONE_PARTITION_KEY);
     }
 
-    public static PartitionMetadata dispatchPartitions(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<PartitionMetadata> partitions, PartitionSelector partitionSelector) {
-        return partitionSelector.select(messages.get(0), topicMetadata, partitions);
+    public static PartitionNode dispatchPartitions(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<BrokerNode> brokerNodes, PartitionSelector partitionSelector) {
+        return partitionSelector.select(messages.get(0), topicMetadata, brokerNodes);
     }
-
-    public static List<PartitionMetadata> filterBlackList(List<PartitionMetadata> partitions, List<PartitionMetadata> blackPartitionList) {
-        List<PartitionMetadata> newPartitions = Lists.newArrayList(partitions);
-        Iterator<PartitionMetadata> newPartitionIterator = newPartitions.iterator();
-        while (newPartitionIterator.hasNext()) {
-            PartitionMetadata newPartition = newPartitionIterator.next();
-            for (PartitionMetadata blackPartition : blackPartitionList) {
-                if (blackPartition.getPartitionGroupId() == newPartition.getPartitionGroupId()) {
-                    newPartitionIterator.remove();
-                    break;
-                }
-            }
-        }
-        return newPartitions;
-    }
-
 }

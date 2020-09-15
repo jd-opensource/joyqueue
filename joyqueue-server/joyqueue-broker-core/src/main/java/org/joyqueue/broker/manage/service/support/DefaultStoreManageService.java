@@ -128,7 +128,9 @@ public class DefaultStoreManageService implements StoreManageService {
 
     @Override
     public List<String> topics() {
-        return Arrays.stream(storeManagementService.listFiles(TOPICS_DIR)).map(file -> file.getName()).collect(Collectors.toList());
+        return Arrays.stream(storeManagementService.listFiles(TOPICS_DIR))
+                .filter(file -> !file.getName().startsWith(DEL_PREFIX))
+                .map(file -> file.getName()).collect(Collectors.toList());
     }
 
     @Override

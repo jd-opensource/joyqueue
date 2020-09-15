@@ -15,6 +15,8 @@
  */
 package org.joyqueue.model.domain;
 
+import java.util.Map;
+
 /**
  * Created by  cyy on 16-9-19.
  */
@@ -23,6 +25,8 @@ public class BrokerGroup extends LabelBaseModel {
     private String code;
     private String name;
     private String description;
+
+    private Map<String, String> policies;
 
     public BrokerGroup() {
     }
@@ -61,4 +65,11 @@ public class BrokerGroup extends LabelBaseModel {
         this.description = description;
     }
 
+    public Map<String, String> getPolicies() {
+        return policies;
+    }
+
+    public void setPolicies(Map<String, String> policies) {
+        this.policies = policies;
+    }
 }

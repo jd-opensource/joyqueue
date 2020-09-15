@@ -21,6 +21,7 @@ import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -104,6 +105,9 @@ public class ArchiveManager extends Service {
      * @return 未归档的发送日志条数
      */
     public long getSendBacklogNum() {
+        if (sendArchiveService == null) {
+            return 0;
+        }
         return sendArchiveService.remainMessagesSum();
     }
 
@@ -113,6 +117,9 @@ public class ArchiveManager extends Service {
      * @return 剩余未归档消费日志的大小（文件数量 * 文件大小）
      */
     public long getConsumeBacklogNum() {
+        if (consumeArchiveService == null) {
+            return 0;
+        }
         return consumeArchiveService.getRemainConsumeLogFileNum();
     }
 
@@ -122,6 +129,9 @@ public class ArchiveManager extends Service {
      * @return 未归档的发送日志条数
      */
     public Map<String, Long> getSendBacklogNumByTopic() {
+        if (sendArchiveService == null) {
+            return Collections.emptyMap();
+        }
         return sendArchiveService.getArchivePosition();
     }
 }

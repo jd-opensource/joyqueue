@@ -34,43 +34,45 @@ public class CompositionConfigInternalService implements ConfigInternalService {
     protected static final Logger logger = LoggerFactory.getLogger(CompositionConfigInternalService.class);
 
     private CompositionConfig config;
-    private ConfigInternalService igniteConfigService;
-    private ConfigInternalService journalkeeperConfigService;
+    private ConfigInternalService sourceConfigService;
+    private ConfigInternalService targetConfigService;
 
-    public CompositionConfigInternalService(CompositionConfig config, ConfigInternalService igniteConfigService,
-                                            ConfigInternalService journalkeeperConfigService) {
+    public CompositionConfigInternalService(CompositionConfig config, ConfigInternalService sourceConfigService,
+                                            ConfigInternalService targetConfigService) {
         this.config = config;
-        this.igniteConfigService = igniteConfigService;
-        this.journalkeeperConfigService = journalkeeperConfigService;
+        this.sourceConfigService = sourceConfigService;
+        this.targetConfigService = targetConfigService;
     }
 
     @Override
     public Config getById(String id) {
-        return igniteConfigService.getById(id);
+        return sourceConfigService.getById(id);
     }
 
     @Override
     public Config getByGroupAndKey(String group, String key) {
-        return igniteConfigService.getByGroupAndKey(group, key);
+        return sourceConfigService.getByGroupAndKey(group, key);
     }
 
     @Override
     public List<Config> getAll() {
-        List<Config> configs = igniteConfigService.getAll();
+        List<Config> configs = sourceConfigService.getAll();
         List<Config> result = Lists.newArrayList(configs);
         result.add(0, new Config(null, "current.nameserver.composition.read.source", this.config.getReadSource()));
         result.add(1, new Config(null, "current.nameserver.composition.write.source", this.config.getWriteSource()));
+        result.add(2, new Config(null, "current.nameserver.composition.source", this.config.getSource()));
+        result.add(3, new Config(null, "current.nameserver.composition.target", this.config.getTarget()));
         return result;
     }
 
     @Override
     public Config add(Config config) {
-        Config result = igniteConfigService.add(config);
-        if (this.config.isWriteJournalkeeper()) {
+        Config result = sourceConfigService.add(config);
+        if (this.config.isWriteTarget()) {
             try {
-                journalkeeperConfigService.add(config);
+                targetConfigService.add(config);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", config, e);
+                logger.error("update exception, params: {}", config, e);
             }
         }
         return result;
@@ -78,12 +80,12 @@ public class CompositionConfigInternalService implements ConfigInternalService {
 
     @Override
     public Config update(Config config) {
-        Config result = igniteConfigService.update(config);
-        if (this.config.isWriteJournalkeeper()) {
+        Config result = sourceConfigService.update(config);
+        if (this.config.isWriteTarget()) {
             try {
-                journalkeeperConfigService.update(config);
+                targetConfigService.update(config);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", config, e);
+                logger.error("update exception, params: {}", config, e);
             }
         }
         return result;
@@ -91,12 +93,12 @@ public class CompositionConfigInternalService implements ConfigInternalService {
 
     @Override
     public void delete(String id) {
-        igniteConfigService.delete(id);
-        if (this.config.isWriteJournalkeeper()) {
+        sourceConfigService.delete(id);
+        if (this.config.isWriteTarget()) {
             try {
-                journalkeeperConfigService.delete(id);
+                targetConfigService.delete(id);
             } catch (Exception e) {
-                logger.error("update journalkeeper exception, params: {}", id, e);
+                logger.error("update exception, params: {}", id, e);
             }
         }
     }

@@ -51,6 +51,10 @@ public class TopicMsgFilter extends BaseModel {
      */
     private int queryCount;
     /**
+     * 允许查询总条数
+     */
+    private int totalCount;
+    /**
      * 消息的偏移量
      */
     private long offset;
@@ -189,6 +193,14 @@ public class TopicMsgFilter extends BaseModel {
 
     public void setApp(String app) {
         this.app = app;
+    }
+
+    public int getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(int totalCount) {
+        this.totalCount = totalCount;
     }
 
     @Override

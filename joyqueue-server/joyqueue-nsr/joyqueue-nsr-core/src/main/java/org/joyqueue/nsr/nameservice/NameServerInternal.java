@@ -253,17 +253,17 @@ public class NameServerInternal extends Service implements NameService, Property
         while (groupIterator.hasNext()) {
             PartitionGroup pgroup = groupIterator.next();
             if (pgroup.getGroup() == partitionGroup) {
-                if (pgroup.getTerm() > termId || (pgroup.getTerm() == termId && leaderBrokerId == -1)) {
-                    logger.warn("Leader report for topic {} group {}, term {} less than current term {}, leaderId is {}",
-                            topic, partitionGroup, termId, pgroup.getTerm(), leaderBrokerId);
-                    return;
-                }
+//                if (pgroup.getTerm() > termId || (pgroup.getTerm() == termId && leaderBrokerId == -1)) {
+//                    logger.warn("Leader report for topic {} group {}, term {} less than current term {}, leaderId is {}",
+//                            topic, partitionGroup, termId, pgroup.getTerm(), leaderBrokerId);
+//                    return;
+//                }
                 group = pgroup;
                 break;
             }
         }
         if (null == group) {
-            throw new RuntimeException(String.format("topic[%s] group[%s] is not exist", topic, partitionGroup));
+            throw new RuntimeException(String.format("topic[%s] group[%s] does not exist", topic, partitionGroup));
         }
         group.setIsrs(isrId);
         group.setLeader(leaderBrokerId);

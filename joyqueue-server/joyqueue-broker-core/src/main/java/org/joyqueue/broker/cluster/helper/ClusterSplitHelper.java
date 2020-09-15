@@ -88,7 +88,10 @@ public class ClusterSplitHelper {
             for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
                 Integer leader = entry.getValue().getLeader();
                 if (leader != null && !leader.equals(-1)) {
-                    splittedByLeader.put(leader, splittedByGroup.get(leader));
+                    List<Integer> groups = splittedByGroup.get(leader);
+                    if (groups != null) {
+                        splittedByLeader.put(leader, groups);
+                    }
                 }
             }
         }

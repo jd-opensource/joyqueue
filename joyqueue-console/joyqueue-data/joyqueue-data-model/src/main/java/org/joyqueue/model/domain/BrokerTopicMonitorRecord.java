@@ -29,6 +29,7 @@ public class BrokerTopicMonitorRecord {
     private long retryCount;
     private long retryTps;
     private long backlog;
+    private long traffic;
 
     public String getApp() {
         return app;
@@ -100,5 +101,13 @@ public class BrokerTopicMonitorRecord {
 
     public void setTps(long tps) {
         this.tps = tps;
+    }
+
+    public long getTraffic() {
+        return traffic;
+    }
+
+    public void setTraffic(long traffic) {
+        this.traffic = traffic;
     }
 }

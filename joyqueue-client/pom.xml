@@ -20,7 +20,7 @@
     <parent>
         <artifactId>joyqueue</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.5.4-SNAPSHOT</version>
+        <version>4.2.7.RC3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -36,6 +36,7 @@
         <module>joyqueue-client-all</module>
         <module>joyqueue-client-core-shaded</module>
         <module>joyqueue-client-all-shaded</module>
+        <module>joyqueue-client-loadbalance-adaptive</module>
     </modules>
 
     <properties>

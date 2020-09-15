@@ -18,6 +18,7 @@ package org.joyqueue.broker.kafka;
 import com.google.common.collect.Maps;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
+import org.joyqueue.store.WriteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +37,8 @@ public enum KafkaErrorCode {
     OFFSET_OUT_OF_RANGE(1),
     CORRUPT_MESSAGE(2,
             JoyQueueCode.CN_CHECKSUM_ERROR, JoyQueueCode.CT_MESSAGE_BODY_NULL),
-    UNKNOWN_TOPIC_OR_PARTITION(3,
-            JoyQueueCode.CN_NO_PERMISSION, JoyQueueCode.CN_AUTHENTICATION_ERROR),
+    UNKNOWN_TOPIC_OR_PARTITION(3, new Class<?>[] {WriteException.class},
+            new JoyQueueCode[] {JoyQueueCode.CN_NO_PERMISSION, JoyQueueCode.CN_AUTHENTICATION_ERROR}),
     INVALID_FETCH_SIZE(4),
     LEADER_NOT_AVAILABLE(5),
     NOT_LEADER_FOR_PARTITION(6, JoyQueueCode.CT_NO_CLUSTER),
@@ -135,21 +136,21 @@ public enum KafkaErrorCode {
             if (errorCode.getException() == null) {
                 continue;
             }
-            for (Throwable throwable : errorCode.getException()) {
-                EXCEPTION_TO_CODE_MAPPER.put(throwable.getClass(), errorCode.getCode());
+            for (Class<?> exception : errorCode.getException()) {
+                EXCEPTION_TO_CODE_MAPPER.put(exception, errorCode.getCode());
             }
         }
     }
 
     private int code;
     private JoyQueueCode[] joyQueueCodes;
-    private Throwable[] exception;
+    private Class<?>[] exception;
 
     KafkaErrorCode(int code) {
         this.code = code;
     }
 
-    KafkaErrorCode(int code, Throwable... exception) {
+    KafkaErrorCode(int code, Class<?>... exception) {
         this.code = code;
         this.exception = exception;
     }
@@ -159,7 +160,7 @@ public enum KafkaErrorCode {
         this.joyQueueCodes = joyQueueCodes;
     }
 
-    KafkaErrorCode(int code, Throwable[] exception, JoyQueueCode[] joyQueueCodes) {
+    KafkaErrorCode(int code, Class<?>[] exception, JoyQueueCode[] joyQueueCodes) {
         this.code = code;
         this.joyQueueCodes = joyQueueCodes;
         this.exception = exception;
@@ -173,7 +174,7 @@ public enum KafkaErrorCode {
         return joyQueueCodes;
     }
 
-    public Throwable[] getException() {
+    public Class<?>[] getException() {
         return exception;
     }
 

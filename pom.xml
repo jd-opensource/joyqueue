@@ -19,7 +19,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.joyqueue</groupId>
-    <version>4.2.5.4-SNAPSHOT</version>
+    <version>4.2.7.RC3</version>
     <artifactId>joyqueue</artifactId>
     <packaging>pom</packaging>
     <url>http://www.joyqueue.org</url>
@@ -69,6 +69,7 @@
     <properties>
         <journalkeeper.version>0.1.10-SNAPSHOT</journalkeeper.version>
         <fastjson.version>1.2.68</fastjson.version>
+        <druid.version>1.1.19</druid.version>
         <netty.version>4.1.27.Final</netty.version>
         <log4j.version>2.13.3</log4j.version>
         <commons-logging.version>1.2</commons-logging.version>
@@ -358,6 +359,11 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-client-loadbalance-adaptive</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-hbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -392,6 +398,11 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -489,6 +500,11 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
+                <artifactId>joyqueue-nsr-sql</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-broker-monitor-pth</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -581,6 +597,11 @@
                 <version>${commons-beanutils.version}</version>
             </dependency>
             <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>commons-fileupload</groupId>
                 <artifactId>commons-fileupload</artifactId>
                 <version>${commons-fileupload.version}</version>
@@ -639,11 +660,6 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>

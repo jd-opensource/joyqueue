@@ -68,6 +68,13 @@ export default {
           {
             title: '消息服务器',
             key: 'ip'
+          },
+          {
+            title: '授权',
+            key: 'client.auth',
+            formatter (item) {
+              return (item.client && item.client.auth === true) ? '是' : '否'
+            }
           }
         ]
       }

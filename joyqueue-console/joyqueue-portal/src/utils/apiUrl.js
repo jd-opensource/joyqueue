@@ -84,7 +84,9 @@ export default {
     search: '/operLog/search'
   },
   common: {
-    findSubscribeGroup: `/consumer/findAllSubscribeGroups`
+    findSubscribeGroup: `/consumer/findAllSubscribeGroups`,
+    updateConsumer: `/consumer/update`,
+    updateProducer: `/producer/update`
   },
   monitor: {
     redirectUrl: `/grafana/getRedirectUrl`

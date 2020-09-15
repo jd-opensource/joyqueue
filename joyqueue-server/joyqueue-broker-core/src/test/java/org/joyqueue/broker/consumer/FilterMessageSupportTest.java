@@ -16,7 +16,6 @@
 package org.joyqueue.broker.consumer;
 
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.consumer.FilterMessageSupport;
 import org.joyqueue.broker.consumer.filter.FilterCallback;
 import org.joyqueue.domain.Consumer;
 import org.joyqueue.exception.JoyQueueException;
@@ -69,6 +68,6 @@ public class FilterMessageSupportTest {
             }
         });
 
-        Assert.assertEquals(2, filter.size());
+        Assert.assertEquals(3, filter.size());
     }
 }

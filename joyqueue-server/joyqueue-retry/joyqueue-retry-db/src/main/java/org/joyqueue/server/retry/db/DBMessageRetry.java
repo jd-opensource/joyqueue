@@ -37,15 +37,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库重试管理，负责存放重试数据到数据库中
  */
 public class DBMessageRetry implements MessageRetry<Long> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DBMessageRetry.class);
+    protected static final Logger logger = LoggerFactory.getLogger(DBMessageRetry.class);
     protected static final String QUERY_SQL_NOID =
             "select id, business_id, topic, app, data, exception, send_time from message_retry where status = " + RetryStatus.RETRY_ING.getValue() +
                     " and topic = ? and app = ? and retry_time<=? limit ?, ?";
@@ -156,7 +164,7 @@ public class DBMessageRetry implements MessageRetry<Long> {
 
             consumeRetry.setExpireTime(getExpireTime(retryPolicy, SystemClock.now()));
             consumeRetry.setRetryTime(getRetryTime(retryPolicy, SystemClock.now(), 1));
-            consumeRetry.setRetryCount((short) 0);
+            consumeRetry.setRetryCount(0);
             consumeRetry.setData(retryMessageModel.getBrokerMessage());
             consumeRetry.setException(retryMessageModel.getException());
             consumeRetry.setCreateTime(SystemClock.now());

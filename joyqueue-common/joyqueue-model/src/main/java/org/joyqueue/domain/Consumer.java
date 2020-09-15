@@ -205,6 +205,8 @@ public class Consumer extends Subscription {
         private Integer readRetryProbability;
         //过滤规则
         private Map</*类型*/String, /*内容*/String> filters;
+        private String region;
+        private Map<String, String> params;
 
         public ConsumerPolicy() {
         }
@@ -353,6 +355,29 @@ public class Consumer extends Subscription {
             return filters;
         }
 
+        public void setRegion(String region) {
+            this.region = region;
+        }
+
+        public String getRegion() {
+            return region;
+        }
+
+        public void setParams(Map<String, String> params) {
+            this.params = params;
+        }
+
+        public Map<String, String> getParams() {
+            return params;
+        }
+
+        public String getParam(String key) {
+            if (params == null) {
+                return null;
+            }
+            return params.get(key);
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -371,13 +396,15 @@ public class Consumer extends Subscription {
                     Objects.equals(errTimes, that.errTimes) &&
                     Objects.equals(maxPartitionNum, that.maxPartitionNum) &&
                     Objects.equals(readRetryProbability, that.readRetryProbability) &&
-                    Objects.equals(filters, that.filters);
+                    Objects.equals(filters, that.filters) &&
+                    Objects.equals(region, that.region) &&
+                    Objects.equals(params, that.params);
         }
 
         @Override
         public int hashCode() {
 
-            return Objects.hash(nearby, paused, archive, retry, seq, ackTimeout, batchSize, concurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability, filters);
+            return Objects.hash(nearby, paused, archive, retry, seq, ackTimeout, batchSize, concurrent, delay, blackList, errTimes, maxPartitionNum, readRetryProbability, filters, params);
         }
 
         public static class Builder {
@@ -410,9 +437,18 @@ public class Consumer extends Subscription {
             //消息过滤规则
             private Map</*类型*/String, /*规则*/String> filters = new HashMap<>();
 
+            private String region;
+
+            private Map<String, String> params;
+
 
             public static Builder build() {
                 return new Builder();
+            }
+
+            public Builder region(String region) {
+                this.region = region;
+                return this;
             }
 
             public Builder nearby(Boolean nearby) {
@@ -484,7 +520,7 @@ public class Consumer extends Subscription {
             }
             public Builder filters(String filtersStr) {
                 if (filtersStr != null && !"".equals(filtersStr.trim())) {
-                    String[] filterArray=filtersStr.split(",");
+                    String[] filterArray=filtersStr.split(";");
                     Map<String,String> map = new HashMap<>();
                     for (String filter:filterArray) {
                         map.put(filter.split(":")[0],filter.split(":")[1]);
@@ -499,9 +535,19 @@ public class Consumer extends Subscription {
                 return this;
             }
 
+            public Builder params(Map<String, String> params) {
+                this.params = params;
+                return this;
+            }
+
             public ConsumerPolicy create() {
-                return new ConsumerPolicy(nearby, paused, archive, retry, seq, ackTimeout, batchSize,concurrent, delay,
+                ConsumerPolicy consumerPolicy = new ConsumerPolicy(nearby, paused, archive, retry, seq, ackTimeout, batchSize, concurrent, delay,
                         blackList, errTimes, maxPartitionNum, retryReadProbability, filters);
+                consumerPolicy.setRegion(region);
+                if (this.params!=null && this.params.size() > 0) {
+                    consumerPolicy.setParams(this.params);
+                }
+                return consumerPolicy;
             }
         }
 

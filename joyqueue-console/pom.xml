@@ -20,17 +20,14 @@
     <parent>
         <artifactId>joyqueue</artifactId>
         <groupId>org.joyqueue</groupId>
-        <version>4.2.5.4-SNAPSHOT</version>
+        <version>4.2.7.RC3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <version>4.2.5.4-SNAPSHOT</version>
+    <version>4.2.7.RC3</version>
     <packaging>pom</packaging>
     <artifactId>joyqueue-console</artifactId>
     <name>JoyQueue-Console</name>
     <description>Administration console</description>
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-    </properties>
 
     <modules>
         <module>joyqueue-data</module>

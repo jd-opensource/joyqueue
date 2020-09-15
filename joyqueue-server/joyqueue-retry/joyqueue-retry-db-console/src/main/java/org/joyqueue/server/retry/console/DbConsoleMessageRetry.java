@@ -110,7 +110,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
                     message.setSendTime(rs.getTimestamp(6).getTime());
                     message.setExpireTime(rs.getTimestamp(7).getTime());
                     message.setRetryTime(rs.getTimestamp(8).getTime());
-                    message.setRetryCount(rs.getShort(9));
+                    message.setRetryCount(rs.getInt(9));
                     message.setData(rs.getBytes(10));
                     message.setException(rs.getBytes(11));
                     message.setCreateTime(rs.getTimestamp(12).getTime());
@@ -160,7 +160,7 @@ public class DbConsoleMessageRetry implements ConsoleMessageRetry<Long> {
                     message.setSendTime(rs.getTimestamp(6).getTime());
                     message.setExpireTime(rs.getTimestamp(7).getTime());
                     message.setRetryTime(rs.getTimestamp(8).getTime());
-                    message.setRetryCount(rs.getShort(9));
+                    message.setRetryCount(rs.getInt(9));
                     message.setData(rs.getBytes(10));
                     message.setException(rs.getBytes(11));
                     message.setCreateTime(rs.getTimestamp(12).getTime());

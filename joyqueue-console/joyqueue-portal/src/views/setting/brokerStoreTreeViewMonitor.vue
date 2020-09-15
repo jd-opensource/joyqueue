@@ -98,7 +98,6 @@ export default {
     removeDialog (node, data) {
       this.modal = true
       this.query.path = data.path
-      console.log(this.query)
     },
     remove () {
       apiRequest.delete(this.urls.deleteStoreGarbageFile + '?brokerId=' + this.brokerId + '&fileName=' + this.query.path + '&retain=' + this.query.retain).then(data => {

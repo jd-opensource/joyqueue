@@ -89,7 +89,7 @@ export default {
             }
           },
           {
-            title: '对外Ip',
+            title: '对外Ip:端口',
             key: 'externalIp',
             width: '15%',
             formatter (row) {

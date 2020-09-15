@@ -27,16 +27,20 @@ public class QBroker implements Query {
 
     private String retryType;
     private String ip;
+
     private int brokerId;
+
     private Identity group;
-    private String externalIp;
+
     @Deprecated
     private long brokerGroupId;
+
     private String keyword;
     @Deprecated
     private List<Integer> brokerGroupIds;
     private List<Integer> notInBrokerIds;
     private List<Integer> inBrokerIds;
+    private String externalIp;
 
     public String getRetryType() {
         return retryType;

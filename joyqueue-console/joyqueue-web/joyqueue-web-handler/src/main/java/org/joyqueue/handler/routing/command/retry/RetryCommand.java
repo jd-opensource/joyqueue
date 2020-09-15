@@ -114,7 +114,7 @@ public class RetryCommand implements Command<Response>, Poolable {
                 retry.getStatus() == Retry.StatusEnum.RETRY_SUCCESS.getValue()) {
             retry.setExpireTime(RetryUtils.getExpireTime().getTime());
             retry.setRetryTime(RetryUtils.getNextRetryTime(new Date(), 0).getTime());
-            retry.setRetryCount((short) 0);
+            retry.setRetryCount(0);
             retry.setUpdateTime(SystemClock.now());
             retryService.recover(retry);
             return  Responses.success("恢复成功");

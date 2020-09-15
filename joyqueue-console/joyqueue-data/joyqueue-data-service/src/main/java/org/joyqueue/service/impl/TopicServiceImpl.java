@@ -281,7 +281,7 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     public int update(Topic model) throws Exception {
-        return 0;
+        return topicNameServerService.update(model);
     }
 
     @Override

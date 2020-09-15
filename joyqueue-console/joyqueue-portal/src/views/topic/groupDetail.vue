@@ -66,7 +66,6 @@ export default {
             key: 'broker.ip',
             width: '14%',
             render: (h, params) => {
-              console.log(params.item)
               if (!params.item.broker) {
                 return h('label', '')
               }

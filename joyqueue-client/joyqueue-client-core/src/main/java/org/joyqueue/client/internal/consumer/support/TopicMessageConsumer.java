@@ -15,7 +15,6 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.cluster.ClusterClientManager;
 import org.joyqueue.client.internal.cluster.ClusterManager;
 import org.joyqueue.client.internal.consumer.BaseMessageListener;
@@ -27,7 +26,6 @@ import org.joyqueue.client.internal.consumer.exception.ConsumerException;
 import org.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptor;
 import org.joyqueue.client.internal.consumer.interceptor.ConsumerInterceptorManager;
 import org.joyqueue.client.internal.consumer.transport.ConsumerClientManager;
-import org.joyqueue.client.internal.metadata.domain.PartitionGroupMetadata;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.client.internal.nameserver.helper.NameServerHelper;
@@ -126,20 +124,14 @@ public class TopicMessageConsumer extends Service {
         TopicMetadata topicMetadata = clusterManager.fetchTopicMetadata(topicName.getFullName(), config.getAppFullName());
 
         if (topicMetadata == null) {
-            throw new ConsumerException(String.format("topic %s is not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s does not exist", topic), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
         if (topicMetadata.getConsumerPolicy() == null) {
-            throw new ConsumerException(String.format("topic %s consumer %s is not exist", topic, config.getAppFullName()), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
+            throw new ConsumerException(String.format("topic %s consumer %s does not exist", topic, config.getAppFullName()), JoyQueueCode.FW_TOPIC_NOT_EXIST.getCode());
         }
 
         if (config.getThread() == ConsumerConfig.NONE_THREAD) {
-            int maxPartition = 1;
-            if (CollectionUtils.isNotEmpty(topicMetadata.getPartitionGroups())) {
-                for (PartitionGroupMetadata partitionGroup : topicMetadata.getPartitionGroups()) {
-                    maxPartition = Math.max(partitionGroup.getPartitions().size(), maxPartition);
-                }
-            }
-            config.setThread(maxPartition);
+            config.setThread(topicMetadata.getPartitions().size());
         }
 
         if (topicMetadata.getType().equals(TopicType.BROADCAST)) {

@@ -33,7 +33,7 @@ public enum ProducerConfigKey implements PropertyDef {
     PRODUCE_BUSINESSID_LENGTH("produce.businessId.length", 100, PropertyDef.Type.INT),
 
     // body长度
-    PRODUCE_BODY_LENGTH("produce.body.length", 1024 * 1024 * 5, PropertyDef.Type.INT),
+    PRODUCE_BODY_LENGTH("produce.body.length", 1024 * 1024 * 3, PropertyDef.Type.INT),
 
     ;
 

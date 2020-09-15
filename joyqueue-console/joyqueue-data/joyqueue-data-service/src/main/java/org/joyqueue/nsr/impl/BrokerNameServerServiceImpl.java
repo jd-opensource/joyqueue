@@ -17,6 +17,7 @@ package org.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.joyqueue.convert.NsrBrokerConverter;
 import org.joyqueue.model.PageResult;
@@ -31,6 +32,7 @@ import org.joyqueue.nsr.model.BrokerQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -129,20 +131,23 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
 
     @Override
     public List<Broker> syncBrokers() throws Exception {
-        List<Broker>  nsrBrokers = JSONArray.parseArray(post(LIST_BROKER,null), Broker.class);
-        List<Broker> brokerList = new ArrayList<>(nsrBrokers.size());
-        nsrBrokers.forEach(nsrBroker->{
+        String json  = post(LIST_BROKER,null);
+        List<Broker>  nsrBrokers = new ArrayList<>();
+        JSONArray jsonArray = JSON.parseArray(json);
+        Iterator<Object> iterator = jsonArray.iterator();
+        while (iterator.hasNext()){
+            JSONObject jsonObject = (JSONObject) iterator.next();
             Broker broker = new Broker();
-            broker.setId(nsrBroker.getId());
-            broker.setIp(nsrBroker.getIp());
-            broker.setPort(nsrBroker.getPort());
-            broker.setRetryType(nsrBroker.getRetryType());
-            broker.setDataCenter(new Identity(0L,"UNKNOW"));
-            broker.setExternalIp(nsrBroker.getExternalIp());
-            broker.setExternalPort(nsrBroker.getExternalPort());
-            brokerList.add(broker);
-        });
-        return brokerList;
+            broker.setDataCenter(new Identity(0L,"UNKNOW",jsonObject.getString("dataCenter")));
+            broker.setId(Long.parseLong(jsonObject.getString("id")));
+            broker.setIp(jsonObject.getString("ip"));
+            broker.setPort(Integer.parseInt(jsonObject.getString("port")));
+            broker.setRetryType(jsonObject.getString("retryType"));
+            broker.setExternalIp(jsonObject.getString("externalIp"));
+            broker.setExternalPort(Integer.parseInt(jsonObject.getString("externalPort")));
+            nsrBrokers.add(broker);
+        }
+        return nsrBrokers;
     }
     /**
      * 删除broker

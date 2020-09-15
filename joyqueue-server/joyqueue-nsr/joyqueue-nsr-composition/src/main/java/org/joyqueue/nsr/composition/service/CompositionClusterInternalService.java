@@ -33,37 +33,37 @@ public class CompositionClusterInternalService implements ClusterInternalService
     protected static final Logger logger = LoggerFactory.getLogger(CompositionClusterInternalService.class);
 
     private CompositionConfig config;
-    private ClusterInternalService igniteClusterInternalService;
-    private ClusterInternalService journalkeeperClusterInternalService;
+    private ClusterInternalService sourceClusterInternalService;
+    private ClusterInternalService targetClusterInternalService;
 
-    public CompositionClusterInternalService(CompositionConfig config, ClusterInternalService igniteClusterInternalService, ClusterInternalService journalkeeperClusterInternalService) {
+    public CompositionClusterInternalService(CompositionConfig config, ClusterInternalService sourceClusterInternalService, ClusterInternalService targetClusterInternalService) {
         this.config = config;
-        this.igniteClusterInternalService = igniteClusterInternalService;
-        this.journalkeeperClusterInternalService = journalkeeperClusterInternalService;
+        this.sourceClusterInternalService = sourceClusterInternalService;
+        this.targetClusterInternalService = targetClusterInternalService;
     }
 
     @Override
     public String getCluster() {
-        return journalkeeperClusterInternalService.getCluster();
+        return targetClusterInternalService.getCluster();
     }
 
     @Override
     public String addNode(URI uri) {
-        return journalkeeperClusterInternalService.addNode(uri);
+        return targetClusterInternalService.addNode(uri);
     }
 
     @Override
     public String removeNode(URI uri) {
-        return journalkeeperClusterInternalService.removeNode(uri);
+        return targetClusterInternalService.removeNode(uri);
     }
 
     @Override
     public String updateNodes(List<URI> uris) {
-        return journalkeeperClusterInternalService.updateNodes(uris);
+        return targetClusterInternalService.updateNodes(uris);
     }
 
     @Override
     public String execute(String command, List<String> args) {
-        return journalkeeperClusterInternalService.execute(command, args);
+        return targetClusterInternalService.execute(command, args);
     }
 }

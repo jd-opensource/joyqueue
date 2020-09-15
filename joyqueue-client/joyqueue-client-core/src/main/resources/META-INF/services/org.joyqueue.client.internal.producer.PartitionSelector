@@ -1,1 +1,2 @@
-org.joyqueue.client.internal.producer.support.WeightedRoundRobinPartitionSelector
+org.joyqueue.client.internal.producer.support.WeightedPartitionSelector
+org.joyqueue.client.internal.producer.support.AdaptivePartitionSelector

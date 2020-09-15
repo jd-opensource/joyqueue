@@ -15,23 +15,40 @@
     <!--新建分组-->
     <my-dialog :dialog="addDialog" @on-dialog-confirm="submit()" @on-dialog-cancel="addCancel()">
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">编码:</grid-col>
+        <grid-col :span="5" class="label">编码:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="addData.code" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">名称:</grid-col>
+        <grid-col :span="5" class="label">名称:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="addData.name" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">仅管理员:</grid-col>
+        <grid-col :span="5" class="label">存储最长时间:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
+          <d-input v-model.number="addData.storeMaxTime" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">保留未消费数据:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
+          <d-radio-group v-model="addData.storeCleanKeepUnconsumed">
+            <d-radio :label="true">是</d-radio>
+            <d-radio :label="false">否</d-radio>
+          </d-radio-group>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">仅管理员:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-radio-group v-model="addData.status">
             <d-radio :label="2">是</d-radio>
             <d-radio :label="1">否</d-radio>
@@ -41,23 +58,41 @@
     </my-dialog>
     <my-dialog :dialog="editDialog" @on-dialog-confirm="editSubmit()" @on-dialog-cancel="editCancel()">
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">编码:</grid-col>
+        <grid-col :span="5" class="label">编码:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="editData.code" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">名称:</grid-col>
+        <grid-col :span="5" class="label">名称:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
           <d-input v-model="editData.name" oninput="value = value.trim()"></d-input>
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
-        <grid-col :span="4" class="label">仅管理员:</grid-col>
+        <grid-col :span="5" class="label">存储最长时间:</grid-col>
         <grid-col :span="1"/>
-        <grid-col :span="15" class="val">
+        <grid-col :span="14" class="val">
+          <d-input v-model.number="editData.storeMaxTime" oninput="value=value.replace(/[^\d]/g, '')"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">保留未消费数据:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
+          <d-radio-group v-model="editData.storeCleanKeepUnconsumed">
+            <d-radio :label="true">是</d-radio>
+            <d-radio :label="false">否</d-radio>
+            <d-radio :label="''">置空</d-radio>
+          </d-radio-group>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
+        <grid-col :span="5" class="label">仅管理员:</grid-col>
+        <grid-col :span="1"/>
+        <grid-col :span="14" class="val">
           <d-radio-group v-model="editData.status">
             <d-radio :label="2">是</d-radio>
             <d-radio :label="1">否</d-radio>
@@ -78,6 +113,7 @@ import myDialog from '../../components/common/myDialog.vue'
 import addBroker from '../topic/addBroker.vue'
 import crud from '../../mixins/crud.js'
 import apiRequest from '../../utils/apiRequest.js'
+import {deepCopy} from '../../utils/assist'
 
 export default {
   name: 'broker-group',
@@ -162,19 +198,23 @@ export default {
         colData: [
           {
             title: 'ID',
-            key: 'id'
+            key: 'id',
+            width: '20%'
           },
           {
             title: '编码',
-            key: 'code'
+            key: 'code',
+            width: '20%'
           },
           {
             title: '名称',
-            key: 'name'
+            key: 'name',
+            width: '20%'
           },
           {
             title: '仅管理员',
             key: 'status',
+            width: '20%',
             formatter (row) {
               if (row.status === 2) {
                 return '是'
@@ -218,6 +258,8 @@ export default {
       addData: {
         code: '',
         name: '',
+        storeCleanKeepUnconsumed: undefined,
+        storeMaxTime: undefined,
         status: 1
       },
       editDialog: {
@@ -228,6 +270,8 @@ export default {
       editData: {
         code: '',
         name: '',
+        storeCleanKeepUnconsumed: undefined,
+        storeMaxTime: undefined,
         status: 1
       },
       addBrokerDialog: {
@@ -274,7 +318,32 @@ export default {
         this.$Message.error('名称不能为空')
         return false
       }
+      this.addData.policies = {}
+      if (this.addData.storeMaxTime !== undefined && this.addData.storeMaxTime > 0) {
+        this.addData.policies.storeMaxTime = this.addData.storeMaxTime
+      }
+      if (this.addData.storeCleanKeepUnconsumed !== undefined && this.addData.storeCleanKeepUnconsumed !== '') {
+        this.addData.policies.storeCleanKeepUnconsumed = this.addData.storeCleanKeepUnconsumed
+      }
       this.addConfirm()
+    },
+    beforeEditData (item) {
+      if (item.policies !== undefined) {
+        if (item.policies.storeMaxTime !== undefined) {
+          item.storeMaxTime = item.policies.storeMaxTime
+        }
+        if (item.policies.storeCleanKeepUnconsumed !== undefined && this.addData.storeCleanKeepUnconsumed !== '') {
+          let storeCleanKeepUnconsumed = item.policies.storeCleanKeepUnconsumed
+          if (storeCleanKeepUnconsumed === true || storeCleanKeepUnconsumed === 'true') {
+            item.storeCleanKeepUnconsumed = true
+          } else if (storeCleanKeepUnconsumed === false || storeCleanKeepUnconsumed === 'false') {
+            item.storeCleanKeepUnconsumed = false
+          } else {
+            item.storeCleanKeepUnconsumed = ''
+          }
+        }
+      }
+      return deepCopy(item)
     },
     editSubmit () {
       if (!this.editData.code) {
@@ -285,6 +354,13 @@ export default {
       if (!this.editData.name) {
         this.$Message.error('名称不能为空')
         return false
+      }
+      this.editData.policies = {}
+      if (this.editData.storeMaxTime !== undefined && this.editData.storeMaxTime > 0) {
+        this.editData.policies.storeMaxTime = this.editData.storeMaxTime
+      }
+      if (this.editData.storeCleanKeepUnconsumed !== undefined && this.addData.storeCleanKeepUnconsumed !== '') {
+        this.editData.policies.storeCleanKeepUnconsumed = this.editData.storeCleanKeepUnconsumed
       }
       this.editConfirm()
     },
@@ -315,6 +391,39 @@ export default {
           }
         })
       }).catch(() => {
+      })
+    },
+    getList () {
+      this.showTablePin = true
+      let data = this.getSearchVal()
+      apiRequest.post(this.urlOrigin.search, {}, data).then((data) => {
+        if (data === '') {
+          return
+        }
+        data.data = data.data || []
+        if (typeof (this.sortData) === 'function') {
+          data.data = this.sortData(data.data)
+        }
+        data.pagination = data.pagination || {
+          totalRecord: data.data.length
+        }
+        this.page.total = data.pagination.totalRecord
+        this.page.page = data.pagination.page
+        this.page.size = data.pagination.size
+        this.tableData.rowData = data.data
+        for (let i in this.tableData.rowData) {
+          if (this.tableData.rowData.hasOwnProperty(i)) {
+            if (this.tableData.rowData[i].policies) {
+              for (let key in this.tableData.rowData[i].policies) {
+                if (this.tableData.rowData[i].policies.hasOwnProperty(key)) {
+                  this.tableData.rowData[i][key] = this.tableData.rowData[i].policies[key]
+                }
+              }
+              this.$set(this.tableData.rowData, i, this.tableData.rowData[i])
+            }
+          }
+        }
+        this.showTablePin = false
       })
     }
   },

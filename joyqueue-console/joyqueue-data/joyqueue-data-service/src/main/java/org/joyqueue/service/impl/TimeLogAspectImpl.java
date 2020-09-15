@@ -50,7 +50,7 @@ public class TimeLogAspectImpl {
            logger.info(log.toString());
            return result;
        }catch (Throwable throwable){
-
+           logger.info(throwable.getMessage());
        }
        return null;
     }
