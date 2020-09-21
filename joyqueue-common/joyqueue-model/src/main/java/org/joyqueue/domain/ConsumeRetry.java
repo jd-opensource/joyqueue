@@ -38,7 +38,7 @@ public class ConsumeRetry {
     // 重试时间
     private long retryTime;
     // 重试次数
-    private short retryCount;
+    private int retryCount;
     // 消息体
     private byte[] data;
     // 异常
@@ -118,11 +118,11 @@ public class ConsumeRetry {
         this.retryTime = retryTime;
     }
 
-    public short getRetryCount() {
+    public int getRetryCount() {
         return retryCount;
     }
 
-    public void setRetryCount(short retryCount) {
+    public void setRetryCount(int retryCount) {
         this.retryCount = retryCount;
     }
 
