@@ -213,7 +213,7 @@ public class TopicConfig extends Topic implements Serializable {
             return true;
         }
 
-        return super.equals(((TopicConfig) o).getName());
+        return super.equals(o);
     }
 
     @Override
