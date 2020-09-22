@@ -77,4 +77,12 @@ public class DefaultRateLimiter implements RateLimiter {
         semaphore.release();
         return true;
     }
+
+    public int getTps() {
+        return tps;
+    }
+
+    public int getTraffic() {
+        return traffic;
+    }
 }

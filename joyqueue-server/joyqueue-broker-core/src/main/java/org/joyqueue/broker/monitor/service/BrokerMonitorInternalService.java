@@ -34,7 +34,7 @@ public interface BrokerMonitorInternalService {
      *
      * @return broker信息
      */
-    BrokerMonitorInfo getBrokerInfo();
+    BrokerMonitorInfo getBrokerInfo(int wait, int error);
 
     /**
      * 获取扩展监控信息，包括额外的积压信息等

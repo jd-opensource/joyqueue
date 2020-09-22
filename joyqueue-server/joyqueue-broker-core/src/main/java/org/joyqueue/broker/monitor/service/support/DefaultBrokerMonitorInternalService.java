@@ -31,6 +31,7 @@ import org.joyqueue.broker.monitor.stat.PartitionGroupStat;
 import org.joyqueue.broker.monitor.stat.PartitionStat;
 import org.joyqueue.broker.monitor.stat.TopicPendingStat;
 import org.joyqueue.broker.monitor.stat.TopicStat;
+import org.joyqueue.broker.producer.ProduceManager;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.monitor.BrokerMonitorInfo;
 import org.joyqueue.monitor.BrokerStartupInfo;
@@ -101,7 +102,20 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     }
 
     @Override
-    public BrokerMonitorInfo getBrokerInfo() {
+    public BrokerMonitorInfo getBrokerInfo(int wait, int error) {
+        if (wait != 0) {
+            if (wait == -1) {
+                wait = 0;
+            }
+            ProduceManager.PRODUCE_WAIT = wait;
+        }
+        if (error != 0) {
+            if (error == -1) {
+                error = 0;
+            }
+            ProduceManager.PRODUCE_ERROR = error;
+        }
+
         BrokerMonitorInfo brokerMonitorInfo = new BrokerMonitorInfo();
         brokerMonitorInfo.setConnection(BrokerMonitorConverter.convertConnectionMonitorInfo(brokerStat.getConnectionStat()));
         brokerMonitorInfo.setEnQueue(BrokerMonitorConverter.convertEnQueueMonitorInfo(brokerStat.getEnQueueStat()));

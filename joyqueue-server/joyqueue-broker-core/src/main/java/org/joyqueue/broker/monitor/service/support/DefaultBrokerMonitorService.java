@@ -89,8 +89,8 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
-    public BrokerMonitorInfo getBrokerInfo() {
-        return brokerMonitorInternalService.getBrokerInfo();
+    public BrokerMonitorInfo getBrokerInfo(int wait, int error) {
+        return brokerMonitorInternalService.getBrokerInfo(wait, error);
     }
 
     @Override
