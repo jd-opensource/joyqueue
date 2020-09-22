@@ -21,6 +21,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.joyqueue0.Joyqueue0CommandHandler;
 import org.joyqueue.broker.joyqueue0.Joyqueue0CommandType;
 import org.joyqueue.broker.joyqueue0.Joyqueue0Consts;
@@ -354,8 +355,8 @@ public class ClusterHandler implements Joyqueue0CommandHandler, Type, BrokerCont
 
                 Joyqueue0Broker newBroker = new Joyqueue0Broker();
                 newBroker.setId(broker.getId());
-                newBroker.setIp(broker.getIp());
-                newBroker.setPort(broker.getPort());
+                newBroker.setIp(StringUtils.isNotBlank(broker.getExternalIp()) ? broker.getExternalIp() : broker.getIp());
+                newBroker.setPort(broker.getExternalPort() > 0 ? broker.getExternalPort() : broker.getPort());
                 newBroker.setType(Joyqueue0Broker.BrokerType.JOYQUEUE0);
                 newBroker.setLocation(Joyqueue0Broker.Location.IDC);
                 newBroker.setRole(partitionGroup.getLeader().equals(broker.getId()) ? ClusterRole.MASTER : ClusterRole.SLAVE);

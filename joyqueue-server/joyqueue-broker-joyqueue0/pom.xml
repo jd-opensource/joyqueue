@@ -25,6 +25,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>joyqueue-broker-joyqueue0</artifactId>
+    <name>JoyQueue-Broker-JoyQueue0</name>
+    <description>Broker JoyQueue0 Protocol</description>
+    <version>4.2.7.TPAAS</version>
 
     <dependencies>
         <dependency>
