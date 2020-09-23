@@ -70,10 +70,6 @@ import java.util.concurrent.TimeoutException;
  */
 public class ProduceManager extends Service implements Produce, BrokerContextAware {
 
-    public static int PRODUCE_WAIT = 0;
-
-    public static int PRODUCE_ERROR = 0;
-
     private static final Logger logger = LoggerFactory.getLogger(ProduceManager.class);
 
     private ProduceConfig config;
@@ -371,15 +367,6 @@ public class ProduceManager extends Service implements Produce, BrokerContextAwa
                     if (config.getLogDetail(producer.getApp())) {
                         logger.info("writeMessagesAsync, topic: {}, app: {}, partitionGroup: {}, qosLevel: {}, size: {}, result: {}",
                                 producer.getTopic(), producer.getApp(), partitionGroup.getGroup(), qosLevel, writeRequests.size(),event.getCode());
-                    }
-                    if (PRODUCE_WAIT != 0) {
-                        try {
-                            Thread.currentThread().sleep(PRODUCE_WAIT);
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                    if (PRODUCE_ERROR != 0) {
-                        event.setCode(JoyQueueCode.valueOf(PRODUCE_ERROR));
                     }
                     eventListener.onEvent(event);
                 }, writeRequests.toArray(new WriteRequest[]{}));

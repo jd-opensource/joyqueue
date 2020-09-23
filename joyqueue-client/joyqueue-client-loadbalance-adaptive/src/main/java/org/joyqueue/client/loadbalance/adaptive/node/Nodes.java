@@ -11,6 +11,7 @@ public class Nodes {
 
     private Metric metric = new Metric();
     private List<Node> nodes;
+    private Object attachment;
 
     public Nodes() {
     }
@@ -33,5 +34,21 @@ public class Nodes {
 
     public List<Node> getNodes() {
         return nodes;
+    }
+
+    public Object getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Object attachment) {
+        this.attachment = attachment;
+    }
+
+    @Override
+    public String toString() {
+        return "Nodes{" +
+                "nodes=" + nodes +
+                ", attachment=" + attachment +
+                '}';
     }
 }

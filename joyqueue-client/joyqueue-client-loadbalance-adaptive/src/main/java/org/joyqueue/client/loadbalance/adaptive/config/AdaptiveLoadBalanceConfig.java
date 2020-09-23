@@ -9,6 +9,7 @@ public class AdaptiveLoadBalanceConfig {
 
     private int ssthreshhold = 10;
     private String[] judges;
+    private int computeInterval = 1000 * 1;
 
     public int getSsthreshhold() {
         return ssthreshhold;
@@ -24,5 +25,13 @@ public class AdaptiveLoadBalanceConfig {
 
     public void setJudges(String[] judges) {
         this.judges = judges;
+    }
+
+    public int getComputeInterval() {
+        return computeInterval;
+    }
+
+    public void setComputeInterval(int computeInterval) {
+        this.computeInterval = computeInterval;
     }
 }
