@@ -82,7 +82,7 @@ public class Broker extends BaseModel {
     /**
      * 对外端口
      */
-    private int externalPort;
+    private Integer externalPort;
 
     public Broker() {
         super();
@@ -201,11 +201,11 @@ public class Broker extends BaseModel {
         this.externalIp = externalIp;
     }
 
-    public int getExternalPort() {
+    public Integer getExternalPort() {
         return externalPort;
     }
 
-    public void setExternalPort(int externalPort) {
+    public void setExternalPort(Integer externalPort) {
         this.externalPort = externalPort;
     }
 

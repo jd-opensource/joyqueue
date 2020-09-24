@@ -70,7 +70,7 @@ public class Broker implements Serializable {
     /**
      * 对外Port，备用
      */
-    protected int externalPort;
+    protected Integer externalPort;
 
 
     public Integer getId() {
@@ -246,11 +246,11 @@ public class Broker implements Serializable {
         this.externalIp = externalIp;
     }
 
-    public int getExternalPort() {
+    public Integer getExternalPort() {
         return externalPort;
     }
 
-    public void setExternalPort(int externalPort) {
+    public void setExternalPort(Integer externalPort) {
         this.externalPort = externalPort;
     }
 
@@ -262,7 +262,7 @@ public class Broker implements Serializable {
     }
 
     public int getRealPort() {
-        if (externalPort > 0) {
+        if (externalPort != null && externalPort.intValue() > 0) {
             return externalPort;
         }
         return port;
