@@ -10,6 +10,11 @@ public class Metric {
     private Metrics all = new Metrics();
     private Metrics error = new Metrics();
 
+    public void refresh() {
+        all.refresh();
+        error.reinit();
+    }
+
     public Tracer begin() {
         return new Tracer(this);
     }
@@ -51,10 +56,6 @@ public class Metric {
 
     public double getTp75() {
         return all.getTp75();
-    }
-
-    public double getTp90() {
-        return all.getTp90();
     }
 
     public double getMax() {

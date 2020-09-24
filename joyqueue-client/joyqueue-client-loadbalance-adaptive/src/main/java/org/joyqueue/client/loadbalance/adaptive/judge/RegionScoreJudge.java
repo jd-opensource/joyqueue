@@ -16,7 +16,7 @@ public class RegionScoreJudge implements ScoreJudge {
         if (node.isNearby()) {
             return 100;
         }
-        return 0;
+        return 1;
     }
 
     @Override
