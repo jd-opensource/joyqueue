@@ -11,13 +11,20 @@ import org.joyqueue.client.loadbalance.adaptive.node.Nodes;
  */
 public class AvgScoreJudge implements ScoreJudge {
 
-    public static int threshhold = 500;
+    public static int exceptionThreshhold = 500;
 
     @Override
     public double compute(Nodes nodes, Node node) {
-        double score = node.getMetric().getAvg() / nodes.getMetric().getAvg() * 100;
+        double maxAvg = 0;
+        for (Node otherNode : nodes.getNodes()) {
+            if (!otherNode.getUrl().equals(node.getUrl())) {
+                maxAvg = Math.max(maxAvg, otherNode.getMetric().getAvg());
+            }
+        }
 
-        if (score > threshhold) {
+        double score = node.getMetric().getAvg() / maxAvg * 100;
+
+        if (score > exceptionThreshhold) {
             return -Integer.MAX_VALUE;
         } else {
             return 100;

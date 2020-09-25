@@ -66,9 +66,7 @@ public class AdaptiveLoadBalance {
                 double compute = scoreJudge.compute(nodes, node);
                 score += (compute / 100 * scoreJudge.getRatio());
             }
-            if (score > 0) {
-                weightNodes.add(new WeightNode(node, score));
-            }
+            weightNodes.add(new WeightNode(node, score));
         }
         return weightSelect(weightNodes);
     }
