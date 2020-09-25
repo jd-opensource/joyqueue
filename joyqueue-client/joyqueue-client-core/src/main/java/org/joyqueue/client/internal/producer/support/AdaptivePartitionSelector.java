@@ -68,7 +68,12 @@ public class AdaptivePartitionSelector extends AbstractPartitionSelector {
             if (node == null) {
                 node = new Node();
                 node.setUrl(String.valueOf(brokerNode.getId()));
-                node.setNearby(brokerNode.isNearby());
+
+                if (topicMetadata.getProducerPolicy() != null && topicMetadata.getProducerPolicy().getNearby() != null) {
+                    node.setNearby(topicMetadata.getProducerPolicy().getNearby() && brokerNode.isNearby());
+                } else {
+                    node.setNearby(false);
+                }
 
                 Node oldNode = brokerNode.putIfAbsentAttachment(NODE_CACHE_KEY, node);
                 if (oldNode != null) {
