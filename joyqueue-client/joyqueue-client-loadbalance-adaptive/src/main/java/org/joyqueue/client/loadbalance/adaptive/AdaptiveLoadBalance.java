@@ -1,16 +1,15 @@
 package org.joyqueue.client.loadbalance.adaptive;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.joyqueue.client.loadbalance.adaptive.config.AdaptiveLoadBalanceConfig;
+import org.joyqueue.client.loadbalance.adaptive.node.Metrics;
 import org.joyqueue.client.loadbalance.adaptive.node.Node;
 import org.joyqueue.client.loadbalance.adaptive.node.Nodes;
 import org.joyqueue.client.loadbalance.adaptive.node.WeightNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * AdaptiveLoadBalance
@@ -19,20 +18,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class AdaptiveLoadBalance {
 
+    protected static final Logger logger = LoggerFactory.getLogger(AdaptiveLoadBalance.class);
+
     private AdaptiveLoadBalanceConfig config;
     private List<ScoreJudge> scoreJudges;
 
     private WeightLoadBalance weightLoadBalance = new WeightLoadBalance();
     private RandomLoadBalance randomLoadBalance = new RandomLoadBalance();
 
-    private Cache<String, Node> selectCache;
-
     public AdaptiveLoadBalance(AdaptiveLoadBalanceConfig config) {
         this.config = config;
         this.scoreJudges = getScoreJudges(config);
-        this.selectCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(config.getComputeInterval(), TimeUnit.MILLISECONDS)
-                .build();
+        Metrics.cacheInterval = config.getCacheInterval();
+        Metrics.sliceInterval = config.getSliceInterval();
     }
 
     protected List<ScoreJudge> getScoreJudges(AdaptiveLoadBalanceConfig config) {
@@ -53,18 +51,11 @@ public class AdaptiveLoadBalance {
     }
 
     protected boolean isStartup(Nodes nodes) {
-        return nodes.getMetric().getTps() > config.getSsthreshhold();
+        return nodes.getMetric().getCount() > config.getSsthreshhold();
     }
 
     protected Node adaptiveSelect(Nodes nodes) {
-        String cacheKey = nodes.toString();
-        try {
-            return selectCache.get(cacheKey, () -> {
-                return doAdaptiveSelect(nodes);
-            });
-        } catch (ExecutionException e) {
-            return doAdaptiveSelect(nodes);
-        }
+        return doAdaptiveSelect(nodes);
     }
 
     public Node doAdaptiveSelect(Nodes nodes) {
@@ -74,9 +65,6 @@ public class AdaptiveLoadBalance {
             for (ScoreJudge scoreJudge : scoreJudges) {
                 double compute = scoreJudge.compute(nodes, node);
                 score += (compute / 100 * scoreJudge.getRatio());
-            }
-            if (score == 0) {
-                score = 1;
             }
             weightNodes.add(new WeightNode(node, score));
         }

@@ -13,15 +13,10 @@ public class AvailableScoreJudge implements ScoreJudge {
 
     @Override
     public double compute(Nodes nodes, Node node) {
-        if (node.getMetric().getErrorTps() == 0) {
-            return 0;
-        } else if (nodes.getMetric().getErrorTps() == 0) {
-            return -100;
-        } else if (node.getMetric().getErrorTps() >= nodes.getMetric().getErrorTps()) {
-            return -100;
-        } else {
-            return -Math.min(100 - ((double) (node.getMetric().getErrorTps() / nodes.getMetric().getErrorTps()) * 100), 100);
+        if (node.getMetric().getErrorCount() != 0) {
+            return -Integer.MAX_VALUE;
         }
+        return 0;
     }
 
     @Override

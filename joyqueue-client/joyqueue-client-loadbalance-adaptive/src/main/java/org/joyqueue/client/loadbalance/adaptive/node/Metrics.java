@@ -13,30 +13,45 @@ import com.codahale.metrics.Snapshot;
  */
 public class Metrics {
 
-    private Meter meter;
-    private Reservoir reservoir;
-    private Histogram histogram;
+    public static int cacheInterval = 1000 * 1;
+    public static int sliceInterval = 1000 * 60;
+
+    private volatile Meter meter;
+    private volatile Reservoir reservoir;
+    private volatile Histogram histogram;
+
+    private volatile long lastSlice;
+
+    private volatile double lastAvg;
+    private volatile long lastAvgTime;
 
     public Metrics() {
         init();
     }
 
-    public void slice() {
-        init();
-    }
-
-    protected void init() {
+    public void init() {
         this.meter = new Meter();
         this.reservoir = new ExponentiallyDecayingReservoir();
         this.histogram = new Histogram(reservoir);
     }
 
-    public void mark() {
-        this.mark(1L);
+    public void slice() {
+        this.reservoir = new ExponentiallyDecayingReservoir();
+        this.histogram = new Histogram(reservoir);
     }
 
-    public void mark(long count) {
-        this.meter.mark(count);
+    public void refresh() {
+        if (System.currentTimeMillis() - lastSlice > sliceInterval) {
+            lastSlice = System.currentTimeMillis();
+            slice();
+        }
+    }
+
+    public void reinit() {
+        if (System.currentTimeMillis() - lastSlice > sliceInterval) {
+            lastSlice = System.currentTimeMillis();
+            init();
+        }
     }
 
     public void mark(long count, double time) {
@@ -72,10 +87,6 @@ public class Metrics {
         return this.getSnapshot().get75thPercentile();
     }
 
-    public double getTp90() {
-        return this.getSnapshot().getMean();
-    }
-
     public double getMax() {
         return this.getSnapshot().getMax();
     }
@@ -85,7 +96,11 @@ public class Metrics {
     }
 
     public double getAvg() {
-        return this.getSnapshot().getMean();
+        if (System.currentTimeMillis() - lastAvgTime > cacheInterval) {
+            lastAvg = this.getSnapshot().getMean();
+            lastAvgTime = System.currentTimeMillis();
+        }
+        return lastAvg;
     }
 
     protected Snapshot getSnapshot() {

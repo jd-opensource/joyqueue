@@ -25,6 +25,7 @@ public class Nodes {
     }
 
     public Metric getMetric() {
+        metric.refresh();
         return metric;
     }
 

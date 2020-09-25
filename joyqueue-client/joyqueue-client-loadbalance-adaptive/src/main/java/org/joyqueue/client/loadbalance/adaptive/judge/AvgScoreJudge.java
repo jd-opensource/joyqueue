@@ -5,23 +5,29 @@ import org.joyqueue.client.loadbalance.adaptive.node.Node;
 import org.joyqueue.client.loadbalance.adaptive.node.Nodes;
 
 /**
- * TP99ScoreJudge
+ * AvgScoreJudge
  * author: gaohaoxiang
  * date: 2020/8/10
  */
-public class TP99ScoreJudge implements ScoreJudge {
+public class AvgScoreJudge implements ScoreJudge {
 
-    private static final double BASE_SCORE = 50;
+    public static int exceptionThreshhold = 500;
 
     @Override
     public double compute(Nodes nodes, Node node) {
-        double score = node.getMetric().getTp99() - nodes.getMetric().getTp99();
-        if (score > 0) {
-            return 0;
-        } else if (score == 0) {
-            return BASE_SCORE;
+        double maxAvg = 0;
+        for (Node otherNode : nodes.getNodes()) {
+            if (!otherNode.getUrl().equals(node.getUrl())) {
+                maxAvg = Math.max(maxAvg, otherNode.getMetric().getAvg());
+            }
+        }
+
+        double score = node.getMetric().getAvg() / maxAvg * 100;
+
+        if (score > exceptionThreshhold) {
+            return -Integer.MAX_VALUE;
         } else {
-            return BASE_SCORE + Math.min(format(-score), BASE_SCORE);
+            return 100;
         }
     }
 
@@ -42,6 +48,6 @@ public class TP99ScoreJudge implements ScoreJudge {
 
     @Override
     public String type() {
-        return "tp99";
+        return "avg";
     }
 }

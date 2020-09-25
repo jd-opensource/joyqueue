@@ -15,8 +15,9 @@
  */
 package org.joyqueue.client.internal.producer.support;
 
-import com.jd.laf.extension.Extension;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.joyqueue.client.internal.metadata.domain.PartitionGroupMetadata;
 import org.joyqueue.client.internal.metadata.domain.PartitionNode;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
@@ -30,7 +31,6 @@ import java.util.List;
  * author: gaohaoxiang
  * date: 2018/12/27
  */
-@Extension(singleton = false)
 public class WeightedPartitionSelector extends AbstractPartitionSelector {
 
     public static final String NAME = "weighted";
@@ -41,13 +41,25 @@ public class WeightedPartitionSelector extends AbstractPartitionSelector {
         double weight = 0;
         int index = 0;
 
-        for (BrokerNode brokerNode : brokerNodes) {
-            weights[index] = brokerNode.getWeight();
-            if (weights[index] < 0) {
-                weights[index] = 0;
+        if (topicMetadata.getProducerPolicy() != null && MapUtils.isNotEmpty(topicMetadata.getProducerPolicy().getWeight())) {
+            for (BrokerNode brokerNode : brokerNodes) {
+                weights[index] = brokerNode.getWeight();
+                if (weights[index] < 0) {
+                    weights[index] = 0;
+                }
+                weight += weights[index];
+                index++;
             }
-            weight += weights[index];
-            index++;
+        } else {
+            for (BrokerNode brokerNode : brokerNodes) {
+                List<PartitionGroupMetadata> brokerPartitionGroups = topicMetadata.getBrokerPartitionGroups(brokerNode.getId());
+                weights[index] = (brokerPartitionGroups != null ? brokerPartitionGroups.size() * 10 : brokerNode.getWeight());
+                if (weights[index] < 0) {
+                    weights[index] = 0;
+                }
+                weight += weights[index];
+                index++;
+            }
         }
 
         if (weight > 0) {
