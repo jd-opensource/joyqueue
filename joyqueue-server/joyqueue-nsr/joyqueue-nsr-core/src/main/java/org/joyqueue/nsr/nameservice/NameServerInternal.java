@@ -395,17 +395,7 @@ public class NameServerInternal extends Service implements NameService, Property
         if (null == brokerId) {
             broker = metaManager.getBrokerByIpAndPort(brokerIp, port);
             if (null == broker) {
-                brokerId = generateBrokerId();
-                broker = new Broker();
-                broker.setId(brokerId);
-                broker.setIp(brokerIp);
-                DataCenter dataCenter = getDataCenter(brokerIp);
-                broker.setDataCenter(dataCenter.getCode());
-                broker.setPort(port);
-                broker.setRetryType(Broker.DEFAULT_RETRY_TYPE);
-                broker.setPermission(Broker.PermissionEnum.FULL);
-                metaManager.addBroker(broker);
-                logger.info("register broker success broker.id {}", brokerId);
+                broker = addNewBroker(generateBrokerId(), brokerIp, port);
             } else {
                 brokerId = broker.getId();
             }
@@ -417,8 +407,24 @@ public class NameServerInternal extends Service implements NameService, Property
             broker.setPort(port);
             broker.setDataCenter(getDataCenter(brokerIp).getCode());
             metaManager.updateBroker(broker);
+        } else {
+            broker = addNewBroker(brokerId, brokerIp, port);
         }
 
+        return broker;
+    }
+
+    protected Broker addNewBroker(Integer brokerId, String brokerIp, Integer port) {
+        Broker broker = new Broker();
+        broker.setId(brokerId);
+        broker.setIp(brokerIp);
+        broker.setPort(port);
+
+        broker.setDataCenter(getDataCenter(brokerIp).getCode());
+        broker.setRetryType(Broker.DEFAULT_RETRY_TYPE);
+        broker.setPermission(Broker.PermissionEnum.FULL);
+        metaManager.addBroker(broker);
+        logger.info("register broker success broker.id {}", brokerId);
         return broker;
     }
 
