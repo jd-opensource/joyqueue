@@ -36,6 +36,8 @@ public enum LimitConfigKey implements PropertyDef {
     MAX_DELAY("limit.delay.max", 1000, PropertyDef.Type.INT),
     // 最小延时
     MIN_DELAY("limit.delay.min", 100, PropertyDef.Type.INT),
+    // 冲突延迟
+    CONFLICT_DELAY("limit.conflict.delay", 0, PropertyDef.Type.INT),
 
     // 拒绝策略
     REJECTED_STRATEGY("limit.rejected.strategy", "delay", PropertyDef.Type.STRING),

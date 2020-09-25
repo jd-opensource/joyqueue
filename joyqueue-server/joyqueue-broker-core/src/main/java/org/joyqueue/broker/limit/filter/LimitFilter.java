@@ -96,7 +96,7 @@ public class LimitFilter extends AbstractLimitFilter implements BrokerContextAwa
 
     protected int getDelay(Transport transport, Command request, Command response, boolean isRequired) {
         if (!isRequired) {
-            return config.getMinDelay();
+            return config.getConflictDelay();
         }
         int delay = config.getDelay();
         if (delay == LimitConfig.DELAY_DYNAMIC) {

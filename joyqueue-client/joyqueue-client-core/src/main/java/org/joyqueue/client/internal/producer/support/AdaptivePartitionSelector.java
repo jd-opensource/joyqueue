@@ -55,13 +55,14 @@ public class AdaptivePartitionSelector extends AbstractPartitionSelector {
         Nodes cacheNodes = topicMetadata.getAttachment(NODES_CACHE_KEY);
         if (cacheNodes == null) {
             cacheNodes = new Nodes();
+            cacheNodes.setAttachment(topicMetadata.getTopic());
             Nodes oldNodes = topicMetadata.putIfAbsentAttachment(NODES_CACHE_KEY, cacheNodes);
             if (oldNodes != null) {
                 cacheNodes = oldNodes;
             }
         }
 
-        List<Node> cacheNodeList = Lists.newArrayListWithCapacity(brokerNodes.size());
+        List<Node> nodeList = Lists.newArrayListWithCapacity(brokerNodes.size());
         for (BrokerNode brokerNode : brokerNodes) {
             Node node = brokerNode.getAttachment(NODE_CACHE_KEY);
             if (node == null) {
@@ -74,12 +75,13 @@ public class AdaptivePartitionSelector extends AbstractPartitionSelector {
                     node = oldNode;
                 }
             }
-            cacheNodeList.add(node);
+            nodeList.add(node);
         }
 
         Nodes nodes = new Nodes();
         nodes.setMetric(cacheNodes.getMetric());
-        nodes.setNodes(cacheNodeList);
+        nodes.setNodes(nodeList);
+        nodes.setAttachment(cacheNodes.getAttachment());
         return nodes;
     }
 
