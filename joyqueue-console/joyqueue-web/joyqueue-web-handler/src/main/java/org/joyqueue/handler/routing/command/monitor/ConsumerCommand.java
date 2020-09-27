@@ -160,6 +160,7 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     private void mergeConsumerConfig(Consumer consumer, ConsumerConfig config) {
         if (consumer.getConfig() == null) {
             consumer.setConfig(config);
+            return;
         }
         if (config.getAckTimeout() !=null) {
             consumer.getConfig().setAckTimeout(config.getAckTimeout());
