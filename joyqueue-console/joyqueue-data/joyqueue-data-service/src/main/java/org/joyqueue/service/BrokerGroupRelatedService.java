@@ -16,6 +16,7 @@
 package org.joyqueue.service;
 
 import org.joyqueue.model.domain.BrokerGroupRelated;
+import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.query.QBrokerGroupRelated;
 
 import java.util.List;
@@ -28,5 +29,5 @@ import java.util.Map;
 public interface BrokerGroupRelatedService extends PageService<BrokerGroupRelated, QBrokerGroupRelated> {
     int updateGroupByGroupId(BrokerGroupRelated brokerGroupRelated);
     int deleteByGroupId(long groupId);
-    Map<Long, String> findByBrokerIds(List<Long> brokerIds);
+    Map<Long, Identity> findGroupByBrokerIds(List<Long> brokerIds);
 }

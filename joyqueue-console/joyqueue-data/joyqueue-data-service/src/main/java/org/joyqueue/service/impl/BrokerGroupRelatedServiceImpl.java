@@ -17,6 +17,7 @@ package org.joyqueue.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.model.domain.BrokerGroupRelated;
+import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.query.QBrokerGroupRelated;
 import org.joyqueue.repository.BrokerGroupRelatedRepository;
 import org.joyqueue.service.BrokerGroupRelatedService;
@@ -45,13 +46,13 @@ public class BrokerGroupRelatedServiceImpl extends PageServiceSupport<BrokerGrou
     }
 
     @Override
-    public Map<Long, String> findByBrokerIds(List<Long> brokerIds) {
+    public Map<Long, Identity> findGroupByBrokerIds(List<Long> brokerIds) {
         List<BrokerGroupRelated> brokerGroupRelateds = repository.findByBrokerIds(brokerIds);
         if (CollectionUtils.isNotEmpty(brokerGroupRelateds)) {
             return brokerGroupRelateds.stream()
                     .filter(brokerGroupRelated -> brokerGroupRelated.getGroup() != null)
                     .collect(Collectors.toMap(BrokerGroupRelated::getId,
-                            brokerGroupRelated -> brokerGroupRelated.getGroup().getCode()));
+                            BrokerGroupRelated::getGroup));
         }
         return Collections.emptyMap();
     }
