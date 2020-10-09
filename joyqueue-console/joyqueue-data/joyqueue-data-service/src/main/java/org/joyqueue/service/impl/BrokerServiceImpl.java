@@ -31,6 +31,7 @@ import org.joyqueue.nsr.BrokerNameServerService;
 import org.joyqueue.service.BrokerGroupRelatedService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.PartitionGroupReplicaService;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.util.NullUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,10 +237,11 @@ public class BrokerServiceImpl implements BrokerService {
         PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
         if (pageResult != null && pageResult.getResult() != null && pageResult.getResult().size() > 0) {
             List<Broker> brokerList = pageResult.getResult();
+            Map<Long, String> brokerGroupMap = brokerGroupRelatedService.findByBrokerIds(brokerList.stream().map(Broker::getId).collect(Collectors.toList()));
             for (Broker broker : brokerList) {
-                BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
-                if (brokerRelated != null && brokerRelated.getGroup() != null) {
-                    broker.setGroup(brokerRelated.getGroup());
+                String group = brokerGroupMap.get(broker.getId());
+                if (StringUtils.isNotBlank(group)) {
+                    broker.setGroup(new Identity(group));
                     broker.setStatus(0);
                 }
             }
