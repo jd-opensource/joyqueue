@@ -7,8 +7,10 @@ package org.joyqueue.client.loadbalance.adaptive.config;
  */
 public class AdaptiveLoadBalanceConfig {
 
-    private int ssthreshhold = 10;
+    private int ssthreshhold = 1000;
     private String[] judges;
+    private int cacheInterval = 1000 * 1;
+    private int sliceInterval = 1000 * 60;
 
     public int getSsthreshhold() {
         return ssthreshhold;
@@ -24,5 +26,21 @@ public class AdaptiveLoadBalanceConfig {
 
     public void setJudges(String[] judges) {
         this.judges = judges;
+    }
+
+    public int getCacheInterval() {
+        return cacheInterval;
+    }
+
+    public void setCacheInterval(int cacheInterval) {
+        this.cacheInterval = cacheInterval;
+    }
+
+    public int getSliceInterval() {
+        return sliceInterval;
+    }
+
+    public void setSliceInterval(int sliceInterval) {
+        this.sliceInterval = sliceInterval;
     }
 }

@@ -18,13 +18,15 @@ package org.joyqueue.message;
 
 public enum SourceType {
 
-    JOYQUEUE0((byte) 0),
+    JMQ((byte) 0),
 
     KAFKA((byte) 1),
 
     MQTT((byte) 2),
 
     JOYQUEUE((byte) 3),
+
+    JOYQUEUE0((byte) 4),
 
     OTHERS((byte) 10),
 

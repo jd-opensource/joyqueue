@@ -185,6 +185,22 @@ public class ProducerServiceImpl  implements ProducerService {
             app.setName(application.getName());
             producer.setOwner(application.getOwner());
         }
+        if (StringUtils.isNotBlank(producer.getConfig().getWeight())) {
+            String[] split = producer.getConfig().getWeight().split(",");
+            StringBuilder builder = new StringBuilder();
+            for (String item: split) {
+                String[] items = item.split(":");
+                if (Long.parseLong(items[1]) > 0) {
+                    builder.append(items[0]).append(":").append(items[1]).append(",");
+                }
+            }
+            if (builder.length() > 0) {
+                builder.deleteCharAt(builder.length() - 1);
+                producer.getConfig().setWeight(builder.toString());
+            } else {
+                producer.getConfig().setWeight(null);
+            }
+        }
         return producer;
     }
 

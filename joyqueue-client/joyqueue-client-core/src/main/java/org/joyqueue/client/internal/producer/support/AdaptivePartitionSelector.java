@@ -55,31 +55,38 @@ public class AdaptivePartitionSelector extends AbstractPartitionSelector {
         Nodes cacheNodes = topicMetadata.getAttachment(NODES_CACHE_KEY);
         if (cacheNodes == null) {
             cacheNodes = new Nodes();
+            cacheNodes.setAttachment(topicMetadata.getTopic());
             Nodes oldNodes = topicMetadata.putIfAbsentAttachment(NODES_CACHE_KEY, cacheNodes);
             if (oldNodes != null) {
                 cacheNodes = oldNodes;
             }
         }
 
-        List<Node> cacheNodeList = Lists.newArrayListWithCapacity(brokerNodes.size());
+        List<Node> nodeList = Lists.newArrayListWithCapacity(brokerNodes.size());
         for (BrokerNode brokerNode : brokerNodes) {
             Node node = brokerNode.getAttachment(NODE_CACHE_KEY);
             if (node == null) {
                 node = new Node();
                 node.setUrl(String.valueOf(brokerNode.getId()));
-                node.setNearby(brokerNode.isNearby());
+
+                if (topicMetadata.getProducerPolicy() != null && topicMetadata.getProducerPolicy().getNearby() != null) {
+                    node.setNearby(topicMetadata.getProducerPolicy().getNearby() && brokerNode.isNearby());
+                } else {
+                    node.setNearby(false);
+                }
 
                 Node oldNode = brokerNode.putIfAbsentAttachment(NODE_CACHE_KEY, node);
                 if (oldNode != null) {
                     node = oldNode;
                 }
             }
-            cacheNodeList.add(node);
+            nodeList.add(node);
         }
 
         Nodes nodes = new Nodes();
         nodes.setMetric(cacheNodes.getMetric());
-        nodes.setNodes(cacheNodeList);
+        nodes.setNodes(nodeList);
+        nodes.setAttachment(cacheNodes.getAttachment());
         return nodes;
     }
 

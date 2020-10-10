@@ -201,5 +201,7 @@ public interface OpenAPIService {
      **/
     List<ApplicationToken> tokens(String app);
 
+    BrokerMonitorRecord brokerMonitor(Subscribe subscribe, boolean active);
+
 
 }

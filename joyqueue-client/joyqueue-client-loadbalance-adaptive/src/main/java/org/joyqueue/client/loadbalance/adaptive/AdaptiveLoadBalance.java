@@ -1,9 +1,12 @@
 package org.joyqueue.client.loadbalance.adaptive;
 
 import org.joyqueue.client.loadbalance.adaptive.config.AdaptiveLoadBalanceConfig;
+import org.joyqueue.client.loadbalance.adaptive.node.Metrics;
 import org.joyqueue.client.loadbalance.adaptive.node.Node;
 import org.joyqueue.client.loadbalance.adaptive.node.Nodes;
 import org.joyqueue.client.loadbalance.adaptive.node.WeightNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,8 @@ import java.util.List;
  */
 public class AdaptiveLoadBalance {
 
+    protected static final Logger logger = LoggerFactory.getLogger(AdaptiveLoadBalance.class);
+
     private AdaptiveLoadBalanceConfig config;
     private List<ScoreJudge> scoreJudges;
 
@@ -24,6 +29,8 @@ public class AdaptiveLoadBalance {
     public AdaptiveLoadBalance(AdaptiveLoadBalanceConfig config) {
         this.config = config;
         this.scoreJudges = getScoreJudges(config);
+        Metrics.cacheInterval = config.getCacheInterval();
+        Metrics.sliceInterval = config.getSliceInterval();
     }
 
     protected List<ScoreJudge> getScoreJudges(AdaptiveLoadBalanceConfig config) {
@@ -44,19 +51,20 @@ public class AdaptiveLoadBalance {
     }
 
     protected boolean isStartup(Nodes nodes) {
-        return nodes.getMetric().getTps() > config.getSsthreshhold();
+        return nodes.getMetric().getCount() > config.getSsthreshhold();
     }
 
     protected Node adaptiveSelect(Nodes nodes) {
+        return doAdaptiveSelect(nodes);
+    }
+
+    public Node doAdaptiveSelect(Nodes nodes) {
         List<WeightNode> weightNodes = new ArrayList<>(nodes.getNodes().size());
         for (Node node : nodes.getNodes()) {
             double score = 0;
             for (ScoreJudge scoreJudge : scoreJudges) {
                 double compute = scoreJudge.compute(nodes, node);
                 score += (compute / 100 * scoreJudge.getRatio());
-            }
-            if (score == 0) {
-                score = 1;
             }
             weightNodes.add(new WeightNode(node, score));
         }

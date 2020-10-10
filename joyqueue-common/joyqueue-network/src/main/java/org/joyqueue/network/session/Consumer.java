@@ -127,6 +127,7 @@ public class Consumer extends Joint {
     public enum ConsumeType {
         JOYQUEUE,
         JOYQUEUE0,
+        JMQ2,
         KAFKA,
         MQTT,
         INTERNAL;

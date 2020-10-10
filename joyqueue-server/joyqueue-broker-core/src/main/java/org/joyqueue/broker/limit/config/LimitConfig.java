@@ -49,6 +49,10 @@ public class LimitConfig {
         return propertySupplier.getValue(LimitConfigKey.MIN_DELAY);
     }
 
+    public int getConflictDelay() {
+        return propertySupplier.getValue(LimitConfigKey.CONFLICT_DELAY);
+    }
+
     public String getRejectedStrategy() {
         return propertySupplier.getValue(LimitConfigKey.REJECTED_STRATEGY);
     }

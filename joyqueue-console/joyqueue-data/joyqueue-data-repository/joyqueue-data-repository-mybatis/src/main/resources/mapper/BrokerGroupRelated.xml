@@ -54,6 +54,14 @@
         WHERE b.id=#{id}
     </select>
 
+    <select id="findByBrokerIds" parameterType="long" resultType="BrokerGroupRelated">
+        <include refid="select"/>
+        WHERE b.id in
+        <foreach collection="brokerIds" item="id" index="i" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <select id="findByIds" resultType="BrokerGroupRelated">
         <include refid="select"/>
         WHERE b.id IN

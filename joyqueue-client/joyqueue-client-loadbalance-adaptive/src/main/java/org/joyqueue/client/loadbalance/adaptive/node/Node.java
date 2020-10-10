@@ -10,6 +10,7 @@ public class Node {
     private Metric metric = new Metric();
     private String url;
     private boolean nearby;
+    private Object attachment;
 
     public Node() {
     }
@@ -28,6 +29,7 @@ public class Node {
     }
 
     public Metric getMetric() {
+        metric.refresh();
         return metric;
     }
 
@@ -37,5 +39,22 @@ public class Node {
 
     public boolean isNearby() {
         return nearby;
+    }
+
+    public Object getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Object attachment) {
+        this.attachment = attachment;
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "url='" + url + '\'' +
+                ", nearby=" + nearby +
+                ", attachment=" + attachment +
+                '}';
     }
 }

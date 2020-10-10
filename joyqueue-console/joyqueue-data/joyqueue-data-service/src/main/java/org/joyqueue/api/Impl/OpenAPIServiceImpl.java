@@ -495,6 +495,11 @@ public class OpenAPIServiceImpl implements OpenAPIService {
 
     }
 
+    @Override
+    public BrokerMonitorRecord brokerMonitor(Subscribe subscribe, boolean active) {
+        return brokerMonitorService.find(subscribe, active);
+    }
+
     /**
      *
      *  Check the subscription legal or not
