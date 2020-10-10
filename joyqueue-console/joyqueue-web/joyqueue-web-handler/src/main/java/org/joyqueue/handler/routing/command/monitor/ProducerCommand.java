@@ -97,13 +97,7 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
 
         if (appFlag) {
             if (CollectionUtils.isNotEmpty(producers) && session.getRole() != User.UserRole.ADMIN.value()) {
-                Iterator<Producer> iterator = producers.iterator();
-                while (iterator.hasNext()) {
-                    Producer producer = iterator.next();
-                    if (applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) == null) {
-                        iterator.remove();
-                    }
-                }
+                producers.removeIf(producer -> applicationUserService.findByUserApp(session.getCode(), producer.getApp().getCode()) == null);
             }
         }
 

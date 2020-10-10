@@ -15,11 +15,18 @@
  */
 package org.joyqueue.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.model.domain.BrokerGroupRelated;
+import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.query.QBrokerGroupRelated;
 import org.joyqueue.repository.BrokerGroupRelatedRepository;
 import org.joyqueue.service.BrokerGroupRelatedService;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 分组服务实现
@@ -36,5 +43,17 @@ public class BrokerGroupRelatedServiceImpl extends PageServiceSupport<BrokerGrou
     @Override
     public int deleteByGroupId(long groupId) {
         return repository.deleteByGroupId(groupId);
+    }
+
+    @Override
+    public Map<Long, Identity> findGroupByBrokerIds(List<Long> brokerIds) {
+        List<BrokerGroupRelated> brokerGroupRelateds = repository.findByBrokerIds(brokerIds);
+        if (CollectionUtils.isNotEmpty(brokerGroupRelateds)) {
+            return brokerGroupRelateds.stream()
+                    .filter(brokerGroupRelated -> brokerGroupRelated.getGroup() != null)
+                    .collect(Collectors.toMap(BrokerGroupRelated::getId,
+                            BrokerGroupRelated::getGroup));
+        }
+        return Collections.emptyMap();
     }
 }

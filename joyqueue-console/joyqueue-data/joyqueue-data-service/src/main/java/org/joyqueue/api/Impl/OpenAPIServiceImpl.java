@@ -496,8 +496,8 @@ public class OpenAPIServiceImpl implements OpenAPIService {
     }
 
     @Override
-    public BrokerMonitorRecord brokerMonitor(Subscribe subscribe) {
-        return brokerMonitorService.find(subscribe, true);
+    public BrokerMonitorRecord brokerMonitor(Subscribe subscribe, boolean active) {
+        return brokerMonitorService.find(subscribe, active);
     }
 
     /**

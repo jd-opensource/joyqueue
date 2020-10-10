@@ -236,10 +236,11 @@ public class BrokerServiceImpl implements BrokerService {
         PageResult<Broker> pageResult = brokerNameServerService.search(qPageQuery);
         if (pageResult != null && pageResult.getResult() != null && pageResult.getResult().size() > 0) {
             List<Broker> brokerList = pageResult.getResult();
+            Map<Long, Identity> brokerGroupMap = brokerGroupRelatedService.findGroupByBrokerIds(brokerList.stream().map(Broker::getId).collect(Collectors.toList()));
             for (Broker broker : brokerList) {
-                BrokerGroupRelated brokerRelated = brokerGroupRelatedService.findById(broker.getId());
-                if (brokerRelated != null && brokerRelated.getGroup() != null) {
-                    broker.setGroup(brokerRelated.getGroup());
+                Identity group = brokerGroupMap.get(broker.getId());
+                if (group != null) {
+                    broker.setGroup(group);
                     broker.setStatus(0);
                 }
             }
