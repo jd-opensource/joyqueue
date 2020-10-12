@@ -147,6 +147,20 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
         return Responses.success();
     }
 
+    @Path("queryByTopic")
+    public Response queryByTopic(@Body QConsumer qConsumer) throws Exception {
+        if (qConsumer.getTopic() == null || qConsumer.getTopic().getCode() == null) {
+            return Responses.error(Response.HTTP_BAD_REQUEST, "Empty topic!");
+        }
+        String namespace = null;
+        String topic = qConsumer.getTopic().getCode();
+        if (null != qConsumer.getTopic().getNamespace()) {
+            namespace = qConsumer.getTopic().getNamespace().getCode();
+        }
+        List<Consumer> consumers = service.findByTopic(topic, namespace);
+        return Responses.success(consumers);
+    }
+
     @Path("configAddOrUpdate")
     public Response configAddOrUpdate(@Body ConsumerConfig config) throws Exception {
         if (config != null) {
