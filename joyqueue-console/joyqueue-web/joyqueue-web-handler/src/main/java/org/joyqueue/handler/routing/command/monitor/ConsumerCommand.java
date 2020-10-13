@@ -206,13 +206,13 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
         if (config.getLimitTraffic() != null) {
             consumer.getConfig().setLimitTraffic(config.getLimitTraffic());
         }
-        if (StringUtils.isNotBlank(config.getRegion())) {
+        if (config.getRegion() != null) {
             consumer.getConfig().setRegion(config.getRegion());
         }
-        if (StringUtils.isNotBlank(config.getBlackList())) {
+        if (config.getBlackList() != null) {
             consumer.getConfig().setBlackList(config.getBlackList());
         }
-        if (StringUtils.isNotBlank(config.getFilters())) {
+        if (config.getFilters() != null) {
             consumer.getConfig().setFilters(config.getFilters());
         }
         if (config.isArchive() != null) {

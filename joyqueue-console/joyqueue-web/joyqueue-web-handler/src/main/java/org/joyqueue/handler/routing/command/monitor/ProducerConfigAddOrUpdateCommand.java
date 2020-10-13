@@ -72,10 +72,10 @@ public class ProducerConfigAddOrUpdateCommand implements Command<Response>, Pool
             producer.setConfig(config);
             return;
         }
-        if (StringUtils.isNotBlank(config.getBlackList())) {
+        if (config.getBlackList() != null) {
             producer.getConfig().setBlackList(config.getBlackList());
         }
-        if (StringUtils.isNotBlank(config.getRegion())) {
+        if (config.getRegion() != null) {
             producer.getConfig().setRegion(config.getRegion());
         }
         if (StringUtils.isNotBlank(config.getWeight())) {
