@@ -131,7 +131,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return nearBy;
     }
 
-    public void setNearBy(boolean nearBy) {
+    public void setNearBy(Boolean nearBy) {
         this.nearBy = nearBy;
     }
 
@@ -147,7 +147,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return paused;
     }
 
-    public void setPaused(boolean paused) {
+    public void setPaused(Boolean paused) {
         this.paused = paused;
     }
 
@@ -155,7 +155,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return archive;
     }
 
-    public void setArchive(boolean archive) {
+    public void setArchive(Boolean archive) {
         this.archive = archive;
     }
 
@@ -163,7 +163,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return retry;
     }
 
-    public void setRetry(boolean retry) {
+    public void setRetry(Boolean retry) {
         this.retry = retry;
     }
 
@@ -171,7 +171,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return delay;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(Integer delay) {
         this.delay = delay;
     }
 
@@ -179,7 +179,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return ackTimeout;
     }
 
-    public void setAckTimeout(int ackTimeout) {
+    public void setAckTimeout(Integer ackTimeout) {
         this.ackTimeout = ackTimeout;
     }
 
@@ -187,7 +187,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return batchSize;
     }
 
-    public void setBatchSize(int batchSize) {
+    public void setBatchSize(Integer batchSize) {
         this.batchSize = batchSize;
     }
 
@@ -195,7 +195,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return maxRetrys;
     }
 
-    public void setMaxRetrys(int maxRetrys) {
+    public void setMaxRetrys(Integer maxRetrys) {
         this.maxRetrys = maxRetrys;
     }
 
@@ -203,7 +203,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return maxRetryDelay;
     }
 
-    public void setMaxRetryDelay(int maxRetryDelay) {
+    public void setMaxRetryDelay(Integer maxRetryDelay) {
         this.maxRetryDelay = maxRetryDelay;
     }
 
@@ -211,7 +211,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return retryDelay;
     }
 
-    public void setRetryDelay(int retryDelay) {
+    public void setRetryDelay(Integer retryDelay) {
         this.retryDelay = retryDelay;
     }
 
@@ -219,7 +219,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return useExponentialBackOff;
     }
 
-    public void setUseExponentialBackOff(boolean useExponentialBackOff) {
+    public void setUseExponentialBackOff(Boolean useExponentialBackOff) {
         this.useExponentialBackOff = useExponentialBackOff;
     }
 
@@ -227,7 +227,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return backOffMultiplier;
     }
 
-    public void setBackOffMultiplier(double backOffMultiplier) {
+    public void setBackOffMultiplier(Double backOffMultiplier) {
         this.backOffMultiplier = backOffMultiplier;
     }
 
@@ -235,7 +235,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return expireTime;
     }
 
-    public void setExpireTime(int expireTime) {
+    public void setExpireTime(Integer expireTime) {
         this.expireTime = expireTime;
     }
 
@@ -243,7 +243,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return concurrent;
     }
 
-    public void setConcurrent(int concurrent) {
+    public void setConcurrent(Integer concurrent) {
         this.concurrent = concurrent;
     }
 
@@ -263,7 +263,7 @@ public class ConsumerConfig extends BaseNsrModel {
         this.filters = filters;
     }
 
-    public void setLimitTps(int limitTps) {
+    public void setLimitTps(Integer limitTps) {
         this.limitTps = limitTps;
     }
 
@@ -271,7 +271,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return limitTps;
     }
 
-    public void setLimitTraffic(int limitTraffic) {
+    public void setLimitTraffic(Integer limitTraffic) {
         this.limitTraffic = limitTraffic;
     }
 

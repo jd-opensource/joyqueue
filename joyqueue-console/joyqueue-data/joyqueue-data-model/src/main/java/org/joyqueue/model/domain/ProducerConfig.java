@@ -70,7 +70,7 @@ public class ProducerConfig extends BaseNsrModel {
         return nearBy;
     }
 
-    public void setNearBy(boolean nearBy) {
+    public void setNearBy(Boolean nearBy) {
         this.nearBy = nearBy;
     }
 
@@ -86,7 +86,7 @@ public class ProducerConfig extends BaseNsrModel {
         return single;
     }
 
-    public void setSingle(boolean single) {
+    public void setSingle(Boolean single) {
         this.single = single;
     }
 
@@ -94,7 +94,7 @@ public class ProducerConfig extends BaseNsrModel {
         return archive;
     }
 
-    public void setArchive(boolean archive) {
+    public void setArchive(Boolean archive) {
         this.archive = archive;
     }
 
@@ -106,7 +106,7 @@ public class ProducerConfig extends BaseNsrModel {
         this.blackList = blackList;
     }
 
-    public void setLimitTps(int limitTps) {
+    public void setLimitTps(Integer limitTps) {
         this.limitTps = limitTps;
     }
 
@@ -114,7 +114,7 @@ public class ProducerConfig extends BaseNsrModel {
         return limitTps;
     }
 
-    public void setLimitTraffic(int limitTraffic) {
+    public void setLimitTraffic(Integer limitTraffic) {
         this.limitTraffic = limitTraffic;
     }
 

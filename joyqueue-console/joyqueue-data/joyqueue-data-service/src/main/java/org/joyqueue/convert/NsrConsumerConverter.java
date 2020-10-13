@@ -99,7 +99,9 @@ public class NsrConsumerConverter extends Converter<Consumer, org.joyqueue.domai
             consumerConfig.setBlackList(StringUtils.join(consumerPolicy.getBlackList(), ","));
             consumerConfig.setAckTimeout(consumerPolicy.getAckTimeout());
             consumerConfig.setArchive(consumerPolicy.getArchive());
-            consumerConfig.setBatchSize(consumerPolicy.getBatchSize());
+            if (consumerPolicy.getBatchSize() != null) {
+                consumerConfig.setBatchSize(Integer.parseInt(consumerPolicy.getBatchSize().toString()));
+            }
             consumerConfig.setConcurrent(consumerPolicy.getConcurrent());
             consumerConfig.setDelay(consumerPolicy.getDelay());
             consumerConfig.setPaused(consumerPolicy.getPaused());
