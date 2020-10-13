@@ -301,6 +301,9 @@
         <route inherit="get"
                path="/v1/producer/weight/:id" handlers="producer#weight render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/producer/updateWeight/:id" handlers="producer#updateWeight render"
+               errors="error"/>
 
         <route inherit="post"
                path="/v1/producer/add" handlers="producer#add render"
