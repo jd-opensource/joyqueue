@@ -729,7 +729,7 @@ public class PositioningStore<T /* 保存的数据类型 */> implements Closeabl
         public static final int DEFAULT_DISK_FULL_RATIO = 90;
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
         public static final boolean DEFAULT_LOAD_ON_READ = false;
-        public static final boolean DEFAULT_FLUSH_FORCE = true;
+        public static final boolean DEFAULT_FLUSH_FORCE = false;
 
         /**
          * 文件头长度

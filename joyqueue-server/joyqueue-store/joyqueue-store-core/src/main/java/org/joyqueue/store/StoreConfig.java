@@ -34,8 +34,8 @@ public class StoreConfig {
     public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
     public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
     public static final boolean DEFAULT_MESSAGE_FILE_LOAD_ON_READ = false;
-    public static final boolean DEFAULT_INDEX_FILE_LOAD_ON_READ = true;
-    public static final boolean DEFAULT_FLUSH_FORCE = true;
+    public static final boolean DEFAULT_INDEX_FILE_LOAD_ON_READ = false;
+    public static final boolean DEFAULT_FLUSH_FORCE = false;
 
     public static final String STORE_PATH = "/store";
     /**
