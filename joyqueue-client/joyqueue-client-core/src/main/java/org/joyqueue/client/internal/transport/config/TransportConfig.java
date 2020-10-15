@@ -59,6 +59,7 @@ public class TransportConfig {
     private boolean nonBlockOneway = false;
     // 重试
     private RetryPolicy retryPolicy = new RetryPolicy(1000 * 1, 1000 * 60, 2, false, 2.0, 0);
+    private int maxIoThreads = 8;
 
     public TransportConfig copy() {
         TransportConfig transportConfig = new TransportConfig();
@@ -216,5 +217,13 @@ public class TransportConfig {
 
     public boolean isNonBlockOneway() {
         return nonBlockOneway;
+    }
+
+    public void setMaxIoThreads(int maxIoThreads) {
+        this.maxIoThreads = maxIoThreads;
+    }
+
+    public int getMaxIoThreads() {
+        return maxIoThreads;
     }
 }

@@ -69,6 +69,7 @@ public class KeyValueConverter {
         transportConfig.setMaxAsync(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.MAX_ASYNC, transportConfig.getMaxAsync()));
         transportConfig.setNonBlockOneway(attributes.getBoolean(JoyQueueTransportBuiltinKeys.NONBLOCK_ONEWAY, transportConfig.isNonBlockOneway()));
         transportConfig.getRetryPolicy().setMaxRetrys(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.RETRIES, transportConfig.getRetryPolicy().getMaxRetrys()));
+        transportConfig.setMaxIoThreads(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.MAX_IO_THREADS, transportConfig.getMaxIoThreads()));
         return transportConfig;
     }
 

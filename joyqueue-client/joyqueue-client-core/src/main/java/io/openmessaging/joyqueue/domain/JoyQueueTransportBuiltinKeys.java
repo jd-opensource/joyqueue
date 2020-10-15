@@ -57,4 +57,6 @@ public interface JoyQueueTransportBuiltinKeys extends OMSBuiltinKeys {
 
     String RETRIES = "TRANSPORT_RETRIES";
 
+    String MAX_IO_THREADS = "TRANSPORT_MAX_IO_THREADS";
+
 }
