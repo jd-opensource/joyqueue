@@ -301,6 +301,9 @@
         <route inherit="get"
                path="/v1/producer/weight/:id" handlers="producer#weight render"
                errors="error"/>
+        <route inherit="post"
+               path="/v1/producer/updateWeight/:id" handlers="producer#updateWeight render"
+               errors="error"/>
 
         <route inherit="post"
                path="/v1/producer/add" handlers="producer#add render"
@@ -310,6 +313,9 @@
                errors="error"/>
         <route inherit="delete"
                path="/v1/producer/delete/:id" handlers="producer#delete render"
+               errors="error"/>
+        <route inherit="post"
+               path="/v1/producer/query-by-topic" handlers="producer#query-by-topic render"
                errors="error"/>
 
         <!-- producerConfig -->
@@ -335,6 +341,9 @@
                errors="error"/>
         <route inherit="delete"
                path="/v1/consumer/delete/:id" handlers="consumer#delete render"/>
+        <route inherit="post"
+               path="/v1/consumer/queryByTopic" handlers="consumer#queryByTopic render"
+               errors="error"/>
 
         <route inherit="get"
                path="/v1/consumer/findAllSubscribeGroups" handlers="consumer#findAllSubscribeGroups render"/>

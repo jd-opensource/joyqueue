@@ -30,17 +30,17 @@ public class ConsumerConfig extends BaseNsrModel {
     /**
      * 开启就近机房消费
      **/
-    private Boolean nearBy;
+    private Boolean nearBy = false;
 
     /**
      * 是否暂停消费
      **/
-    private Boolean paused;
+    private Boolean paused = false;
 
     /**
      * 是否需要归档,默认不归档
      **/
-    private Boolean archive;
+    private Boolean archive = false;
 
     /**
      * 是否启用重试服务，默认开启
@@ -75,19 +75,19 @@ public class ConsumerConfig extends BaseNsrModel {
      * 最大重试次数(无限制)
      **/
     @Min(0)
-    private Integer maxRetrys;
+    private Integer maxRetrys = 0;
 
     /**
      * 最大重试间隔(默认5分钟)
      **/
     @Min(0)
-    private Integer maxRetryDelay;
+    private Integer maxRetryDelay = 0;
 
     /**
      * 重试间隔
      */
     @Min(0)
-    private Integer retryDelay;
+    private Integer retryDelay = 0;
 
     private String region;
 
@@ -100,13 +100,13 @@ public class ConsumerConfig extends BaseNsrModel {
      * 指数系数
      */
     @Min(0)
-    private Double backOffMultiplier;
+    private Double backOffMultiplier = 0D;
 
     /**
      * 过期时间（默认3天）
      **/
     @Min(0)
-    private Integer expireTime;
+    private Integer expireTime = 0;
 
     /**
      * 单队列并行度
@@ -120,9 +120,9 @@ public class ConsumerConfig extends BaseNsrModel {
 
     private String filters;
 
-    private Integer limitTps;
+    private Integer limitTps = 0;
 
-    private Integer limitTraffic;
+    private Integer limitTraffic = 0;
 
     private Map<String, String> params;
 
@@ -131,7 +131,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return nearBy;
     }
 
-    public void setNearBy(boolean nearBy) {
+    public void setNearBy(Boolean nearBy) {
         this.nearBy = nearBy;
     }
 
@@ -147,7 +147,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return paused;
     }
 
-    public void setPaused(boolean paused) {
+    public void setPaused(Boolean paused) {
         this.paused = paused;
     }
 
@@ -155,7 +155,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return archive;
     }
 
-    public void setArchive(boolean archive) {
+    public void setArchive(Boolean archive) {
         this.archive = archive;
     }
 
@@ -163,7 +163,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return retry;
     }
 
-    public void setRetry(boolean retry) {
+    public void setRetry(Boolean retry) {
         this.retry = retry;
     }
 
@@ -171,7 +171,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return delay;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(Integer delay) {
         this.delay = delay;
     }
 
@@ -179,7 +179,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return ackTimeout;
     }
 
-    public void setAckTimeout(int ackTimeout) {
+    public void setAckTimeout(Integer ackTimeout) {
         this.ackTimeout = ackTimeout;
     }
 
@@ -187,7 +187,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return batchSize;
     }
 
-    public void setBatchSize(int batchSize) {
+    public void setBatchSize(Integer batchSize) {
         this.batchSize = batchSize;
     }
 
@@ -195,7 +195,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return maxRetrys;
     }
 
-    public void setMaxRetrys(int maxRetrys) {
+    public void setMaxRetrys(Integer maxRetrys) {
         this.maxRetrys = maxRetrys;
     }
 
@@ -203,7 +203,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return maxRetryDelay;
     }
 
-    public void setMaxRetryDelay(int maxRetryDelay) {
+    public void setMaxRetryDelay(Integer maxRetryDelay) {
         this.maxRetryDelay = maxRetryDelay;
     }
 
@@ -211,7 +211,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return retryDelay;
     }
 
-    public void setRetryDelay(int retryDelay) {
+    public void setRetryDelay(Integer retryDelay) {
         this.retryDelay = retryDelay;
     }
 
@@ -219,7 +219,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return useExponentialBackOff;
     }
 
-    public void setUseExponentialBackOff(boolean useExponentialBackOff) {
+    public void setUseExponentialBackOff(Boolean useExponentialBackOff) {
         this.useExponentialBackOff = useExponentialBackOff;
     }
 
@@ -227,7 +227,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return backOffMultiplier;
     }
 
-    public void setBackOffMultiplier(double backOffMultiplier) {
+    public void setBackOffMultiplier(Double backOffMultiplier) {
         this.backOffMultiplier = backOffMultiplier;
     }
 
@@ -235,7 +235,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return expireTime;
     }
 
-    public void setExpireTime(int expireTime) {
+    public void setExpireTime(Integer expireTime) {
         this.expireTime = expireTime;
     }
 
@@ -243,7 +243,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return concurrent;
     }
 
-    public void setConcurrent(int concurrent) {
+    public void setConcurrent(Integer concurrent) {
         this.concurrent = concurrent;
     }
 
@@ -263,7 +263,7 @@ public class ConsumerConfig extends BaseNsrModel {
         this.filters = filters;
     }
 
-    public void setLimitTps(int limitTps) {
+    public void setLimitTps(Integer limitTps) {
         this.limitTps = limitTps;
     }
 
@@ -271,7 +271,7 @@ public class ConsumerConfig extends BaseNsrModel {
         return limitTps;
     }
 
-    public void setLimitTraffic(int limitTraffic) {
+    public void setLimitTraffic(Integer limitTraffic) {
         this.limitTraffic = limitTraffic;
     }
 

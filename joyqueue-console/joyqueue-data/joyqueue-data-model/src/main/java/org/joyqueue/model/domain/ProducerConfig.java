@@ -28,7 +28,7 @@ public class ProducerConfig extends BaseNsrModel {
     /**
      * 是否就近发送
      **/
-    private Boolean nearBy;
+    private Boolean nearBy = false;
 
     /**
      * 集群实例发送权重
@@ -38,7 +38,7 @@ public class ProducerConfig extends BaseNsrModel {
     /**
      * 是否归档
      */
-    private Boolean archive;
+    private Boolean archive = false;
 
     /**
      * 单个发送者
@@ -47,11 +47,11 @@ public class ProducerConfig extends BaseNsrModel {
 
     private String blackList;
 
-    private Integer limitTps;
+    private Integer limitTps = 0;
 
-    private Integer limitTraffic;
+    private Integer limitTraffic = 0;
 
-    private Integer timeout;
+    private Integer timeout = 2000;
 
     private Integer qosLevel;
     private String region;
@@ -70,7 +70,7 @@ public class ProducerConfig extends BaseNsrModel {
         return nearBy;
     }
 
-    public void setNearBy(boolean nearBy) {
+    public void setNearBy(Boolean nearBy) {
         this.nearBy = nearBy;
     }
 
@@ -86,7 +86,7 @@ public class ProducerConfig extends BaseNsrModel {
         return single;
     }
 
-    public void setSingle(boolean single) {
+    public void setSingle(Boolean single) {
         this.single = single;
     }
 
@@ -94,7 +94,7 @@ public class ProducerConfig extends BaseNsrModel {
         return archive;
     }
 
-    public void setArchive(boolean archive) {
+    public void setArchive(Boolean archive) {
         this.archive = archive;
     }
 
@@ -106,7 +106,7 @@ public class ProducerConfig extends BaseNsrModel {
         this.blackList = blackList;
     }
 
-    public void setLimitTps(int limitTps) {
+    public void setLimitTps(Integer limitTps) {
         this.limitTps = limitTps;
     }
 
@@ -114,7 +114,7 @@ public class ProducerConfig extends BaseNsrModel {
         return limitTps;
     }
 
-    public void setLimitTraffic(int limitTraffic) {
+    public void setLimitTraffic(Integer limitTraffic) {
         this.limitTraffic = limitTraffic;
     }
 

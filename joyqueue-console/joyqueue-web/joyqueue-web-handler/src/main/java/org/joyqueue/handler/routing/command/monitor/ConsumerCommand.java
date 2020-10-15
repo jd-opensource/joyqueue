@@ -24,7 +24,6 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.annotation.PageQuery;
@@ -147,88 +146,28 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
         return Responses.success();
     }
 
+    @Path("queryByTopic")
+    public Response queryByTopic(@Body QConsumer qConsumer) throws Exception {
+        if (qConsumer.getTopic() == null || qConsumer.getTopic().getCode() == null) {
+            return Responses.error(Response.HTTP_BAD_REQUEST, "Empty topic!");
+        }
+        String namespace = null;
+        String topic = qConsumer.getTopic().getCode();
+        if (null != qConsumer.getTopic().getNamespace()) {
+            namespace = qConsumer.getTopic().getNamespace().getCode();
+        }
+        List<Consumer> consumers = service.findByTopic(topic, namespace);
+        return Responses.success(consumers);
+    }
+
     @Path("configAddOrUpdate")
     public Response configAddOrUpdate(@Body ConsumerConfig config) throws Exception {
         if (config != null) {
             Consumer consumer = service.findById(config.getConsumerId());
-            mergeConsumerConfig(consumer, config);
+            consumer.setConfig(config);
             service.update(consumer);
         }
         return Responses.success();
-    }
-
-    private void mergeConsumerConfig(Consumer consumer, ConsumerConfig config) {
-        if (consumer.getConfig() == null) {
-            consumer.setConfig(config);
-            return;
-        }
-        if (config.getAckTimeout() !=null) {
-            consumer.getConfig().setAckTimeout(config.getAckTimeout());
-        }
-        if (config.getBackOffMultiplier() != null) {
-            consumer.getConfig().setBackOffMultiplier(config.getBackOffMultiplier());
-        }
-        if (config.getBatchSize() != null) {
-            consumer.getConfig().setBatchSize(config.getBatchSize());
-        }
-        if (config.getConcurrent() != null) {
-            consumer.getConfig().setConcurrent(config.getConcurrent());
-        }
-        if (config.getDelay() != null) {
-            consumer.getConfig().setDelay(config.getDelay());
-        }
-        if (config.getRetryDelay() != null) {
-            consumer.getConfig().setRetryDelay(config.getRetryDelay());
-        }
-        if (config.getMaxRetrys() != null) {
-            consumer.getConfig().setMaxRetrys(config.getMaxRetrys());
-        }
-        if (config.getMaxRetryDelay() != null) {
-            consumer.getConfig().setMaxRetryDelay(config.getMaxRetryDelay());
-        }
-        if (config.getLimitTps() != null) {
-            consumer.getConfig().setLimitTps(config.getLimitTps());
-        }
-        if (config.getLimitTraffic() != null) {
-            consumer.getConfig().setLimitTraffic(config.getLimitTraffic());
-        }
-        if (StringUtils.isNotBlank(config.getRegion())) {
-            consumer.getConfig().setRegion(config.getRegion());
-        }
-        if (StringUtils.isNotBlank(config.getBlackList())) {
-            consumer.getConfig().setBlackList(config.getBlackList());
-        }
-        if (StringUtils.isNotBlank(config.getFilters())) {
-            consumer.getConfig().setFilters(config.getFilters());
-        }
-        if (config.isArchive() != null) {
-            consumer.getConfig().setArchive(config.isArchive());
-        }
-        if (config.isNearBy() != null) {
-            consumer.getConfig().setNearBy(config.isNearBy());
-        }
-        if (config.isPaused() != null) {
-            consumer.getConfig().setPaused(config.isPaused());
-        }
-        if (config.isRetry() != null) {
-            consumer.getConfig().setRetry(config.isRetry());
-        }
-        if (config.isUseExponentialBackOff() != null) {
-            consumer.getConfig().setUseExponentialBackOff(config.isUseExponentialBackOff());
-        }
-        if (MapUtils.isNotEmpty(config.getParams())) {
-            if (consumer.getConfig().getParams() == null) {
-                consumer.getConfig().setParams(config.getParams());
-            }else  {
-                consumer.getConfig().getParams().putAll(config.getParams());
-            }
-        }
-        if (config.getOffsetMode() != null) {
-            consumer.getConfig().setOffsetMode(config.getOffsetMode());
-        }
-        if (config.getExpireTime() != null) {
-            consumer.getConfig().setExpireTime(config.getExpireTime());
-        }
     }
 
     /**

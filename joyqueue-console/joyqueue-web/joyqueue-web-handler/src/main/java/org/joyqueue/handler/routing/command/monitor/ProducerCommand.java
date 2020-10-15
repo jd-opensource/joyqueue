@@ -179,6 +179,19 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         return Responses.success(currentWeights);
     }
 
+    @Path("updateWeight")
+    public Response updateWeight(@QueryParam(Constants.ID) String id, @Body Map<String, Object> body) throws Exception {
+        Producer producer = service.findById(id);
+        if (body.containsKey("weight")) {
+            if (producer.getConfig() == null) {
+                producer.setConfig(new ProducerConfig());
+            }
+            producer.getConfig().setWeight(body.get("weight").toString());
+        }
+        service.update(producer);
+        return Responses.success();
+    }
+
     /**
      * 同步producer
      * @return
