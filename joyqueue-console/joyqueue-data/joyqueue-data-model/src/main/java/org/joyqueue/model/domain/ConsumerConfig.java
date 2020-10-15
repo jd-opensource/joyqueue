@@ -30,17 +30,17 @@ public class ConsumerConfig extends BaseNsrModel {
     /**
      * 开启就近机房消费
      **/
-    private Boolean nearBy;
+    private Boolean nearBy = false;
 
     /**
      * 是否暂停消费
      **/
-    private Boolean paused;
+    private Boolean paused = false;
 
     /**
      * 是否需要归档,默认不归档
      **/
-    private Boolean archive;
+    private Boolean archive = false;
 
     /**
      * 是否启用重试服务，默认开启
@@ -75,19 +75,19 @@ public class ConsumerConfig extends BaseNsrModel {
      * 最大重试次数(无限制)
      **/
     @Min(0)
-    private Integer maxRetrys;
+    private Integer maxRetrys = 0;
 
     /**
      * 最大重试间隔(默认5分钟)
      **/
     @Min(0)
-    private Integer maxRetryDelay;
+    private Integer maxRetryDelay = 0;
 
     /**
      * 重试间隔
      */
     @Min(0)
-    private Integer retryDelay;
+    private Integer retryDelay = 0;
 
     private String region;
 
@@ -100,13 +100,13 @@ public class ConsumerConfig extends BaseNsrModel {
      * 指数系数
      */
     @Min(0)
-    private Double backOffMultiplier;
+    private Double backOffMultiplier = 0D;
 
     /**
      * 过期时间（默认3天）
      **/
     @Min(0)
-    private Integer expireTime;
+    private Integer expireTime = 0;
 
     /**
      * 单队列并行度
@@ -120,9 +120,9 @@ public class ConsumerConfig extends BaseNsrModel {
 
     private String filters;
 
-    private Integer limitTps;
+    private Integer limitTps = 0;
 
-    private Integer limitTraffic;
+    private Integer limitTraffic = 0;
 
     private Map<String, String> params;
 

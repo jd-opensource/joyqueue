@@ -28,7 +28,7 @@ public class ProducerConfig extends BaseNsrModel {
     /**
      * 是否就近发送
      **/
-    private Boolean nearBy;
+    private Boolean nearBy = false;
 
     /**
      * 集群实例发送权重
@@ -38,7 +38,7 @@ public class ProducerConfig extends BaseNsrModel {
     /**
      * 是否归档
      */
-    private Boolean archive;
+    private Boolean archive = false;
 
     /**
      * 单个发送者
@@ -47,11 +47,11 @@ public class ProducerConfig extends BaseNsrModel {
 
     private String blackList;
 
-    private Integer limitTps;
+    private Integer limitTps = 0;
 
-    private Integer limitTraffic;
+    private Integer limitTraffic = 0;
 
-    private Integer timeout;
+    private Integer timeout = 2000;
 
     private Integer qosLevel;
     private String region;
