@@ -227,6 +227,10 @@ public class IpUtil {
             InetSocketAddress isa = (InetSocketAddress) address;
             StringBuilder builder = new StringBuilder(50);
             if (address instanceof InetSocketAddress) {
+                InetAddress ia = isa.getAddress();
+                if (ia == null) {
+                    throw new RuntimeException("UnknownHost[" + ((InetSocketAddress) address).getHostName() + "]");
+                }
                 builder.append(isa.getAddress().getHostAddress());
                 String separator = isValidIpV4Address(((InetSocketAddress) address).getHostString()) ? IPV4_PORT_SEPARATOR : IPV6_PORT_SEPARATOR;
                 builder.append(separator).append(isa.getPort());

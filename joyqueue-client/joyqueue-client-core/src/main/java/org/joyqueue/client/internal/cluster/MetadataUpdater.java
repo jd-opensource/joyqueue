@@ -121,10 +121,11 @@ public class MetadataUpdater extends Service {
         } catch (Exception e) {
             logger.error("update topic metadata exception, topic: {}, app: {}", topic, app, e);
 
-            if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
-                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE));
-            }
-            return null;
+//            if (metadataCacheManager.getTopicMetadata(topic, app) == null) {
+//                metadataCacheManager.putTopicMetadata(topic, app, new TopicMetadata(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE));
+//            }
+//            return null;
+            throw e;
         }
     }
 
