@@ -18,8 +18,8 @@ package org.joyqueue.broker.store;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Shorts;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.cluster.event.CompensateEvent;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.election.DefaultElectionNode;
 import org.joyqueue.broker.election.ElectionService;
@@ -42,7 +42,6 @@ import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,7 +171,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
                     break;
                 }
                 case COMPENSATE: {
-                    CompensateEvent compensateEvent = (CompensateEvent) event;
+//                    CompensateEvent compensateEvent = (CompensateEvent) event;
 //                    onCompensate(compensateEvent.getTopics());
                     break;
                 }
@@ -292,10 +291,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
             brokers.add(nameService.getBroker(newReplica));
         }
 
-        for (Integer newReplica : newPartitionGroup.getReplicas()) {
-            if (oldPartitionGroup.getReplicas().contains(newReplica)) {
-                continue;
-            }
+        for (Integer newReplica : newReplicas) {
             if (newReplica.equals(currentBrokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", topicName, newPartitionGroup.getGroup());
                 storeService.createPartitionGroup(topicName.getFullName(), newPartitionGroup.getGroup(), Shorts.toArray(newPartitionGroup.getPartitions()));
@@ -314,7 +310,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
             storeService.rePartition(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getPartitions().toArray(new Short[newPartitionGroup.getPartitions().size()]));
         }
 
-        for (Integer oldReplica : oldPartitionGroup.getReplicas()) {
+        for (Integer oldReplica : oldReplicas) {
             if (newPartitionGroup.getReplicas().contains(oldReplica)) {
                 continue;
             }

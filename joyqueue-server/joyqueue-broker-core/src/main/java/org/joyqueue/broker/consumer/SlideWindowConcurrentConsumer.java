@@ -140,7 +140,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
     protected void doStart() throws Exception {
         super.doStart();
         // 定时清理已关闭并行消费或者已经失效的主题
-        scheduledExecutorService.scheduleAtFixedRate(this::clearSlideWindow, CLEAN_INTERVAL_SEC + 32, CLEAN_INTERVAL_SEC, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleAtFixedRate(this::clearSlideWindow, CLEAN_INTERVAL_SEC + 32, CLEAN_INTERVAL_SEC, TimeUnit.SECONDS);
         brokerEventBus.addListener(new EventListener() {
             @Override
             public void onEvent(Object event) {

@@ -123,24 +123,8 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_EVENT_ENABLE);
     }
 
-    public boolean getCompensationCacheEnable() {
-        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_CACHE_ENABLE);
-    }
-
-    public boolean getCompensationErrorCacheEnable() {
-        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_CACHE_ENABLE);
-    }
-
-    public int getCompensationErrorThreshold() {
-        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_THRESHOLD);
-    }
-
     public int getCompensationThreshold() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_THRESHOLD);
-    }
-
-    public int getCompensationErrorRetryInterval() {
-        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_COMPENSATION_ERROR_RETRY_INTERVAL);
     }
 
     public String getMessengerType() {
@@ -157,10 +141,6 @@ public class NameServiceConfig {
 
     public boolean getMessengerPublishTopicEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_TOPIC_ENABLE);
-    }
-
-    public boolean getMessengerPublishLeaderReportEnable() {
-        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_LEADER_REPORT_ENABLE);
     }
 
     public boolean getMessengerPublishSubscriptionEnable() {
