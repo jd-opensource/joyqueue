@@ -311,9 +311,6 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         }
 
         for (Integer oldReplica : oldReplicas) {
-            if (newPartitionGroup.getReplicas().contains(oldReplica)) {
-                continue;
-            }
             if (oldReplica.equals(currentBrokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", topicName, newPartitionGroup.getGroup());
                 storeService.removePartitionGroup(topicName.getFullName(), newPartitionGroup.getGroup());
