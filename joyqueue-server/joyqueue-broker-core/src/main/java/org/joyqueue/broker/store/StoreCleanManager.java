@@ -161,7 +161,7 @@ public class StoreCleanManager extends Service {
                                     }
                                 }
                             } catch (Throwable t) {
-                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, exception: {}", topicConfig, partitionGroup.getGroup(), t);
+                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, exception: ", topicConfig, partitionGroup.getGroup(), t);
                             }
                         }
                     }

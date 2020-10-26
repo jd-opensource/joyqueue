@@ -84,6 +84,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
     private static final Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManager.class);
     // 回调超时
     private static final long EVENT_TIMEOUT_MILLS = 60 * 1000L;
+    private static final long HAS_EARLY_RETRY_TIMES = 2;
     // Journal store
     private final PositioningStore<ByteBuffer> store;
     // Partition Group所在的目录
@@ -1062,20 +1063,38 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
     }
 
     /**
+     * 最早消息是否早于制定时间
      *
      * @param indexStore  partition index store
      * @param time 查询时间
      * @return true if partition 的最早消息时间小于指定时间
      *
      **/
-    private  boolean hasEarly(PositioningStore<IndexItem> indexStore,long time) throws IOException{
-        long left=indexStore.left();
-        IndexItem item=indexStore.read(left);
-        ByteBuffer message=store.read(item.getOffset());
-        // message send time
-        long clientTimestamp=MessageParser.getLong(message,MessageParser.CLIENT_TIMESTAMP);
-        long offset=MessageParser.getInt(message,MessageParser.STORAGE_TIMESTAMP);
-        return clientTimestamp + offset < time;
+    private  boolean hasEarly(PositioningStore<IndexItem> indexStore, long time) throws IOException {
+        long left = indexStore.left();
+        Exception lastException = null;
+
+        for (int i = 0; i < HAS_EARLY_RETRY_TIMES; i++) {
+            try {
+                IndexItem item = indexStore.read(left + i);
+                ByteBuffer message = store.read(item.getOffset());
+                // message send time
+                long clientTimestamp = MessageParser.getLong(message, MessageParser.CLIENT_TIMESTAMP);
+                long offset = MessageParser.getInt(message, MessageParser.STORAGE_TIMESTAMP);
+                return clientTimestamp + offset < time;
+            } catch (Exception e) {
+                logger.error("hasEarly exception, base: {}, index: {}", indexStore.base(), left);
+                if (lastException == null) {
+                    lastException = e;
+                }
+            }
+        }
+
+        if (lastException != null) {
+            throw new IOException(lastException);
+        }
+
+        return false;
     }
 
 
