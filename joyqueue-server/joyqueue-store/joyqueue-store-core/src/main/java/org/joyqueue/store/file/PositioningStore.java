@@ -303,13 +303,23 @@ public class PositioningStore<T /* 保存的数据类型 */> implements Closeabl
 
         // 检查文件是否连续完整
         if (!storeFileMap.isEmpty()) {
+            long notContinueStartPosition = -1;
             long position = storeFileMap.firstKey();
+
             for (Map.Entry<Long, StoreFile<T>> fileEntry : storeFileMap.entrySet()) {
                 if (position != fileEntry.getKey()) {
-                    throw new CorruptedLogException(String.format("Files are not continuous! expect: %d, actual file name: %d, store: %s.", position, fileEntry.getKey(), base.getAbsolutePath()));
-                    // TODO: 考虑自动删除store尾部不连续的文件，以解决掉电后需要手动恢复存储的问题。
+                    notContinueStartPosition = fileEntry.getKey();
+                    break;
                 }
                 position += fileEntry.getValue().file().length() - fileHeaderSize;
+            }
+
+            if (notContinueStartPosition != -1) {
+                for (Map.Entry<Long, StoreFile<T>> entry : storeFileMap.tailMap(notContinueStartPosition).entrySet()) {
+                    logger.warn("delete not continue file: {}", entry.getValue().file());
+                    forceDeleteStoreFile(entry.getValue());
+                    storeFileMap.remove(entry.getKey());
+                }
             }
         }
     }
