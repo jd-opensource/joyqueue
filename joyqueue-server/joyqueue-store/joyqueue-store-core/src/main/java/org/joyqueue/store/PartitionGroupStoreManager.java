@@ -84,7 +84,6 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
     private static final Logger logger = LoggerFactory.getLogger(PartitionGroupStoreManager.class);
     // 回调超时
     private static final long EVENT_TIMEOUT_MILLS = 60 * 1000L;
-    private static final long HAS_EARLY_RETRY_TIMES = 2;
     // Journal store
     private final PositioningStore<ByteBuffer> store;
     // Partition Group所在的目录
@@ -1028,15 +1027,15 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
                     if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
-                        if (logger.isDebugEnabled()){
+                        if (logger.isDebugEnabled()) {
                             logger.info("Delete PositioningStore physical index file by size, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                         }
                     }
                 } else {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
-                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && hasEarly(indexStore,time)) {
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && hasEarly(indexStore, time, minPartitionIndex)) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
-                        if (logger.isDebugEnabled()){
+                        if (logger.isDebugEnabled()) {
                             logger.info("Delete PositioningStore physical index file by time, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                         }
                     }
@@ -1070,31 +1069,20 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
      * @return true if partition 的最早消息时间小于指定时间
      *
      **/
-    private  boolean hasEarly(PositioningStore<IndexItem> indexStore, long time) throws IOException {
+    private boolean hasEarly(PositioningStore<IndexItem> indexStore, long time, long minPartitionIndex) throws IOException {
         long left = indexStore.left();
-        Exception lastException = null;
 
-        for (int i = 0; i < HAS_EARLY_RETRY_TIMES; i++) {
-            try {
-                IndexItem item = indexStore.read(left + i);
-                ByteBuffer message = store.read(item.getOffset());
-                // message send time
-                long clientTimestamp = MessageParser.getLong(message, MessageParser.CLIENT_TIMESTAMP);
-                long offset = MessageParser.getInt(message, MessageParser.STORAGE_TIMESTAMP);
-                return clientTimestamp + offset < time;
-            } catch (Exception e) {
-                logger.error("hasEarly exception, base: {}, index: {}", indexStore.base(), left);
-                if (lastException == null) {
-                    lastException = e;
-                }
-            }
+        try {
+            IndexItem item = indexStore.read(left);
+            ByteBuffer message = store.read(item.getOffset());
+            // message send time
+            long clientTimestamp = MessageParser.getLong(message, MessageParser.CLIENT_TIMESTAMP);
+            long offset = MessageParser.getInt(message, MessageParser.STORAGE_TIMESTAMP);
+            return clientTimestamp + offset < time;
+        } catch (Exception e) {
+            logger.error("hasEarly exception, base: {}, index: {}", indexStore.base(), left);
+            return indexStore.isEarly(time, minPartitionIndex);
         }
-
-        if (lastException != null) {
-            throw new IOException(lastException);
-        }
-
-        return false;
     }
 
 

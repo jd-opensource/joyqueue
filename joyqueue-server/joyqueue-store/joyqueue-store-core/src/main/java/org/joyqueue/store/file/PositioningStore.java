@@ -641,6 +641,16 @@ public class PositioningStore<T /* 保存的数据类型 */> implements Closeabl
         return physicalDeleteTo(storeFile.position() + (storeFile.hasPage() ? storeFile.writePosition() : storeFile.fileDataSize()));
     }
 
+    public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {
+        for (StoreFile<T> storeFile : storeFileMap.headMap(minIndexedPhysicalPosition).values()) {
+            if (storeFile.timestamp() > 0)
+                if (storeFile.timestamp() < timestamp) {
+                    return true;
+                }
+        }
+        return false;
+    }
+
     /**
      * 删除文件，丢弃未刷盘的数据，用于rollback
      */
