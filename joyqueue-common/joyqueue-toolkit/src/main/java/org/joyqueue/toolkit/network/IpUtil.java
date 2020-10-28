@@ -985,5 +985,26 @@ public class IpUtil {
         return periods == 3;
     }
 
+    public static long ip2Long(final String ip) {
+        String[] ipItem = ip.split("\\.");
+        assert ipItem.length == 4;
+        long[] ipNum = new long[4];
+        ipNum[0] = Long.parseLong(ipItem[0]);
+        ipNum[1] = Long.parseLong(ipItem[1]);
+        ipNum[2] = Long.parseLong(ipItem[2]);
+        ipNum[3] = Long.parseLong(ipItem[3]);
+        return (ipNum[0] << 24) + (ipNum[1] << 16) + (ipNum[2] << 8) + ipNum[3];
+    }
+
+    public static String long2Ip(final long num) {
+        return (num >>> 24) +
+                "." +
+                ((num & 0x00FFFFFF) >>> 16) +
+                "." +
+                ((num & 0x0000FFFF) >>> 8) +
+                "." +
+                (num & 0x000000FF);
+    }
+
 
 }
