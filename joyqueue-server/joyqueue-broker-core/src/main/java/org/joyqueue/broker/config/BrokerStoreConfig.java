@@ -17,6 +17,7 @@ package org.joyqueue.broker.config;
 
 import org.joyqueue.toolkit.config.PropertyDef;
 import org.joyqueue.toolkit.config.PropertySupplier;
+
 import static org.joyqueue.toolkit.config.Property.APPLICATION_DATA_PATH;
 
 /**
@@ -26,8 +27,11 @@ public class BrokerStoreConfig {
     public static final String DEFAULT_CLEAN_STRATEGY_CLASS = "GlobalStorageLimitCleaningStrategy";
     public static final long DEFAULT_MAX_STORE_SIZE = 10L * 1024 * 1024 * 1024;  // 10gb
     public static final long DEFAULT_MAX_STORE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7days
-    public static final long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 5 * 60 * 1000;
-    public static final long DEFAULT_STORE_CLEAN_SCHEDULE_END = 10 * 60 * 1000;
+    public static final long DEFAULT_STORE_CLEAN_SCHEDULE_BEGIN = 1 * 60 * 1000;
+    public static final long DEFAULT_STORE_CLEAN_SCHEDULE_END = 5 * 60 * 1000;
+    public static final long DEFAULT_STORE_PHYSICAL_CLEAN_SCHEDULE_BEGIN = 1 * 60 * 1000;
+    public static final long DEFAULT_STORE_PHYSICAL_CLEAN_SCHEDULE_END = 5 * 60 * 1000;
+    public static final long DEFAULT_STORE_PHYSICAL_CLEAN_INTERNAL = 100;
     public static final boolean DEFAULT_KEEP_UNCONSUMED = true;
     public static final int DEFAULT_STORE_DISK_USAGE_MAX= 80;
     public static final int DEFAULT_STORE_DISK_USAGE_SAFE=75;
@@ -49,7 +53,12 @@ public class BrokerStoreConfig {
         CLEAN_SCHEDULE_END("store.clean.schedule.end", DEFAULT_STORE_CLEAN_SCHEDULE_END, Type.LONG),
         FORCE_RESTORE("store.force.restore", true, Type.BOOLEAN),
         STORE_DISK_USAGE_MAX("store.disk.usage.max",DEFAULT_STORE_DISK_USAGE_MAX,Type.INT),
-        STORE_DISK_USAGE_SAFE("store.disk.usage.safe",DEFAULT_STORE_DISK_USAGE_SAFE,Type.INT);
+        STORE_DISK_USAGE_SAFE("store.disk.usage.safe",DEFAULT_STORE_DISK_USAGE_SAFE,Type.INT),
+        STORE_PHYSICAL_CLEAN_SCHEDULE_BEGIN("store.physical.clean.schedule.begin",DEFAULT_STORE_PHYSICAL_CLEAN_SCHEDULE_BEGIN,Type.INT),
+        STORE_PHYSICAL_CLEAN_SCHEDULE_END("store.physical.clean.schedule.end",DEFAULT_STORE_PHYSICAL_CLEAN_SCHEDULE_END,Type.INT),
+        STORE_PHYSICAL_CLEAN_INTERVAL("store.physical.clean.interval",DEFAULT_STORE_PHYSICAL_CLEAN_INTERNAL,Type.INT),
+
+        ;
         private String name;
         private Object value;
         private Type type;
@@ -157,6 +166,18 @@ public class BrokerStoreConfig {
      **/
     public String getApplicationDataPath(){
         return propertySupplier.getOrCreateProperty(APPLICATION_DATA_PATH).getString();
+    }
+
+    public int getStorePhysicalCleanScheduleBegin() {
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_PHYSICAL_CLEAN_SCHEDULE_BEGIN, DEFAULT_STORE_PHYSICAL_CLEAN_SCHEDULE_BEGIN);
+    }
+
+    public int getStorePhysicalCleanScheduleEnd() {
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_PHYSICAL_CLEAN_SCHEDULE_END, DEFAULT_STORE_PHYSICAL_CLEAN_SCHEDULE_END);
+    }
+
+    public int getStorePhysicalCleanInterval() {
+        return PropertySupplier.getValue(propertySupplier, BrokerStoreConfigKey.STORE_PHYSICAL_CLEAN_INTERVAL, DEFAULT_STORE_PHYSICAL_CLEAN_INTERNAL);
     }
 }
 

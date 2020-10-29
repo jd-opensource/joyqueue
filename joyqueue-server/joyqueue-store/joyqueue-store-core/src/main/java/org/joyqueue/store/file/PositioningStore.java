@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -37,6 +38,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * 带缓存的、高性能、多文件、基于位置的、Append Only的日志存储存储。
@@ -639,6 +641,13 @@ public class PositioningStore<T /* 保存的数据类型 */> implements Closeabl
         if (storeFileMap.isEmpty()) return 0;
         StoreFile<T> storeFile = storeFileMap.firstEntry().getValue();
         return physicalDeleteTo(storeFile.position() + (storeFile.hasPage() ? storeFile.writePosition() : storeFile.fileDataSize()));
+    }
+
+    public List<File> getFiles() {
+        if (storeFileMap.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return storeFileMap.values().stream().map(StoreFile::file).collect(Collectors.toList());
     }
 
     public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {

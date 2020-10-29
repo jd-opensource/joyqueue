@@ -17,6 +17,7 @@ package org.joyqueue.store;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.google.common.collect.Maps;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.store.file.Checkpoint;
@@ -1650,6 +1651,18 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         } else {
             return binarySearchByTimestamp(timestamp, journalStore, indexStore, mid, rightIndexInclude);
         }
+    }
+
+    public List<File> getStoreFiles() {
+        return store.getFiles();
+    }
+
+    public Map<Short, List<File>> getIndexStoreFiles() {
+        Map<Short, List<File>> result = Maps.newHashMap();
+        for (Map.Entry<Short, Partition> entry : partitionMap.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().store.getFiles());
+        }
+        return result;
     }
 
     QosStore getQosStore(QosLevel level) {
