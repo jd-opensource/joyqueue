@@ -81,6 +81,10 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.HEARTBEAT_TIMEOUT);
     }
 
+    public int getHeartbeatMaxTimeout() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.HEARTBEAT_MAX_TIMEOUT);
+    }
+
     public int getSendCommandTimeout() {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.SEND_COMMAND_TIMEOUT);
     }

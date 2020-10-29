@@ -17,6 +17,7 @@ package org.joyqueue.broker.election.handler;
 
 import com.google.common.base.Preconditions;
 import org.joyqueue.broker.BrokerContext;
+import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
@@ -46,6 +47,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
     private Consume consume;
     private ElectionConfig electionConfig;
+    private ClusterManager clusterManager;
 
     public ReplicateConsumePosRequestHandler(ElectionConfig electionConfig, Consume consume) {
         Preconditions.checkArgument(consume != null, "consume is null");
@@ -60,6 +62,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
         this.consume = brokerContext.getConsume();
         this.electionConfig = new ElectionConfig(brokerContext.getPropertySupplier());
+        this.clusterManager = brokerContext.getClusterManager();
     }
 
     @Override
@@ -83,8 +86,21 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
         try {
             Map<ConsumePartition, Position> consumePositions = request.getConsumePositions();
-            consume.setConsumePosition(consumePositions);
-            response.setSuccess(true);
+            boolean check = true;
+            for (Map.Entry<ConsumePartition, Position> entry : consumePositions.entrySet()) {
+                ConsumePartition consumePartition = entry.getKey();
+                if (clusterManager.isLeader(consumePartition.getTopic(), consumePartition.getPartition())) {
+                    check = false;
+                    break;
+                }
+            }
+
+            if (check) {
+                consume.setConsumePosition(consumePositions);
+                response.setSuccess(true);
+            } else {
+                response.setSuccess(false);
+            }
         } catch (Exception e) {
             logger.warn("Set consume info {} fail", request.getConsumePositions(), e);
             response.setSuccess(false);
