@@ -131,10 +131,6 @@ public class NameServiceConfig {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_TYPE);
     }
 
-    public boolean getMessengerIgniteEnable() {
-        return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_IGNITE_ENABLE);
-    }
-
     public boolean getMessengerPublishLeaderChangeEnable() {
         return PropertySupplier.getValue(propertySupplier, NameServiceConfigKey.NAMESERVER_MESSENGER_PUBLISH_LEADER_CHANGE_ENABLE);
     }

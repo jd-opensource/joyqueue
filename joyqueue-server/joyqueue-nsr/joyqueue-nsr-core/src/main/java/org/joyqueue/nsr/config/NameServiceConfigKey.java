@@ -42,7 +42,6 @@ public enum NameServiceConfigKey implements PropertyDef {
     NAMESERVER_COMPENSATION_EVENT_ENABLE("nameservice.compensation.event.enable", true, Type.BOOLEAN),
     NAMESERVER_COMPENSATION_THRESHOLD("nameservice.compensation.threshold", 1000, Type.INT),
     NAMESERVER_MESSENGER_TYPE("nameservice.messenger.type", "default", Type.STRING),
-    NAMESERVER_MESSENGER_IGNITE_ENABLE("nameservice.messenger.ignite.enable", false, Type.BOOLEAN), // TODO 临时配置，是否启用ignite推送,
     NAMESERVER_MESSENGER_PUBLISH_LEADER_CHANGE_ENABLE("nameservice.messenger.publish.leaderChange.enable", true, Type.BOOLEAN),
     NAMESERVER_MESSENGER_PUBLISH_TOPIC_ENABLE("nameservice.messenger.publish.topic.enable", true, Type.BOOLEAN),
     NAMESERVER_MESSENGER_PUBLISH_SUBSCRIPTION_ENABLE("nameservice.messenger.publish.subscription.enable", true, Type.BOOLEAN),
