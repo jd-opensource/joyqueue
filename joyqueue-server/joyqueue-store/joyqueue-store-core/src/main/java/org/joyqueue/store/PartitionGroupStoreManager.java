@@ -974,14 +974,18 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
         // 构建写入请求对象
         WriteCommand writeCommand = new WriteCommand(qosLevel, eventListener, messages);
-        // 放入队列中，如果队列满，阻塞等待
-        try {
-            this.writeCommandCache.put(writeCommand);
-        } catch (InterruptedException e) {
-            logger.warn("Exception: ", e);
-            if (eventListener != null)
+
+        // 放入队列中，如果队列满，立刻返回错误
+        if (!this.writeCommandCache.offer(writeCommand)) {
+            logger.warn("offer command queue failed, topic: {}, group: {}, queue size: {}",
+                    topic, partitionGroup, writeCommandCache.size());
+
+            if (eventListener != null) {
                 eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
+            }
+            return;
         }
+
         // 如果QosLevel.RECEIVE，这里就可以给客户端返回写入成功的响应了。
         if (qosLevel == QosLevel.RECEIVE && null != eventListener) {
             eventListener.onEvent(new WriteResult(JoyQueueCode.SUCCESS, null));
