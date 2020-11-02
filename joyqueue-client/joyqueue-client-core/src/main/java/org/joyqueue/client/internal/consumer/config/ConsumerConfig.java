@@ -15,8 +15,8 @@
  */
 package org.joyqueue.client.internal.consumer.config;
 
-import org.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
 
 /**
  * ConsumerConfig
@@ -45,6 +45,7 @@ public class ConsumerConfig {
     private long idleInterval = 1000 * 1;
     private long sessionTimeout = 1000 * 60 * 1;
     private int thread = NONE_THREAD;
+    private int maxThread = 50;
     private boolean failover = true;
     private boolean forceAck = false;
 
@@ -72,6 +73,7 @@ public class ConsumerConfig {
         consumerConfig.setIdleInterval(idleInterval);
         consumerConfig.setSessionTimeout(sessionTimeout);
         consumerConfig.setThread(thread);
+        consumerConfig.setMaxThread(maxThread);
         consumerConfig.setFailover(failover);
         consumerConfig.setForceAck(forceAck);
         consumerConfig.setLoadBalance(loadBalance);
@@ -185,6 +187,14 @@ public class ConsumerConfig {
 
     public int getThread() {
         return thread;
+    }
+
+    public void setMaxThread(int maxThread) {
+        this.maxThread = maxThread;
+    }
+
+    public int getMaxThread() {
+        return maxThread;
     }
 
     public void setFailover(boolean failover) {

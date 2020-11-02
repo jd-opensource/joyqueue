@@ -45,6 +45,8 @@ public interface JoyQueueConsumerBuiltinKeys extends OMSBuiltinKeys {
 
     String THREAD = "CONSUMER_THREAD";
 
+    String MAX_THREAD = "CONSUMER_MAX_THREAD";
+
     String FAILOVER = "CONSUMER_FAILOVER";
 
     String FORCE_ACK = "CONSUMER_FORCE_ACK";

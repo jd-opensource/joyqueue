@@ -110,6 +110,7 @@ public class KeyValueConverter {
         consumerConfig.setIdleInterval(attributes.getLong(JoyQueueConsumerBuiltinKeys.IDLE_INTERVAL, consumerConfig.getIdleInterval()));
         consumerConfig.setSessionTimeout(attributes.getLong(JoyQueueConsumerBuiltinKeys.SESSION_TIMEOUT, consumerConfig.getSessionTimeout()));
         consumerConfig.setThread(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.THREAD, consumerConfig.getThread()));
+        consumerConfig.setMaxThread(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.MAX_THREAD, consumerConfig.getMaxThread()));
         consumerConfig.setFailover(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.FAILOVER, consumerConfig.isFailover()));
         consumerConfig.setForceAck(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.FORCE_ACK, consumerConfig.isForceAck()));
         consumerConfig.setLoadBalance(attributes.getBoolean(JoyQueueConsumerBuiltinKeys.LOADBALANCE, consumerConfig.isLoadBalance()));
