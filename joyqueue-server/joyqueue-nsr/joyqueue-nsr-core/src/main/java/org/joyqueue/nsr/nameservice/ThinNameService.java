@@ -438,6 +438,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     @Override
+    public List<Consumer> getConsumersByApp(String app) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<Producer> getProducerByTopic(TopicName topic) {
         List<Producer> producers = new ArrayList<>();
         Command request = new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.GET_PRODUCER_BY_TOPIC), new GetProducerByTopic().topic(topic));
@@ -451,6 +456,11 @@ public class ThinNameService extends Service implements NameService, PropertySup
             producers.addAll(topicProducers);
         }
         return producers;
+    }
+
+    @Override
+    public List<Producer> getProducersByApp(String app) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -25,9 +25,6 @@ import org.joyqueue.toolkit.config.PropertyDef;
  */
 public enum CoordinatorConfigKey implements PropertyDef {
 
-    // 协调者作用域
-    GROUP_NAMESPACE("coordinator.group.namespace", "", Type.STRING),
-
     // 协调者主题
     GROUP_TOPIC_CODE("coordinator.group.topic.code", "__group_coordinators", Type.STRING),
     // 协调者主题分区

@@ -214,11 +214,25 @@ public interface NameService extends LifeCycle {
     List<Consumer> getConsumerByTopic(TopicName topic);
 
     /**
+     * 根据app返回所有消费订阅
+     * @param app
+     * @return
+     */
+    List<Consumer> getConsumersByApp(String app);
+
+    /**
      * get producer
      * @param topic
      * @return
      */
     List<Producer> getProducerByTopic(TopicName topic);
+
+    /**
+     * 根据app返回所有生产订阅
+     * @param app
+     * @return
+     */
+    List<Producer> getProducersByApp(String app);
 
     /**
      * get replica

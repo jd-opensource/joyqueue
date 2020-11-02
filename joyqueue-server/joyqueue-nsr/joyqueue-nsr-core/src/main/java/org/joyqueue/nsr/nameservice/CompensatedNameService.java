@@ -15,6 +15,7 @@
  */
 package org.joyqueue.nsr.nameservice;
 
+import com.google.common.collect.Lists;
 import com.jd.laf.extension.ExtensionPoint;
 import com.jd.laf.extension.ExtensionPointLazy;
 import org.apache.commons.collections.MapUtils;
@@ -46,6 +47,7 @@ import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -260,8 +262,26 @@ public class CompensatedNameService extends Service implements NameService, Prop
     }
 
     @Override
+    public List<Consumer> getConsumersByApp(String app) {
+        Map<TopicName, Consumer> consumerByApp = metadataCacheManager.getConsumerByApp(app);
+        if (MapUtils.isEmpty(consumerByApp)) {
+            return Collections.emptyList();
+        }
+        return Lists.newArrayList(consumerByApp.values());
+    }
+
+    @Override
     public List<Producer> getProducerByTopic(TopicName topic) {
         return metadataCacheManager.getProducerByTopic(topic);
+    }
+
+    @Override
+    public List<Producer> getProducersByApp(String app) {
+        Map<TopicName, Producer> producerByApp = metadataCacheManager.getProducerByApp(app);
+        if (MapUtils.isEmpty(producerByApp)) {
+            return Collections.emptyList();
+        }
+        return Lists.newArrayList(producerByApp.values());
     }
 
     @Override
