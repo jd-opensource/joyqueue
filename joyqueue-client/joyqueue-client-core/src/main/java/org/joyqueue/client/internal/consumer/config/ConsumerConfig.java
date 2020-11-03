@@ -16,7 +16,7 @@
 package org.joyqueue.client.internal.consumer.config;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
+import org.joyqueue.client.internal.consumer.support.BindThreadBrokerLoadBalance;
 
 /**
  * ConsumerConfig
@@ -40,7 +40,7 @@ public class ConsumerConfig {
     private long ackTimeout = NONE_ACK_TIMEOUT;
     private long timeout = 1000 * 10;
     private long pollTimeout = 1000 * 10;
-    private long longPollTimeout = 1000 * 1;
+    private long longPollTimeout = 1000 * 5;
     private long interval = 0;
     private long idleInterval = 1000 * 1;
     private long sessionTimeout = 1000 * 60 * 1;
@@ -50,7 +50,7 @@ public class ConsumerConfig {
     private boolean forceAck = false;
 
     private boolean loadBalance = true;
-    private String loadBalanceType = RoundRobinBrokerLoadBalance.NAME;
+    private String loadBalanceType = BindThreadBrokerLoadBalance.NAME;
 
     private String broadcastGroup;
     private String broadcastLocalPath;
