@@ -180,7 +180,7 @@ public class ClientManager extends Service {
         clientConfig.setMaxAsync(transportConfig.getMaxAsync());
         clientConfig.setRetryPolicy(transportConfig.getRetryPolicy());
         clientConfig.setNonBlockOneway(transportConfig.isNonBlockOneway());
-        clientConfig.setIoThreadName("joyqueue-client-io-eventLoop");
+        clientConfig.setIoThreadName(transportConfig.getIoThreadName());
         return clientConfig;
     }
 }

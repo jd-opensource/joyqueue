@@ -58,6 +58,8 @@ public class ConsumerConfig {
     private int broadcastIndexExpireTime = NONE_BROADCAST_INDEX_EXPIRE_TIME;
     private int broadcastIndexAutoReset = BROADCAST_AUTO_RESET_RIGHT_INDEX;
 
+    private String scheduleThreadName = "joyqueue-consumer-scheduler-%s";
+
     private volatile String appFullName;
 
     public ConsumerConfig copy() {
@@ -83,6 +85,7 @@ public class ConsumerConfig {
         consumerConfig.setBroadcastPersistInterval(broadcastPersistInterval);
         consumerConfig.setBroadcastIndexExpireTime(broadcastIndexExpireTime);
         consumerConfig.setBroadcastIndexAutoReset(broadcastIndexAutoReset);
+        consumerConfig.setScheduleThreadName(scheduleThreadName);
         return consumerConfig;
     }
 
@@ -267,5 +270,13 @@ public class ConsumerConfig {
 
     public int getBroadcastIndexAutoReset() {
         return broadcastIndexAutoReset;
+    }
+
+    public String getScheduleThreadName() {
+        return scheduleThreadName;
+    }
+
+    public void setScheduleThreadName(String scheduleThreadName) {
+        this.scheduleThreadName = scheduleThreadName;
     }
 }

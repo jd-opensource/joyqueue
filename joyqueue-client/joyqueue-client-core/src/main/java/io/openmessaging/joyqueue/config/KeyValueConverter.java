@@ -70,6 +70,7 @@ public class KeyValueConverter {
         transportConfig.setNonBlockOneway(attributes.getBoolean(JoyQueueTransportBuiltinKeys.NONBLOCK_ONEWAY, transportConfig.isNonBlockOneway()));
         transportConfig.getRetryPolicy().setMaxRetrys(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.RETRIES, transportConfig.getRetryPolicy().getMaxRetrys()));
         transportConfig.setMaxIoThreads(KeyValueHelper.getInt(attributes, JoyQueueTransportBuiltinKeys.MAX_IO_THREADS, transportConfig.getMaxIoThreads()));
+        transportConfig.setIoThreadName(KeyValueHelper.getString(attributes, JoyQueueTransportBuiltinKeys.IO_THREAD_NAME, transportConfig.getIoThreadName()));
         return transportConfig;
     }
 
@@ -120,6 +121,7 @@ public class KeyValueConverter {
         consumerConfig.setBroadcastPersistInterval(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_PERSIST_INTERVAL, consumerConfig.getBroadcastPersistInterval()));
         consumerConfig.setBroadcastIndexExpireTime(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_INDEX_EXPIRE_TIME, consumerConfig.getBroadcastIndexExpireTime()));
         consumerConfig.setBroadcastIndexAutoReset(KeyValueHelper.getInt(attributes, JoyQueueConsumerBuiltinKeys.BROADCAST_INDEX_AUTO_RESET, consumerConfig.getBroadcastIndexAutoReset()));
+        consumerConfig.setScheduleThreadName(KeyValueHelper.getString(attributes, JoyQueueConsumerBuiltinKeys.SCHEDULE_THREAD_NAME, consumerConfig.getScheduleThreadName()));
         return consumerConfig;
     }
 

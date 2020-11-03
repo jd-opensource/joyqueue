@@ -52,7 +52,7 @@ public class TopicMessageConsumerScheduler extends Service implements Runnable {
 
     @Override
     protected void validate() throws Exception {
-        scheduleThreadPool = Executors.newFixedThreadPool(config.getThread(), new NamedThreadFactory(String.format("joyqueue-consumer-scheduler-%s", topic), true));
+        scheduleThreadPool = Executors.newFixedThreadPool(config.getThread(), new NamedThreadFactory(String.format(config.getScheduleThreadName(), topic), true));
     }
 
     @Override

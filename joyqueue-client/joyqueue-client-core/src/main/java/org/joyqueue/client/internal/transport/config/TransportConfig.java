@@ -60,6 +60,7 @@ public class TransportConfig {
     // 重试
     private RetryPolicy retryPolicy = new RetryPolicy(1000 * 1, 1000 * 60, 2, false, 2.0, 0);
     private int maxIoThreads = 8;
+    private String ioThreadName = "joyqueue-client-io-eventLoop";
 
     public TransportConfig copy() {
         TransportConfig transportConfig = new TransportConfig();
@@ -80,6 +81,7 @@ public class TransportConfig {
         transportConfig.setMaxAsync(maxAsync);
         transportConfig.setRetryPolicy(retryPolicy);
         transportConfig.setNonBlockOneway(nonBlockOneway);
+        transportConfig.setIoThreadName(ioThreadName);
         return transportConfig;
     }
 
@@ -225,5 +227,13 @@ public class TransportConfig {
 
     public int getMaxIoThreads() {
         return maxIoThreads;
+    }
+
+    public String getIoThreadName() {
+        return ioThreadName;
+    }
+
+    public void setIoThreadName(String ioThreadName) {
+        this.ioThreadName = ioThreadName;
     }
 }
