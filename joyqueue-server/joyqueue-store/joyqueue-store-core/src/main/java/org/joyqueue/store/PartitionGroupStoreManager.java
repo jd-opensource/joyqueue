@@ -17,6 +17,7 @@ package org.joyqueue.store;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.google.common.collect.Maps;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.store.file.Checkpoint;
@@ -973,14 +974,18 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
         // 构建写入请求对象
         WriteCommand writeCommand = new WriteCommand(qosLevel, eventListener, messages);
-        // 放入队列中，如果队列满，阻塞等待
-        try {
-            this.writeCommandCache.put(writeCommand);
-        } catch (InterruptedException e) {
-            logger.warn("Exception: ", e);
-            if (eventListener != null)
+
+        // 放入队列中，如果队列满，立刻返回错误
+        if (!this.writeCommandCache.offer(writeCommand)) {
+            logger.warn("offer command queue failed, topic: {}, group: {}, queue size: {}",
+                    topic, partitionGroup, writeCommandCache.size());
+
+            if (eventListener != null) {
                 eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
+            }
+            return;
         }
+
         // 如果QosLevel.RECEIVE，这里就可以给客户端返回写入成功的响应了。
         if (qosLevel == QosLevel.RECEIVE && null != eventListener) {
             eventListener.onEvent(new WriteResult(JoyQueueCode.SUCCESS, null));
@@ -1027,15 +1032,15 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的文件块
                     if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
-                        if (logger.isDebugEnabled()){
+                        if (logger.isDebugEnabled()) {
                             logger.info("Delete PositioningStore physical index file by size, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                         }
                     }
                 } else {
                     // 依次删除每个分区p索引中最左侧的文件 满足当前分区p的最小消费位置之前的以及最长时间戳的文件块
-                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && hasEarly(indexStore,time)) {
+                    if (indexStore.fileCount() > 1 && indexStore.meetMinStoreFile(minPartitionIndex) > 1 && hasEarly(indexStore, time, minPartitionIndex)) {
                         deletedSize += indexStore.physicalDeleteLeftFile();
-                        if (logger.isDebugEnabled()){
+                        if (logger.isDebugEnabled()) {
                             logger.info("Delete PositioningStore physical index file by time, partition: <{}>, offset position: <{}>", p, minPartitionIndex);
                         }
                     }
@@ -1062,20 +1067,27 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
     }
 
     /**
+     * 最早消息是否早于制定时间
      *
      * @param indexStore  partition index store
      * @param time 查询时间
      * @return true if partition 的最早消息时间小于指定时间
      *
      **/
-    private  boolean hasEarly(PositioningStore<IndexItem> indexStore,long time) throws IOException{
-        long left=indexStore.left();
-        IndexItem item=indexStore.read(left);
-        ByteBuffer message=store.read(item.getOffset());
-        // message send time
-        long clientTimestamp=MessageParser.getLong(message,MessageParser.CLIENT_TIMESTAMP);
-        long offset=MessageParser.getInt(message,MessageParser.STORAGE_TIMESTAMP);
-        return clientTimestamp + offset < time;
+    private boolean hasEarly(PositioningStore<IndexItem> indexStore, long time, long minPartitionIndex) throws IOException {
+        long left = indexStore.left();
+
+        try {
+            IndexItem item = indexStore.read(left);
+            ByteBuffer message = store.read(item.getOffset());
+            // message send time
+            long clientTimestamp = MessageParser.getLong(message, MessageParser.CLIENT_TIMESTAMP);
+            long offset = MessageParser.getInt(message, MessageParser.STORAGE_TIMESTAMP);
+            return clientTimestamp + offset < time;
+        } catch (Exception e) {
+            logger.error("hasEarly exception, base: {}, index: {}", indexStore.base(), left);
+            return indexStore.isEarly(time, minPartitionIndex);
+        }
     }
 
 
@@ -1645,6 +1657,18 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         }
     }
 
+    public List<File> getStoreFiles() {
+        return store.getFiles();
+    }
+
+    public Map<Short, List<File>> getIndexStoreFiles() {
+        Map<Short, List<File>> result = Maps.newHashMap();
+        for (Map.Entry<Short, Partition> entry : partitionMap.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().store.getFiles());
+        }
+        return result;
+    }
+
     QosStore getQosStore(QosLevel level) {
         return qosStores[level.value()];
     }
@@ -1704,9 +1728,9 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
     public static class Config {
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
-        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
+        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 10240;
         public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
-        public static final boolean DEFAULT_FLUSH_FORCE = true;
+        public static final boolean DEFAULT_FLUSH_FORCE = false;
         public static final long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
         public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
         public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0L;
@@ -1749,8 +1773,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
             this(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
                     DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_PRINT_METRIC_INTERVAL_MS,
                     new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE),
-                    // 索引在读取的时候默认加载到内存中
-                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, true, DEFAULT_FLUSH_FORCE));
+                    new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, false, DEFAULT_FLUSH_FORCE));
         }
 
         public Config(int maxMessageLength, int writeRequestCacheSize, long flushIntervalMs,

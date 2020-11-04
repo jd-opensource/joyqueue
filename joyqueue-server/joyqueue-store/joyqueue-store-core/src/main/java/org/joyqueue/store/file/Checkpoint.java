@@ -73,4 +73,14 @@ public class Checkpoint {
     public void setReplicationPosition(long replicationPosition) {
         this.replicationPosition = replicationPosition;
     }
+
+    @Override
+    public String toString() {
+        return "Checkpoint{" +
+                "version=" + version +
+                ", indexPosition=" + indexPosition +
+                ", partitions=" + partitions +
+                ", replicationPosition=" + replicationPosition +
+                '}';
+    }
 }

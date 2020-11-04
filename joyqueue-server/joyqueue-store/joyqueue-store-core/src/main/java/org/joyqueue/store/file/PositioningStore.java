@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -37,6 +38,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * 带缓存的、高性能、多文件、基于位置的、Append Only的日志存储存储。
@@ -303,13 +305,23 @@ public class PositioningStore<T /* 保存的数据类型 */> implements Closeabl
 
         // 检查文件是否连续完整
         if (!storeFileMap.isEmpty()) {
+            long notContinueStartPosition = -1;
             long position = storeFileMap.firstKey();
+
             for (Map.Entry<Long, StoreFile<T>> fileEntry : storeFileMap.entrySet()) {
                 if (position != fileEntry.getKey()) {
-                    throw new CorruptedLogException(String.format("Files are not continuous! expect: %d, actual file name: %d, store: %s.", position, fileEntry.getKey(), base.getAbsolutePath()));
-                    // TODO: 考虑自动删除store尾部不连续的文件，以解决掉电后需要手动恢复存储的问题。
+                    notContinueStartPosition = fileEntry.getKey();
+                    break;
                 }
                 position += fileEntry.getValue().file().length() - fileHeaderSize;
+            }
+
+            if (notContinueStartPosition != -1) {
+                for (Map.Entry<Long, StoreFile<T>> entry : storeFileMap.tailMap(notContinueStartPosition).entrySet()) {
+                    logger.warn("delete not continue file: {}", entry.getValue().file());
+                    forceDeleteStoreFile(entry.getValue());
+                    storeFileMap.remove(entry.getKey());
+                }
             }
         }
     }
@@ -631,6 +643,23 @@ public class PositioningStore<T /* 保存的数据类型 */> implements Closeabl
         return physicalDeleteTo(storeFile.position() + (storeFile.hasPage() ? storeFile.writePosition() : storeFile.fileDataSize()));
     }
 
+    public List<File> getFiles() {
+        if (storeFileMap.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return storeFileMap.values().stream().map(StoreFile::file).collect(Collectors.toList());
+    }
+
+    public boolean isEarly(long timestamp, long minIndexedPhysicalPosition) {
+        for (StoreFile<T> storeFile : storeFileMap.headMap(minIndexedPhysicalPosition).values()) {
+            if (storeFile.timestamp() > 0)
+                if (storeFile.timestamp() < timestamp) {
+                    return true;
+                }
+        }
+        return false;
+    }
+
     /**
      * 删除文件，丢弃未刷盘的数据，用于rollback
      */
@@ -729,7 +758,7 @@ public class PositioningStore<T /* 保存的数据类型 */> implements Closeabl
         public static final int DEFAULT_DISK_FULL_RATIO = 90;
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
         public static final boolean DEFAULT_LOAD_ON_READ = false;
-        public static final boolean DEFAULT_FLUSH_FORCE = true;
+        public static final boolean DEFAULT_FLUSH_FORCE = false;
 
         /**
          * 文件头长度
