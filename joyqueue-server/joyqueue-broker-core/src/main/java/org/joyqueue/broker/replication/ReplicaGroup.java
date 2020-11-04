@@ -227,7 +227,7 @@ public class ReplicaGroup extends Service {
      * @param replicaId 副本id
      * @return replica
      */
-    private Replica getReplica(int replicaId) {
+    public Replica getReplica(int replicaId) {
         return replicas.stream()
                 .filter(r -> r.replicaId() == replicaId)
                 .findFirst()
@@ -416,12 +416,9 @@ public class ReplicaGroup extends Service {
 
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
-                        if (!electionConfig.enableSharedHeartbeat()) {
-                            if (SystemClock.now() - replica.getLastAppendTime() >= electionConfig.getHeartbeatTimeout()) {
-                                request = generateHeartbeatRequest(replica);
-                            }
-                        }
-                        if (request == null) {
+                        if (SystemClock.now() - replica.getLastAppendTime() >= electionConfig.getElectionTimeout()) {
+                            request = generateHeartbeatRequest(replica);
+                        } else {
                             replicateResponseQueue.put(new DelayedCommand(ONE_MS_NANO, replica.replicaId()));
                             return;
                         }

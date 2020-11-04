@@ -23,6 +23,7 @@ import org.joyqueue.broker.election.command.TimeoutNowRequest;
 import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.election.command.VoteRequest;
 import org.joyqueue.broker.election.command.VoteResponse;
+import org.joyqueue.broker.replication.Replica;
 import org.joyqueue.broker.replication.ReplicaGroup;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
@@ -835,6 +836,15 @@ public class RaftLeaderElection extends LeaderElection  {
             if (node.equals(localNode)) {
                 continue;
             }
+
+            if (!electionConfig.enableSharedHeartbeat()) {
+                Replica replica = replicaGroup.getReplica(node.getNodeId());
+                if (replica != null && replica.getLastAppendTime() != 0
+                        && SystemClock.now() - replica.getLastAppendTime() > electionConfig.getHeartbeatMaxTimeout()) {
+                    continue;
+                }
+            }
+
             try {
                 electionExecutor.submit(() -> {
                     JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
