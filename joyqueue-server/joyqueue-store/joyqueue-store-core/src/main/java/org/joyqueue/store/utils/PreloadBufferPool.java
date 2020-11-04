@@ -280,7 +280,7 @@ public class PreloadBufferPool {
                 .sorted(Comparator.comparing(LruWrapper::getLastAccessTime))
                 .collect(Collectors.toList());
 
-        int needEvictCount = maxFd - mMapBufferHolders.size();
+        int needEvictCount = mMapBufferHolders.size() - maxFd;
         for (int i = 0; i < needEvictCount && !sortedMmapPage.isEmpty(); i++) {
             LruWrapper<BufferHolder> bufferHolder = sortedMmapPage.remove(0);
             bufferHolder.get().evict();

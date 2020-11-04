@@ -1728,7 +1728,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
 
     public static class Config {
         public static final int DEFAULT_MAX_MESSAGE_LENGTH = 4 * 1024 * 1024;
-        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 128;
+        public static final int DEFAULT_WRITE_REQUEST_CACHE_SIZE = 10240;
         public static final long DEFAULT_FLUSH_INTERVAL_MS = 50L;
         public static final boolean DEFAULT_FLUSH_FORCE = false;
         public static final long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
