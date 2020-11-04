@@ -163,7 +163,7 @@ public class BaseRepository {
     }
 
     protected String getTraceKey(String name) {
-        return "NameService." + sqlOperator.getClass().getSimpleName() + name.replace(" = ?", "_")
+        return "NameService." + sqlOperator.getClass().getSimpleName() + "." + name.replace(" = ?", "_")
                 .replace(" ", "_")
                 .replace("`", "")
                 .replace(",", "");

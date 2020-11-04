@@ -16,6 +16,7 @@
 package org.joyqueue.domain;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections.MapUtils;
 
 import java.io.Serializable;
@@ -40,6 +41,8 @@ public class TopicConfig extends Topic implements Serializable {
     private Map<Short, PartitionGroup> partitionGroupMap = new HashMap<>();
 
     private Map<Integer,PartitionGroup> partitionGroups;
+
+    private Set<Integer> replicas;
 
     /**
      * 主题配置转换
@@ -89,12 +92,7 @@ public class TopicConfig extends Topic implements Serializable {
     }
 
     public boolean isReplica(int brokerId) {
-        for (Map.Entry<Integer, PartitionGroup> entry : partitionGroups.entrySet()) {
-            if (entry.getValue().getReplicas().contains(brokerId)) {
-                return true;
-            }
-        }
-        return false;
+        return replicas.contains(brokerId);
     }
 
     public List<PartitionGroup> fetchTopicPartitionGroupsByBrokerId(int brokerId) {
@@ -110,6 +108,15 @@ public class TopicConfig extends Topic implements Serializable {
     public void setPartitionGroups(Map<Integer,PartitionGroup> partitionGroups) {
         this.partitionGroups = partitionGroups;
         this.partitionGroupMap = buildPartitionGroupMap(partitionGroups);
+        this.replicas = buildReplica(partitionGroups);
+    }
+
+    private Set<Integer> buildReplica(Map<Integer, PartitionGroup> partitionGroups) {
+        Set<Integer> result = Sets.newHashSet();
+        for (Map.Entry<Integer, PartitionGroup> partitionGroupEntry : partitionGroups.entrySet()) {
+            result.addAll(partitionGroupEntry.getValue().getReplicas());
+        }
+        return result;
     }
 
     private Map<Short, PartitionGroup> buildPartitionGroupMap(Map<Integer,PartitionGroup> partitionGroups) {

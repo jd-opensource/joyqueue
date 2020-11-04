@@ -15,9 +15,6 @@
  */
 package org.joyqueue.nsr.nameservice;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Maps;
 import com.jd.laf.extension.Type;
 import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.domain.AllMetadata;
@@ -54,20 +51,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * NameServerWrapper
  * author: gaohaoxiang
  * date: 2020/2/24
  */
-public class NameServer extends Service implements NameService, PropertySupplierAware, Type {
+public class NameServiceWrapper extends Service implements NameService, PropertySupplierAware, Type {
 
-    protected static final Logger logger = LoggerFactory.getLogger(NameServer.class);
+    protected static final Logger logger = LoggerFactory.getLogger(NameServiceWrapper.class);
 
     private NameServerInternal delegate;
     private PointTracer tracer;
@@ -76,10 +69,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     private NsrTransportServerFactory transportServerFactory;
     private TransportServer transportServer;
 
-    private Cache<String, Map<TopicName, TopicConfig>> appTopicCache;
-    private Cache<String, Optional<TopicConfig>> topicCache;
-
-    public NameServer() {
+    public NameServiceWrapper() {
         this.delegate = new NameServerInternal();
     }
 
@@ -210,19 +200,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     }
 
     protected TopicConfig doGetTopicConfig(TopicName topicName) {
-        if (nameServerConfig.getCacheEnable()) {
-            try {
-                Optional<TopicConfig> result = topicCache.get(topicName.getFullName(), () -> {
-                    return Optional.ofNullable(delegate.getTopicConfig(topicName));
-                });
-                return (result.isPresent() ? result.get() : null);
-            } catch (Exception e) {
-                logger.error("getTopicConfig exception, topicName: {}", topicName, e);
-                throw new NsrException(e);
-            }
-        } else {
-            return delegate.getTopicConfig(topicName);
-        }
+        return delegate.getTopicConfig(topicName);
     }
 
     @Override
@@ -317,22 +295,7 @@ public class NameServer extends Service implements NameService, PropertySupplier
     }
 
     protected Map<TopicName, TopicConfig> doGetTopicConfigByApp(String subscribeApp, Subscription.Type subscribe) {
-        if (nameServerConfig.getCacheEnable()) {
-            try {
-                return appTopicCache.get(subscribeApp + "_" + String.valueOf(subscribe), new Callable<Map<TopicName, TopicConfig>>() {
-                    @Override
-                    public Map<TopicName, TopicConfig> call() throws Exception {
-                        return delegate.getTopicConfigByApp(subscribeApp, subscribe);
-                    }
-                });
-            } catch (ExecutionException e) {
-                logger.error("getTopicConfigByApp exception, subscribeApp: {}, subscribe: {}",
-                        subscribeApp, subscribe);
-                return Maps.newHashMap();
-            }
-        } else {
-            return delegate.getTopicConfigByApp(subscribeApp, subscribe);
-        }
+        return delegate.getTopicConfigByApp(subscribeApp, subscribe);
     }
 
     @Override
@@ -401,10 +364,36 @@ public class NameServer extends Service implements NameService, PropertySupplier
     }
 
     @Override
+    public List<Consumer> getConsumersByApp(String app) {
+        TraceStat trace = tracer.begin("NameService.getConsumersByApp");
+        try {
+            List<Consumer> result = delegate.getConsumersByApp(app);
+            tracer.end(trace);
+            return result;
+        } catch (Exception e) {
+            tracer.error(trace);
+            throw e;
+        }
+    }
+
+    @Override
     public List<Producer> getProducerByTopic(TopicName topic) {
         TraceStat trace = tracer.begin("NameService.getProducerByTopic");
         try {
             List<Producer> result = delegate.getProducerByTopic(topic);
+            tracer.end(trace);
+            return result;
+        } catch (Exception e) {
+            tracer.error(trace);
+            throw e;
+        }
+    }
+
+    @Override
+    public List<Producer> getProducersByApp(String app) {
+        TraceStat trace = tracer.begin("NameService.getProducersByApp");
+        try {
+            List<Producer> result = delegate.getProducersByApp(app);
             tracer.end(trace);
             return result;
         } catch (Exception e) {
@@ -480,12 +469,6 @@ public class NameServer extends Service implements NameService, PropertySupplier
         nameServerConfig = new NameServerConfig(propertySupplier);
         transportServerFactory = new NsrTransportServerFactory(this, propertySupplier);
         transportServer = buildTransportServer();
-        topicCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(nameServerConfig.getTopicCacheExpireTime(), TimeUnit.MILLISECONDS)
-                .build();
-        appTopicCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(nameServerConfig.getTopicCacheExpireTime(), TimeUnit.MILLISECONDS)
-                .build();
         try {
             transportServer.start();
         } catch (Exception e) {

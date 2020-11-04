@@ -32,8 +32,10 @@ import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.nsr.event.AddConsumerEvent;
 import org.joyqueue.nsr.event.AddPartitionGroupEvent;
+import org.joyqueue.nsr.event.AddTopicEvent;
 import org.joyqueue.nsr.event.RemoveConsumerEvent;
 import org.joyqueue.nsr.event.RemovePartitionGroupEvent;
+import org.joyqueue.nsr.event.RemoveTopicEvent;
 import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
@@ -690,6 +692,14 @@ public class PositionManager extends Service {
                     logger.info("listen add partition group event:[{}]", addPartitionGroupEvent.toString());
 
                     addPartitionGroup(addPartitionGroupEvent.getTopic(), addPartitionGroupEvent.getPartitionGroup());
+                } else if (event.getEventType() == EventType.ADD_TOPIC) {
+                    AddTopicEvent addTopicEvent = (AddTopicEvent) event;
+                    logger.info("listen add topic event:[{}]", addTopicEvent.toString());
+
+
+                    for (PartitionGroup partitionGroup : addTopicEvent.getPartitionGroups()) {
+                        addPartitionGroup(partitionGroup.getTopic(), partitionGroup);
+                    }
                 }
             } catch (Exception ex) {
                 logger.error("AddPartitionGroupListener error.", ex);
@@ -710,6 +720,13 @@ public class PositionManager extends Service {
                     logger.info("listen remove partition group event:[{}]", removePartitionGroupEvent.toString());
 
                     removePartitionGroup(removePartitionGroupEvent.getTopic(), removePartitionGroupEvent.getPartitionGroup());
+                } else if (event.getEventType() == EventType.REMOVE_TOPIC) {
+                    RemoveTopicEvent removeTopicEvent = (RemoveTopicEvent) event;
+                    logger.info("listen remove topic event:[{}]", removeTopicEvent.toString());
+
+                    for (PartitionGroup partitionGroup : removeTopicEvent.getPartitionGroups()) {
+                        removePartitionGroup(partitionGroup.getTopic(), partitionGroup);
+                    }
                 }
             } catch (Exception ex) {
                 logger.error("RemovePartitionGroupListener error.", ex);
