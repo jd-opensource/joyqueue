@@ -558,7 +558,7 @@ public class PositionManager extends Service {
      * @param partitionGroup 分区分组
      */
     private void addPartitionGroup(TopicName topic, PartitionGroup partitionGroup) {
-        List<String> appList = clusterManager.getAppByTopic(topic);
+        List<String> appList = clusterManager.getConsumersByTopic(topic);
         Set<Short> partitions = partitionGroup.getPartitions();
 
         logger.debug("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
