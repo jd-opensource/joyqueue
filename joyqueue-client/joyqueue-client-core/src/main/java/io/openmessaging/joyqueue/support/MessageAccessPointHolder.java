@@ -19,7 +19,7 @@ import org.joyqueue.client.internal.MessageAccessPoint;
 
 /**
  * MessageAccessPointHolder
- *
+ *  
  * author: gaohaoxiang
  * date: 2019/5/14
  */
@@ -42,6 +42,7 @@ public class MessageAccessPointHolder {
         maybeStop();
     }
 
+    /** start producer */
     public void startProducer() {
         producers++;
     }
