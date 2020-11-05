@@ -118,12 +118,11 @@ public class BrokerRepository {
 
         if (StringUtils.isNotBlank(query.getKeyword())) {
             if (StringUtils.isNumeric(query.getKeyword())) {
-                sql.append(" AND (`id` = ? OR `ip` LIKE ?)");
+                sql.append(" AND `id` = ?");
                 params.add(query.getKeyword());
-                params.add("%" + query.getKeyword() + "%");
             } else {
-                sql.append(" AND `ip` LIKE ?");
-                params.add("%" + query.getKeyword() + "%");
+                sql.append(" AND `ip` = ?");
+                params.add(query.getKeyword());
             }
         }
         return sql.toString();
