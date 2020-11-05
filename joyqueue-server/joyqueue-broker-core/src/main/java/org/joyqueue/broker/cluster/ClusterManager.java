@@ -430,7 +430,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Consumer.ConsumerPolicy getConsumerPolicy(TopicName topic, String app) throws JoyQueueException {
-        Consumer consumer = nameService.getConsumerByTopicAndApp(topic, app);
+        Consumer consumer = tryGetConsumer(topic, app);
         if (null == consumer) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getConsumerPolicy();
@@ -486,6 +486,10 @@ public class ClusterManager extends Service {
     }
 
     public Consumer tryGetConsumer(TopicName topic, String app) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return null;
+        }
         return nameService.getConsumerByTopicAndApp(topic, app);
     }
 
@@ -497,7 +501,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Consumer.ConsumerPolicy tryGetConsumerPolicy(TopicName topic, String app) {
-        Consumer consumer = nameService.getConsumerByTopicAndApp(topic, app);
+        Consumer consumer = tryGetConsumer(topic, app);
         if (consumer == null) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getConsumerPolicy();
@@ -515,7 +519,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Producer.ProducerPolicy tryGetProducerPolicy(TopicName topic, String app) {
-        Producer producer = nameService.getProducerByTopicAndApp(topic, app);
+        Producer producer = tryGetProducer(topic, app);
         if (producer == null) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getProducerPolicy();
@@ -551,6 +555,10 @@ public class ClusterManager extends Service {
     }
 
     public Producer tryGetProducer(TopicName topic, String app) {
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return null;
+        }
         return nameService.getProducerByTopicAndApp(topic, app);
     }
 
@@ -562,7 +570,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Producer.ProducerPolicy getProducerPolicy(TopicName topic, String app) throws JoyQueueException {
-        Producer producer = nameService.getProducerByTopicAndApp(topic, app);
+        Producer producer = tryGetProducer(topic, app);
         if (null == producer) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getProducerPolicy();
@@ -825,10 +833,10 @@ public class ClusterManager extends Service {
      * @param topic 主题
      * @return
      */
-    public List<String> getAppByTopic(TopicName topic) {
+    public List<String> getConsumersByTopic(TopicName topic) {
         List<Consumer> consumerByTopic = nameService.getConsumerByTopic(topic);
         if (CollectionUtils.isEmpty(consumerByTopic)) {
-            return new ArrayList<>(0);
+            return Collections.emptyList();
         }
         List<String> appList = new ArrayList<>(consumerByTopic.size());
         consumerByTopic.stream().forEach(consume -> appList.add(consume.getApp()));
