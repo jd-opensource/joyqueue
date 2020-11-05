@@ -975,7 +975,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         // 构建写入请求对象
         WriteCommand writeCommand = new WriteCommand(qosLevel, eventListener, messages);
 
-        // 放入队列中，如果队列满，立刻返回错误
+        // 放入队列，如果队列满，立刻返回错误
         if (!this.writeCommandCache.offer(writeCommand)) {
             logger.warn("offer command queue failed, topic: {}, group: {}, queue size: {}",
                     topic, partitionGroup, writeCommandCache.size());

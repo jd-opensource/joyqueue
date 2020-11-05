@@ -175,7 +175,7 @@ public class PartitionGroupStoreManagerTest {
 
     @Test
     public void indexLengthTest() throws Exception {
-        int count = 1024 * 1024;
+        int count = 1024 * 10;
         long timeout = 500000L;
         long length = 0L;
 
