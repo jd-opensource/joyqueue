@@ -172,6 +172,7 @@ public class BaseRepository {
                 .replace("`", "")
                 .replace("(", "")
                 .replace(")", "")
+                .replace("=", "-")
                 .replace(",", "");
 
         return key;
