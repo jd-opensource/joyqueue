@@ -37,6 +37,7 @@ import org.joyqueue.nsr.event.LeaderChangeEvent;
 import org.joyqueue.nsr.event.RemovePartitionGroupEvent;
 import org.joyqueue.nsr.event.RemoveTopicEvent;
 import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
+import org.joyqueue.store.NoSuchPartitionGroupException;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.concurrent.EventListener;
@@ -302,12 +303,15 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
                 electionService.onNodeAdd(topicName, newPartitionGroup.getGroup(), newPartitionGroup.getElectType(),
                         brokers, newPartitionGroup.getLearners(), nameService.getBroker(newReplica),
                         currentBrokerId, newPartitionGroup.getLeader());
-                storeService.rePartition(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getPartitions().toArray(new Short[newPartitionGroup.getPartitions().size()]));
             }
         }
 
         if (oldPartitionGroup.getPartitions().size() != newPartitionGroup.getPartitions().size()) {
-            storeService.rePartition(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getPartitions().toArray(new Short[newPartitionGroup.getPartitions().size()]));
+            try {
+                storeService.rePartition(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getPartitions().toArray(new Short[newPartitionGroup.getPartitions().size()]));
+            } catch (NoSuchPartitionGroupException e) {
+                logger.error("rePartition exception, topic: {}, group: {}", newPartitionGroup.getTopic(), newPartitionGroup.getGroup(), e);
+            }
         }
 
         for (Integer oldReplica : oldReplicas) {
@@ -318,7 +322,6 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
             } else {
                 logger.info("topic[{}] update partitionGroup[{}] add node[{}] ", topicName, newPartitionGroup.getGroup(), oldReplica);
                 electionService.onNodeRemove(topicName, newPartitionGroup.getGroup(), oldReplica, currentBrokerId);
-                storeService.rePartition(topicName.getFullName(), newPartitionGroup.getGroup(), newPartitionGroup.getPartitions().toArray(new Short[newPartitionGroup.getPartitions().size()]));
             }
         }
     }
