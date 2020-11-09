@@ -51,8 +51,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * CompensatedNameService
@@ -75,8 +73,6 @@ public class CompensatedNameService extends Service implements NameService, Prop
     private MetadataCompensator metadataCompensator;
     private CompensateMetadataThread compensateMetadataThread;
     private int brokerId;
-    private AtomicLong nameserverLastAvailableTime = new AtomicLong();
-    private AtomicInteger nameserverNotAvailableCounter = new AtomicInteger(0);
 
     public CompensatedNameService(NameService delegate) {
         this.delegate = delegate;
