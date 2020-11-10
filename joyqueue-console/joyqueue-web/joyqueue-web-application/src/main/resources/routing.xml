@@ -311,8 +311,8 @@
         <route inherit="put"
                path="/v1/producer/update/:id" handlers="producer#update render"
                errors="error"/>
-        <route inherit="delete"
-               path="/v1/producer/delete/:id" handlers="producer#delete render"
+        <route inherit="post"
+               path="/v1/producer/delete" handlers="producer#delete render"
                errors="error"/>
         <route inherit="post"
                path="/v1/producer/query-by-topic" handlers="producer#query-by-topic render"
