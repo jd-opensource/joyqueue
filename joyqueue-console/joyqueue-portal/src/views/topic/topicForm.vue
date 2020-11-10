@@ -10,17 +10,21 @@
         <div class="stepForm1">
           <d-form ref="form1" :model="formData" :rules="rules.rule1" label-width="110px">
             <d-form-item label="主题英文名：" :error="error.code" prop="code">
-              <d-input v-model="formData.code" oninput="value = value.trim()" placeholder="仅支持英文字母大小写、数字、-、_和/" style="width: 70%"></d-input>
+              <d-input v-model="formData.code" oninput="value = value.trim()" placeholder="支持-、_、字母、数字，区分大小写，首字符为字母" style="width: 70%"></d-input>
             </d-form-item>
             <d-form-item label="命名空间：" prop="namespace">
-              <d-autocomplete
+<!--              <d-autocomplete
                 class="inline-input"
                 v-model="formData.namespace.code"
                 :fetch-suggestions="searchNamespace"
                 placeholder="请输入内容"
                 style="width: 50%"
                 @select="handleNamespaceSelect"
-              ></d-autocomplete>
+              ></d-autocomplete>-->
+              <d-select v-model="formData.namespace.code"
+                        style="width: 50%">
+                <d-option v-for="item in namespaceList" :value="item.code" :key="item.code">{{ item.code }}</d-option>
+              </d-select>
             </d-form-item>
             <d-form-item label="主题类型：" prop="type">
               <d-select v-model="formData.type" :value="0" style="width: 70%" @on-change="handlerTypeChange">
@@ -32,10 +36,10 @@
             <d-form-item label="分区数量：" prop="partitions">
               <d-input v-model.number="formData.partitions" oninput="value = value.trim()" :disabled="partitionsDisabled" style="width: 70%"></d-input>
             </d-form-item>
-            <d-form-item label="选举类型：" prop="electType">
-              <d-select v-model.number="formData.electType" style="width: 70%">
+            <d-form-item label="选举类型：" prop="electType" style="display:none">
+              <d-select v-model.number="formData.electType" style="width: 70%" >
                 <d-option :value="0" >Raft</d-option>
-                <d-option :value="1" >Fix</d-option>
+<!--                <d-option :value="1" >Fix</d-option>-->
               </d-select>
             </d-form-item>
             <d-form-item label="Broker分组：" prop="brokerGroup">
@@ -152,7 +156,7 @@ export default {
         rule1: {
           code: [
             {required: true, message: '请输入topic英文名', trigger: 'change'},
-            {pattern: /^[a-zA-Z0-9/_-]{3,120}$/, message: '英文名格式不匹配', trigger: 'change'}
+            {pattern: /^[a-zA-Z].[a-zA-Z0-9_-]{1,120}$/, message: '英文名格式不匹配', trigger: 'change'}
           ],
           name: getNameRule(),
           partitions: [
