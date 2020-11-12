@@ -88,6 +88,8 @@ public enum StoreConfigKey implements PropertyDef {
 
     DISK_FULL_RATIO("store.disk.full.ratio", PositioningStore.Config.DEFAULT_DISK_FULL_RATIO, Type.INT),
 
+    ENQUEUE_TIMEOUT("store.enqueue.timeout", StoreConfig.DEFAULT_ENQUEUE_TIMEOUT, Type.INT),
+
     PRINT_METRIC_INTERVAL_MS("print.metric.interval", StoreConfig.DEFAULT_PRINT_METRIC_INTERVAL_MS, Type.LONG);
 
 

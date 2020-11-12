@@ -59,6 +59,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -975,9 +976,18 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         // 构建写入请求对象
         WriteCommand writeCommand = new WriteCommand(qosLevel, eventListener, messages);
 
-        // 放入队列，如果队列满，立刻返回错误
-        if (!this.writeCommandCache.offer(writeCommand)) {
-            logger.warn("offer command queue failed, topic: {}, group: {}, queue size: {}",
+        try {
+            if (!this.writeCommandCache.offer(writeCommand, config.enqueueTimeout, TimeUnit.MILLISECONDS)) {
+                logger.warn("offer command queue failed, topic: {}, group: {}, queue size: {}",
+                        topic, partitionGroup, writeCommandCache.size());
+
+                if (eventListener != null) {
+                    eventListener.onEvent(new WriteResult(JoyQueueCode.SE_WRITE_FAILED, null));
+                }
+                return;
+            }
+        } catch (InterruptedException e) {
+            logger.warn("offer command queue interrupted, topic: {}, group: {}, queue size: {}",
                     topic, partitionGroup, writeCommandCache.size());
 
             if (eventListener != null) {
@@ -1734,6 +1744,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
         public static final long DEFAULT_WRITE_TIMEOUT_MS = 3000L;
         public static final long DEFAULT_MAX_DIRTY_SIZE = 10L * 1024 * 1024;
         public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0L;
+        public static final int DEFAULT_ENQUEUE_TIMEOUT = 100;
 
         /**
          * 允许脏数据的最大长度，超过这个长度就阻塞写入。
@@ -1765,19 +1776,24 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
          */
         private final long printMetricIntervalMs;
 
+        /**
+         * 入队超时
+         */
+        private final int enqueueTimeout;
+
         private final PositioningStore.Config storeConfig;
         private final PositioningStore.Config indexStoreConfig;
 
         public Config() {
 
             this(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
-                    DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_PRINT_METRIC_INTERVAL_MS,
+                    DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, DEFAULT_PRINT_METRIC_INTERVAL_MS, DEFAULT_ENQUEUE_TIMEOUT,
                     new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE),
                     new PositioningStore.Config(PositioningStore.Config.DEFAULT_FILE_DATA_SIZE, false, DEFAULT_FLUSH_FORCE));
         }
 
         public Config(int maxMessageLength, int writeRequestCacheSize, long flushIntervalMs,
-                      long writeTimeoutMs, long maxDirtySize, long printMetricIntervalMs,
+                      long writeTimeoutMs, long maxDirtySize, long printMetricIntervalMs, int enqueueTimeout,
                       PositioningStore.Config storeConfig, PositioningStore.Config indexStoreConfig) {
             this.maxMessageLength = maxMessageLength;
             this.writeRequestCacheSize = writeRequestCacheSize;
@@ -1785,6 +1801,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
             this.writeTimeoutMs = writeTimeoutMs;
             this.maxDirtySize = maxDirtySize;
             this.printMetricIntervalMs = printMetricIntervalMs;
+            this.enqueueTimeout = enqueueTimeout;
             this.storeConfig = storeConfig;
             this.indexStoreConfig = indexStoreConfig;
         }
