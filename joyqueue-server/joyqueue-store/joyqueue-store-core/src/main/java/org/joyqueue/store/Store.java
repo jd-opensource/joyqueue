@@ -307,7 +307,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         return new PartitionGroupStoreManager.Config(
                 config.getMaxMessageLength(), config.getWriteRequestCacheSize(), config.getFlushIntervalMs(),
                 config.getWriteTimeoutMs(), config.getMaxDirtySize(),
-                config.getPrintMetricIntervalMs(), messageConfig, indexConfig);
+                config.getPrintMetricIntervalMs(), config.getEnqueueTimeout(), messageConfig, indexConfig);
     }
 
     private PositioningStore.Config getIndexStoreConfig(StoreConfig config) {
