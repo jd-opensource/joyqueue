@@ -24,17 +24,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.joyqueue.context.GlobalApplicationContext;
-import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.handler.routing.command.application.ApplicationTokenCommand;
-import org.joyqueue.handler.routing.command.broker.BrokerCommand;
-import org.joyqueue.handler.routing.command.config.ConfigCommand;
-import org.joyqueue.handler.routing.command.config.DataCenterCommand;
-import org.joyqueue.handler.routing.command.monitor.ConsumerCommand;
-import org.joyqueue.handler.routing.command.monitor.ProducerCommand;
-import org.joyqueue.handler.routing.command.topic.NamespaceCommand;
-import org.joyqueue.handler.routing.command.topic.PartitionGroupReplicaCommand;
-import org.joyqueue.handler.routing.command.topic.TopicCommand;
-import org.joyqueue.handler.routing.command.topic.TopicPartitionGroupCommand;
 import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.nsr.NsrServiceProvider;
@@ -44,10 +33,7 @@ import org.joyqueue.util.LocalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 
 /**
