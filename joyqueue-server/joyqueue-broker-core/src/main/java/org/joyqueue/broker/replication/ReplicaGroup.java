@@ -401,6 +401,7 @@ public class ReplicaGroup extends Service {
             delayTimeNs = ONE_SECOND_NANO;
         }
 
+        getReplica(localReplicaId).writePosition(replicableStore.rightPosition());
         replicateResponseQueue.put(new DelayedCommand(delayTimeNs, localReplicaId));
     }
 
