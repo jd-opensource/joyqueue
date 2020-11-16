@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.joyqueue.handler.Constants.ID;
+
 /**
  * Created by wangxiaofei1 on 2018/10/19.
  */
@@ -87,4 +89,15 @@ public class DataCenterCommand extends NsrCommandSupport<DataCenter,DataCenterSe
         return Responses.success(dataCenters);
     }
 
+    @Path("add")
+    @Override
+    public Response add(@Body DataCenter model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body DataCenter model) throws Exception {
+        return super.update(id, model);
+    }
 }

@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.joyqueue.handler.Constants.ID;
+
 
 public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService, QProducer> {
     private final Logger logger = LoggerFactory.getLogger(ProducerCommand.class);
@@ -246,4 +248,15 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
 //    }
 
 
+    @Path("add")
+    @Override
+    public Response add(@Body Producer model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body Producer model) throws Exception {
+        return super.update(id, model);
+    }
 }

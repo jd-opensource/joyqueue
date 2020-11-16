@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.apache.commons.collections.CollectionUtils;
@@ -44,6 +45,8 @@ import org.joyqueue.service.TopicService;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * 主题 处理器
@@ -129,4 +132,15 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         }
     }
 
+    @Path("add")
+    @Override
+    public Response add(@Body Topic model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body Topic model) throws Exception {
+        return super.update(id, model);
+    }
 }

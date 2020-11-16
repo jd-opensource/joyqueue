@@ -59,28 +59,23 @@ public class OperLogAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(OperLogAspect.class);
 
-    private final Set<Class<?>> exceptCommandClasses = new HashSet<>(
-            Arrays.asList(TopicCommand.class, NamespaceCommand.class, ConsumerCommand.class,
-                    ProducerCommand.class, ApplicationTokenCommand.class, BrokerCommand.class,
-                    TopicPartitionGroupCommand.class, PartitionGroupReplicaCommand.class,
-                    ConfigCommand.class, DataCenterCommand.class, NsrCommandSupport.class)
-    );
-
     @Around("@annotation(com.jd.laf.web.vertx.annotation.Path)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         Object result = joinPoint.proceed();
         if (result instanceof Response) {
             Response response = (Response) result;
             Class<?> clazz = joinPoint.getSignature().getDeclaringType();
-            if (response.getCode() == 200 && !exceptCommandClasses.contains(clazz)) {
+            if (response.getCode() == 200) {
                 MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
                 Path path = methodSignature.getMethod().getAnnotation(Path.class);
                 int operType = -1;
                 if (StringUtils.containsIgnoreCase(path.value(), "add")) {
                     operType = OperLog.OperType.ADD.value();
-                } else if (StringUtils.containsIgnoreCase(path.value(), "delete")) {
+                } else if (StringUtils.containsIgnoreCase(path.value(), "delete") ||
+                        StringUtils.containsIgnoreCase(path.value(), "remove")) {
                     operType = OperLog.OperType.DELETE.value();
-                } else if (StringUtils.containsIgnoreCase(path.value(), "update")) {
+                } else if (StringUtils.containsIgnoreCase(path.value(), "update") ||
+                    StringUtils.containsIgnoreCase(path.value(), "reset")) {
                     operType = OperLog.OperType.UPDATE.value();
                 }
                 if (operType >= 1 && operType <= 3) {

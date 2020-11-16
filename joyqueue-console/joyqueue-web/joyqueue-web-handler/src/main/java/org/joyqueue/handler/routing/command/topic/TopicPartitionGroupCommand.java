@@ -18,6 +18,7 @@ package org.joyqueue.handler.routing.command.topic;
 
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.joyqueue.handler.annotation.PageQuery;
@@ -34,6 +35,8 @@ import org.joyqueue.service.TopicPartitionGroupService;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * Topic partition group command
@@ -88,4 +91,9 @@ public class TopicPartitionGroupCommand extends NsrCommandSupport<TopicPartition
         return Responses.success();
     }
 
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body TopicPartitionGroup model) throws Exception {
+        return super.update(id, model);
+    }
 }

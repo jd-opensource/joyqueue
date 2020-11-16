@@ -16,6 +16,7 @@
 package org.joyqueue.handler.routing.command.application;
 
 import com.jd.laf.binding.annotation.Value;
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
@@ -37,6 +38,8 @@ import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.UserService;
 
 import javax.validation.constraints.NotNull;
+
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * Created by wangxiaofei1 on 2018/10/19.
@@ -103,4 +106,21 @@ public class ApplicationCommand extends CommandSupport<Application,ApplicationSe
         return Responses.success(service.findByCode(appCode));
     }
 
+    @Path("add")
+    @Override
+    public Response add(@Body Application model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)Long id,@Body Application model) throws Exception {
+        return super.update(id, model);
+    }
+
+    @Path("delete")
+    @Override
+    public Response delete(@QueryParam(ID)Long id) throws Exception {
+        return super.delete(id);
+    }
 }

@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.joyqueue.handler.Constants.ID;
 import static org.joyqueue.handler.routing.command.monitor.ProducerCommand.CAN_OPERATE_PROPERTY;
 
 
@@ -243,4 +244,9 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
         return Responses.success(service.findAppsByTopic(topic));
     }
 
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body Consumer model) throws Exception {
+        return super.update(id, model);
+    }
 }

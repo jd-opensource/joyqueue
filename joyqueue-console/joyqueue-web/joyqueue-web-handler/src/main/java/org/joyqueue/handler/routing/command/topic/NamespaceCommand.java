@@ -15,7 +15,9 @@
  */
 package org.joyqueue.handler.routing.command.topic;
 
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +32,8 @@ import org.joyqueue.service.NamespaceService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * 命名空间 处理器
@@ -75,4 +79,21 @@ public class NamespaceCommand extends NsrCommandSupport<Namespace, NamespaceServ
         return Responses.success(service.findAll());
     }
 
+    @Path("add")
+    @Override
+    public Response add(@Body Namespace model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id, @Body Namespace model) throws Exception {
+        return super.update(id, model);
+    }
+
+    @Path("delete")
+    @Override
+    public Response delete(@QueryParam(ID)String id) throws Exception {
+        return super.delete(id);
+    }
 }

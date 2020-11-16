@@ -32,6 +32,8 @@ import org.joyqueue.model.query.QBroker;
 import org.joyqueue.service.BrokerService;
 import org.apache.commons.net.telnet.TelnetClient;
 
+import static org.joyqueue.handler.Constants.ID;
+
 /**
  * @author wylixiaobin
  * Date: 2018/10/17
@@ -81,5 +83,17 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
             return Responses.error(500,"未存活");
         }
         return Responses.success();
+    }
+
+    @Path("add")
+    @Override
+    public Response add(@Body Broker model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body Broker model) throws Exception {
+        return super.update(id, model);
     }
 }
