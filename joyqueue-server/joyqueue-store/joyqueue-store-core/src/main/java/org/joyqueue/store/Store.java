@@ -236,7 +236,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         }
         File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
 
-        if (groupBase.exists()) deletePartitionGroup(groupBase, partitionGroupStoreManger);
+        if (groupBase.exists()) deletePartitionGroup(groupBase, topic, partitionGroup, partitionGroupStoreManger);
 
 
         File topicBase = new File(base, getTopicRelPath(topic));
@@ -292,7 +292,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
         if (!storeMap.containsKey(topic + "/" + partitionGroup)) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
-            if (groupBase.exists()) deletePartitionGroup(groupBase, null);
+            if (groupBase.exists()) deletePartitionGroup(groupBase, topic, partitionGroup, null);
             PartitionGroupStoreSupport.init(groupBase, partitions);
 
             restorePartitionGroup(topic, partitionGroup);
@@ -323,9 +323,9 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     /**
      * 并不真正删除，只是重命名
      */
-    private boolean deletePartitionGroup(File file, PartitionGroupStoreManager partitionGroupStoreManager) {
+    private boolean deletePartitionGroup(File file, String topic, int partitionGroup, PartitionGroupStoreManager partitionGroupStoreManager) {
         File renamed = new File(base, TOPICS_DIR + File.separator + DEL_PREFIX + SystemClock.now() +
-                "." + partitionGroupStoreManager.getTopic() + "." + partitionGroupStoreManager.getPartitionGroup());
+                "." + topic + "." + partitionGroup);
         boolean renameResult = file.renameTo(renamed);
 
         if (partitionGroupStoreManager != null) {
