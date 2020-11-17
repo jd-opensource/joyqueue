@@ -29,7 +29,7 @@
     <description>Spring Support for the OpenMessaging API</description>
 
     <properties>
-        <spring.version>5.1.5.RELEASE</spring.version>
+        <spring.version>5.2.9.RELEASE</spring.version>
     </properties>
 
     <dependencies>
