@@ -487,7 +487,7 @@
                errors="error"/>
         <!--同步操作 -->
         <route inherit="post"
-               path="/v1/sync/application" handlers="syncApp render"
+               path="/v1/sync/application" handlers="syncApplication#syncApp render"
                errors="error"/>
         <route inherit="post"
                path="/v1/sync/user" handlers="syncUser render"
