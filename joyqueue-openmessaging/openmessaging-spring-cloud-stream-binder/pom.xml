@@ -14,7 +14,7 @@
     <description>SpringCloud Stream binder Support for the OpenMessaging API</description>
 
     <properties>
-        <spring-cloud-stream.version>3.0.3.RELEASE</spring-cloud-stream.version>
+        <spring-cloud-stream.version>2.1.4.RELEASE</spring-cloud-stream.version>
     </properties>
 
     <dependencies>
@@ -49,10 +49,6 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.joyqueue</groupId>

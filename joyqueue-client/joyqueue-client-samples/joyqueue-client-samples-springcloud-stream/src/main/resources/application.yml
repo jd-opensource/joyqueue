@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# 采用Spring Cloud Stream与此种配置冲突
+# 采用Spring Cloud Stream与Spring Boot配置冲突, Spring Boot优先级会更高
 #spring.oms:
 #  url: oms:joyqueue://test_app@127.0.0.1:50088/UNKNOWN
 #  attributes:

@@ -15,7 +15,7 @@
  */
 package io.openmessaging.spring.cloud.stream.binder.utils;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.openmessaging.producer.Producer;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.logging.Log;
@@ -32,10 +32,12 @@ public class MessageUtil {
 
     private static final Log log = LogFactory.getLog(MessageUtil.class);
 
-    public static org.springframework.messaging.Message<?> convert2SpringMessage(io.openmessaging.message.Message message) {
+    private static ObjectMapper mapper = new ObjectMapper();
+
+    public static org.springframework.messaging.Message<?> convert2SpringMessage(io.openmessaging.message.Message omsMessage) {
         try {
-            return MessageBuilder.withPayload(message.getData())
-                    .copyHeaders(BeanUtils.describe(message.header()))
+            return MessageBuilder.withPayload(omsMessage.getData())
+                    .copyHeaders(BeanUtils.describe(omsMessage.header()))
                     .build();
         } catch (Exception e) {
             log.error("Convert OMS message to Spring message error! " + e.getMessage(), e);
@@ -51,8 +53,8 @@ public class MessageUtil {
             omsMessage = producer.createMessage(destination, (byte[]) message.getPayload());
         } else {
             try {
-                String jsonObj = JSON.toJSONString(message.getPayload());
-                omsMessage = producer.createMessage(destination, jsonObj.getBytes(Charset.forName("utf8")));
+                String jsonStr = mapper.writeValueAsString(message.getPayload());
+                omsMessage = producer.createMessage(destination, jsonStr.getBytes(Charset.forName("utf8")));
             } catch (Exception e) {
                 log.error("Convert Spring message to OMS message error! " + e.getMessage(), e);
                 throw new RuntimeException("Convert to OMS message failed.", e);

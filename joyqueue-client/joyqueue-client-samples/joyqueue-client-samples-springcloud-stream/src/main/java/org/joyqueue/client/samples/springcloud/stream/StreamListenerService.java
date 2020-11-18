@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.openmessaging.samples.springcloudstream;
+package org.joyqueue.client.samples.springcloud.stream;
 
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.Message;

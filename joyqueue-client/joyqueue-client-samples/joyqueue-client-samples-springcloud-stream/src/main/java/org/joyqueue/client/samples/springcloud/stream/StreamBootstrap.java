@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.openmessaging.samples.springcloudstream;
+package org.joyqueue.client.samples.springcloud.stream;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,7 +23,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.GenericMessage;
 
 @EnableBinding(CustomProcessor.class)
-@SpringBootApplication(scanBasePackages = {"io.openmessaging.samples.springcloudstream"})
+@SpringBootApplication(scanBasePackages = {"org.joyqueue.client.samples.springcloud.stream"})
 public class StreamBootstrap {
 
     public static void main(String[] args) throws InterruptedException {

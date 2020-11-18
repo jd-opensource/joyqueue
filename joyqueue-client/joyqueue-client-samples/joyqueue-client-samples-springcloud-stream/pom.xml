@@ -16,32 +16,25 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>joyqueue-openmessaging</artifactId>
+        <artifactId>joyqueue-client-samples</artifactId>
         <groupId>org.joyqueue</groupId>
         <version>4.2.8-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>openmessaging-spring</artifactId>
-    <name>OpenMessaging-Spring</name>
-    <description>Spring Support for the OpenMessaging API</description>
-
-    <properties>
-        <spring.version>5.1.5.RELEASE</spring.version>
-    </properties>
+    <artifactId>joyqueue-client-samples-springcloud-stream</artifactId>
+    <name>JoyQueue-Client-Samples-SpringCloud-Stream</name>
+    <description>Client samples using SpringCloud Stream</description>
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
+            <groupId>org.joyqueue</groupId>
+            <artifactId>openmessaging-spring-cloud-stream-binder</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
