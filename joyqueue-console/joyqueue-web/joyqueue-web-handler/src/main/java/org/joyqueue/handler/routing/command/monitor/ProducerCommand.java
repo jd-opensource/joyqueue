@@ -133,7 +133,7 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
 
     @Override
     @Path("delete")
-    public Response delete(@QueryParam(Constants.ID) String id) throws Exception {
+    public Response delete(@Body(type = Body.BodyType.TEXT) String id) throws Exception {
         Producer producer = service.findById(id);
         int count = service.delete(producer);
         if (count <= 0) {
@@ -177,6 +177,19 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
             }
         }
         return Responses.success(currentWeights);
+    }
+
+    @Path("updateWeight")
+    public Response updateWeight(@QueryParam(Constants.ID) String id, @Body Map<String, Object> body) throws Exception {
+        Producer producer = service.findById(id);
+        if (body.containsKey("weight")) {
+            if (producer.getConfig() == null) {
+                producer.setConfig(new ProducerConfig());
+            }
+            producer.getConfig().setWeight(body.get("weight").toString());
+        }
+        service.update(producer);
+        return Responses.success();
     }
 
     /**

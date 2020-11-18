@@ -212,6 +212,7 @@ public class ConsumerServiceImpl implements ConsumerService {
         if (application != null) {
             app.setId(application.getId());
             app.setName(application.getName());
+            consumer.setOwner(application.getOwner());
         }
         return consumer;
     }
