@@ -91,6 +91,12 @@ public class TopicPartitionGroupCommand extends NsrCommandSupport<TopicPartition
         return Responses.success();
     }
 
+    @Path("add")
+    @Override
+    public Response add(TopicPartitionGroup model) throws Exception {
+        return super.add(model);
+    }
+
     @Path("update")
     @Override
     public Response update(@QueryParam(ID)String id,@Body TopicPartitionGroup model) throws Exception {
