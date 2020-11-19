@@ -785,7 +785,7 @@ public class RaftLeaderElection extends LeaderElection  {
         if (request.getTerm() < currentTerm) {
             logger.info("Partition group {}/node {} receive append entries request from {}, current term {} " +
                             "is bigger than request term {}, length is {}",
-                    topicPartitionGroup, localNode, currentTerm, request.getLeaderId(),
+                    topicPartitionGroup, localNode, request.getLeaderId(), currentTerm,
                     request.getTerm(), request.getEntriesLength());
             return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                     new AppendEntriesResponse.Build().success(false).term(currentTerm)

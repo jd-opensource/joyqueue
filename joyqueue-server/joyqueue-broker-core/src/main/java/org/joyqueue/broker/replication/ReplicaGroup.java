@@ -564,7 +564,7 @@ public class ReplicaGroup extends Service {
                         1, entriesLength, usTime() - startTimeUs);
 
             } catch (Exception e) {
-                logger.info("Partition group {}/node {} process append entries reponse fail",
+                logger.info("Partition group {}/node {} process append entries response fail",
                         topicPartitionGroup, localReplicaId, e);
             } finally {
                 replicateResponseQueue.put(new DelayedCommand(0, replica.replicaId()));
