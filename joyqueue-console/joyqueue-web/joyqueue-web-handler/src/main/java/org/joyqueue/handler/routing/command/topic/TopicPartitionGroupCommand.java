@@ -93,7 +93,7 @@ public class TopicPartitionGroupCommand extends NsrCommandSupport<TopicPartition
 
     @Path("add")
     @Override
-    public Response add(TopicPartitionGroup model) throws Exception {
+    public Response add(@Body TopicPartitionGroup model) throws Exception {
         return super.add(model);
     }
 
