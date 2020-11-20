@@ -284,8 +284,8 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         int currentBrokerId = clusterManager.getBrokerId();
         Set<Integer> newReplicas = Sets.newHashSet(newPartitionGroup.getReplicas());
         Set<Integer> oldReplicas = Sets.newHashSet(oldPartitionGroup.getReplicas());
-        newReplicas.removeAll(oldReplicas);
-        oldReplicas.removeAll(newReplicas);
+        newReplicas.removeAll(oldPartitionGroup.getReplicas());
+        oldReplicas.removeAll(newPartitionGroup.getReplicas());
 
         List<Broker> brokers = Lists.newLinkedList();
         for (Integer newReplica : newPartitionGroup.getReplicas()) {
