@@ -47,7 +47,7 @@ public class DefaultTransportServerFactory implements TransportServerFactory {
     }
 
     public DefaultTransportServerFactory(Codec codec, CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler) {
-        this(codec, commandHandlerFactory, exceptionHandler, new EventBus());
+        this(codec, commandHandlerFactory, exceptionHandler, new EventBus("joyqueue-transport-server-eventBus"));
     }
 
     public DefaultTransportServerFactory(Codec codec, CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler, EventBus<TransportEvent> eventBus) {
