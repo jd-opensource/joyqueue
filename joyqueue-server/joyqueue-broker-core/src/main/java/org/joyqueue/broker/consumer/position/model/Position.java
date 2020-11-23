@@ -16,6 +16,7 @@
 package org.joyqueue.broker.consumer.position.model;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 位置信息（消费序号/拉取序号）
@@ -26,7 +27,7 @@ public class Position implements Cloneable {
     // 开始应答序号
     private volatile long ackStartIndex;
     // 结束应答序号
-    private volatile long ackCurIndex;
+    private volatile AtomicLong ackCurIndex = new AtomicLong(0);
     // 开始拉取序号
     private volatile long pullStartIndex;
     // 结束拉取序号
@@ -39,7 +40,7 @@ public class Position implements Cloneable {
 
     public Position(long ackStartIndex, long ackEndIndex, long pullStartIndex, long pullEndIndex) {
         this.ackStartIndex = ackStartIndex;
-        this.ackCurIndex = ackEndIndex;
+        this.ackCurIndex = new AtomicLong(ackEndIndex);
         this.pullStartIndex = pullStartIndex;
         this.pullCurIndex = pullEndIndex;
     }
@@ -53,11 +54,15 @@ public class Position implements Cloneable {
     }
 
     public long getAckCurIndex() {
-        return ackCurIndex;
+        return ackCurIndex.get();
     }
 
     public void setAckCurIndex(long ackCurIndex) {
-        this.ackCurIndex = ackCurIndex;
+        this.ackCurIndex.set(ackCurIndex);
+    }
+
+    public boolean setAckCurIndex(long oldAckCurIndex, long ackCurIndex) {
+        return this.ackCurIndex.compareAndSet(oldAckCurIndex, ackCurIndex);
     }
 
     public long getPullStartIndex() {

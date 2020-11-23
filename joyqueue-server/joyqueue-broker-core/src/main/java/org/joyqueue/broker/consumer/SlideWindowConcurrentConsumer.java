@@ -183,7 +183,9 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
 
             if (consumePartition.getTopic().equals(topic) && partitions.contains(consumePartition.getPartition())) {
                 if (clearSlideWindow(consumePartition)) {
+                    resetPullPositionFlag.remove(consumePartition);
                     iterator.remove();
+                    resetPullPositionFlag.remove(consumePartition);
                 }
             }
         }
@@ -195,7 +197,6 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
         if (policy != null && policy.isConcurrent() && isLeader) {
             return false;
         }
-        resetPullPositionFlag.remove(consumePartition);
         return true;
     }
 
@@ -848,7 +849,7 @@ public class SlideWindowConcurrentConsumer extends Service implements Concurrent
                    long lastMsgAckIndex = positionManager.getLastMsgAckIndex(topic, app, partition);
                    consumedMessagesMap.remove(consumedMessages.getStartIndex());
                    if (lastMsgAckIndex >= consumedMessages.getStartIndex() && lastMsgAckIndex < consumedMessages.getStartIndex() + consumedMessages.getCount()) {
-                       positionManager.updateLastMsgAckIndex(topic, app, partition,
+                       positionManager.updateLastMsgAckIndex(topic, app, partition, lastMsgAckIndex,
                                consumedMessages.getStartIndex() + consumedMessages.getCount(), false);
                    } else {
                        logger.warn("Ack index not match, topic: {}, partition: {}, ack: [{} - {}], currentAckIndex: {}!",

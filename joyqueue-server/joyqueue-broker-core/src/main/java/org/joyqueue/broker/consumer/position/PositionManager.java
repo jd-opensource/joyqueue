@@ -303,6 +303,31 @@ public class PositionManager extends Service {
         return true;
     }
 
+    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long oldIndex, long index, boolean isUpdatePullIndex) throws JoyQueueException {
+        logger.debug("Update last ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+        // 检查索引有效性
+        checkIndex(topic, partition, index);
+        // 标记最近一次更新应答位置时间
+        markLastAckTime(topic, app, partition);
+
+        ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
+        Position position = positionStore.get(consumePartition);
+        if (position != null) {
+            boolean result = position.setAckCurIndex(oldIndex, index);
+            if (!result) {
+                return false;
+            }
+            if (isUpdatePullIndex) {
+                position.setPullCurIndex(-1);
+            }
+        } else {
+            logger.error("Position is null, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+            // 补偿逻辑：如果当前broker是指定partition对应partitionGroup的leader，则按照给定index初始化Position，否则不处理
+            addAndUpdatePosition(topic, app, partition, index);
+        }
+        return true;
+    }
+
     /**
      * 检查更新的位置是否有效
      *
