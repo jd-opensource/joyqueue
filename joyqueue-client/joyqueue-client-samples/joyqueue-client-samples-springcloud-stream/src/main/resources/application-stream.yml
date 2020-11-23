@@ -39,16 +39,15 @@ spring:
 
       oms:
         binder:
-          url: oms:joyqueue://jqbinder@test-nameserver.jmq.xx.local:50088/UNKNOWN
+          url: oms:joyqueue://jqbinder@test-nameserver.jmq.jd.local:50088/UNKNOWN
           attributes:
             ACCOUNT_KEY: 3badf11566f94465968968827dfce0c8
         bindings:
           outputOrder:
             producer:
-              destination: jqtopic
-              content-type: text/plain
               group: demo-group
+              sync: true
           inputOrder:
             consumer:
               enable: true
-              batch: true
+              batch: false

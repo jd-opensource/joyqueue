@@ -80,13 +80,19 @@ public class OMSMessageChannelBinder extends AbstractMessageChannelBinder<Extend
                                                           MessageChannel channel,
                                                           MessageChannel errorChannel) throws Exception {
         Producer producer = accessPointContainer.getAccessPoint().createProducer();
+        MessageConverterConfigurer.PartitioningInterceptor partitioningInterceptor = null;
+        if (null != channel) {
+            partitioningInterceptor = ((AbstractMessageChannel) channel).getChannelInterceptors().stream()
+                    .filter(channelInterceptor -> channelInterceptor instanceof MessageConverterConfigurer.PartitioningInterceptor)
+                    .map(channelInterceptor -> ((MessageConverterConfigurer.PartitioningInterceptor) channelInterceptor))
+                    .findFirst().orElse(null);
+        }
         OMSMessageHandler messageHandler = new OMSMessageHandler(producer, destination.getName(),
                 StringUtils.isEmpty(producerProperties.getExtension().getGroup()) ? destination.getName() : producerProperties.getExtension().getGroup(),
-                producerProperties.getExtension().getTransactional(), producerProperties,
-                ((AbstractMessageChannel) channel).getChannelInterceptors().stream()
-                        .filter(channelInterceptor -> channelInterceptor instanceof MessageConverterConfigurer.PartitioningInterceptor)
-                        .map(channelInterceptor -> ((MessageConverterConfigurer.PartitioningInterceptor) channelInterceptor))
-                        .findFirst().orElse(null));
+                producerProperties.getExtension().getTransactional(),
+                producerProperties,
+                partitioningInterceptor
+        );
         messageHandler.setBeanFactory(this.getApplicationContext().getBeanFactory());
         return messageHandler;
     }
@@ -104,7 +110,7 @@ public class OMSMessageChannelBinder extends AbstractMessageChannelBinder<Extend
     protected MessageHandler createProducerMessageHandler(ProducerDestination destination,
                                                           ExtendedProducerProperties<OMSProducerProperties> producerProperties,
                                                           MessageChannel errorChannel) throws Exception {
-        throw new UnsupportedOperationException("The abstract binder should not call this method");
+        return createProducerMessageHandler(destination, producerProperties, null, errorChannel);
     }
 
     @Override
@@ -112,7 +118,7 @@ public class OMSMessageChannelBinder extends AbstractMessageChannelBinder<Extend
                                                      String group,
                                                      ExtendedConsumerProperties<OMSConsumerProperties> consumerProperties) throws Exception {
         if (group == null || "".equals(group)) {
-            throw new RuntimeException("'group must be configured for channel " + destination.getName());
+            throw new RuntimeException("'group' must be configured for channel " + destination.getName());
         }
         OMSListenerBindingContainer listenerContainer = new OMSListenerBindingContainer(
                 consumerProperties, omsBinderConfigurationProperties, this, accessPointContainer);
@@ -165,8 +171,7 @@ public class OMSMessageChannelBinder extends AbstractMessageChannelBinder<Extend
         return extendedBindingProperties.getExtendedPropertiesEntryClass();
     }
 
-    public void setExtendedBindingProperties(
-            OMSExtendedBindingProperties extendedBindingProperties) {
+    public void setExtendedBindingProperties(OMSExtendedBindingProperties extendedBindingProperties) {
         this.extendedBindingProperties = extendedBindingProperties;
     }
 
