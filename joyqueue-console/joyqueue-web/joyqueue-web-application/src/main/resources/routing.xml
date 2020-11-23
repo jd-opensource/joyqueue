@@ -320,7 +320,7 @@
 
         <!-- producerConfig -->
         <route inherit="post"
-               path="/v1/producer/config/addOrUpdate" handlers="addOrUpdateProducerConfig render"
+               path="/v1/producer/config/addOrUpdate" handlers="producer#configAddOrUpdate render"
                errors="error"/>
 
         <!-- consumer post-id -->

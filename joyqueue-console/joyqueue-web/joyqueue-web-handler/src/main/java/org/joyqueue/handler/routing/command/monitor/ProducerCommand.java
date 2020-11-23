@@ -16,6 +16,7 @@
 package org.joyqueue.handler.routing.command.monitor;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
@@ -192,6 +193,14 @@ public class ProducerCommand extends NsrCommandSupport<Producer, ProducerService
         }
         service.update(producer);
         return Responses.success();
+    }
+
+    @Path("configAddOrUpdate")
+    public Response configAddOrUpdate(@Body ProducerConfig producerConfig) throws Exception {
+        Preconditions.checkArgument(null!=producerConfig,  "invalid argument");
+        Producer producer = service.findById(producerConfig.getProducerId());
+        producer.setConfig(producerConfig);
+        return Responses.success(service.update(producer));
     }
 
     /**
