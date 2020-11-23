@@ -33,14 +33,7 @@ public class OMSBinderConfigurationProperties {
     //@Pattern(regexp = "^[\\d.:;]+$", message = "address needs to match expression \"host:port;host:port\"")
     private String url = "";
 
-
     private Map<String, String> attributes;
-
-    /**
-     * Switch flag instance for message trace.
-     */
-    private boolean enableMsgTrace = true;
-
 
     public String getUrl() {
         return url;
@@ -58,11 +51,4 @@ public class OMSBinderConfigurationProperties {
         this.attributes = attributes;
     }
 
-    public boolean isEnableMsgTrace() {
-        return enableMsgTrace;
-    }
-
-    public void setEnableMsgTrace(boolean enableMsgTrace) {
-        this.enableMsgTrace = enableMsgTrace;
-    }
 }

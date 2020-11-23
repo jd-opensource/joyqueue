@@ -20,8 +20,6 @@ package io.openmessaging.spring.cloud.stream.binder.properties;
  */
 public class OMSProducerProperties {
 
-    private Boolean enabled = true;
-
     private String group;
 
     /**
@@ -29,18 +27,11 @@ public class OMSProducerProperties {
      */
     private Integer maxMessageSize = 1024 * 1024 * 4;
 
-    private Boolean transactional = false;
+    private boolean transactional = false;
 
-    private Boolean sync = false;
+    private boolean sync = false;
 
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
+    private boolean batch = false;
 
     public String getGroup() {
         return group;
@@ -58,19 +49,27 @@ public class OMSProducerProperties {
         this.maxMessageSize = maxMessageSize;
     }
 
-    public Boolean getTransactional() {
+    public boolean getTransactional() {
         return transactional;
     }
 
-    public void setTransactional(Boolean transactional) {
+    public void setTransactional(boolean transactional) {
         this.transactional = transactional;
     }
 
-    public Boolean getSync() {
+    public boolean getSync() {
         return sync;
     }
 
-    public void setSync(Boolean sync) {
+    public void setSync(boolean sync) {
         this.sync = sync;
+    }
+
+    public boolean getBatch() {
+        return batch;
+    }
+
+    public void setBatch(boolean batch) {
+        this.batch = batch;
     }
 }

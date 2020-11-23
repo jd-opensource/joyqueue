@@ -31,7 +31,7 @@ spring:
           content-type: text/plain
           group: group1
           consumer:
-            concurrency: 5
+            concurrency: 50
       binders:
         oms1:
           type: oms
@@ -48,3 +48,7 @@ spring:
               destination: jqtopic
               content-type: text/plain
               group: demo-group
+          inputOrder:
+            consumer:
+              enable: true
+              batch: true

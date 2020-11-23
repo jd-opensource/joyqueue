@@ -44,8 +44,6 @@ public class OMSMessageHandler extends AbstractMessageHandler implements Lifecyc
 
     private final String groupName;
 
-    //private boolean sync = false;
-
     private volatile boolean running = false;
 
     private ExtendedProducerProperties<OMSProducerProperties> producerProperties;

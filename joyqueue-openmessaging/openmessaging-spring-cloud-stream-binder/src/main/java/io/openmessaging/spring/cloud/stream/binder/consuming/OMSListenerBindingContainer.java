@@ -1,12 +1,12 @@
 /**
  * Copyright 2019 The JoyQueue Authors.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,57 +42,49 @@ public class OMSListenerBindingContainer implements InitializingBean, Disposable
 
     private Consumer consumer;
 
-    //private String address;
-
     private String consumerGroup;
 
     private String topic;
 
     private int consumeThreadMax = 64;
 
-    private String charset = "UTF-8";
-
     private boolean running;
 
-    private final ExtendedConsumerProperties<OMSConsumerProperties> jmqConsumerProperties;
+    private final ExtendedConsumerProperties<OMSConsumerProperties> omsConsumerProperties;
 
-    private final OMSMessageChannelBinder jmqMessageChannelBinder;
+    private final OMSMessageChannelBinder omsMessageChannelBinder;
 
-    private final OMSBinderConfigurationProperties jmqBinderConfigurationProperties;
+    private final OMSBinderConfigurationProperties omsBinderConfigurationProperties;
 
     private final AccessPointContainer accessPointContainer;
 
-    public OMSListenerBindingContainer(ExtendedConsumerProperties<OMSConsumerProperties> jmqConsumerProperties,
-                                       OMSBinderConfigurationProperties jmqBinderConfigurationProperties,
-                                       OMSMessageChannelBinder jmqMessageChannelBinder,
+    public OMSListenerBindingContainer(ExtendedConsumerProperties<OMSConsumerProperties> omsConsumerProperties,
+                                       OMSBinderConfigurationProperties omsBinderConfigurationProperties,
+                                       OMSMessageChannelBinder omsMessageChannelBinder,
                                        AccessPointContainer accessPointContainer) {
-        this.jmqConsumerProperties = jmqConsumerProperties;
-        this.jmqMessageChannelBinder = jmqMessageChannelBinder;
-        this.jmqBinderConfigurationProperties = jmqBinderConfigurationProperties;
+        this.omsConsumerProperties = omsConsumerProperties;
+        this.omsMessageChannelBinder = omsMessageChannelBinder;
+        this.omsBinderConfigurationProperties = omsBinderConfigurationProperties;
         this.accessPointContainer = accessPointContainer;
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(messageListener, "Property 'messageListener' is required");
         Assert.notNull(consumerGroup, "Property 'consumerGroup' is required");
-        //Assert.notNull(address, "Property 'address' is required");
         Assert.notNull(topic, "Property 'topic' is required");
-
+        if (null == messageListener && null == batchMessageListener) {
+            throw new IllegalStateException("No available listener!");
+        }
         Consumer consumer = accessPointContainer.getAccessPoint().createConsumer();
         consumer.start();
-
         for (ConsumerInterceptor interceptor : accessPointContainer.getConsumerInterceptors()) {
             consumer.addInterceptor(interceptor);
         }
-        if (messageListener instanceof MessageListener) {
-            consumer.bindQueue(topic, messageListener);
-        } else if (messageListener instanceof BatchMessageListener) {
-            consumer.bindQueue(topic, (BatchMessageListener) messageListener);
+        if (null != batchMessageListener && omsConsumerProperties.getExtension().isBatch()) {
+            consumer.bindQueue(topic, batchMessageListener);
         } else {
-            throw new IllegalArgumentException("Listener type error, need MessageListener or BatchMessageListener");
+            consumer.bindQueue(topic, messageListener);
         }
-
         this.consumer = consumer;
     }
 
@@ -150,5 +142,9 @@ public class OMSListenerBindingContainer implements InitializingBean, Disposable
 
     public void setMessageListener(MessageListener messageListener) {
         this.messageListener = messageListener;
+    }
+
+    public void setBatchMessageListener(BatchMessageListener batchMessageListener) {
+        this.batchMessageListener = batchMessageListener;
     }
 }

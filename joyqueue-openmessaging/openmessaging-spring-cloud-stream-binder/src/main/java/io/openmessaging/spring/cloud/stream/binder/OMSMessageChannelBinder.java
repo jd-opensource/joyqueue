@@ -52,15 +52,15 @@ public class OMSMessageChannelBinder extends AbstractMessageChannelBinder<Extend
 
     private final AccessPointContainer accessPointContainer;
 
-    private Map<String, String> topicInUse = new HashMap<>();
+    private final Map<String, String> topicInUse = new HashMap<>();
 
     public OMSMessageChannelBinder(OMSTopicProvisioner provisioningProvider,
                                    OMSExtendedBindingProperties extendedBindingProperties,
-                                   OMSBinderConfigurationProperties joyQueueBinderConfigurationProperties,
+                                   OMSBinderConfigurationProperties omsBinderConfigurationProperties,
                                    AccessPointContainer accessPointContainer) {
         super(null, provisioningProvider);
         this.extendedBindingProperties = extendedBindingProperties;
-        this.omsBinderConfigurationProperties = joyQueueBinderConfigurationProperties;
+        this.omsBinderConfigurationProperties = omsBinderConfigurationProperties;
         this.accessPointContainer = accessPointContainer;
     }
 
@@ -120,9 +120,7 @@ public class OMSMessageChannelBinder extends AbstractMessageChannelBinder<Extend
         listenerContainer.setTopic(destination.getName());
         listenerContainer.setConsumeThreadMax(consumerProperties.getConcurrency());
         OMSInboundChannelAdapter omsInboundChannelAdapter = new OMSInboundChannelAdapter(listenerContainer, consumerProperties);
-
         topicInUse.put(destination.getName(), group);
-
         ErrorInfrastructure errorInfrastructure = registerErrorInfrastructure(destination, group, consumerProperties);
         if (consumerProperties.getMaxAttempts() > 1) {
             omsInboundChannelAdapter.setRetryTemplate(buildRetryTemplate(consumerProperties));
@@ -130,7 +128,6 @@ public class OMSMessageChannelBinder extends AbstractMessageChannelBinder<Extend
         } else {
             omsInboundChannelAdapter.setErrorChannel(errorInfrastructure.getErrorChannel());
         }
-
         return omsInboundChannelAdapter;
     }
 

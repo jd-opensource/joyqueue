@@ -57,7 +57,7 @@ public class OMSBinderAutoConfiguration {
     }
 
     @Bean
-    public OMSMessageChannelBinder joyQueueMessageChannelBinder(OMSTopicProvisioner provisioningProvider) {
+    public OMSMessageChannelBinder omsMessageChannelBinder(OMSTopicProvisioner provisioningProvider) {
         OMSMessageChannelBinder binder = new OMSMessageChannelBinder(
                 provisioningProvider, extendedBindingProperties,
                 omsBinderConfigurationProperties, accessPointContainer);

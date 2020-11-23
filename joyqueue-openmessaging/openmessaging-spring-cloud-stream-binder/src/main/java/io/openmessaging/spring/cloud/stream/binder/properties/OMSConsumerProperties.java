@@ -20,13 +20,23 @@ package io.openmessaging.spring.cloud.stream.binder.properties;
  */
 public class OMSConsumerProperties {
 
-    private Boolean enabled = true;
+    private boolean enable = true;
 
-    public Boolean getEnabled() {
-        return enabled;
+    private boolean batch = false;
+
+    public boolean getEnable() {
+        return enable;
     }
 
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
+
+    public boolean isBatch() {
+        return batch;
+    }
+
+    public void setBatch(boolean batch) {
+        this.batch = batch;
     }
 }
