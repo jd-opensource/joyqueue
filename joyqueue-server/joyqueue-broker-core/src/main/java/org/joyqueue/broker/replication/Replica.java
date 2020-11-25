@@ -66,7 +66,7 @@ public class Replica {
         this.topicPartitionGroup = topicPartitionGroup;
     }
 
-    int replicaId() {
+    public int replicaId() {
         return replicaId;
     }
 
@@ -86,7 +86,7 @@ public class Replica {
         this.address = address;
     }
 
-    long writePosition() {
+    public long writePosition() {
         return writePosition;
     }
 
@@ -102,7 +102,7 @@ public class Replica {
         this.commitPosition = commitPosition;
     }
 
-    long nextPosition() {
+    public long nextPosition() {
         return nextPosition;
     }
 

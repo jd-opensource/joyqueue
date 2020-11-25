@@ -24,7 +24,12 @@ public class PartitionMonitorInfo extends BaseMonitorInfo {
 
     private String topic;
     private String app;
+    private int partitionGroup;
     private short partition;
+    private long leftIndex;
+    private long rightIndex;
+    private long ackIndex;
+    private long pending;
 
     private EnQueueMonitorInfo enQueue;
     private DeQueueMonitorInfo deQueue;
@@ -45,12 +50,52 @@ public class PartitionMonitorInfo extends BaseMonitorInfo {
         this.app = app;
     }
 
+    public int getPartitionGroup() {
+        return partitionGroup;
+    }
+
+    public void setPartitionGroup(int partitionGroup) {
+        this.partitionGroup = partitionGroup;
+    }
+
     public short getPartition() {
         return partition;
     }
 
     public void setPartition(short partition) {
         this.partition = partition;
+    }
+
+    public long getLeftIndex() {
+        return leftIndex;
+    }
+
+    public void setLeftIndex(long leftIndex) {
+        this.leftIndex = leftIndex;
+    }
+
+    public long getRightIndex() {
+        return rightIndex;
+    }
+
+    public void setRightIndex(long rightIndex) {
+        this.rightIndex = rightIndex;
+    }
+
+    public long getAckIndex() {
+        return ackIndex;
+    }
+
+    public void setAckIndex(long ackIndex) {
+        this.ackIndex = ackIndex;
+    }
+
+    public long getPending() {
+        return pending;
+    }
+
+    public void setPending(long pending) {
+        this.pending = pending;
     }
 
     public EnQueueMonitorInfo getEnQueue() {

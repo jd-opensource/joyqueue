@@ -5,6 +5,8 @@
         <!-- broker -->
         <route path="/monitor/broker" inherit="get"
                handlers="brokerMonitorService.getBrokerInfo"/>
+        <route path="/monitor/broker/ext" inherit="get"
+               handlers="brokerMonitorService.getBrokerInfoExt"/>
 
         <!-- deprecated -->
         <route path="/startInfo" inherit="get"

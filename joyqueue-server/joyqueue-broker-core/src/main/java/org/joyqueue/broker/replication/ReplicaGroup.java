@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -232,6 +233,10 @@ public class ReplicaGroup extends Service {
                 .filter(r -> r.replicaId() == replicaId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<Replica> getReplicas() {
+        return Collections.unmodifiableList(replicas);
     }
 
 

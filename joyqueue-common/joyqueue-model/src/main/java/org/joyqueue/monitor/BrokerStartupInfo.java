@@ -21,11 +21,20 @@ import java.io.Serializable;
  * Created by wangxiaofei1 on 2019/5/23.
  */
 public class BrokerStartupInfo implements Serializable {
+    private Integer brokerId;
     private long startupTime;
     private String version;
     private String revision;
     private String commitDate;
+    private long upTime;
 
+    public Integer getBrokerId() {
+        return brokerId;
+    }
+
+    public void setBrokerId(Integer brokerId) {
+        this.brokerId = brokerId;
+    }
 
     public long getStartupTime() {
         return startupTime;
@@ -57,5 +66,13 @@ public class BrokerStartupInfo implements Serializable {
 
     public void setCommitDate(String commitDate) {
         this.commitDate = commitDate;
+    }
+
+    public long getUpTime() {
+        return upTime;
+    }
+
+    public void setUpTime(long upTime) {
+        this.upTime = upTime;
     }
 }

@@ -38,6 +38,7 @@ import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.model.Pager;
 import org.joyqueue.monitor.ArchiveMonitorInfo;
 import org.joyqueue.monitor.BrokerMonitorInfo;
+import org.joyqueue.monitor.BrokerMonitorInfoExt;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.ConnectionMonitorDetailInfo;
 import org.joyqueue.monitor.ConnectionMonitorInfo;
@@ -89,8 +90,13 @@ public class DefaultBrokerMonitorService implements BrokerMonitorService {
     }
 
     @Override
-    public BrokerMonitorInfo getBrokerInfo() {
-        return brokerMonitorInternalService.getBrokerInfo();
+    public BrokerMonitorInfo getBrokerInfo(long timestamp) {
+        return brokerMonitorInternalService.getBrokerInfo(timestamp);
+    }
+
+    @Override
+    public BrokerMonitorInfoExt getBrokerInfoExt(long timestamp) {
+        return brokerMonitorInternalService.getBrokerInfoExt(timestamp);
     }
 
     @Override

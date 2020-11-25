@@ -23,6 +23,8 @@ package org.joyqueue.monitor;
 public class TopicMonitorInfo extends BaseMonitorInfo {
 
     private String topic;
+    private String app;
+    private long pending;
 
     private ConnectionMonitorInfo connection;
     private EnQueueMonitorInfo enQueue;
@@ -34,6 +36,22 @@ public class TopicMonitorInfo extends BaseMonitorInfo {
 
     public void setTopic(String topic) {
         this.topic = topic;
+    }
+
+    public String getApp() {
+        return app;
+    }
+
+    public void setApp(String app) {
+        this.app = app;
+    }
+
+    public long getPending() {
+        return pending;
+    }
+
+    public void setPending(long pending) {
+        this.pending = pending;
     }
 
     public void setConnection(ConnectionMonitorInfo connection) {

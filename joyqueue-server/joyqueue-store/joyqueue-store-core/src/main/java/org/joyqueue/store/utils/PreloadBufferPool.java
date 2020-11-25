@@ -505,10 +505,15 @@ public class PreloadBufferPool {
             long usedPreLoad = preLoadCache.onFlyCounter.get();
             long totalSize = preLoadCache.bufferSize * (cached + usedPreLoad);
             BufferPoolMonitorInfo.PLMonitorInfo plMonitorInfo = new BufferPoolMonitorInfo.PLMonitorInfo();
-            plMonitorInfo.setBufferSize(Format.formatSize(preLoadCache.bufferSize));
-            plMonitorInfo.setCached(Format.formatSize(preLoadCache.bufferSize * cached));
-            plMonitorInfo.setUsedPreLoad(Format.formatSize(preLoadCache.bufferSize * usedPreLoad));
-            plMonitorInfo.setTotalSize(Format.formatSize(totalSize));
+            plMonitorInfo.setBufferSizeBytes(preLoadCache.bufferSize);
+            plMonitorInfo.setCachedBytes(preLoadCache.bufferSize * cached);
+            plMonitorInfo.setUsedPreLoadBytes(preLoadCache.bufferSize * usedPreLoad);
+            plMonitorInfo.setTotalSizeBytes(totalSize);
+
+            plMonitorInfo.setBufferSize(Format.formatSize(plMonitorInfo.getBufferSizeBytes()));
+            plMonitorInfo.setCached(Format.formatSize(plMonitorInfo.getCachedBytes()));
+            plMonitorInfo.setUsedPreLoad(Format.formatSize(plMonitorInfo.getUsedPreLoadBytes()));
+            plMonitorInfo.setTotalSize(Format.formatSize(plMonitorInfo.getTotalSizeBytes()));
             plMonitorInfos.add(plMonitorInfo);
             return totalSize;
         }).sum();
@@ -517,14 +522,19 @@ public class PreloadBufferPool {
 
         bufferPoolMonitorInfo.setPlMonitorInfos(plMonitorInfos);
         bufferPoolMonitorInfo.setPlUsed(Format.formatSize(plUsed));
+        bufferPoolMonitorInfo.setPlUsedBytes(plUsed);
         bufferPoolMonitorInfo.setUsed(Format.formatSize(totalUsed));
+        bufferPoolMonitorInfo.setUsedBytes(totalUsed);
         bufferPoolMonitorInfo.setMaxMemorySize(Format.formatSize(maxMemorySize));
+        bufferPoolMonitorInfo.setMaxMemorySizeBytes(maxMemorySize);
         bufferPoolMonitorInfo.setMmpUsed(Format.formatSize(mmpUsed));
-        bufferPoolMonitorInfo.setMmpFd(String.valueOf(mMapBufferHolders.size()));
+        bufferPoolMonitorInfo.setMmpUsedBytes(mmpUsed);
+        bufferPoolMonitorInfo.setMmpFd(mMapBufferHolders.size());
         bufferPoolMonitorInfo.setMmapAllocate(mmapAllocateCounter.get());
         bufferPoolMonitorInfo.setMmapDestroy(mmapDestroyCounter.get());
         bufferPoolMonitorInfo.setDirectUsed(Format.formatSize(directUsed));
-        bufferPoolMonitorInfo.setDirectFd(String.valueOf(directBufferHolders.size()));
+        bufferPoolMonitorInfo.setDirectUsedBytes(directUsed);
+        bufferPoolMonitorInfo.setDirectFd(directBufferHolders.size());
         bufferPoolMonitorInfo.setDirectAllocate(directAllocateCounter.get());
         bufferPoolMonitorInfo.setDirectDestroy(directDestroyCounter.get());
         return bufferPoolMonitorInfo;
