@@ -247,7 +247,11 @@ export default {
       for (let policy in this.policies) {
         if (this.policies.hasOwnProperty(policy)) {
           if (this.policies[policy].key === 'storeMaxTime') {
-            this.topic.policy[this.policies[policy].key] = this.policies[policy].value * (1000 * 60 * 60)
+            if (this.policies[policy].value) {
+              this.topic.policy[this.policies[policy].key] = this.policies[policy].value * (1000 * 60 * 60)
+            } else {
+              this.topic.policy[this.policies[policy].key] = undefined
+            }
           } else {
             this.topic.policy[this.policies[policy].key] = this.policies[policy].value
           }
@@ -256,9 +260,7 @@ export default {
       apiRequest.put(this.urlOrigin.edit + '/' + encodeURIComponent(this.topic.id), {}, this.topic).then((data) => {
         this.policyDialog.visible = false
         if (data.code === 200) {
-          this.$Dialog.success({
-            content: '更新成功'
-          })
+          this.$Message.info('更新成功')
         }
         this.getList()
         this.policies = undefined
@@ -277,11 +279,13 @@ export default {
         this.topic.policy = {}
       }
       this.policies.push({
-        key: '存储最长时间',
-        value: item.policy.storeMaxTime / (1000 * 60 * 60)
+        key: 'storeMaxTime',
+        txt: '存储最长时间(h)',
+        value: item.policy.storeMaxTime !== undefined ? item.policy.storeMaxTime / (1000 * 60 * 60) : undefined
       })
       this.policies.push({
-        key: '保留未消费数据',
+        key: 'storeCleanKeepUnconsumed',
+        txt: '保留未消费数据',
         value: item.policy.storeCleanKeepUnconsumed
       })
       for (let policy in this.policy) {

@@ -203,9 +203,9 @@ export default {
             type: 'number',
             trigger: 'change',
             min: 1,
-            max: 1000,
+            max: 100,
             adminMax: 30000,
-            hint: '批量大小范围为1~1000',
+            hint: '批量大小范围为1~100',
             adminHint: '批量大小范围为1~30000',
             required: false
           }
