@@ -77,7 +77,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
             new ConfigException(ErrorCode.BadRequest);
         }
         if (topic.getReplica() > topic.getBrokers().size()) topic.setReplica(topic.getBrokers().size());
-        service.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
+        service.addWithBrokerGroup(topic);
         return Responses.success(topic);
     }
 
@@ -97,7 +97,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         Preconditions.checkArgument(null == brokerList || brokerList.size() < 1, topic.getBrokerGroup().getCode() + "分组暂时无可用broker");
         topic.setBrokers(brokerList);
         if (topic.getReplica() > brokerList.size()) topic.setReplica(brokerList.size());
-        service.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
+        service.addWithBrokerGroup(topic);
         return Responses.success(topic);
     }
 

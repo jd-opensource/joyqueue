@@ -38,11 +38,8 @@ public interface TopicService extends NsrService<Topic ,String> {
     /**
      * 保存：带分组和Broker信息
      * @param topic
-     * @param brokerGroup
-     * @param brokers
-     * @param operator 操作人
      */
-    void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator);
+    void addWithBrokerGroup(Topic topic);
 
     /**
      * 查询未订阅的topics
