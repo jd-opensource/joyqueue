@@ -46,7 +46,7 @@ public class BatchMessageListenerAdapter implements BatchMessageListener {
         List<Message> omsMessages = MessageConverter.convertMessages(messages);
         omsBatchMessageListener.onReceived(omsMessages, context);
 
-        if (!context.isAck() && consumerConfig.isForceAck()) {
+        if (consumerConfig.isForceAck() && !context.isAck()) {
             throw new IgnoreAckException();
         }
     }

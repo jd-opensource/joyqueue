@@ -15,12 +15,12 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
+import io.openmessaging.joyqueue.consumer.message.MessageConverter;
+import io.openmessaging.message.Message;
 import org.joyqueue.client.internal.consumer.MessageListener;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import org.joyqueue.client.internal.consumer.exception.IgnoreAckException;
-import io.openmessaging.joyqueue.consumer.message.MessageConverter;
-import io.openmessaging.message.Message;
 
 /**
  * MessageListenerAdapter
@@ -44,7 +44,7 @@ public class MessageListenerAdapter implements MessageListener {
         Message omsMessage = MessageConverter.convertMessage(message);
         omsMessageListener.onReceived(omsMessage, context);
 
-        if (!context.isAck() && consumerConfig.isForceAck()) {
+        if (consumerConfig.isForceAck() && !context.isAck()) {
             throw new IgnoreAckException();
         }
     }
