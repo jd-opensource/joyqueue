@@ -81,11 +81,7 @@ public class OnceConsumerInvoker implements ConsumerInvoker {
                         if (logger.isDebugEnabled()) {
                             logger.debug("execute messageListener, ignore ack, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners);
                         }
-                        if (config.isForceAck()) {
-                            retryType = RetryType.OTHER;
-                        } else {
-                            retryType = RetryType.NONE;
-                        }
+                        retryType = RetryType.OTHER;
                     } else {
                         logger.error("execute messageListener exception, topic: {}, message: {}, listeners: {}", topicMetadata.getTopic(), message, listeners, e);
                         retryType = RetryType.EXCEPTION;
