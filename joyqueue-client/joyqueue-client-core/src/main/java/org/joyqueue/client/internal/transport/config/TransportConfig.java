@@ -81,6 +81,7 @@ public class TransportConfig {
         transportConfig.setMaxAsync(maxAsync);
         transportConfig.setRetryPolicy(retryPolicy);
         transportConfig.setNonBlockOneway(nonBlockOneway);
+        transportConfig.setMaxIoThreads(maxIoThreads);
         transportConfig.setIoThreadName(ioThreadName);
         return transportConfig;
     }
