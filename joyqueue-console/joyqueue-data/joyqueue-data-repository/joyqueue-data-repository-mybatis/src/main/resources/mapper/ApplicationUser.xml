@@ -113,7 +113,7 @@
         <include refid="baseColumn"/>
         FROM
           application_user
-        WHERE app_id = #{appId}
+        WHERE app_id = #{appId} and status != -1
     </select>
 
     <select id="findByUserApp" resultMap="baseResultMap" parameterType="ApplicationUser">
@@ -121,7 +121,7 @@
         <include refid="baseColumn"/>
         FROM
         application_user
-        WHERE app_code = #{application.code} and user_code=#{user.code}
+        WHERE app_code = #{application.code} and user_code=#{user.code} and status != -1
     </select>
 
 </mapper>
