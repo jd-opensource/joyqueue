@@ -29,6 +29,10 @@ import java.util.Map;
  */
 public class ReplicateConsumePosRequest extends JoyQueuePayload {
     private Map<ConsumePartition, Position> consumePositions;
+    private int term;
+    private int leaderId;
+    private String topic;
+    private int group;
 
     public Map<ConsumePartition, Position> getConsumePositions() {
         return consumePositions;
@@ -38,11 +42,36 @@ public class ReplicateConsumePosRequest extends JoyQueuePayload {
         this.consumePositions = consumePositions;
     }
 
-    public ReplicateConsumePosRequest(Map<ConsumePartition, Position> consumePositions) {
-        this.consumePositions = consumePositions;
+    public int getTerm() {
+        return term;
     }
 
-    public ReplicateConsumePosRequest() {
+    public void setTerm(int term) {
+        this.term = term;
+    }
+
+    public int getLeaderId() {
+        return leaderId;
+    }
+
+    public void setLeaderId(int leaderId) {
+        this.leaderId = leaderId;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public int getGroup() {
+        return group;
+    }
+
+    public void setGroup(int group) {
+        this.group = group;
     }
 
     @Override

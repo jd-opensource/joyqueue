@@ -165,6 +165,10 @@ public class ElectionConfig {
         return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_SHARED_HEARTBEAT);
     }
 
+    public boolean enableReplicatePositionV3Protocol() {
+        return PropertySupplier.getValue(propertySupplier, ElectionConfigKey.ENABLE_REPLICATE_POSITION_V3_PROTOCOL);
+    }
+
     public void setListenPort(String port) {
         listenPort = Integer.valueOf(port);
     }
