@@ -11,6 +11,9 @@ public class PartitionGroupNodeMonitorInfo {
     private long rightPosition;
     private long commitPosition;
     private long pending;
+    private long lastAppendTime;
+    private long lastAppendSuccessTime;
+    private long lastReplicateConsumePosTime;
 
     public int getReplicaId() {
         return replicaId;
@@ -42,5 +45,29 @@ public class PartitionGroupNodeMonitorInfo {
 
     public void setPending(long pending) {
         this.pending = pending;
+    }
+
+    public long getLastAppendTime() {
+        return lastAppendTime;
+    }
+
+    public void setLastAppendTime(long lastAppendTime) {
+        this.lastAppendTime = lastAppendTime;
+    }
+
+    public long getLastAppendSuccessTime() {
+        return lastAppendSuccessTime;
+    }
+
+    public void setLastAppendSuccessTime(long lastAppendSuccessTime) {
+        this.lastAppendSuccessTime = lastAppendSuccessTime;
+    }
+
+    public long getLastReplicateConsumePosTime() {
+        return lastReplicateConsumePosTime;
+    }
+
+    public void setLastReplicateConsumePosTime(long lastReplicateConsumePosTime) {
+        this.lastReplicateConsumePosTime = lastReplicateConsumePosTime;
     }
 }
