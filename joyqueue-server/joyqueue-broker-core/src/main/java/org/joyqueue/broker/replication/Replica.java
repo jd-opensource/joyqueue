@@ -123,7 +123,7 @@ public class Replica {
         this.lastReplicateConsumePosTime = lastReplicateConsumePosTime;
     }
 
-    long lastReplicateConsumePosTime() {
+    public long lastReplicateConsumePosTime() {
         return lastReplicateConsumePosTime;
     }
 
@@ -131,7 +131,7 @@ public class Replica {
         this.lastAppendSuccessTime = lastAppendSuccessTime;
     }
 
-    long lastAppendSuccessTime() {
+    public long lastAppendSuccessTime() {
         return lastAppendSuccessTime;
     }
 

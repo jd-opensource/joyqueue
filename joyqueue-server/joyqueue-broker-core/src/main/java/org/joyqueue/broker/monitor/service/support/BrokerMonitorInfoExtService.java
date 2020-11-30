@@ -192,6 +192,9 @@ public class BrokerMonitorInfoExtService {
                 partitionGroupNodeMonitorInfo.setRightPosition(replica.writePosition());
                 partitionGroupNodeMonitorInfo.setCommitPosition(replica.writePosition());
                 partitionGroupNodeMonitorInfo.setPending(partitionGroupMetric.getRightPosition() - replica.writePosition());
+                partitionGroupNodeMonitorInfo.setLastAppendTime(replica.getLastAppendTime());
+                partitionGroupNodeMonitorInfo.setLastAppendSuccessTime(replica.lastAppendSuccessTime());
+                partitionGroupNodeMonitorInfo.setLastReplicateConsumePosTime(replica.lastReplicateConsumePosTime());
                 nodeInfos.add(partitionGroupNodeMonitorInfo);
             }
         } else if (leaderElection instanceof FixLeaderElection) {
