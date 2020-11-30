@@ -265,10 +265,6 @@ public class RaftLeaderElection extends LeaderElection  {
         }
     }
 
-    public int getCurrentTerm() {
-        return currentTerm;
-    }
-
     /**
      * 切换状态
      * @param state 切换到的状态
