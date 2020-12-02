@@ -329,7 +329,6 @@ public class NameServerInternal extends Service implements NameService, Property
         }
     }
 
-    //TODO Ignite不可用
     @Override
     public Set<String> getTopics(String app, Subscription.Type subscribe) {
         Set<String> topics = new HashSet<>();
@@ -525,8 +524,18 @@ public class NameServerInternal extends Service implements NameService, Property
     }
 
     @Override
+    public List<Consumer> getConsumersByApp(String app) {
+        return metaManager.getConsumer(app);
+    }
+
+    @Override
     public List<Producer> getProducerByTopic(TopicName topic) {
         return metaManager.getProducerByTopic(topic);
+    }
+
+    @Override
+    public List<Producer> getProducersByApp(String app) {
+        return metaManager.getProducer(app);
     }
 
     @Override

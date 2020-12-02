@@ -51,9 +51,6 @@ public class PartitionGroupLeaderChangeHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) {
-        if (!config.getMessengerIgniteEnable()) {
-            return BooleanAck.build();
-        }
         if (command == null) {
             logger.error("PartitionGroupLeaderChangeHandler request command is null");
             return null;

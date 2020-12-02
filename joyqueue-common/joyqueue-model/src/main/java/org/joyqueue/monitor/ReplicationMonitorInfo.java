@@ -27,7 +27,6 @@ public class ReplicationMonitorInfo extends BaseMonitorInfo {
     private int partitionGroup;
     private EnQueueMonitorInfo replicaStat;
     private EnQueueMonitorInfo appendStat;
-    private boolean started;
 
     public void setTopic(String topic) {
         this.topic = topic;
@@ -59,13 +58,5 @@ public class ReplicationMonitorInfo extends BaseMonitorInfo {
 
     public void setAppendStat(EnQueueMonitorInfo appendStat) {
         this.appendStat = appendStat;
-    }
-
-    public void setStarted(boolean started) {
-        this.started = started;
-    }
-
-    public boolean isStarted() {
-        return started;
     }
 }

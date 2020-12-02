@@ -254,6 +254,7 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
                 brokerTopicMonitorRecord.setCount(consumerMonitorInfo.getDeQueue().getCount());
                 brokerTopicMonitorRecord.setTotalSize(consumerMonitorInfo.getDeQueue().getTotalSize());
                 brokerTopicMonitorRecord.setTraffic(consumerMonitorInfo.getDeQueue().getTraffic());
+                brokerTopicMonitorRecord.setTps(consumerMonitorInfo.getDeQueue().getTps());
                 brokerTopicMonitorRecord.setApp(consumerMonitorInfo.getApp());
                 List<BrokerTopicMonitorRecord> brokerMonitorRecordList = new ArrayList<>();
                 brokerMonitorRecordList.add(brokerTopicMonitorRecord);

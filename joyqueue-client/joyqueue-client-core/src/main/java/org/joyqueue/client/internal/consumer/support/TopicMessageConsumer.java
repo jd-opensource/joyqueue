@@ -131,7 +131,7 @@ public class TopicMessageConsumer extends Service {
         }
 
         if (config.getThread() == ConsumerConfig.NONE_THREAD) {
-            config.setThread(topicMetadata.getPartitions().size());
+            config.setThread(Math.min(topicMetadata.getPartitions().size(), config.getMaxThread()));
         }
 
         if (topicMetadata.getType().equals(TopicType.BROADCAST)) {

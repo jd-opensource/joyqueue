@@ -338,10 +338,6 @@ public class DefaultTopicService implements TopicService {
             transactionInternalService.rollback();
             throw new NsrException(e);
         }
-
-        if (config.getMessengerPublishLeaderReportEnable()) {
-            messenger.publish(new UpdatePartitionGroupEvent(oldPartitionGroup.getTopic(), oldPartitionGroup, newPartitionGroup), replicas);
-        }
     }
 
     @Override
@@ -479,7 +475,7 @@ public class DefaultTopicService implements TopicService {
     }
 
     protected List<Broker> getReplicas(PartitionGroup partitionGroup) {
-        if (CollectionUtils.isNotEmpty(partitionGroup.getReplicas())) {
+        if (CollectionUtils.isEmpty(partitionGroup.getReplicas())) {
             return Collections.emptyList();
         }
         return brokerInternalService.getByIds(Lists.newArrayList(partitionGroup.getReplicas()));

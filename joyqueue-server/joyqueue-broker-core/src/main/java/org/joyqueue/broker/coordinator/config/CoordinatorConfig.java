@@ -37,13 +37,12 @@ public class CoordinatorConfig {
         this.propertySupplier = propertySupplier;
     }
 
-    public String getGroupNamespace() {
-        return PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_NAMESPACE);
+    public TopicName getGroupTopic() {
+        return getGroupTopic(null);
     }
 
-    public TopicName getGroupTopic() {
+    public TopicName getGroupTopic(String namespace) {
         String topic = PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.GROUP_TOPIC_CODE);
-        String namespace = getGroupNamespace();
         if (StringUtils.isBlank(namespace) || namespace.equals("null")) {
             return TopicName.parse(topic);
         } else {
@@ -61,12 +60,7 @@ public class CoordinatorConfig {
 
     public TopicName getTransactionTopic() {
         String topic = PropertySupplier.getValue(propertySupplier, CoordinatorConfigKey.TRANSACTION_TOPIC_CODE);
-        String namespace = getGroupNamespace();
-        if (StringUtils.isBlank(namespace) || namespace.equals("null")) {
-            return TopicName.parse(topic);
-        } else {
-            return TopicName.parse(topic, namespace);
-        }
+        return TopicName.parse(topic);
     }
 
     public short getTransactionTopicPartitions() {

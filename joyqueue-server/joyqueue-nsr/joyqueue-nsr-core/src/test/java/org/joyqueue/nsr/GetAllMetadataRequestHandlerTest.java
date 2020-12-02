@@ -312,6 +312,11 @@ public class GetAllMetadataRequestHandlerTest {
         }
 
         @Override
+        public List<Consumer> getConsumersByApp(String app) {
+            return null;
+        }
+
+        @Override
         public List<Producer> getProducerByTopic(TopicName topic) {
             check();
             List<Producer> result = Lists.newArrayList();
@@ -321,6 +326,11 @@ public class GetAllMetadataRequestHandlerTest {
                 }
             }
             return result;
+        }
+
+        @Override
+        public List<Producer> getProducersByApp(String app) {
+            return null;
         }
 
         @Override

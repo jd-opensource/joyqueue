@@ -47,10 +47,6 @@ public class PushNameServerEventHandler implements NsrCommandHandler, Types,com.
 
     @Override
     public Command handle(Transport transport, Command command) {
-        if (!config.getMessengerIgniteEnable()) {
-            return new Command(new PushNameServerEventAck());
-        }
-
         nameService.addEvent(((PushNameServerEvent)command.getPayload()).getEvent());
         return new Command(new PushNameServerEventAck());
     }

@@ -22,10 +22,21 @@ import java.util.List;
  */
 public class BufferPoolMonitorInfo {
     private String plUsed;
+    private long plUsedBytes;
     private String used;
+    private long usedBytes;
     private String maxMemorySize;
+    private long maxMemorySizeBytes;
     private String mmpUsed;
+    private long mmpUsedBytes;
+    private int mmpFd;
     private String directUsed;
+    private int directFd;
+    private long directUsedBytes;
+    private int directDestroy;
+    private int directAllocate;
+    private int mmapDestroy;
+    private int mmapAllocate;
 
     private List<PLMonitorInfo> plMonitorInfos;
 
@@ -37,12 +48,28 @@ public class BufferPoolMonitorInfo {
         this.plUsed = plUsed;
     }
 
+    public long getPlUsedBytes() {
+        return plUsedBytes;
+    }
+
+    public void setPlUsedBytes(long plUsedBytes) {
+        this.plUsedBytes = plUsedBytes;
+    }
+
     public String getUsed() {
         return used;
     }
 
     public void setUsed(String used) {
         this.used = used;
+    }
+
+    public long getUsedBytes() {
+        return usedBytes;
+    }
+
+    public void setUsedBytes(long usedBytes) {
+        this.usedBytes = usedBytes;
     }
 
     public String getMaxMemorySize() {
@@ -53,12 +80,36 @@ public class BufferPoolMonitorInfo {
         this.maxMemorySize = maxMemorySize;
     }
 
+    public long getMaxMemorySizeBytes() {
+        return maxMemorySizeBytes;
+    }
+
+    public void setMaxMemorySizeBytes(long maxMemorySizeBytes) {
+        this.maxMemorySizeBytes = maxMemorySizeBytes;
+    }
+
     public String getMmpUsed() {
         return mmpUsed;
     }
 
     public void setMmpUsed(String mmpUsed) {
         this.mmpUsed = mmpUsed;
+    }
+
+    public long getMmpUsedBytes() {
+        return mmpUsedBytes;
+    }
+
+    public void setMmpUsedBytes(long mmpUsedBytes) {
+        this.mmpUsedBytes = mmpUsedBytes;
+    }
+
+    public int getMmpFd() {
+        return mmpFd;
+    }
+
+    public void setMmpFd(int mmpFd) {
+        this.mmpFd = mmpFd;
     }
 
     public String getDirectUsed() {
@@ -69,6 +120,22 @@ public class BufferPoolMonitorInfo {
         this.directUsed = directUsed;
     }
 
+    public long getDirectUsedBytes() {
+        return directUsedBytes;
+    }
+
+    public void setDirectUsedBytes(long directUsedBytes) {
+        this.directUsedBytes = directUsedBytes;
+    }
+
+    public int getDirectFd() {
+        return directFd;
+    }
+
+    public void setDirectFd(int directFd) {
+        this.directFd = directFd;
+    }
+
     public List<PLMonitorInfo> getPlMonitorInfos() {
         return plMonitorInfos;
     }
@@ -77,11 +144,47 @@ public class BufferPoolMonitorInfo {
         this.plMonitorInfos = plMonitorInfos;
     }
 
+    public int getDirectDestroy() {
+        return directDestroy;
+    }
+
+    public void setDirectDestroy(int directDestroy) {
+        this.directDestroy = directDestroy;
+    }
+
+    public int getDirectAllocate() {
+        return directAllocate;
+    }
+
+    public void setDirectAllocate(int directAllocate) {
+        this.directAllocate = directAllocate;
+    }
+
+    public int getMmapDestroy() {
+        return mmapDestroy;
+    }
+
+    public void setMmapDestroy(int mmapDestroy) {
+        this.mmapDestroy = mmapDestroy;
+    }
+
+    public int getMmapAllocate() {
+        return mmapAllocate;
+    }
+
+    public void setMmapAllocate(int mmapAllocate) {
+        this.mmapAllocate = mmapAllocate;
+    }
+
     public static class PLMonitorInfo {
         private String cached;
         private String usedPreLoad;
         private String totalSize;
         private String bufferSize;
+        private long cachedBytes;
+        private long usedPreLoadBytes;
+        private long totalSizeBytes;
+        private long bufferSizeBytes;
 
         public String getCached() {
             return cached;
@@ -113,6 +216,38 @@ public class BufferPoolMonitorInfo {
 
         public void setBufferSize(String bufferSize) {
             this.bufferSize = bufferSize;
+        }
+
+        public long getCachedBytes() {
+            return cachedBytes;
+        }
+
+        public void setCachedBytes(long cachedBytes) {
+            this.cachedBytes = cachedBytes;
+        }
+
+        public long getUsedPreLoadBytes() {
+            return usedPreLoadBytes;
+        }
+
+        public void setUsedPreLoadBytes(long usedPreLoadBytes) {
+            this.usedPreLoadBytes = usedPreLoadBytes;
+        }
+
+        public long getTotalSizeBytes() {
+            return totalSizeBytes;
+        }
+
+        public void setTotalSizeBytes(long totalSizeBytes) {
+            this.totalSizeBytes = totalSizeBytes;
+        }
+
+        public long getBufferSizeBytes() {
+            return bufferSizeBytes;
+        }
+
+        public void setBufferSizeBytes(long bufferSizeBytes) {
+            this.bufferSizeBytes = bufferSizeBytes;
         }
     }
 }

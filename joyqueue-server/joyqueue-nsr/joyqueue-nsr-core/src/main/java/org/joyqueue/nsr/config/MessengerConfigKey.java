@@ -27,7 +27,7 @@ public enum MessengerConfigKey implements PropertyDef {
     SESSION_EXPIRE_TIME("nameservice.messenger.session.expire.time", 1000 * 60 * 5, Type.INT),
     SESSION_TIMEOUT("nameservice.messenger.session.timeout", 1000 * 5, Type.INT),
     PUBLISH_ENABLE("nameservice.messenger.publish.enable", true, Type.BOOLEAN),
-    PUBLISH_TIMEOUT("nameservice.messenger.publish.timeout", 1000 * 10, Type.INT),
+    PUBLISH_TIMEOUT("nameservice.messenger.publish.timeout", 1000 * 3, Type.INT),
     HANDLER_THREADS("nameservice.messenger.handler.threads", Runtime.getRuntime().availableProcessors(), Type.INT),
     HANDLER_KEEPALIVE("nameservice.messenger.handler.keepalive", 1000 * 60, Type.INT),
     HANDLER_QUEUES("nameservice.messenger.handler.queues", 1024, Type.INT),

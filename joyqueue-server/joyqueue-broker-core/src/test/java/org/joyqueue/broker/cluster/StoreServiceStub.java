@@ -7,6 +7,7 @@ import org.joyqueue.domain.TopicName;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.nsr.NameService;
 import org.joyqueue.store.PartitionGroupStore;
+import org.joyqueue.store.RemovedPartitionGroupStore;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreNode;
 import org.joyqueue.store.StoreNodes;
@@ -55,6 +56,16 @@ public class StoreServiceStub implements StoreService {
     @Override
     public void removePartitionGroup(String topic, int partitionGroup) {
 
+    }
+
+    @Override
+    public void physicalDeleteRemovedPartitionGroup(String topic, int partitionGroup) {
+
+    }
+
+    @Override
+    public List<RemovedPartitionGroupStore> getRemovedPartitionGroups() {
+        return null;
     }
 
     @Override

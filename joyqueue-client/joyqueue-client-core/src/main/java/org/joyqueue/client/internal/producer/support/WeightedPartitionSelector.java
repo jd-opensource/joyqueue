@@ -17,7 +17,7 @@ package org.joyqueue.client.internal.producer.support;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.joyqueue.client.internal.metadata.domain.PartitionGroupMetadata;
+import org.joyqueue.client.internal.metadata.domain.PartitionMetadata;
 import org.joyqueue.client.internal.metadata.domain.PartitionNode;
 import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
@@ -52,8 +52,8 @@ public class WeightedPartitionSelector extends AbstractPartitionSelector {
             }
         } else {
             for (BrokerNode brokerNode : brokerNodes) {
-                List<PartitionGroupMetadata> brokerPartitionGroups = topicMetadata.getBrokerPartitionGroups(brokerNode.getId());
-                weights[index] = (brokerPartitionGroups != null ? brokerPartitionGroups.size() * 10 : brokerNode.getWeight());
+                List<PartitionMetadata> brokerPartitions = topicMetadata.getBrokerPartitions(brokerNode.getId());
+                weights[index] = (brokerPartitions != null ? brokerPartitions.size() * 10 : brokerNode.getWeight());
                 if (weights[index] < 0) {
                     weights[index] = 0;
                 }

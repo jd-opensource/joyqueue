@@ -262,6 +262,7 @@ public class StoreFileImpl<T> implements StoreFile<T>, BufferHolder {
             ByteBuffer byteBuffer = pageBuffer.asReadOnlyBuffer();
             byteBuffer.position(position);
             byteBuffer.limit(writePosition);
+
             return bufferReader.read(byteBuffer, length);
         } finally {
             bufferLock.unlock(stamp);

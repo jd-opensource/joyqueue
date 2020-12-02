@@ -40,7 +40,8 @@ public class CheckResultConverter {
             case FW_PUT_MESSAGE_TOPIC_NOT_WRITE: {
                 return KafkaErrorCode.LEADER_NOT_AVAILABLE.getCode();
             }
-            case FW_BROKER_NOT_WRITABLE: {
+            case FW_BROKER_NOT_WRITABLE:
+            case SE_WRITE_FAILED: {
                 return KafkaErrorCode.KAFKA_STORAGE_ERROR.getCode();
             }
             case FW_PRODUCE_MESSAGE_BROKER_NOT_LEADER:
