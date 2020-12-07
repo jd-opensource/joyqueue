@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;

@@ -19,7 +19,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.exception.ValidationException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.routing.command.CommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Broker;

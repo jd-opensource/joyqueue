@@ -28,15 +28,9 @@ import org.joyqueue.sync.SyncService;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
 import com.jd.laf.web.vertx.annotation.Body;
-import com.jd.laf.web.vertx.annotation.CVertx;
 import com.jd.laf.web.vertx.pool.Poolable;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
-import io.vertx.core.Vertx;
-
-import javax.validation.constraints.NotNull;
-
-import static com.jd.laf.web.vertx.annotation.Body.BodyType.JSON;
 
 /**
  * 同步应用

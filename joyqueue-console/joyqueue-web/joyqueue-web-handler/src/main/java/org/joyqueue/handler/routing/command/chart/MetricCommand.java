@@ -15,7 +15,6 @@
  */
 package org.joyqueue.handler.routing.command.chart;
 
-import org.joyqueue.handler.Constants;
 import org.joyqueue.handler.routing.command.CommandSupport;
 import org.joyqueue.model.ListQuery;
 import org.joyqueue.exception.ValidationException;
