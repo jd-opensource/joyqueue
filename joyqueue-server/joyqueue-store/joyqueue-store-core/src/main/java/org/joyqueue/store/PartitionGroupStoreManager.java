@@ -622,7 +622,7 @@ public class PartitionGroupStoreManager extends Service implements ReplicableSto
                 continue;
             }
             if (indexItem.getOffset() >= commitPosition()) {
-                continue;
+                break;
             }
             try {
                 ByteBuffer log;
