@@ -19,9 +19,6 @@ import org.joyqueue.domain.TopicName;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.AppUnsubscribedTopic;
-import org.joyqueue.model.domain.Broker;
-import org.joyqueue.model.domain.BrokerGroup;
-import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.Topic;
 import org.joyqueue.model.query.QTopic;
 import org.joyqueue.nsr.NsrService;
@@ -38,11 +35,8 @@ public interface TopicService extends NsrService<Topic ,String> {
     /**
      * 保存：带分组和Broker信息
      * @param topic
-     * @param brokerGroup
-     * @param brokers
-     * @param operator 操作人
      */
-    void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator);
+    void addWithBrokerGroup(Topic topic);
 
     /**
      * 查询未订阅的topics

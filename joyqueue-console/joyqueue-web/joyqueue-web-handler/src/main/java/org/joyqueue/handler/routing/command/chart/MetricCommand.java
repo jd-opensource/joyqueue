@@ -30,6 +30,7 @@ import com.jd.laf.web.vertx.response.Responses;
 
 import static org.joyqueue.exception.ValidationException.NOT_FOUND_EXCEPTION_STATUS;
 import static org.joyqueue.exception.ValidationException.UNIQUE_EXCEPTION_STATUS;
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * Created by libinghui3 on 2019/3/7.
@@ -50,7 +51,7 @@ public class MetricCommand extends CommandSupport<Metric,MetricService,QMetric> 
     }
 
     @Path("update")
-    public Response update(@QueryParam(Constants.ID) Long id, @Body Metric metric) throws Exception {
+    public Response update(@QueryParam(ID) Long id, @Body Metric metric) throws Exception {
         //validate metric code and alias code, unique
         if (service.findByCode(metric.getCode()) == null) {
             throw new ValidationException(NOT_FOUND_EXCEPTION_STATUS, "code|不存在");
@@ -67,5 +68,11 @@ public class MetricCommand extends CommandSupport<Metric,MetricService,QMetric> 
     @Path("findByPermission")
     public Response findByPermission(@QueryParam("userPermission") Boolean userPermission) throws Exception {
         return Responses.success(service.findByQuery(new ListQuery<>(new QMetric(userPermission))));
+    }
+
+    @Path("delete")
+    @Override
+    public Response delete(@QueryParam(ID)Long id) throws Exception {
+        return super.delete(id);
     }
 }

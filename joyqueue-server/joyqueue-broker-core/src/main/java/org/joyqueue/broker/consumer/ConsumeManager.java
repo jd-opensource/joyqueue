@@ -202,7 +202,7 @@ public class ConsumeManager extends Service implements Consume, BrokerContextAwa
         super.doStop();
         Close.close(partitionConsumption);
         Close.close(messageRetry);
-        Close.close(partitionConsumption);
+        Close.close(positionManager);
         Close.close(concurrentConsumption);
         resetBroadcastIndexTimer.cancel();
         partitionManager.close();

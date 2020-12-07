@@ -335,7 +335,7 @@ public class OpenAPIServiceImpl implements OpenAPIService {
         //计算总数
         topic.setPartitions(topic.getPartitions() * select.size());
         topic.setBrokers(select);
-        topicService.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
+        topicService.addWithBrokerGroup(topic);
         return topicService.findById(topic.getId());    }
 
     @Override

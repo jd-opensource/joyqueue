@@ -37,6 +37,8 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 
+import static org.joyqueue.handler.Constants.ID;
+
 
 /**
  * 分组 处理器
@@ -52,7 +54,7 @@ public class BrokerGroupCommand extends CommandSupport<BrokerGroup, BrokerGroupS
     }
 
     @Path("updateBroker")
-    public Response updateBroker(@QueryParam(Constants.ID) String id, @Body Broker model) throws Exception {
+    public Response updateBroker(@QueryParam(ID) String id, @Body Broker model) throws Exception {
         try {
             service.updateBroker(model);
         } catch (ValidationException e) {
@@ -89,5 +91,23 @@ public class BrokerGroupCommand extends CommandSupport<BrokerGroup, BrokerGroupS
             service.updateBroker(broker);
         }
         return Responses.success();
+    }
+
+    @Path("add")
+    @Override
+    public Response add(@Body BrokerGroup model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)Long id, @Body BrokerGroup model) throws Exception {
+        return super.update(id, model);
+    }
+
+    @Path("delete")
+    @Override
+    public Response delete(@QueryParam(ID)Long id) throws Exception {
+        return super.delete(id);
     }
 }

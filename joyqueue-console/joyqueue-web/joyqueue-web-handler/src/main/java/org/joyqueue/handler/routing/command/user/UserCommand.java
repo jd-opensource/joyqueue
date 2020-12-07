@@ -32,6 +32,8 @@ import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 
+import static org.joyqueue.handler.Constants.ID;
+
 /**
  * @author wylixiaobin
  * Date: 2018/10/17
@@ -60,7 +62,7 @@ public class UserCommand extends CommandSupport<User, UserService, QUser> {
 
     @Override
     @Path("update")
-    public Response update(@QueryParam(Constants.ID) Long id, @Body User model) throws Exception {
+    public Response update(@QueryParam(ID) Long id, @Body User model) throws Exception {
         if (operator == null || operator.getRole() != User.UserRole.ADMIN.value()) {
             throw new ConfigException(ErrorCode.NoPrivilege);
         }
@@ -77,5 +79,11 @@ public class UserCommand extends CommandSupport<User, UserService, QUser> {
         return Responses.success(service.findByRole(role));
     }
 
+
+    @Path("delete")
+    @Override
+    public Response delete(@QueryParam(ID) Long id) throws Exception {
+        return super.delete(id);
+    }
 
 }

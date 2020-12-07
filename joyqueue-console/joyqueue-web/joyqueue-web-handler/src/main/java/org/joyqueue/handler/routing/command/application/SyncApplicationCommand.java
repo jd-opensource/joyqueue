@@ -16,6 +16,7 @@
 package org.joyqueue.handler.routing.command.application;
 
 
+import com.jd.laf.web.vertx.annotation.Path;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.handler.Constants;
@@ -47,21 +48,11 @@ public class SyncApplicationCommand implements Command<Response>, Poolable {
     @Value(nullable = false)
     protected SyncService syncService;
 
-    @Body(type = JSON)
-    @NotNull
-    protected Application application;
     @Value(Constants.USER_KEY)
     protected User session;
-    @CVertx
-    private Vertx vertx;
 
-    @Override
-    public String type() {
-        return "syncApp";
-    }
-
-    @Override
-    public Response execute() throws Exception {
+    @Path("syncApp")
+    public Response add(@Body Application application) throws Exception {
         application.setErp(session.getCode());
         ApplicationInfo info = syncService.syncApp(application);
         if (info == null) {
@@ -73,7 +64,6 @@ public class SyncApplicationCommand implements Command<Response>, Poolable {
 
     @Override
     public void clean() {
-        application = null;
         session = null;
     }
 

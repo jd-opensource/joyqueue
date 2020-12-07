@@ -15,6 +15,7 @@
  */
 package org.joyqueue.handler.routing.command.config;
 
+import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
@@ -33,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.joyqueue.handler.Constants.ID;
 
 
 /**
@@ -76,7 +79,7 @@ public class ConfigCommand extends NsrCommandSupport<Config, ConfigService, QCon
 
     @Override
     @Path("delete")
-    public Response delete(@QueryParam(Constants.ID) String id) throws Exception {
+    public Response delete(@QueryParam(ID) String id) throws Exception {
         Config newModel = service.findById(id);
         int count = service.delete(newModel);
         if (count <= 0) {
@@ -84,6 +87,18 @@ public class ConfigCommand extends NsrCommandSupport<Config, ConfigService, QCon
         }
         //publish(); 暂不进行发布消息
         return Responses.success();
+    }
+
+    @Path("add")
+    @Override
+    public Response add(@Body Config model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body Config model) throws Exception {
+        return super.update(id, model);
     }
 
 }
