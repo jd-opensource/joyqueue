@@ -126,8 +126,15 @@ public class BrokerRepository {
                 sql.append(" AND `id` = ?");
                 params.add(query.getKeyword());
             } else {
-                sql.append(" AND `ip` = ?");
-                params.add(query.getKeyword());
+                if (query.getFuzzy() != null && query.getFuzzy()) {
+                    sql.append(" AND `ip` LIKE ?");
+                    params.add("%");
+                    params.add(query.getKeyword());
+                    params.add("%");
+                } else {
+                    sql.append(" AND `ip` = ?");
+                    params.add(query.getKeyword());
+                }
             }
         }
         return sql.toString();
