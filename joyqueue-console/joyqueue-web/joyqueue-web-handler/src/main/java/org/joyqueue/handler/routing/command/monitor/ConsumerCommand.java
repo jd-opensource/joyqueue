@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.joyqueue.handler.Constants.ID;
 import static org.joyqueue.handler.routing.command.monitor.ProducerCommand.CAN_OPERATE_PROPERTY;
 
 
@@ -136,7 +137,7 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
 
     @Override
     @Path("delete")
-    public Response delete(@QueryParam(Constants.ID) String id) throws Exception {
+    public Response delete(@QueryParam(ID) String id) throws Exception {
         Consumer consumer = service.findById(id);
         int count = service.delete(consumer);
         if (count <= 0) {
@@ -243,4 +244,9 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
         return Responses.success(service.findAppsByTopic(topic));
     }
 
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body Consumer model) throws Exception {
+        return super.update(id, model);
+    }
 }

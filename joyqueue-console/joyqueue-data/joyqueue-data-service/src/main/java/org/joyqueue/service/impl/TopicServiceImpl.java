@@ -25,9 +25,7 @@ import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.AppUnsubscribedTopic;
 import org.joyqueue.model.domain.Broker;
-import org.joyqueue.model.domain.BrokerGroup;
 import org.joyqueue.model.domain.Consumer;
-import org.joyqueue.model.domain.Identity;
 import org.joyqueue.model.domain.Namespace;
 import org.joyqueue.model.domain.PartitionGroupReplica;
 import org.joyqueue.model.domain.Topic;
@@ -74,13 +72,16 @@ public class TopicServiceImpl implements TopicService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public void addWithBrokerGroup(Topic topic, BrokerGroup brokerGroup, List<Broker> brokers, Identity operator) {
+    public void addWithBrokerGroup(Topic topic) {
         Namespace namespace = topic.getNamespace();
         Topic oldTopic = findByCode(namespace == null?null:namespace.getCode(),topic.getCode());
         if (oldTopic != null) {
             throw new DuplicateKeyException("topic aleady exist");
         }
-
+        List<Broker> brokers = topic.getBrokers();
+        if (brokers == null) {
+            brokers = new ArrayList<>();
+        }
         if (EnvironmentUtil.isTest()) {
             topic.setElectType(TopicPartitionGroup.ElectType.fix.type());
             brokers = Lists.newArrayList(brokers.get(0));

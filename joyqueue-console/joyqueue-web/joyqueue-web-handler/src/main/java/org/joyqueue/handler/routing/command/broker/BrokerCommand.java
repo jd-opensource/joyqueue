@@ -24,13 +24,14 @@ import com.jd.laf.web.vertx.response.Responses;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Broker;
 import org.joyqueue.model.query.QBroker;
 import org.joyqueue.service.BrokerService;
 import org.apache.commons.net.telnet.TelnetClient;
+
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * @author wylixiaobin
@@ -47,7 +48,7 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
 
     @Override
     @Path("delete")
-    public Response delete(@QueryParam(Constants.ID) String id) throws Exception {
+    public Response delete(@QueryParam(ID) String id) throws Exception {
         Broker newModel = service.findById(Integer.valueOf(id));
         int count = service.delete(newModel);
         if (count <= 0) {
@@ -58,7 +59,7 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
     }
 
     @Path("get")
-    public Response get(@QueryParam(Constants.ID) Long id) throws Exception {
+    public Response get(@QueryParam(ID) Long id) throws Exception {
         Broker newModel = service.findById(Integer.valueOf(String.valueOf(id)));
         if (newModel == null) {
             throw new ConfigException(getErrorCode());
@@ -81,5 +82,17 @@ public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroke
             return Responses.error(500,"未存活");
         }
         return Responses.success();
+    }
+
+    @Path("add")
+    @Override
+    public Response add(@Body Broker model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body Broker model) throws Exception {
+        return super.update(id, model);
     }
 }

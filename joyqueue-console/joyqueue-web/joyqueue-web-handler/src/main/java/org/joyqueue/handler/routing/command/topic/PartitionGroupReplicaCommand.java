@@ -49,6 +49,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.joyqueue.handler.Constants.ID;
+
 /**
  * 主题队列-Broker分组 处理器
  * Created by wylixiaobin on 2018-10-19
@@ -255,5 +257,11 @@ public class PartitionGroupReplicaCommand extends NsrCommandSupport<PartitionGro
             logger.error("", e);
             return Responses.error(500, e.getMessage());
         }
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body PartitionGroupReplica model) throws Exception {
+        return super.update(id, model);
     }
 }

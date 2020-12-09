@@ -25,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
-import org.joyqueue.handler.Constants;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
@@ -36,6 +35,8 @@ import org.joyqueue.service.DataCenterService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * Created by wangxiaofei1 on 2018/10/19.
@@ -72,7 +73,7 @@ public class DataCenterCommand extends NsrCommandSupport<DataCenter,DataCenterSe
 
     @Override
     @Path("delete")
-    public Response delete(@QueryParam(Constants.ID) String id) throws Exception {
+    public Response delete(@QueryParam(ID) String id) throws Exception {
         DataCenter newModel = service.findById(id);
         int count = service.delete(newModel);
         if (count <= 0) {
@@ -87,4 +88,15 @@ public class DataCenterCommand extends NsrCommandSupport<DataCenter,DataCenterSe
         return Responses.success(dataCenters);
     }
 
+    @Path("add")
+    @Override
+    public Response add(@Body DataCenter model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id,@Body DataCenter model) throws Exception {
+        return super.update(id, model);
+    }
 }
