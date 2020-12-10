@@ -65,6 +65,7 @@ import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.lang.LifeCycle;
+import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
@@ -167,13 +168,14 @@ public class ClusterManager extends Service {
      * @return
      */
     private void register() throws Exception {
-        String localIp = brokerConfig.getFrontendConfig().getHost();
+        String localHost = brokerConfig.getFrontendConfig().getHost();
+        String localIp = IpUtil.getDefaultLocalIp();
         long port = brokerConfig.getFrontendConfig().getPort();
         Integer brokerId = readBroker();
-        broker = nameService.register(brokerId, localIp, (int) port);
+        broker = nameService.register(brokerId, localHost, localIp, (int) port);
         // brokerId
         if (broker == null) {
-            logger.error("brokerId[{}] [{}:{}] 注册失败", brokerId, localIp, port);
+            logger.error("brokerId[{}] [{}:{}:{}] 注册失败", brokerId, localHost, localIp, port);
             throw new JoyQueueException(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE);
         }
         brokerConfig.setBroker(broker);

@@ -191,7 +191,7 @@ public class IpUtil {
         }
     }
 
-    private static String getDefaultLocalHost() {
+    public static String getDefaultLocalHost() {
         try {
             return InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
@@ -199,7 +199,7 @@ public class IpUtil {
         }
     }
 
-    private static String getDefaultLocalIp() {
+    public static String getDefaultLocalIp() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
