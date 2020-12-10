@@ -1,123 +1,123 @@
-CREATE TABLE IF NOT EXISTS `topic` (
-	`id` varchar(255) NOT NULL,
-	`code` varchar(255),
-	`namespace` varchar(255),
-	`partitions` int(11),
-	`priority_partitions` varchar(255),
-	`type` tinyint(1),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_code_namespace ON topic(`code`, `namespace`);
-ALTER TABLE `topic` ADD COLUMN IF NOT EXISTS `policy` varchar(1024) AFTER `type`;
+CREATE TABLE `topic` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `code` varchar(255) comment '主题名称' DEFAULT NULL,
+  `namespace` varchar(255) comment '作用域' DEFAULT NULL,
+  `partitions` int(11) comment '分区' DEFAULT NULL,
+  `priority_partitions` varchar(255) comment '优先分区' DEFAULT NULL,
+  `type` tinyint(1) comment '类型' DEFAULT NULL,
+  `policy` varchar(1024) comment '策略' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_code_namespace` (`code`(200),`namespace`(20))
+) comment '主题' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `partition_group` (
-	`id` varchar(255) NOT NULL,
-	`namespace` varchar(255),
-	`topic` varchar(255),
-	`group` int(11),
-	`leader` int(11),
-	`isrs` varchar(255),
-	`term` int(11),
-	`partitions` varchar(1024),
-	`learners` varchar(1024),
-	`replicas` varchar(1024),
-	`out_sync_replicas` varchar(1024),
-	`elect_Type` tinyint(1),
-	`rec_leader` int(11),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_topic_namespace ON partition_group(`topic`, `namespace`);
+CREATE TABLE `producer` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `namespace` varchar(255) comment '作用域' DEFAULT NULL,
+  `topic` varchar(255) comment '主题名称' DEFAULT NULL,
+  `app` varchar(255) comment '应用' DEFAULT NULL,
+  `client_type` tinyint(1) comment '客户端类型' DEFAULT NULL,
+  `produce_policy` varchar(1024) comment '生产策略' DEFAULT NULL,
+  `limit_policy` varchar(1024) comment '限流策略' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_topic_namespace_app` (`topic`(200),`namespace`(20),`app`(20)),
+  KEY `idx_app` (`app`)
+) comment '生产者' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `broker` (
-	`id` bigint(11) NOT NULL,
-	`ip` varchar(255),
-	`port` int(11),
-	`data_center` varchar(255),
-	`retry_type` varchar(255),
-	`permission` varchar(255),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_ip_port ON broker(`ip`, `port`);
-CREATE INDEX IF NOT EXISTS idx_retry_type ON broker(`retry_type`);
-CREATE INDEX IF NOT EXISTS idx_data_center ON broker(`data_center`);
+CREATE TABLE `partition_group_replica` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `topic` varchar(255) comment '主题名称' DEFAULT NULL,
+  `namespace` varchar(255) comment '作用域' DEFAULT NULL,
+  `broker_id` bigint(11) comment 'broker id' DEFAULT NULL,
+  `group` int(11) comment '组' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_topic_namespace_group` (`topic`(200),`namespace`(20),`group`),
+  KEY `idx_broker` (`broker_id`)
+) comment '副本' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `app_token` (
-	`id` varchar(255) NOT NULL,
-	`app` varchar(255),
-	`token` varchar(255),
-	`effective_time` datetime,
-	`expiration_time` datetime,
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_app_token ON app_token(`app`, `token`);
-CREATE INDEX IF NOT EXISTS idx_token ON app_token(`token`);
+CREATE TABLE `partition_group` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `namespace` varchar(255) comment '作用域' DEFAULT NULL,
+  `topic` varchar(255) comment '主题名称' DEFAULT NULL,
+  `group` int(11) comment '组' DEFAULT NULL,
+  `leader` int(11) comment 'leader' DEFAULT NULL,
+  `isrs` varchar(255) comment 'isr' DEFAULT NULL,
+  `term` int(11) comment 'term' DEFAULT NULL,
+  `partitions` varchar(1024) comment '分区' DEFAULT NULL,
+  `learners` varchar(1024) comment 'learners' DEFAULT NULL,
+  `replicas` varchar(1024) comment '副本' DEFAULT NULL,
+  `out_sync_replicas` varchar(1024) comment 'out_sync_replicas' DEFAULT NULL,
+  `elect_Type` tinyint(1) comment '选举类型' DEFAULT NULL,
+  `rec_leader` int(11) comment '推荐leader' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_topic_namespace` (`topic`(200),`namespace`(20))
+) comment '分区组' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `consumer` (
-	`id` varchar(255) NOT NULL,
-	`namespace` varchar(255),
-	`topic` varchar(255),
-	`app` varchar(255),
-	`topic_type` tinyint(1),
-	`client_type` tinyint(1),
-	`group` varchar(255),
-	`referer` varchar(255),
-	`consume_policy` varchar(1024),
-	`retry_policy` varchar(1024),
-	`limit_policy` varchar(1024),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_topic_namespace_app ON consumer(`topic`, `namespace`, `app`);
-CREATE INDEX IF NOT EXISTS idx_referer ON consumer(`referer`);
-CREATE INDEX IF NOT EXISTS idx_app ON consumer(`app`);
+CREATE TABLE `namespace` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `code` varchar(255) comment 'code' DEFAULT NULL,
+  `name` varchar(255) comment '名称' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_code` (`code`)
+) comment '作用域' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `producer` (
-	`id` varchar(255) NOT NULL,
-	`namespace` varchar(255),
-	`topic` varchar(255),
-	`app` varchar(255),
-	`client_type` tinyint(1),
-	`produce_policy` varchar(1024),
-	`limit_policy` varchar(1024),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_topic_namespace_app ON producer(`topic`, `namespace`, `app`);
-CREATE INDEX IF NOT EXISTS idx_app ON producer(`app`);
+CREATE TABLE `datacenter` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `region` varchar(255) comment '区域' DEFAULT NULL,
+  `code` varchar(255) comment 'code' DEFAULT NULL,
+  `name` varchar(255) comment '名称' DEFAULT NULL,
+  `url` varchar(255) comment 'url' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_code` (`code`)
+) comment '数据中心' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `namespace` (
-	`id` varchar(255) NOT NULL,
-	`code` varchar(255),
-	`name` varchar(255),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_code ON namespace(`code`);
+CREATE TABLE `consumer` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `namespace` varchar(255) comment '作用域' DEFAULT NULL,
+  `topic` varchar(255) comment '主题名称' DEFAULT NULL,
+  `app` varchar(255) comment '应用' DEFAULT NULL,
+  `topic_type` tinyint(1) comment '主题类型' DEFAULT NULL,
+  `client_type` tinyint(1) comment '客户端类型' DEFAULT NULL,
+  `group` varchar(255) comment '组' DEFAULT NULL,
+  `referer` varchar(255) comment 'referer' DEFAULT NULL,
+  `consume_policy` varchar(1024) comment '消费策略' DEFAULT NULL,
+  `retry_policy` varchar(1024) comment '重试策略' DEFAULT NULL,
+  `limit_policy` varchar(1024) comment '限流策略' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_topic_namespace_app` (`topic`(200),`namespace`(10),`app`(20)),
+  KEY `idx_referer` (`referer`),
+  KEY `idx_app` (`app`)
+) comment '消费者' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `datacenter` (
-	`id` varchar(255) NOT NULL,
-	`region` varchar(255),
-	`code` varchar(255),
-	`name` varchar(255),
-	`url` varchar(255),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_code ON datacenter(`code`);
+CREATE TABLE `config` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `key` varchar(255) comment 'key' DEFAULT NULL,
+  `value` varchar(255) comment 'value' DEFAULT NULL,
+  `group` varchar(1024) comment 'group' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_key_group` (`key`(200),`group`(50)),
+  KEY `idx_group` (`group`(255))
+) comment '配置' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `partition_group_replica` (
-	`id` varchar(255) NOT NULL,
-	`topic` varchar(255),
-	`namespace` varchar(255),
-	`broker_id` bigint(11),
-	`group` int(11),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_topic_namespace_group ON partition_group_replica(`topic`, `namespace`, `group`);
-CREATE INDEX IF NOT EXISTS idx_broker ON partition_group_replica(`broker_id`);
+CREATE TABLE `broker` (
+  `id` bigint(11) comment 'id' NOT NULL,
+  `ip` varchar(255) comment 'ip' DEFAULT NULL,
+  `port` int(11) comment 'port' DEFAULT NULL,
+  `data_center` varchar(255) comment '数据中心' DEFAULT NULL,
+  `retry_type` varchar(255) comment '重试类型' DEFAULT NULL,
+  `permission` varchar(255) comment '权限' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_ip_port` (`ip`(200),`port`),
+  KEY `idx_retry_type` (`retry_type`),
+  KEY `idx_data_center` (`data_center`)
+) comment 'broker' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-CREATE TABLE IF NOT EXISTS `config` (
-	`id` varchar(255) NOT NULL,
-	`key` varchar(255),
-	`value` varchar(255),
-	`group` varchar(1024),
-	PRIMARY KEY (`id`)
-);
-CREATE INDEX IF NOT EXISTS idx_key_group ON config(`key`, `group`);
-CREATE INDEX IF NOT EXISTS idx_group ON config(`group`);
+CREATE TABLE `app_token` (
+  `id` varchar(255) comment 'id' NOT NULL,
+  `app` varchar(255) comment '应用' DEFAULT NULL,
+  `token` varchar(255) comment '令牌' DEFAULT NULL,
+  `effective_time` datetime comment '生效时间' DEFAULT NULL,
+  `expiration_time` datetime comment '过期时间' DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_app_token` (`app`(20),`token`(200)),
+  KEY `idx_token` (`token`)
+) comment '令牌' ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
