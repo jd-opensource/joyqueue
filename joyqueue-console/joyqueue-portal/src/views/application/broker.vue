@@ -152,14 +152,6 @@ export default {
             title: '备注',
             key: 'description'
           }
-          // {
-          //   title:'状态',
-          //   key: 'status',
-          //   render:(h, params) => {
-          //     let txt = params.item.status == 1 ? '已启用' : '不可用'
-          //     return h('label', {}, txt)
-          //   }
-          // }
         ]
       }
     }
