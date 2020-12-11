@@ -254,6 +254,19 @@ public class ReplicaGroup extends Service {
         return this.state == ElectionNode.State.LEADER;
     }
 
+    public synchronized boolean addReplicaTask(int replicaId) {
+        if (!isLeader()) {
+            logger.error("add replica task error, not leader, partition: {}", topicPartitionGroup);
+            return false;
+        }
+        if (getReplica(replicaId) == null) {
+            logger.error("add replica task error, replica not exist, partition: {}", topicPartitionGroup);
+            return false;
+        }
+        replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, replicaId));
+        return true;
+    }
+
     /**
      * 是否需要复制，kafka的coordinators不需要复制
      * @return if topic need replicate
