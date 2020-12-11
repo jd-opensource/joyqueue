@@ -325,7 +325,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
      */
     private boolean deletePartitionGroup(File file, String topic, int partitionGroup, PartitionGroupStoreManager partitionGroupStoreManager) {
         File renamed = new File(base, TOPICS_DIR + File.separator + DEL_PREFIX + SystemClock.now() +
-                "." + topic + "." + partitionGroup);
+                "." + topic.replace('/', '@') + "." + partitionGroup);
         boolean renameResult = file.renameTo(renamed);
 
         if (partitionGroupStoreManager != null) {
