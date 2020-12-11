@@ -45,4 +45,13 @@ public interface ElectionManageService {
      * @param term 轮次
      */
     void updateTerm(String topic, int partitionGroup, int term);
+
+    /**
+     * 添加复制任务
+     * @param topic
+     * @param partitionGroup
+     * @param replicaId
+     * @return
+     */
+    boolean addReplicaTask(String topic, int partitionGroup, int replicaId);
 }
