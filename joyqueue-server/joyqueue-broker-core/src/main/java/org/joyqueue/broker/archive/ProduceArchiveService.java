@@ -134,7 +134,8 @@ public class ProduceArchiveService extends Service {
         this.updateItemThread = LoopThread.builder()
                 .sleepTime(1000 * 10, 1000 * 10)
                 .name("UpdateArchiveItem-Thread")
-                .onException(e -> logger.warn("Exception:", e))
+                .daemon(true)
+                .onException(e -> logger.error("UpdateArchiveItem-Thread error: {}", e))
                 .doWork(() -> {
                     // 更新item列表
                     updateArchiveItem();
@@ -145,7 +146,8 @@ public class ProduceArchiveService extends Service {
         this.readMsgThread = LoopThread.builder()
                 .sleepTime(0, 10)
                 .name("ReadArchiveMsg-Thread")
-                .onException(e -> logger.warn("Exception:", e))
+                .daemon(true)
+                .onException(e -> logger.error("ReadArchiveMsg-Thread error: {}", e))
                 .doWork(() -> {
                     // 消费接口读取消息，放入队列
                     readArchiveMsg();
@@ -154,7 +156,8 @@ public class ProduceArchiveService extends Service {
         this.writeMsgThread = LoopThread.builder()
                 .sleepTime(10, 10)
                 .name("WriteArchiveMsg-Thread")
-                .onException(e -> logger.warn("Exception:", e))
+                .daemon(true)
+                .onException(e -> logger.error("WriteArchiveMsg-Thread error: {}", e))
                 .doWork(() -> {
                     // 队列读取消息，放入归档存储
                     write2Store();
@@ -172,7 +175,7 @@ public class ProduceArchiveService extends Service {
         updateItemThread.start();
         readMsgThread.start();
         writeMsgThread.start();
-        logger.info("produce archive archiveService started.");
+        logger.info("Produce-archive: service started.");
     }
 
     @Override
@@ -183,7 +186,7 @@ public class ProduceArchiveService extends Service {
         Close.close(writeMsgThread);
         Close.close(executorService);
         Close.close(archiveStore);
-        logger.info("produce archive archiveService stopped.");
+        logger.info("Produce-archive: service stopped.");
     }
 
     /**
@@ -196,7 +199,9 @@ public class ProduceArchiveService extends Service {
             TopicName name = topicConfig.getName();
             // 检查是否开启发送归档
             if (clusterManager.checkArchiveable(name)) {
-                logger.info("Topic:{} send archive is enable.", name.getFullName());
+                if (archiveConfig.getLogDetail(ArchiveConfig.LOG_DETAIL_PRODUCE_PREFIX, clusterManager.getBrokerId().toString())) {
+                    logger.info("Produce-archive: topic [{}] archive is enable.", name.getFullName());
+                }
                 List<Short> partitionSet = clusterManager.getLocalPartitions(topicConfig);
                 partitionSet.stream().forEach(partition -> {
                     list.add(new SendArchiveItem(name.getFullName(), partition));
@@ -207,7 +212,7 @@ public class ProduceArchiveService extends Service {
         itemList.addAndUpdate(list);
         long count=updateArchiveMetadataCounter.getAndIncrement();
         if(count% ARCHIVE_METADATA_MOD ==0){
-            logger.info("Add or Update archive item ping,size {}",list.size());
+            logger.info("Produce-archive: add or update archive item,size {}",list.size());
         }
     }
 
@@ -226,10 +231,8 @@ public class ProduceArchiveService extends Service {
             try {
                 pullResult = consume.getMessage(item.topic, item.partition, readIndex, batchNum);
             } catch (Throwable th) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("read message from topic:" + item.topic + " partition:" + item.partition
-                            + " index:" + item.getReadIndex() + " error.", th);
-                }
+                logger.error("Produce-archive: read journal message from topic: [{}] partition: [{}] index: [{}] error: {}, {}",
+                        item.topic, item.partition, item.getReadIndex(), th.getMessage(), th.getCause());
 
                 if (th.getCause() instanceof PositionUnderflowException) {
                     // 如果读取位置小于存储索引的最小位置，将位置重置为可读到的最小位置
@@ -237,7 +240,7 @@ public class ProduceArchiveService extends Service {
                     long minIndex = consume.getMinIndex(new Consumer(item.topic, ""), item.partition);
                     item.setReadIndex(minIndex);
 
-                    logger.debug("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, minIndex);
+                    logger.error("Produce-archive: repair read journal message position SendArchiveItem info:[{}], currentIndex-min:[{}], exception: {}", item, minIndex, th.getCause());
 
                 }
 
@@ -247,7 +250,7 @@ public class ProduceArchiveService extends Service {
                     long maxIndex = consume.getMaxIndex(new Consumer(item.topic, ""), item.partition);
                     item.setReadIndex(maxIndex);
 
-                    logger.debug("repair read message position SendArchiveItem info:[{}], currentIndex:[{}]", item, maxIndex);
+                    logger.error("Produce-archive: repair read journal message position SendArchiveItem info:[{}], currentIndex-max:[{}], exception: {}", item, maxIndex, th.getCause());
 
                 }
 
@@ -269,8 +272,8 @@ public class ProduceArchiveService extends Service {
                 item.setReadIndex(readIndex + size, readIndex);
                 // 计数
                 counter += messageSize;
-                if (logger.isDebugEnabled()) {
-                    logger.debug("produce archive: {} messages put into the archive queue.", size);
+                if (archiveConfig.getLogDetail(ArchiveConfig.LOG_DETAIL_PRODUCE_PREFIX, clusterManager.getBrokerId().toString())) {
+                    logger.info("Produce-archive: {} messages put into the archive queue.", size);
                 }
             }
         }
@@ -388,10 +391,13 @@ public class ProduceArchiveService extends Service {
                     try {
                         // 写入存储
                         archiveStore.putSendLog(sendLogs, tracer);
-                        logger.debug("Write sendLogs size:{} to archive store.", sendLogs.size());
+                        if (archiveConfig.getLogDetail(ArchiveConfig.LOG_DETAIL_PRODUCE_PREFIX, clusterManager.getBrokerId().toString())) {
+                            logger.info("Produce-archive: write sendLogs size:{} to archive store.", sendLogs.size());
+                        }
                         // 写入计数（用于归档位置）
                         writeCounter(sendLogs);
                     } catch (JoyQueueException e) {
+                        logger.error("Produce-archive: write sendLogs error: {}", e);
                         // 写入存储失败
                         hasStoreError.set(true);
                         // 回滚读取位置
@@ -663,9 +669,9 @@ public class ProduceArchiveService extends Service {
                 if (!newItemList.contains(item)) {
                     try {
                         remove(item);
-                        logger.info("Clean up archive item,topic {},partition {}",item.getTopic(),item.getPartition());
+                        logger.info("Produce-archive: clean up archive item, topic [{}], partition [{}]",item.getTopic(),item.getPartition());
                     }catch (JoyQueueException e){
-                        logger.info("remove archive item exception",e);
+                        logger.error("Produce-archive: clean up archive item error: {}", e);
                     }
                 }
             });
@@ -680,9 +686,9 @@ public class ProduceArchiveService extends Service {
                         // fullName
                         consumer.setTopic(item.getTopic());
                         index = consume.getMaxIndex(consumer,item.getPartition());
-                        logger.info("New archive item,topic {},partition {},init from local store max index {}",item.getTopic(),item.getPartition(),item.getReadIndex());
+                        logger.info("Produce-archive: new archive item, topic [{}], partition [{}], init from local store max index {}",item.getTopic(),item.getPartition(),item.getReadIndex());
                     }else{
-                        logger.info("New archive item,topic {},partition {},recover from archive store,index {}",item.getTopic(),item.getPartition(),index);
+                        logger.info("Produce-archive: new archive item, topic [{}], partition [{}], recover from archive position store index {}",item.getTopic(),item.getPartition(),index);
                     }
                     item.setReadIndex(index);
                     cpList.add(item);

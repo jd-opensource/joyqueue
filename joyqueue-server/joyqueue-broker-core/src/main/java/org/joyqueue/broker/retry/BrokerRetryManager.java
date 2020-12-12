@@ -24,11 +24,13 @@ import org.joyqueue.broker.BrokerContextAware;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.limit.RateLimiter;
+import org.joyqueue.broker.limit.SubscribeRateLimiter;
 import org.joyqueue.broker.monitor.BrokerMonitor;
 import org.joyqueue.broker.network.support.BrokerTransportClientFactory;
 import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.Consumer;
+import org.joyqueue.domain.Subscription;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.event.EventType;
 import org.joyqueue.event.MetaEvent;
@@ -85,7 +87,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
     // 集群管理
     private ClusterManager clusterManager;
     private PropertySupplier propertySupplier;
-    private RetryRateLimiter rateLimiterManager;
+    private SubscribeRateLimiter rateLimiterManager;
     private BrokerMonitor brokerMonitor;
     private PointTracer tracer;
 
@@ -231,7 +233,7 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
      **/
     public boolean retryTokenAvailable(Set<Joint> consumers){
         for(Joint consumer:consumers) {
-            RateLimiter rateLimiter= rateLimiterManager.getOrCreate(consumer.getTopic(),consumer.getApp());
+            RateLimiter rateLimiter= rateLimiterManager.getOrCreate(consumer.getTopic(),consumer.getApp(), Subscription.Type.CONSUMPTION);
             if(rateLimiter==null||rateLimiter.tryAcquireTps()){
                 return true;
             }

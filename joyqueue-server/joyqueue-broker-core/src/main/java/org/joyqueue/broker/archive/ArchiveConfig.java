@@ -25,6 +25,9 @@ import org.joyqueue.toolkit.config.PropertySupplier;
  * Created by chengzhiliang on 2018/12/6.
  */
 public class ArchiveConfig {
+    public static final String LOG_DETAIL_PRODUCE_PREFIX = "produce.";
+    public static final String LOG_DETAIL_CONSUME_PREFIX = "consume.";
+
     private static final String ARCHIVE_PATH ="/archive/";
     private PropertySupplier propertySupplier;
     private String archivePath;
@@ -60,6 +63,13 @@ public class ArchiveConfig {
         }
     }
 
+    public boolean getLogDetail(String archiveType, String brokerId) {
+        return (boolean) PropertySupplier.getValue(propertySupplier,
+                ArchiveConfigKey.ARCHIVE_TRACE_LOG.getName() + archiveType + brokerId,
+                ArchiveConfigKey.ARCHIVE_TRACE_LOG.getType(),
+                ArchiveConfigKey.ARCHIVE_TRACE_LOG.getValue());
+    }
+
     public int getConsumeBatchNum() {
         return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.CONSUME_BATCH_NUM);
     }
@@ -91,6 +101,10 @@ public class ArchiveConfig {
         return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_STORE_NAMESPACE);
     }
 
+    public int getStoreFialedRetryCount() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_STORE_RETRY_COUNT);
+    }
+
     public String getTracerType() {
         return PropertySupplier.getValue(propertySupplier, BrokerConfigKey.TRACER_TYPE);
     }
@@ -101,5 +115,9 @@ public class ArchiveConfig {
 
     public boolean isBacklogEnable() {
         return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_BACKLOG_ENABLE);
+    }
+
+    public int getLogRetainDuration() {
+        return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_LOG_RETAIN_DURATION);
     }
 }
