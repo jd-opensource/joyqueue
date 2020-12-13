@@ -257,7 +257,7 @@ public class ConsumeArchiveServiceTest {
         consumeService.readAndWrite();
     }
 
-    //@Test
+    @Test
     public void testArchive() {
         ConsumeArchiveService.ArchiveMappedFileRepository archiveMappedFileRepository =
                 consumeService.new ArchiveMappedFileRepository(getTestPath());
