@@ -40,7 +40,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * Created by chengzhiliang on 2018/12/19.
@@ -95,7 +94,7 @@ public class ConsumeArchiveServiceTest {
         Thread.sleep(100);
     }
 
-    @Test
+    //@Test
     public void multiWriteConsumeLogTest() {
         String testPath = getTestPath();
         ConsumeArchiveService.ArchiveMappedFileRepository archiveMappedFileRepository = consumeService.new ArchiveMappedFileRepository(testPath);
@@ -211,7 +210,7 @@ public class ConsumeArchiveServiceTest {
         return "";
     }
 
-    @Test
+    //@Test
     public void testConsumeArchiveService() throws NoSuchFieldException, IllegalAccessException {
         ArchiveStore archiveStore = new MockArchiveStore();
         Field archiveField = consumeService.getClass().getDeclaredField("archiveStore");
@@ -249,7 +248,7 @@ public class ConsumeArchiveServiceTest {
         consumeService.readAndWrite();
     }
 
-    @Test
+    //@Test
     public void testArchive() {
         ConsumeArchiveService.ArchiveMappedFileRepository archiveMappedFileRepository =
                 consumeService.new ArchiveMappedFileRepository(getTestPath());
@@ -311,27 +310,7 @@ public class ConsumeArchiveServiceTest {
         return list;
     }
 
-    @Test
-    public void testFilelist() {
-        File file = new File(archiveConfig.getArchivePath());
-        String[] list = file.list();
-        if (list != null && list.length > 0) {
-            System.out.println(Arrays.stream(list).filter(name -> name.compareTo("") > 0).collect(Collectors.toList()));
-        }
-    }
-
-    @Test
-    public void testAsyncWrite() throws IOException {
-        String path = getTestPath();
-        String fileName = getTestFile();
-        File wFile = new File(path + fileName);
-        MappedByteBuffer wMap = new RandomAccessFile(wFile, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE,0, 1024);
-        wMap.position(100);
-        wMap.putInt(10);
-        print(wMap);
-    }
-
-    @Test
+    //@Test
     public void testAsyncRead() throws IOException {
         String path = getTestPath();
         String fileName = getTestFile();
@@ -350,7 +329,7 @@ public class ConsumeArchiveServiceTest {
         print(rMap);
     }
 
-    @Test
+    //@Test
     public void testMappedFileRollback() throws IOException {
         String path = getTestPath();
         String fileName = getTestFile();
@@ -382,7 +361,7 @@ public class ConsumeArchiveServiceTest {
         }
     }
 
-    @Test
+    //@Test
     public void testMappedFileRW() throws IOException {
         String pathR = getTestPath();
         String fileNameR = getTestFile();
@@ -410,7 +389,7 @@ public class ConsumeArchiveServiceTest {
         } while (isExit);
     }
 
-    @Test
+    //@Test
     public void testMappedFileRead() throws IOException {
         AtomicInteger counter = new AtomicInteger(0);
         String path = getTestPath();
