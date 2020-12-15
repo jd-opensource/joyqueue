@@ -39,6 +39,7 @@ public class TopicMetadata implements Serializable {
     private ProducerPolicy producerPolicy;
     private ConsumerPolicy consumerPolicy;
     private TopicType type;
+    private Map<String, String> params;
     private JoyQueueCode code;
 
     private List<PartitionGroupMetadata> partitionGroups;
@@ -76,7 +77,7 @@ public class TopicMetadata implements Serializable {
                          List<PartitionMetadata> partitions, Map<Short, PartitionMetadata> partitionMap, Map<Integer, PartitionGroupMetadata> partitionGroupMap, List<BrokerNode> brokers,
                          List<BrokerNode> writableBrokers, List<BrokerNode> readableBrokers, List<BrokerNode> nearbyBrokers, List<BrokerNode> writableNearbyBrokers,
                          List<BrokerNode> readableNearbyBrokers, Map<Integer, BrokerNode> brokerMap, Map<Integer, List<PartitionMetadata>> brokerPartitions,
-                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, JoyQueueCode code) {
+                         Map<Integer, List<PartitionGroupMetadata>> brokerPartitionGroups, boolean allAvailable, Map<String, String> params, JoyQueueCode code) {
         this.topic = topic;
         this.producerPolicy = producerPolicy;
         this.consumerPolicy = consumerPolicy;
@@ -95,6 +96,7 @@ public class TopicMetadata implements Serializable {
         this.brokerPartitions = brokerPartitions;
         this.brokerPartitionGroups = brokerPartitionGroups;
         this.allAvailable = allAvailable;
+        this.params = params;
         this.code = code;
     }
 
@@ -172,6 +174,10 @@ public class TopicMetadata implements Serializable {
 
     public JoyQueueCode getCode() {
         return code;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
     }
 
     public void setAttachments(ConcurrentMap<Object, Object> attachments) {

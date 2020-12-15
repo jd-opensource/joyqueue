@@ -17,6 +17,9 @@ package org.joyqueue.network.codec;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.netty.buffer.ByteBuf;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.joyqueue.domain.ConsumerPolicy;
 import org.joyqueue.domain.ProducerPolicy;
 import org.joyqueue.domain.TopicType;
@@ -32,9 +35,6 @@ import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadCodec;
 import org.joyqueue.network.transport.command.Header;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -173,7 +173,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
     public void encode(FetchClusterResponse payload, ByteBuf buffer) throws Exception {
         buffer.writeShort(payload.getTopics().size());
         for (Map.Entry<String, Topic> entry : payload.getTopics().entrySet()) {
-            encodeTopic(entry.getValue(), buffer);
+            encodeTopic(payload.getHeader(), entry.getValue(), buffer);
         }
 
         buffer.writeShort(payload.getBrokers().size());
@@ -182,7 +182,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         }
     }
 
-    protected void encodeTopic(Topic topic, ByteBuf buffer) throws Exception {
+    protected void encodeTopic(Header header, Topic topic, ByteBuf buffer) throws Exception {
         ProducerPolicy producerPolicy = topic.getProducerPolicy();
         ConsumerPolicy consumerPolicy = topic.getConsumerPolicy();
         Serializer.write(topic.getTopic(), buffer, Serializer.SHORT_SIZE);
@@ -269,6 +269,18 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         }
 
         buffer.writeInt(topic.getCode().getCode());
+
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+            if (MapUtils.isEmpty(topic.getParams())) {
+                buffer.writeShort(0);
+            } else {
+                buffer.writeShort(topic.getParams().size());
+                for (Map.Entry<String, String> entry : topic.getParams().entrySet()) {
+                    Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
+                    Serializer.write(entry.getValue(), buffer, Serializer.SHORT_SIZE);
+                }
+            }
+        }
     }
 
     protected void encodeBroker(Header header, BrokerNode brokerNode, ByteBuf buffer) throws Exception {

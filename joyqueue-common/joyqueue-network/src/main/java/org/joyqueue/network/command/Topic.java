@@ -36,6 +36,7 @@ public class Topic implements Serializable {
     private ConsumerPolicy consumerPolicy;
     private TopicType type;
     private Map<Integer, TopicPartitionGroup> partitionGroups;
+    private Map<String, String> params;
     private JoyQueueCode code;
 
     public void setTopic(String topic) {
@@ -78,6 +79,14 @@ public class Topic implements Serializable {
         this.partitionGroups = partitionGroups;
     }
 
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
     public void setCode(JoyQueueCode code) {
         this.code = code;
     }
@@ -94,6 +103,7 @@ public class Topic implements Serializable {
                 ", consumerPolicy=" + consumerPolicy +
                 ", type=" + type +
                 ", partitionGroups=" + partitionGroups +
+                ", params=" + params +
                 ", code=" + code +
                 '}';
     }
