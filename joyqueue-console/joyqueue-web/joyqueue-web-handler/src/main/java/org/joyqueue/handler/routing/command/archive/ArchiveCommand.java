@@ -21,7 +21,7 @@ import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.message.SourceType;
-import org.joyqueue.server.archive.store.HBaseSerializer;
+import org.joyqueue.server.archive.store.utils.ArchiveSerializer;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.service.MessagePreviewService;
@@ -200,10 +200,10 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         }
         for(BrokerMessage m:msgs){
             String msgId=ArchiveUtils.messageId(brokerMessage.getTopic(),m.getPartition(),m.getMsgIndexNo());
-            byte[] msgIdMd5Bytes=HBaseSerializer.md5(msgId,null);
+            byte[] msgIdMd5Bytes= ArchiveSerializer.md5(msgId,null);
             if(logger.isDebugEnabled()) {
                 logger.debug("current message business id {},message id {},md5 length {},base 64 bytes {},hex {}", m.getBusinessId(), msgId, msgIdMd5Bytes.length,
-                        Base64.getEncoder().encodeToString(msgIdMd5Bytes), HBaseSerializer.byteArrayToHexStr(msgIdMd5Bytes));
+                        Base64.getEncoder().encodeToString(msgIdMd5Bytes), ArchiveSerializer.byteArrayToHexStr(msgIdMd5Bytes));
             }
             if(Arrays.equals(msgIdMd5Bytes,sendLog.getBytesMessageId())){
                 return m;
