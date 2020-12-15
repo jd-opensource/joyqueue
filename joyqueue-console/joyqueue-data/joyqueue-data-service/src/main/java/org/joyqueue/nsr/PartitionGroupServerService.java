@@ -15,6 +15,7 @@
  */
 package org.joyqueue.nsr;
 
+import org.joyqueue.domain.Replica;
 import org.joyqueue.model.domain.TopicPartitionGroup;
 
 import java.util.List;
@@ -27,4 +28,6 @@ public interface PartitionGroupServerService extends NsrService<TopicPartitionGr
     List<TopicPartitionGroup> findByTopic(String topic,String namespace);
 
     TopicPartitionGroup findByTopicAndGroup(String namespace, String topic, Integer groupNo);
+
+    List<Replica> getByBrokerId(Integer brokerId);
 }

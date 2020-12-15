@@ -117,6 +117,12 @@ public class ApplicationServiceImpl extends PageServiceSupport<Application, QApp
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+    public int update(Application model) {
+        return super.update(model);
+    }
+
+    @Override
     public Application findByCode(final String code) {
         if (code == null || code.isEmpty()) {
             return null;

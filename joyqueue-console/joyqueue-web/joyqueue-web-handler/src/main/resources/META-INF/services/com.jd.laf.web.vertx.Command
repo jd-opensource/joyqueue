@@ -14,7 +14,6 @@ org.joyqueue.handler.routing.command.topic.PartitionGroupReplicaCommand
 org.joyqueue.handler.routing.command.topic.TopicPartitionGroupCommand
 org.joyqueue.handler.routing.command.monitor.ConsumerCommand
 org.joyqueue.handler.routing.command.monitor.ProducerCommand
-org.joyqueue.handler.routing.command.monitor.ProducerConfigAddOrUpdateCommand
 org.joyqueue.handler.routing.command.monitor.BrokerMonitorCommand
 org.joyqueue.handler.routing.command.log.OperLogCommand
 org.joyqueue.handler.routing.command.retry.RetryCommand

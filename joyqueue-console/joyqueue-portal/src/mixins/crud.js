@@ -164,7 +164,7 @@ export default {
         if (typeof (_this.beforeDel) === 'function') {
           _this.beforeDel(item)
         }
-        apiRequest.delete(_this.urlOrigin.del + '/' + item.id).then((data) => {
+        apiRequest.delete(_this.urlOrigin.del + '/' + encodeURIComponent(item.id)).then((data) => {
           if (data.code !== this.$store.getters.successCode) {
             this.$Dialog.error({
               content: '删除失败'
