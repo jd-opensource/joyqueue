@@ -16,6 +16,7 @@
 package org.joyqueue.client.internal.producer.interceptor;
 
 import com.google.common.collect.Maps;
+import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.client.internal.producer.domain.ProduceMessage;
 
@@ -32,14 +33,16 @@ public class ProduceContext {
 
     private String topic;
     private String app;
-    private NameServerConfig nameserver;
+    private NameServerConfig nameserverConfig;
+    private TopicMetadata topicMetadata;
     private List<ProduceMessage> messages;
     private Map<Object, Object> attributes;
 
-    public ProduceContext(String topic, String app, NameServerConfig nameserver, List<ProduceMessage> messages) {
+    public ProduceContext(String topic, String app, NameServerConfig nameserverConfig, TopicMetadata topicMetadata, List<ProduceMessage> messages) {
         this.topic = topic;
         this.app = app;
-        this.nameserver = nameserver;
+        this.nameserverConfig = nameserverConfig;
+        this.topicMetadata = topicMetadata;
         this.messages = messages;
     }
 
@@ -51,12 +54,16 @@ public class ProduceContext {
         return app;
     }
 
-    public NameServerConfig getNameserver() {
-        return nameserver;
+    public NameServerConfig getNameserverConfig() {
+        return nameserverConfig;
     }
 
     public List<ProduceMessage> getMessages() {
         return messages;
+    }
+
+    public TopicMetadata getTopicMetadata() {
+        return topicMetadata;
     }
 
     public <T> T getAttribute(Object key) {
