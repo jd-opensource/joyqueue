@@ -57,7 +57,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
 
         short topicSize = buffer.readShort();
         for (int i = 0; i < topicSize; i++) {
-            Topic topic = decodeTopic(buffer);
+            Topic topic = decodeTopic(header, buffer);
             topics.put(topic.getTopic(), topic);
         }
 
@@ -72,7 +72,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         return fetchClusterResponse;
     }
 
-    protected Topic decodeTopic(ByteBuf buffer) throws Exception {
+    protected Topic decodeTopic(JoyQueueHeader header, ByteBuf buffer) throws Exception {
         String topicCode = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         Topic topic = new Topic();
         topic.setTopic(topicCode);
@@ -97,6 +97,19 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
 
             int timeout = buffer.readInt();
             topic.setProducerPolicy(new ProducerPolicy(isNearBy, isSingle, isArchive, weight, blackList, timeout));
+
+            if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+                int paramSize = buffer.readShort();
+                if (paramSize > 0) {
+                    Map<String, String> params = Maps.newHashMap();
+                    for (int i = 0; i < paramSize; i++) {
+                        String key = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+                        String value = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+                        params.put(key, value);
+                    }
+                    topic.setParams(params);
+                }
+            }
         }
 
         boolean isExistConsumerPolicy = buffer.readBoolean();
