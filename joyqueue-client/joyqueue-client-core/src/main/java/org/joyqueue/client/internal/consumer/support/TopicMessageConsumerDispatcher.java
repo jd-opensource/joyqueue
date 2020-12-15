@@ -100,12 +100,12 @@ public class TopicMessageConsumerDispatcher extends Service {
 
     protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, ConsumerPolicy consumerPolicy,
                                                  List<ConsumeMessage> messages, List<BatchMessageListener> listeners) {
-        return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
+        return new ConsumerInvocation(config, topic, nameServerConfig, topicMetadata, messages, consumerInterceptorManager,
                 new BatchConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners)).invoke();
     }
 
     protected List<ConsumeReply> doOnceDispatch(TopicMetadata topicMetadata, final ConsumerPolicy consumerPolicy, final List<ConsumeMessage> messages, final List<MessageListener> listeners) {
-        return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
+        return new ConsumerInvocation(config, topic, nameServerConfig, topicMetadata, messages, consumerInterceptorManager,
                 new OnceConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners)).invoke();
     }
 }
