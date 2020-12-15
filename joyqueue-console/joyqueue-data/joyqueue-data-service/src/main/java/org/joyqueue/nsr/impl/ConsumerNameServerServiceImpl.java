@@ -17,6 +17,7 @@ package org.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.convert.NsrConsumerConverter;
 import org.joyqueue.domain.ClientType;
@@ -26,7 +27,6 @@ import org.joyqueue.model.query.QConsumer;
 import org.joyqueue.nsr.ConsumerNameServerService;
 import org.joyqueue.nsr.NameServerBase;
 import org.joyqueue.nsr.model.ConsumerQuery;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

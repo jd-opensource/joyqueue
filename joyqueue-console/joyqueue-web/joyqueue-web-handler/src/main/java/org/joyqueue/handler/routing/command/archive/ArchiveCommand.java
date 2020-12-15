@@ -17,7 +17,7 @@ package org.joyqueue.handler.routing.command.archive;
 
 import com.alibaba.fastjson.JSON;
 import org.joyqueue.broker.archive.ArchiveUtils;
-import org.joyqueue.broker.buffer.Serializer;
+import org.joyqueue.util.serializer.Serializer;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.message.SourceType;
@@ -45,7 +45,6 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
@@ -221,7 +220,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
                return messagePreviewService.preview(messageType, brokerMessage.getDecompressedBody());
             } catch (Throwable e) {
                 logger.error("parse error",e);
-               return Bytes.toString(brokerMessage.getDecompressedBody());
+                return Serializer.readString(brokerMessage.getDecompressedBody());
             }
     }
 

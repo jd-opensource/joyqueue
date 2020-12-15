@@ -112,9 +112,13 @@
             <artifactId>commons-beanutils</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+        </dependency>
+        <!--<dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-hbase</artifactId>
-        </dependency>
+        </dependency>-->
        <dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-nsr-core</artifactId>

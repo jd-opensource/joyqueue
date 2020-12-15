@@ -229,6 +229,18 @@ public abstract class AbstractSerializer {
         return new HashMap(properties);
     }
 
+    public static String readString(final byte[] bytes) {
+        return bytes == null ? null : readString(bytes, 0, bytes.length);
+    }
+
+    public static String readString(byte[] bytes, int offset, int length) {
+        if (bytes == null) {
+            return null;
+        } else {
+            return length == 0 ? "" : new String(bytes, offset, length, Charset.forName("UTF-8"));
+        }
+    }
+
     /**
      * 读取字符串，字符长度&lt;=255
      *
