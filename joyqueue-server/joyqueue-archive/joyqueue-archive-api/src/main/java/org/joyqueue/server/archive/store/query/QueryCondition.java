@@ -18,6 +18,8 @@ package org.joyqueue.server.archive.store.query;
 import org.joyqueue.server.archive.store.model.Query;
 import org.joyqueue.server.archive.store.utils.ArchiveSerializer;
 
+import java.util.Arrays;
+
 /**
  * Created by chengzhiliang on 2018/12/4.
  */
@@ -77,6 +79,17 @@ public class QueryCondition implements Query {
         this.startRowKeyByteArr = bytes;
     }
 
+    @Override
+    public String toString() {
+        return "QueryCondition{" +
+                "startRowKey=" + startRowKey +
+                ", stopRowKey=" + stopRowKey +
+                ", count=" + count +
+                ", rowKey=" + rowKey +
+                ", startRowKeyByteArr=" + Arrays.toString(startRowKeyByteArr) +
+                '}';
+    }
+
     /**
      * 查询RowKey
      */
@@ -118,5 +131,14 @@ public class QueryCondition implements Query {
             this.messageId = messageId;
         }
 
+        @Override
+        public String toString() {
+            return "RowKey{" +
+                    "topic='" + topic + '\'' +
+                    ", time=" + time +
+                    ", businessId='" + businessId + '\'' +
+                    ", messageId='" + messageId + '\'' +
+                    '}';
+        }
     }
 }

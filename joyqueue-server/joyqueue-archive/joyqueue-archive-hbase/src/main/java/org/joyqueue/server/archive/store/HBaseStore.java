@@ -22,6 +22,8 @@ import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
 import org.joyqueue.monitor.PointTracer;
 import org.joyqueue.server.archive.store.model.*;
+import org.joyqueue.server.archive.store.query.QueryCondition;
+import org.joyqueue.server.archive.store.utils.ArchiveSerializer;
 import org.joyqueue.toolkit.lang.Pair;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.security.Md5;
@@ -118,7 +120,7 @@ public class HBaseStore implements ArchiveStore {
                 int appId = topicAppMapping.getAppId(app);
                 consumeLog.setAppId(appId);
 
-                Pair<byte[], byte[]> pair = HBaseSerializer.convertConsumeLogToKVBytes(consumeLog);
+                Pair<byte[], byte[]> pair = ArchiveSerializer.convertConsumeLogToKVBytes(consumeLog);
 
                 logList.add(pair);
             }
@@ -145,10 +147,10 @@ public class HBaseStore implements ArchiveStore {
                 log.setTopicId(topicId);
                 log.setAppId(appId);
 
-                Pair<byte[], byte[]> pair = HBaseSerializer.convertSendLogToKVBytes(log);
+                Pair<byte[], byte[]> pair = ArchiveSerializer.convertSendLogToKVBytes(log);
                 logList.add(pair);
 
-                Pair<byte[], byte[]> pair4BizId = HBaseSerializer.convertSendLogToKVBytes4BizId(log);
+                Pair<byte[], byte[]> pair4BizId = ArchiveSerializer.convertSendLogToKVBytes4BizId(log);
                 logList.add(pair4BizId);
 
             }
@@ -233,13 +235,13 @@ public class HBaseStore implements ArchiveStore {
             for (Pair<byte[], byte[]> pair : scan) {
                 SendLog log;
                 if (hasBizId) {
-                    log = HBaseSerializer.readSendLog4BizId(pair);
+                    log = ArchiveSerializer.readSendLog4BizId(pair);
                 } else {
-                    log = HBaseSerializer.readSendLog(pair);
+                    log = ArchiveSerializer.readSendLog(pair);
                 }
 
                 log.setClientIpStr(toIpString(log.getClientIp()));
-                log.setRowKeyStart(HBaseSerializer.byteArrayToHexStr(pair.getKey()));
+                log.setRowKeyStart(ArchiveSerializer.byteArrayToHexStr(pair.getKey()));
                 String topicName = topicAppMapping.getTopicName(log.getTopicId());
                 log.setTopic(topicName);
 
@@ -412,13 +414,13 @@ public class HBaseStore implements ArchiveStore {
             allocate.putInt(topicAppMapping.getTopicId(rowKey.getTopic()));
             allocate.putLong(rowKey.getTime());
             allocate.put(Md5.INSTANCE.encrypt(rowKey.getBusinessId().getBytes(Charset.forName("utf-8")), null));
-            allocate.put(HBaseSerializer.hexStrToByteArray(rowKey.getMessageId()));
+            allocate.put(ArchiveSerializer.hexStrToByteArray(rowKey.getMessageId()));
             // rowKey
             byte[] bytesRowKey = allocate.array();
 
             Pair<byte[], byte[]> bytes = hBaseClient.getKV(namespace, sendLogTable, cf, col, bytesRowKey);
 
-            SendLog log = HBaseSerializer.readSendLog(bytes);
+            SendLog log = ArchiveSerializer.readSendLog(bytes);
 
             StringBuilder clientIp = new StringBuilder();
             IpUtil.toAddress(log.getClientIp(), clientIp);
@@ -452,7 +454,7 @@ public class HBaseStore implements ArchiveStore {
             scanParameters.setCf(cf);
             scanParameters.setCol(col);
 
-            byte[] messageIdBytes = HBaseSerializer.hexStrToByteArray(messageId);
+            byte[] messageIdBytes = ArchiveSerializer.hexStrToByteArray(messageId);
             scanParameters.setStartRowKey(messageIdBytes);
 
             ByteBuffer bytebuffer = ByteBuffer.allocate(messageIdBytes.length + 1);
@@ -465,8 +467,8 @@ public class HBaseStore implements ArchiveStore {
             List<Pair<byte[], byte[]>> scan = hBaseClient.scan(namespace, scanParameters);
 
             for (Pair<byte[], byte[]> pair : scan) {
-                ConsumeLog log = HBaseSerializer.readConsumeLog(pair);
-                log.setMessageId(HBaseSerializer.byteArrayToHexStr(log.getBytesMessageId()));
+                ConsumeLog log = ArchiveSerializer.readConsumeLog(pair);
+                log.setMessageId(ArchiveSerializer.byteArrayToHexStr(log.getBytesMessageId()));
 
                 StringBuilder clientIp = new StringBuilder();
                 IpUtil.toAddress(log.getClientIp(), clientIp);
