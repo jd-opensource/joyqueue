@@ -101,7 +101,6 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
         ReplicaQuery replicaQuery = new ReplicaQuery();
         replicaQuery.setBrokerId(brokerId);
         String result = post(POSTBY_REPLICA_BROKER, replicaQuery);
-        List<Replica> replicas = JSON.parseArray(result, Replica.class);
-        return null;
+        return JSON.parseArray(result, Replica.class);
     }
 }

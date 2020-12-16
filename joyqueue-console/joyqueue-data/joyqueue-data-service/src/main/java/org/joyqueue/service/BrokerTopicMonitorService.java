@@ -35,4 +35,5 @@ public interface BrokerTopicMonitorService {
     BrokerMonitorInfo findBrokerMonitor(Long brokerId);
     BrokerStartupInfo getStartupInfo(Long brokerId) throws Exception;
     List<String> queryTopicList(Long brokerId) throws Exception;
+    List<BrokerTopicMonitor> queryTopicsPartitionMonitors(Integer brokerId);
 }
