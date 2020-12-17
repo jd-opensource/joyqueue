@@ -18,11 +18,16 @@ package org.joyqueue.broker.archive;
 import com.google.common.base.Preconditions;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.cluster.ClusterManager;
+import org.joyqueue.broker.limit.RateLimiter;
+import org.joyqueue.broker.limit.SubscribeRateLimiter;
+import org.joyqueue.domain.Subscription;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.MessageLocation;
 import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.network.session.Connection;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
@@ -62,6 +67,7 @@ public class ConsumeArchiveService extends Service {
     private ClusterManager clusterManager;
     // 归档日志
     private ArchiveConfig archiveConfig;
+    private BrokerContext brokerContext;
 
     // 统计当前读取的字节数，用于异常回滚
     private AtomicInteger readByteCounter;
@@ -74,9 +80,19 @@ public class ConsumeArchiveService extends Service {
 
     private PointTracer tracer;
 
+    // 归档限流器
+    private SubscribeRateLimiter rateLimiterManager;
+
     public ConsumeArchiveService(ArchiveConfig archiveConfig, ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
         this.archiveConfig = archiveConfig;
+    }
+
+    public ConsumeArchiveService(ArchiveConfig archiveConfig, BrokerContext brokerContext, SubscribeRateLimiter rateLimiter) {
+        this.archiveConfig = archiveConfig;
+        this.brokerContext = brokerContext;
+        this.clusterManager = brokerContext.getClusterManager();
+        this.rateLimiterManager = rateLimiter;
     }
 
     @Override
@@ -257,13 +273,30 @@ public class ConsumeArchiveService extends Service {
             logger.warn("ConsumeArchiveService not be started.");
             return;
         }
-        List<ConsumeLog> logList = convert(connection, locations);
-        logList.forEach(log -> {
-            // 序列化
-            ByteBuffer buffer = ArchiveSerializer.write(log);
-            appendLog(buffer);
-            ArchiveSerializer.release(buffer);
-        });
+        TraceStat stat = tracer.begin("org.joyqueue.server.archive.consume.appendConsumeLog");
+        if (locations != null && locations.length > 0) {
+            MessageLocation location = locations[0];
+            if (checkRateLimit(connection, location)) {
+                List<ConsumeLog> logList = convert(connection, locations);
+                logList.forEach(log -> {
+                    // 序列化
+                    ByteBuffer buffer = ArchiveSerializer.write(log);
+                    appendLog(buffer);
+                    ArchiveSerializer.release(buffer);
+                });
+            } else {
+                logger.error("Consume-archive: trigger rate limited topic: {}, app: {}", location.getTopic(), connection.getApp());
+            }
+        }
+        tracer.end(stat);
+    }
+
+    private boolean checkRateLimit(Connection connection, MessageLocation messageLocation) {
+        RateLimiter rateLimiter = rateLimiterManager.getOrCreate(messageLocation.getTopic(), connection.getApp(), Subscription.Type.CONSUMPTION);
+        if(rateLimiter == null || rateLimiter.tryAcquireTps()) {
+            return true;
+        }
+        return false;
     }
 
     /**

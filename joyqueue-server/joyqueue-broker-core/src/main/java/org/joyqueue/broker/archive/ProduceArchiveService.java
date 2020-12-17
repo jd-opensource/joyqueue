@@ -17,12 +17,16 @@ package org.joyqueue.broker.archive;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.Plugins;
 import org.joyqueue.broker.buffer.Serializer;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.consumer.Consume;
 import org.joyqueue.broker.consumer.MessageConvertSupport;
 import org.joyqueue.broker.consumer.model.PullResult;
+import org.joyqueue.broker.limit.RateLimiter;
+import org.joyqueue.broker.limit.SubscribeRateLimiter;
+import org.joyqueue.domain.Subscription;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.exception.JoyQueueException;
@@ -76,6 +80,7 @@ public class ProduceArchiveService extends Service {
     private int batchNum = 1000;
     // 集群管理
     private ClusterManager clusterManager;
+    private BrokerContext brokerContext;
     // 消费管理
     private Consume consume;
     // 发送归档任务池
@@ -108,11 +113,23 @@ public class ProduceArchiveService extends Service {
     private ArchiveConfig archiveConfig;
     private MessageConvertSupport messageConvertSupport;
 
+    // 归档限流器
+    private SubscribeRateLimiter rateLimiterManager;
+
     public ProduceArchiveService(ArchiveConfig archiveConfig, ClusterManager clusterManager, Consume consume, MessageConvertSupport messageConvertSupport) {
         this.clusterManager = clusterManager;
         this.consume = consume;
         this.archiveConfig = archiveConfig;
         this.messageConvertSupport = messageConvertSupport;
+    }
+
+    public ProduceArchiveService(ArchiveConfig archiveConfig, BrokerContext brokerContext, SubscribeRateLimiter rateLimiter) {
+        this.archiveConfig = archiveConfig;
+        this.brokerContext = brokerContext;
+        this.clusterManager = brokerContext.getClusterManager();
+        this.consume = brokerContext.getConsume();
+        this.messageConvertSupport = brokerContext.getMessageConvertSupport();
+        this.rateLimiterManager = rateLimiter;
     }
 
     @Override
@@ -162,8 +179,6 @@ public class ProduceArchiveService extends Service {
                     // 队列读取消息，放入归档存储
                     write2Store();
                 }).build();
-
-
     }
 
     @Override
@@ -280,6 +295,14 @@ public class ProduceArchiveService extends Service {
         if (counter == 0) {
             Thread.sleep(1);
         }
+    }
+
+    private boolean checkRateLimit(String topic) {
+        RateLimiter rateLimiter = rateLimiterManager.getOrCreate(topic, clusterManager.getBrokerId() + "", Subscription.Type.PRODUCTION);
+        if(rateLimiter == null || rateLimiter.tryAcquireTps()) {
+            return true;
+        }
+        return false;
     }
 
     /**
