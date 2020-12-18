@@ -49,7 +49,7 @@ public class ReplicateConsumePosRequestEncoder implements PayloadEncoder<Replica
             Serializer.write(JSON.toJSONString(request.getConsumePositions()), buffer, bodyLength);
         }
 
-        if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V4) {
+        if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V4 && buffer.readableBytes() != 0) {
             buffer.writeInt(request.getTerm());
             buffer.writeInt(request.getLeaderId());
             Serializer.write(request.getTopic(), buffer);
