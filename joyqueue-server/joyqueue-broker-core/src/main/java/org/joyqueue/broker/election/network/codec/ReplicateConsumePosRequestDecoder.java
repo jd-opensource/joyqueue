@@ -55,7 +55,7 @@ public class ReplicateConsumePosRequestDecoder implements PayloadDecoder<JoyQueu
             consumePositionsMap = JSON.parseObject(consumePositionString, new TypeReference<Map<ConsumePartition, Position>>() {});
         }
 
-        if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V4 && buffer.readableBytes() != 0) {
             term = buffer.readInt();
             leaderId = buffer.readInt();
             topic = Serializer.readString(buffer);
