@@ -399,6 +399,7 @@ public class ProduceArchiveService extends Service {
     private void write2Store() throws InterruptedException {
         int readBatchSize;
         do {
+            batchNum = archiveConfig.getProduceBatchNum();
             List<SendLog> sendLogs = new ArrayList<>(batchNum);
             for (int i = 0; i < batchNum; i++) {
                 SendLog sendLog = archiveQueue.poll();
@@ -415,7 +416,7 @@ public class ProduceArchiveService extends Service {
                         // 写入存储
                         archiveStore.putSendLog(sendLogs, tracer);
                         if (archiveConfig.getLogDetail(ArchiveConfig.LOG_DETAIL_PRODUCE_PREFIX, clusterManager.getBrokerId().toString())) {
-                            logger.info("Produce-archive: write sendLogs size:{} to archive store.", sendLogs.size());
+                            logger.info("Produce-archive: write sendLogs size:{} to archive store. sample log: {}", sendLogs.size(), sendLogs.get(0));
                         }
                         // 写入计数（用于归档位置）
                         writeCounter(sendLogs);
@@ -674,8 +675,11 @@ public class ProduceArchiveService extends Service {
         public void remove(SendArchiveItem item) throws JoyQueueException {
             // 移除列表
             cpList.remove(item);
-            // clean archive position from store
-            archiveStore.cleanPosition(item.getTopic(),item.getPartition());
+            // only archive disable will clean position store, not include raft node
+            if (!clusterManager.checkArchiveable(TopicName.parse(item.getTopic()))) {
+                logger.info("Produce-archive: topic [{}] archive is disable on clean.", item.getTopic());
+                archiveStore.cleanPosition(item.getTopic(),item.getPartition());
+            }
         }
 
         /**
@@ -709,6 +713,7 @@ public class ProduceArchiveService extends Service {
                         // fullName
                         consumer.setTopic(item.getTopic());
                         index = consume.getMaxIndex(consumer,item.getPartition());
+                        archiveStore.putPosition(new AchivePosition(item.getTopic(), item.getPartition(), index));
                         logger.info("Produce-archive: new archive item, topic [{}], partition [{}], init from local store max index {}",item.getTopic(),item.getPartition(),item.getReadIndex());
                     }else{
                         logger.info("Produce-archive: new archive item, topic [{}], partition [{}], recover from archive position store index {}",item.getTopic(),item.getPartition(),index);

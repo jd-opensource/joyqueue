@@ -25,9 +25,9 @@ import org.joyqueue.toolkit.config.PropertyDef;
 public enum ArchiveConfigKey implements PropertyDef {
     CONSUME_BATCH_NUM("archive.consume.batch.num", 1000, Type.INT),
     CONSUME_WRITE_DELAY("archive.consume.write.delay", 1, Type.INT),
-    PRODUCE_BATCH_NUM("archive.produce.batch.num", 10, Type.INT),
-    LOG_QUEUE_SIZE("archive.send.log.queue.size", 1000, Type.INT),
-    WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
+    PRODUCE_BATCH_NUM("archive.produce.batch.num", 50, Type.INT),
+    LOG_QUEUE_SIZE("archive.send.log.queue.size", 10000, Type.INT),
+    WRITE_THREAD_NUM("archive.thread.num", 10, Type.INT),
     ARCHIVE_SWITCH("archive.switch", false, Type.BOOLEAN),
     ARCHIVE_THREAD_POOL_QUEUE_SIZE("archive.thread.pool.queue.size", 10, Type.INT),
     ARCHIVE_STORE_NAMESPACE("archive.store.namespace", "joyqueue", Type.STRING),
