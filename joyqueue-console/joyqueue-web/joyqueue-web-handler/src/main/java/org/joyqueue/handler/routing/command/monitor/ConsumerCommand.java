@@ -277,25 +277,7 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
             Consumer consumer = service.findById(consumerId);
             String app = consumer.getApp().getCode();
             String subscribeGroup = consumer.getSubscribeGroup();
-            List<Consumer> consumers = service.findByApp(app);
-            if (StringUtils.isNotBlank(subscribeGroup)) {
-                consumers = consumers.stream().filter(item -> StringUtils.isNotBlank(item.getSubscribeGroup())
-                        && subscribeGroup.equals(item.getSubscribeGroup()))
-                        .collect(Collectors.toList());
-            } else {
-                consumers = consumers.stream().filter(item -> StringUtils.isBlank(item.getSubscribeGroup()))
-                        .collect(Collectors.toList());
-            }
-            for (Consumer consumerItem: consumers) {
-                if (consumerItem.getConfig() != null) {
-                    if (StringUtils.isNotBlank(region)) {
-                        consumerItem.getConfig().setRegion(region);
-                    } else {
-                        consumerItem.getConfig().setRegion(null);
-                    }
-                    service.update(consumerItem);
-                }
-            }
+            service.updateAllConsumerRegion(app, subscribeGroup, region);
             return Responses.success();
 
         }
