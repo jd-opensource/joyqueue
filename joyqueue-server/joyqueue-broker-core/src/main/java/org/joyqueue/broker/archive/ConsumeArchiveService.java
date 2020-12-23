@@ -284,7 +284,11 @@ public class ConsumeArchiveService extends Service {
                     ArchiveSerializer.release(buffer);
                 });
             } else {
+                TraceStat limitBroker = tracer.begin("archive.consume.rate.limited");
+                TraceStat limitTopic = tracer.begin(String.format("archive.produce.rate.limited.%s.%s", locations[0].getTopic(), connection.getApp()));
                 logger.warn("Consume-archive: trigger rate limited topic: {}, app: {}", locations[0].getTopic(), connection.getApp());
+                tracer.end(limitBroker);
+                tracer.end(limitTopic);
             }
         }
         tracer.end(stat);

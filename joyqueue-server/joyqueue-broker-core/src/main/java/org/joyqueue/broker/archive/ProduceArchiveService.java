@@ -33,6 +33,7 @@ import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.message.BrokerMessage;
 import org.joyqueue.message.SourceType;
 import org.joyqueue.monitor.PointTracer;
+import org.joyqueue.monitor.TraceStat;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
 import org.joyqueue.server.archive.store.model.AchivePosition;
@@ -242,7 +243,11 @@ public class ProduceArchiveService extends Service {
                 continue;
             }
             if (!checkRateLimitAvailable(item.topic)) {
+                TraceStat limitBroker = tracer.begin("archive.produce.rate.limited");
+                TraceStat limitTopic = tracer.begin(String.format("archive.produce.rate.limited.%s", item.topic));
                 logger.warn("Produce-archive: trigger rate limited topic: {}", item);
+                tracer.end(limitBroker);
+                tracer.end(limitTopic);
                 continue;
             }
             PullResult pullResult;

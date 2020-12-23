@@ -221,7 +221,9 @@ public class BrokerRetryManager extends Service implements MessageRetry<Long>, B
                 throw e;
             }
         }else{
+            TraceStat limit = tracer.begin("BrokerRetryManager.rate.limited");
             logger.warn("Broker retry message limited, limit consumers: {}", consumers);
+            tracer.end(limit);
             throw new JoyQueueException(JoyQueueCode.RETRY_TOKEN_LIMIT);
         }
     }
