@@ -249,4 +249,56 @@ public class ConsumerCommand extends NsrCommandSupport<Consumer, ConsumerService
     public Response update(@QueryParam(ID)String id,@Body Consumer model) throws Exception {
         return super.update(id, model);
     }
+
+    @Path("checkRegion")
+    public Response checkRegion(@QueryParam("app") String app,
+                                @QueryParam("subscribeGroup") String subscribeGroup,
+                                @QueryParam("region") String region) throws Exception {
+        if (StringUtils.isNotBlank(app) && StringUtils.isNotBlank(region)) {
+            List<Consumer> consumers = consumerNameServerService.findByApp(app);
+            if (StringUtils.isNotBlank(subscribeGroup)) {
+                consumers = consumers.stream().filter(consumer -> subscribeGroup.equals(consumer.getSubscribeGroup()))
+                        .collect(Collectors.toList());
+            }
+            consumers = consumers.stream().filter(consumer -> consumer.getConfig() != null
+                    && StringUtils.isNotBlank(consumer.getConfig().getRegion())
+                    && !region.equals(consumer.getConfig().getRegion()))
+                    .collect(Collectors.toList());
+            return Responses.success(consumers.size() == 0);
+
+        }
+        return Responses.error(500, "app, region can't be empty");
+    }
+
+    @Path("updateRegion")
+    public Response updateRegion(@QueryParam("consumerId") String consumerId,
+                                @QueryParam("region") String region) throws Exception {
+        if (StringUtils.isNotBlank(consumerId)) {
+            Consumer consumer = service.findById(consumerId);
+            String app = consumer.getApp().getCode();
+            String subscribeGroup = consumer.getSubscribeGroup();
+            List<Consumer> consumers = service.findByApp(app);
+            if (StringUtils.isNotBlank(subscribeGroup)) {
+                consumers = consumers.stream().filter(item -> StringUtils.isNotBlank(item.getSubscribeGroup())
+                        && subscribeGroup.equals(item.getSubscribeGroup()))
+                        .collect(Collectors.toList());
+            } else {
+                consumers = consumers.stream().filter(item -> StringUtils.isBlank(item.getSubscribeGroup()))
+                        .collect(Collectors.toList());
+            }
+            for (Consumer consumerItem: consumers) {
+                if (consumerItem.getConfig() != null) {
+                    if (StringUtils.isNotBlank(region)) {
+                        consumerItem.getConfig().setRegion(region);
+                    } else {
+                        consumerItem.getConfig().setRegion(null);
+                    }
+                    service.update(consumerItem);
+                }
+            }
+            return Responses.success();
+
+        }
+        return Responses.error(500, "consumerId can't be empty");
+    }
 }

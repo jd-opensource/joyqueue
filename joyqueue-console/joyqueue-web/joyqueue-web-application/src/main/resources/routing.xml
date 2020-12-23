@@ -330,6 +330,12 @@
         <route inherit="get"
                path="/v1/consumer/get/:id" handlers="consumer#get render"
                errors="error"/>
+        <route inherit="get"
+               path="/v1/consumer/checkRegion" handlers="consumer#checkRegion render"
+               errors="error"/>
+        <route inherit="get"
+               path="/v1/consumer/updateRegion" handlers="consumer#updateRegion render"
+               errors="error"/>
         <!--<route inherit="get"-->
                <!--path="/v1/consumer/syncMqttClient" handlers="consumer#syncMqttClient render"-->
                <!--errors="error"/>-->
