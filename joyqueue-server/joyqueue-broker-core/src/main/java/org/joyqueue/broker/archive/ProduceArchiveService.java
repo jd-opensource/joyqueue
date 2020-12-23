@@ -241,6 +241,10 @@ public class ProduceArchiveService extends Service {
             if (isPause(item.getTopic(), item.getPartition())) {
                 continue;
             }
+            if (!checkRateLimitAvailable(item.topic)) {
+                logger.warn("Produce-archive: trigger rate limited topic: {}", item);
+                continue;
+            }
             PullResult pullResult;
             long readIndex = item.getReadIndex();
             try {
@@ -297,9 +301,9 @@ public class ProduceArchiveService extends Service {
         }
     }
 
-    private boolean checkRateLimit(String topic) {
+    private boolean checkRateLimitAvailable(String topic) {
         RateLimiter rateLimiter = rateLimiterManager.getOrCreate(topic, clusterManager.getBrokerId() + "", Subscription.Type.PRODUCTION);
-        if(rateLimiter == null || rateLimiter.tryAcquireTps()) {
+        if (rateLimiter == null || rateLimiter.tryAcquireTps(batchNum)) {
             return true;
         }
         return false;

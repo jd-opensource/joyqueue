@@ -28,8 +28,8 @@ public enum ProducerConfigKey implements PropertyDef {
     TOPIC_QOS_LEVEL_PREFIX("produce.topic.qos.level.", -1, Type.INT),
     APP_QOS_LEVEL_PREFIX("produce.app.qos.level.", -1, Type.INT),
     PRINT_METRIC_INTERVAL_MS("print.metric.interval", 0L ,Type.LONG),
-    PRODUCE_ARCHIVE_RATE("archive.rate.produce", -1, Type.INT),
-    PRODUCE_ARCHIVE_RATE_PREFIX("archive.rate.produce.", -1, Type.INT),
+    PRODUCE_ARCHIVE_RATE("archive.rate.produce", 1000, Type.INT),
+    PRODUCE_ARCHIVE_RATE_PREFIX("archive.rate.produce.", 1000, Type.INT),
 
     // businessId长度
     PRODUCE_BUSINESSID_LENGTH("produce.businessId.length", 100, PropertyDef.Type.INT),

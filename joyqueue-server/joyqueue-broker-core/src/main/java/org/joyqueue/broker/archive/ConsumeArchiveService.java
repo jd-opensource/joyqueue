@@ -275,8 +275,7 @@ public class ConsumeArchiveService extends Service {
         }
         TraceStat stat = tracer.begin("org.joyqueue.server.archive.consume.appendConsumeLog");
         if (locations != null && locations.length > 0) {
-            MessageLocation location = locations[0];
-            if (checkRateLimit(connection, location)) {
+            if (checkRateLimitAvailable(connection, locations)) {
                 List<ConsumeLog> logList = convert(connection, locations);
                 logList.forEach(log -> {
                     // 序列化
@@ -285,15 +284,15 @@ public class ConsumeArchiveService extends Service {
                     ArchiveSerializer.release(buffer);
                 });
             } else {
-                logger.error("Consume-archive: trigger rate limited topic: {}, app: {}", location.getTopic(), connection.getApp());
+                logger.warn("Consume-archive: trigger rate limited topic: {}, app: {}", locations[0].getTopic(), connection.getApp());
             }
         }
         tracer.end(stat);
     }
 
-    private boolean checkRateLimit(Connection connection, MessageLocation messageLocation) {
-        RateLimiter rateLimiter = rateLimiterManager.getOrCreate(messageLocation.getTopic(), connection.getApp(), Subscription.Type.CONSUMPTION);
-        if(rateLimiter == null || rateLimiter.tryAcquireTps()) {
+    private boolean checkRateLimitAvailable(Connection connection, MessageLocation[] locations) {
+        RateLimiter rateLimiter = rateLimiterManager.getOrCreate(locations[0].getTopic(), connection.getApp(), Subscription.Type.CONSUMPTION);
+        if (rateLimiter == null || rateLimiter.tryAcquireTps(locations.length)) {
             return true;
         }
         return false;

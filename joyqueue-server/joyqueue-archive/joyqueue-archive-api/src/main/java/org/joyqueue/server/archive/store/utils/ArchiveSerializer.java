@@ -261,4 +261,23 @@ public class ArchiveSerializer {
         }
         return byteArray;
     }
+
+    public static byte[] reverse(byte[] byteArray) {
+        if (byteArray == null || byteArray.length == 0) {
+            return byteArray;
+        }
+        byte[] reverseArray = new byte[byteArray.length];
+        for (int i = 0; i < byteArray.length; i++) {
+            reverseArray[i] = byteArray[byteArray.length - i - 1];
+        }
+        return reverseArray;
+    }
+
+    public static byte[] reverse(ByteBuffer buffer) {
+        return reverse(buffer.array());
+    }
+
+    public static String reverse(String reverseStr) {
+        return new StringBuffer(reverseStr).reverse().toString();
+    }
 }
