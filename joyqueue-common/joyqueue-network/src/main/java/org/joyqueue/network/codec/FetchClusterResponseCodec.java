@@ -151,7 +151,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
         topic.setPartitionGroups(partitionGroups);
         topic.setCode(JoyQueueCode.valueOf(buffer.readInt()));
 
-        if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V4 && buffer.isReadable()) {
             int paramSize = buffer.readShort();
             if (paramSize > 0) {
                 Map<String, String> params = Maps.newHashMap();
