@@ -283,7 +283,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
 
         buffer.writeInt(topic.getCode().getCode());
 
-        if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V4 && buffer.isReadable()) {
             if (MapUtils.isEmpty(topic.getParams())) {
                 buffer.writeShort(0);
             } else {
