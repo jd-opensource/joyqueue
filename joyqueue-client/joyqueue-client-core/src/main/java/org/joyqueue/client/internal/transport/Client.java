@@ -128,7 +128,7 @@ public class Client extends Service {
         }
 
         if (!response.isSuccess()) {
-            throw new ClientException(response.getHeader().getError(), response.getHeader().getStatus());
+            throw new ClientException(transport.remoteAddress() + ":" + response.getHeader().getError(), response.getHeader().getStatus());
         }
         return response;
     }
