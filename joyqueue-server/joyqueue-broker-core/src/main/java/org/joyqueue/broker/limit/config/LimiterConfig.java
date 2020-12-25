@@ -50,4 +50,12 @@ public class LimiterConfig {
     public void setTraffic(int traffic) {
         this.traffic = traffic;
     }
+
+    @Override
+    public String toString() {
+        return "LimiterConfig{" +
+                "tps=" + tps +
+                ", traffic=" + traffic +
+                '}';
+    }
 }

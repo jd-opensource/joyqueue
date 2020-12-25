@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.archive;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.config.BrokerConfigKey;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -119,5 +120,37 @@ public class ArchiveConfig {
 
     public int getLogRetainDuration() {
         return PropertySupplier.getValue(propertySupplier, ArchiveConfigKey.ARCHIVE_LOG_RETAIN_DURATION);
+    }
+
+    public int getProduceArchiveRate() {
+        return propertySupplier.getValue(ArchiveConfigKey.ARCHIVE_PRODUCE_RATE);
+    }
+
+    public int getConsumeArchiveRate() {
+        return propertySupplier.getValue(ArchiveConfigKey.ARCHIVE_CONSUME_RATE);
+    }
+
+    public int getProduceArchiveRate(String topic, String app) {
+        if (StringUtils.isEmpty(app)) {
+            return PropertySupplier.getValue(propertySupplier,ArchiveConfigKey.ARCHIVE_PRODUCE_RATE_PREFIX.getName() + String.format("%s",topic),
+                    ArchiveConfigKey.ARCHIVE_PRODUCE_RATE_PREFIX.getType(), ArchiveConfigKey.ARCHIVE_PRODUCE_RATE_PREFIX.getValue()
+            );
+        } else {
+            return PropertySupplier.getValue(propertySupplier,ArchiveConfigKey.ARCHIVE_PRODUCE_RATE_PREFIX.getName() + String.format("%s.%s",topic,app),
+                    ArchiveConfigKey.ARCHIVE_PRODUCE_RATE_PREFIX.getType(), ArchiveConfigKey.ARCHIVE_PRODUCE_RATE_PREFIX.getValue()
+            );
+        }
+    }
+
+    public int getConsumeArchiveRate(String topic, String app) {
+        if (StringUtils.isEmpty(app)) {
+            return PropertySupplier.getValue(propertySupplier,ArchiveConfigKey.ARCHIVE_CONSUME_RATE_PREFIX.getName() + String.format("%s",topic),
+                    ArchiveConfigKey.ARCHIVE_CONSUME_RATE_PREFIX.getType(), ArchiveConfigKey.ARCHIVE_CONSUME_RATE_PREFIX.getValue()
+            );
+        } else {
+            return PropertySupplier.getValue(propertySupplier,ArchiveConfigKey.ARCHIVE_CONSUME_RATE_PREFIX.getName() + String.format("%s.%s",topic,app),
+                    ArchiveConfigKey.ARCHIVE_CONSUME_RATE_PREFIX.getType(), ArchiveConfigKey.ARCHIVE_CONSUME_RATE_PREFIX.getValue()
+            );
+        }
     }
 }

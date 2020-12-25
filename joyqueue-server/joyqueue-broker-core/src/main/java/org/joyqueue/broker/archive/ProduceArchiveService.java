@@ -211,7 +211,7 @@ public class ProduceArchiveService extends Service {
     private void updateArchiveItem() throws JoyQueueException {
         List<SendArchiveItem> list = new ArrayList<>();
         List<TopicConfig> topics = clusterManager.getTopics();
-        topics.stream().forEach(topicConfig -> {
+        topics.forEach(topicConfig -> {
             TopicName name = topicConfig.getName();
             // 检查是否开启发送归档
             if (clusterManager.checkArchiveable(name)) {
@@ -219,7 +219,7 @@ public class ProduceArchiveService extends Service {
                     logger.info("Produce-archive: topic [{}] archive is enable.", name.getFullName());
                 }
                 List<Short> partitionSet = clusterManager.getLocalPartitions(topicConfig);
-                partitionSet.stream().forEach(partition -> {
+                partitionSet.forEach(partition -> {
                     list.add(new SendArchiveItem(name.getFullName(), partition));
                 });
             }
@@ -245,7 +245,9 @@ public class ProduceArchiveService extends Service {
             if (!checkRateLimitAvailable(item.topic)) {
                 TraceStat limitBroker = tracer.begin("archive.produce.rate.limited");
                 TraceStat limitTopic = tracer.begin(String.format("archive.produce.rate.limited.%s", item.topic));
-                logger.warn("Produce-archive: trigger rate limited topic: {}", item);
+                if (archiveConfig.getLogDetail(ArchiveConfig.LOG_DETAIL_PRODUCE_PREFIX, clusterManager.getBrokerId().toString())) {
+                    logger.warn("Produce-archive: trigger rate limited topic: {}", item);
+                }
                 tracer.end(limitBroker);
                 tracer.end(limitTopic);
                 continue;
@@ -266,6 +268,7 @@ public class ProduceArchiveService extends Service {
 
                     logger.error("Produce-archive: repair read journal message position SendArchiveItem info:[{}], currentIndex-min:[{}], exception: {}", item, minIndex, th.getCause());
 
+                    archiveStore.putPosition(new AchivePosition(item.topic, item.partition, minIndex));
                 }
 
                 if (th.getCause() instanceof PositionOverflowException) {
@@ -276,6 +279,7 @@ public class ProduceArchiveService extends Service {
 
                     logger.error("Produce-archive: repair read journal message position SendArchiveItem info:[{}], currentIndex-max:[{}], exception: {}", item, maxIndex, th.getCause());
 
+                    archiveStore.putPosition(new AchivePosition(item.topic, item.partition, maxIndex));
                 }
 
                 // 报错暂停一会
@@ -307,7 +311,7 @@ public class ProduceArchiveService extends Service {
     }
 
     private boolean checkRateLimitAvailable(String topic) {
-        RateLimiter rateLimiter = rateLimiterManager.getOrCreate(topic, clusterManager.getBrokerId() + "", Subscription.Type.PRODUCTION);
+        RateLimiter rateLimiter = rateLimiterManager.getOrCreate(topic, Subscription.Type.PRODUCTION);
         if (rateLimiter == null || rateLimiter.tryAcquireTps(batchNum)) {
             return true;
         }
@@ -686,7 +690,7 @@ public class ProduceArchiveService extends Service {
             cpList.remove(item);
             // only archive disable will clean position store, not include raft node
             if (!clusterManager.checkArchiveable(TopicName.parse(item.getTopic()))) {
-                logger.info("Produce-archive: topic [{}] archive is disable on clean.", item.getTopic());
+                logger.info("Produce-archive: topic [{}] archive is disable on clean.", item);
                 archiveStore.cleanPosition(item.getTopic(),item.getPartition());
             }
         }
@@ -716,15 +720,18 @@ public class ProduceArchiveService extends Service {
                 // 列表中不包含则添加
                 if (!cpList.contains(item)) {
                     Long index = archiveStore.getPosition(item.topic, item.partition);
+                    Consumer consumer=new Consumer();
+                    consumer.setTopic(item.getTopic());
                     if (index == null) {
-                        // 从当前的 max index 开始归档
-                        Consumer consumer=new Consumer();
-                        // fullName
-                        consumer.setTopic(item.getTopic());
                         index = consume.getMaxIndex(consumer,item.getPartition());
                         archiveStore.putPosition(new AchivePosition(item.getTopic(), item.getPartition(), index));
                         logger.info("Produce-archive: new archive item, topic [{}], partition [{}], init from local store max index {}",item.getTopic(),item.getPartition(),item.getReadIndex());
                     }else{
+                        Long minIndex = consume.getMinIndex(consumer, item.getPartition());
+                        if (index < minIndex) {
+                            index = minIndex;
+                            archiveStore.putPosition(new AchivePosition(item.getTopic(), item.getPartition(), index));
+                        }
                         logger.info("Produce-archive: new archive item, topic [{}], partition [{}], recover from archive position store index {}",item.getTopic(),item.getPartition(),index);
                     }
                     item.setReadIndex(index);

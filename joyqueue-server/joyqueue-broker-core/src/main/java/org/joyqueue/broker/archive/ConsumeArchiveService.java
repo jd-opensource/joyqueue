@@ -286,7 +286,9 @@ public class ConsumeArchiveService extends Service {
             } else {
                 TraceStat limitBroker = tracer.begin("archive.consume.rate.limited");
                 TraceStat limitTopic = tracer.begin(String.format("archive.produce.rate.limited.%s.%s", locations[0].getTopic(), connection.getApp()));
-                logger.warn("Consume-archive: trigger rate limited topic: {}, app: {}", locations[0].getTopic(), connection.getApp());
+                if (archiveConfig.getLogDetail(ArchiveConfig.LOG_DETAIL_CONSUME_PREFIX, clusterManager.getBrokerId().toString())) {
+                    logger.warn("Consume-archive: trigger rate limited topic: {}, app: {}", locations[0].getTopic(), connection.getApp());
+                }
                 tracer.end(limitBroker);
                 tracer.end(limitTopic);
             }

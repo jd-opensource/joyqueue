@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.consumer.ConsumeConfig;
 import org.joyqueue.broker.consumer.ConsumeConfigKey;
+import org.joyqueue.broker.limit.config.LimiterConfig;
 import org.joyqueue.broker.limit.support.AbstractSubscribeRateLimiterManager;
 import org.joyqueue.domain.Config;
 import org.joyqueue.domain.Subscription;
@@ -25,12 +26,22 @@ public class BrokerRetryRateLimiterManager extends AbstractSubscribeRateLimiterM
     }
 
     @Override
-    public int producerLimitRate(String topic, String app) {
+    public LimiterConfig getLimiterConfig(String topic, String app, Subscription.Type subscribe) {
+        if (subscribe == Subscription.Type.CONSUMPTION) {
+            int tps = defaultConsumerLimitRate(topic, app);
+            if (tps <= 0) {
+                tps = Integer.MAX_VALUE;
+            }
+            return new LimiterConfig(tps, -1);
+        }
+        return null;
+    }
+
+    public int defaultProducerLimitRate(String topic, String app) {
         return 0;
     }
 
-    @Override
-    public int consumerLimitRate(String topic, String app) {
+    public int defaultConsumerLimitRate(String topic, String app) {
         int retryRate = consumeConfig.getRetryRate(topic, app);
         if (retryRate <= 0) {
             // get broker level retry rate

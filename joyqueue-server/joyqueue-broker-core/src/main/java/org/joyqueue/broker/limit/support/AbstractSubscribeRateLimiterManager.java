@@ -5,6 +5,7 @@ import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.limit.RateLimiter;
 import org.joyqueue.broker.limit.SubscribeRateLimiter;
+import org.joyqueue.broker.limit.config.LimiterConfig;
 import org.joyqueue.domain.Config;
 import org.joyqueue.domain.Subscription;
 import org.joyqueue.event.MetaEvent;
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author majun8
  */
 public abstract class AbstractSubscribeRateLimiterManager implements SubscribeRateLimiter {
-    protected static final Logger LOG = LoggerFactory.getLogger(AbstractSubscribeRateLimiterManager.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractSubscribeRateLimiterManager.class);
 
     protected static final String SPLIT = ".";
 
@@ -41,46 +42,36 @@ public abstract class AbstractSubscribeRateLimiterManager implements SubscribeRa
                 topicRateLimiters = old;
             }
         }
-        RateLimiter subscribeRateLimiter = topicRateLimiters.get(subscribe.name() + SPLIT + app);
+        String subscribeName = app == null ? subscribe.name() + SPLIT : subscribe.name() + SPLIT + app;
+        RateLimiter subscribeRateLimiter = topicRateLimiters.get(subscribeName);
         if (subscribeRateLimiter == null) {
-            switch (subscribe) {
-                case PRODUCTION:
-                    int pTps = producerLimitRate(topic, app);
-                    if (pTps > 0) {
-                        subscribeRateLimiter = new DefaultRateLimiter(pTps);
-                        RateLimiter oldRateLimiter = topicRateLimiters.putIfAbsent(subscribe.name() + SPLIT + app, subscribeRateLimiter);
-                        if (oldRateLimiter != null) {
-                            subscribeRateLimiter = oldRateLimiter;
-                        } else {
-                            LOG.info("New produce archive rate limiter for {},{},{},{}", topic, app, subscribe.name(), pTps);
-                        }
-                    }
-                    break;
-                case CONSUMPTION:
-                    int cTps = consumerLimitRate(topic, app);
-                    if (cTps > 0) {
-                        subscribeRateLimiter = new DefaultRateLimiter(cTps);
-                        RateLimiter oldRateLimiter = topicRateLimiters.putIfAbsent(subscribe.name() + SPLIT + app, subscribeRateLimiter);
-                        if (oldRateLimiter != null) {
-                            subscribeRateLimiter = oldRateLimiter;
-                        } else {
-                            LOG.info("New consume archive rate limiter for {},{},{},{}", topic, app, subscribe.name(), cTps);
-                        }
-                    }
-                    break;
+            LimiterConfig config = getLimiterConfig(topic, app, subscribe);
+            subscribeRateLimiter = new DefaultRateLimiter(config.getTps());
+            RateLimiter oldRateLimiter = topicRateLimiters.putIfAbsent(subscribeName, subscribeRateLimiter);
+            if (oldRateLimiter != null) {
+                subscribeRateLimiter = oldRateLimiter;
+            } else {
+                logger.info("Archive rate limiter for {},{},{},{}", topic, app, subscribe.name(), config);
             }
-
         }
         return subscribeRateLimiter;
     }
 
-    public abstract int producerLimitRate(String topic, String app);
+    public RateLimiter getOrCreate(String topic, Subscription.Type subscribe) {
+        return getOrCreate(topic, null, subscribe);
+    }
 
-    public abstract int consumerLimitRate(String topic, String app);
+    public abstract LimiterConfig getLimiterConfig(String topic, String app, Subscription.Type subscribe);
 
     @Override
     public void onEvent(MetaEvent event) {
         switch (event.getEventType()) {
+            case ADD_CONFIG: {
+                UpdateConfigEvent updateConfigEvent = (UpdateConfigEvent) event;
+                Config config = updateConfigEvent.getNewConfig();
+                cleanRateLimiter(config);
+                break;
+            }
             case UPDATE_CONFIG: {
                 UpdateConfigEvent updateConfigEvent = (UpdateConfigEvent) event;
                 Config config = updateConfigEvent.getNewConfig();
@@ -93,9 +84,17 @@ public abstract class AbstractSubscribeRateLimiterManager implements SubscribeRa
                 cleanRateLimiter(config);
                 break;
             }
+            case ADD_TOPIC:
+                AddTopicEvent addTopicEvent = (AddTopicEvent) event;
+                cleanRateLimiter(addTopicEvent.getTopic().getName().getFullName(), null, null);
+                break;
+            case UPDATE_TOPIC:
+                UpdateTopicEvent updateTopicEvent = (UpdateTopicEvent) event;
+                cleanRateLimiter(updateTopicEvent.getNewTopic().getName().getFullName(), null, null);
+                break;
             case REMOVE_TOPIC:
-                RemoveTopicEvent topicEvent = (RemoveTopicEvent) event;
-                cleanRateLimiter(topicEvent.getTopic().getName().getFullName(), null, null);
+                RemoveTopicEvent removeTopicEvent = (RemoveTopicEvent) event;
+                cleanRateLimiter(removeTopicEvent.getTopic().getName().getFullName(), null, null);
                 break;
             case UPDATE_PRODUCER:
                 UpdateProducerEvent updateProducerEvent = (UpdateProducerEvent) event;
@@ -107,8 +106,7 @@ public abstract class AbstractSubscribeRateLimiterManager implements SubscribeRa
                 RemoveProducerEvent removeProducerEvent = (RemoveProducerEvent) event;
                 cleanRateLimiter(removeProducerEvent.getTopic().getFullName(),
                         removeProducerEvent.getProducer().getApp(),
-                        Subscription.Type.PRODUCTION
-                );
+                        Subscription.Type.PRODUCTION);
                 break;
             case UPDATE_CONSUMER:
                 UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event;
@@ -120,8 +118,7 @@ public abstract class AbstractSubscribeRateLimiterManager implements SubscribeRa
                 RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event;
                 cleanRateLimiter(removeConsumerEvent.getTopic().getFullName(),
                         removeConsumerEvent.getConsumer().getApp(),
-                        Subscription.Type.CONSUMPTION
-                );
+                        Subscription.Type.CONSUMPTION);
                 break;
         }
     }

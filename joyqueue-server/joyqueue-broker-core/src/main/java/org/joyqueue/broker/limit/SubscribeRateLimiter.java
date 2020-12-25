@@ -15,4 +15,6 @@ public interface SubscribeRateLimiter extends EventListener<MetaEvent> {
      * @return null indicate no limit
      **/
     RateLimiter getOrCreate(String topic, String app, Subscription.Type subscribe);
+
+    RateLimiter getOrCreate(String topic, Subscription.Type subscribe);
 }

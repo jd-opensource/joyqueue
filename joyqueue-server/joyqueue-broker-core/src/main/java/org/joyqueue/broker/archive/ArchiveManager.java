@@ -141,4 +141,12 @@ public class ArchiveManager extends Service {
         }
         return sendArchiveService.getArchivePosition();
     }
+
+    public ArchiveConfig getArchiveConfig() {
+        return archiveConfig;
+    }
+
+    public void setArchiveConfig(ArchiveConfig archiveConfig) {
+        this.archiveConfig = archiveConfig;
+    }
 }

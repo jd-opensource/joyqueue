@@ -88,16 +88,6 @@ public class ConsumeConfig {
                 ConsumeConfigKey.RETRY_FORCE_ACK_PREFIX.getValue());
     }
 
-    public int getArchiveRate() {
-        return propertySupplier.getValue(ConsumeConfigKey.CONSUME_ARCHIVE_RATE);
-    }
-
-    public int getArchiveRate(String topic, String app) {
-        return PropertySupplier.getValue(propertySupplier,ConsumeConfigKey.CONSUME_ARCHIVE_RATE_PREFIX.getName() + String.format("%s.%s",topic,app),
-                ConsumeConfigKey.CONSUME_ARCHIVE_RATE_PREFIX.getType(), ConsumeConfigKey.CONSUME_ARCHIVE_RATE_PREFIX.getValue()
-        );
-    }
-
     public void setConsumePositionPath(String consumePositionPath) {
         this.consumePositionPath = consumePositionPath;
     }

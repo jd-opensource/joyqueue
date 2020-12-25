@@ -84,14 +84,4 @@ public class ProduceConfig {
     public boolean getLogDetail(String app) {
         return brokerConfig.getLogDetail(app);
     }
-
-    public int getArchiveRate() {
-        return propertySupplier.getValue(ProducerConfigKey.PRODUCE_ARCHIVE_RATE);
-    }
-
-    public int getArchiveRate(String topic, String app) {
-        return PropertySupplier.getValue(propertySupplier,ProducerConfigKey.PRODUCE_ARCHIVE_RATE_PREFIX.getName() + String.format("%s.%s",topic,app),
-                ProducerConfigKey.PRODUCE_ARCHIVE_RATE_PREFIX.getType(), ProducerConfigKey.PRODUCE_ARCHIVE_RATE_PREFIX.getValue()
-        );
-    }
 }
