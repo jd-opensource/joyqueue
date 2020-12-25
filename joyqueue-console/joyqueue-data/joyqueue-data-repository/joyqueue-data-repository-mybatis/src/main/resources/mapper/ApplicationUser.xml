@@ -121,7 +121,15 @@
         <include refid="baseColumn"/>
         FROM
         application_user
-        WHERE app_code = #{application.code} and user_code=#{user.code}
+        WHERE app_code = #{application.code} and user_code=#{user.code} and status != -1
+    </select>
+
+    <select id="findAppByUser" resultMap="baseResultMap" parameterType="java.lang.String">
+        SELECT
+        app_code
+        FROM
+        application_user
+        WHERE user_code=#{user} and status != -1
     </select>
 
 </mapper>

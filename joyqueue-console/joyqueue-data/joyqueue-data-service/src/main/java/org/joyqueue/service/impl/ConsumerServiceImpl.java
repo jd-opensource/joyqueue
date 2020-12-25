@@ -217,4 +217,26 @@ public class ConsumerServiceImpl implements ConsumerService {
         return consumer;
     }
 
+    @Override
+    public void updateAllConsumerRegion(String app, String subscribeGroup, String region) throws Exception {
+        List<Consumer> consumers = findByApp(app);
+        if (StringUtils.isNotBlank(subscribeGroup)) {
+            consumers = consumers.stream().filter(item -> StringUtils.isNotBlank(item.getSubscribeGroup())
+                    && subscribeGroup.equals(item.getSubscribeGroup()))
+                    .collect(Collectors.toList());
+        } else {
+            consumers = consumers.stream().filter(item -> StringUtils.isBlank(item.getSubscribeGroup()))
+                    .collect(Collectors.toList());
+        }
+        for (Consumer consumerItem: consumers) {
+            if (consumerItem.getConfig() != null) {
+                if (StringUtils.isNotBlank(region)) {
+                    consumerItem.getConfig().setRegion(region);
+                } else {
+                    consumerItem.getConfig().setRegion(null);
+                }
+                this.update(consumerItem);
+            }
+        }
+    }
 }

@@ -17,6 +17,7 @@ package org.joyqueue.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import org.joyqueue.convert.CodeConverter;
+import org.joyqueue.domain.Replica;
 import org.joyqueue.manage.PartitionGroupMetric;
 import org.joyqueue.model.PageResult;
 import org.joyqueue.model.Pagination;
@@ -35,6 +36,7 @@ import org.joyqueue.monitor.ConnectionMonitorDetailInfo;
 import org.joyqueue.monitor.ConsumerMonitorInfo;
 import org.joyqueue.monitor.ProducerMonitorInfo;
 import org.joyqueue.monitor.RestResponse;
+import org.joyqueue.nsr.PartitionGroupServerService;
 import org.joyqueue.other.HttpRestService;
 import org.joyqueue.service.BrokerService;
 import org.joyqueue.service.BrokerTopicMonitorService;
@@ -48,7 +50,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +69,8 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
     private ConsumerService consumerService;
     @Autowired
     private ProducerService producerService;
+    @Autowired
+    private PartitionGroupServerService partitionGroupServerService;
 
 
     @Override
@@ -179,6 +185,23 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
     public List<String> queryTopicList(Long brokerId) throws Exception {
         Broker broker = brokerService.findById(brokerId.intValue());
         return queryTopicList(broker);
+    }
+
+    @Override
+    public List<BrokerTopicMonitor> queryTopicsPartitionMonitors(Integer brokerId) {
+        List<BrokerTopicMonitor> brokerTopicMonitorList = new ArrayList<>();
+        try {
+            Map<String, List<PartitionGroupMetric>> partitionGroupMetricMap = getPartitionGroupMetricMap(brokerId);
+            for (Map.Entry<String, List<PartitionGroupMetric>> entry: partitionGroupMetricMap.entrySet()) {
+                BrokerTopicMonitor brokerTopicMonitor = new BrokerTopicMonitor();
+                brokerTopicMonitor.setTopic(entry.getKey());
+                brokerTopicMonitor.setPartitionGroupMetricList(entry.getValue());
+                brokerTopicMonitorList.add(brokerTopicMonitor);
+            }
+        } catch (Exception e) {
+            logger.error("queryTopicsPartitionMointor exception", e);
+        }
+        return brokerTopicMonitorList;
     }
 
     private BrokerTopicMonitor getMonitorByAppAndTopic(String topic, List<String> appList, Broker broker, SubscribeType type) throws Exception {
@@ -333,6 +356,22 @@ public class BrokerTopicMonitorServiceImpl implements BrokerTopicMonitorService 
             return restResponse.getData();
         }
         return null;
+    }
+
+    private Map<String, List<PartitionGroupMetric>> getPartitionGroupMetricMap(Integer brokerId) {
+        Map<String, List<Replica>> replicaMap = partitionGroupServerService.getByBrokerId(brokerId)
+                .stream().collect(Collectors.groupingBy(replica -> replica.getTopic().getCode()));
+        Map<String, List<PartitionGroupMetric>> map = new HashMap<>();
+        for (Map.Entry<String, List<Replica>> entry: replicaMap.entrySet()) {
+            List<PartitionGroupMetric> metrics = new ArrayList<>(entry.getValue().size());
+            for (Replica replica: entry.getValue()) {
+                PartitionGroupMetric metric = new PartitionGroupMetric();
+                metric.setPartitionGroup(replica.getGroup());
+                metrics.add(metric);
+            }
+            map.put(entry.getKey(), metrics);
+        }
+        return map;
     }
 
     private JSONObject queryMonitorConsumers(Broker broker, int page, int pageSize) {
