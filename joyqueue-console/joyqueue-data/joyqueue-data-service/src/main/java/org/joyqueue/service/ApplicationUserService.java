@@ -19,6 +19,8 @@ import org.joyqueue.model.Uniqueable;
 import org.joyqueue.model.domain.ApplicationUser;
 import org.joyqueue.model.query.QApplicationUser;
 
+import java.util.List;
+
 /**
  * 应用-用户关联关系 服务
  * Created by chenyanying on 2018-10-17.
@@ -26,4 +28,5 @@ import org.joyqueue.model.query.QApplicationUser;
 public interface ApplicationUserService extends PageService<ApplicationUser, QApplicationUser>, Uniqueable<ApplicationUser> {
     ApplicationUser findByUserApp(String user, String app);
     int deleteByAppId(long appId);
+    List<String> findAppByUser(String user);
 }

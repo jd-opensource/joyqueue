@@ -33,4 +33,6 @@ public interface ConsumerService extends NsrService<Consumer, String> {
 
     List<String> findAppsByTopic(String topic) throws Exception;
 
+    void updateAllConsumerRegion(String app, String subscribeGroup, String region) throws Exception;
+
 }
