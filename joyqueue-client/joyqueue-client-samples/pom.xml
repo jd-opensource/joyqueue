@@ -33,6 +33,7 @@
         <module>joyqueue-client-samples-spring</module>
         <module>joyqueue-client-samples-springboot</module>
         <module>joyqueue-client-samples-kafka</module>
+        <module>joyqueue-client-samples-springcloud-stream</module>
     </modules>
 
     <dependencies>
