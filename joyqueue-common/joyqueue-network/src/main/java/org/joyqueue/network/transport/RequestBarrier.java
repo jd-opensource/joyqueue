@@ -201,6 +201,14 @@ public class RequestBarrier {
         }
     }
 
+    public boolean tryAcquire(final SemaphoreType type) throws TransportException {
+        if (type == null) {
+            return false;
+        }
+        Semaphore semaphore = type == SemaphoreType.ASYNC ? asyncSemaphore : onewaySemaphore;
+        return semaphore.tryAcquire();
+    }
+
     /**
      * 释放信号量
      *

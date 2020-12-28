@@ -15,9 +15,10 @@
  */
 package org.joyqueue.broker.election;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
-import org.joyqueue.broker.election.TopicPartitionGroup;
 import org.joyqueue.broker.election.command.AppendEntriesRequest;
 import org.joyqueue.broker.election.command.AppendEntriesResponse;
 import org.joyqueue.broker.election.command.ReplicateConsumePosRequest;
@@ -43,8 +44,6 @@ import org.joyqueue.broker.election.network.codec.VoteRequestEncoder;
 import org.joyqueue.broker.election.network.codec.VoteResponseDecoder;
 import org.joyqueue.broker.election.network.codec.VoteResponseEncoder;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -162,7 +161,8 @@ public class ElectionCommandCodecTest {
     public void testReplicateConsumePosRequestCodec() throws Exception {
         Map<ConsumePartition, Position> consumePositions = new HashMap<>();
         consumePositions.put(new ConsumePartition("logbook18-HT", "logbookApi.lgbk18", Short.valueOf("0")), new Position(-1,-1,-1,-1));
-        ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
+        ReplicateConsumePosRequest request = new ReplicateConsumePosRequest();
+        request.setConsumePositions(consumePositions);
         request.setHeader(new JoyQueueHeader());
 
         ReplicateConsumePosRequestEncoder encoder = new ReplicateConsumePosRequestEncoder();

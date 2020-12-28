@@ -15,6 +15,9 @@
  */
 package org.joyqueue.network.transport.support;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.network.transport.ChannelTransport;
 import org.joyqueue.network.transport.RequestBarrier;
@@ -30,9 +33,6 @@ import org.joyqueue.network.transport.config.TransportConfig;
 import org.joyqueue.network.transport.exception.TransportException;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.time.SystemClock;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,7 +151,19 @@ public class DefaultChannelTransport implements ChannelTransport {
         long sendTimeout = timeout <= 0 ? barrier.getSendTimeout() : timeout;
         // 获取信号量
         if (!config.isNonBlockAsync()) {
-            barrier.acquire(RequestBarrier.SemaphoreType.ASYNC, sendTimeout);
+            if (config.isFastfailAsync()) {
+                if (!barrier.tryAcquire(RequestBarrier.SemaphoreType.ASYNC)) {
+                    callback.onException(command, TransportException.RequestExcessiveException.build());
+                    return;
+                }
+            } else {
+                try {
+                    barrier.acquire(RequestBarrier.SemaphoreType.ASYNC, timeout);
+                } catch (Exception e) {
+                    callback.onException(command, e);
+                    return;
+                }
+            }
         }
 
         try {
@@ -217,7 +229,13 @@ public class DefaultChannelTransport implements ChannelTransport {
         long time = SystemClock.now();
         // 获取信号量
         if (!config.isNonBlockOneway()) {
-            barrier.acquire(RequestBarrier.SemaphoreType.ONEWAY, sendTimeout);
+            if (config.isFastfailAsync()) {
+                if (!barrier.tryAcquire(RequestBarrier.SemaphoreType.ONEWAY)) {
+                    throw TransportException.RequestExcessiveException.build();
+                }
+            } else {
+                barrier.acquire(RequestBarrier.SemaphoreType.ONEWAY, timeout);
+            }
         }
 
         try {

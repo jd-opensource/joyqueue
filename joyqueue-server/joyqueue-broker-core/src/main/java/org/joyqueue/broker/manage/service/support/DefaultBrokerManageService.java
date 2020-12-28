@@ -254,6 +254,11 @@ public class DefaultBrokerManageService implements BrokerManageService {
     }
 
     @Override
+    public boolean addReplicaTask(String topic, int partitionGroup, int replicaId) {
+        return electionManageService.addReplicaTask(topic, partitionGroup, replicaId);
+    }
+
+    @Override
     public Directory storeTreeView(boolean recursive) {
         return storeManageService.storeTreeView(recursive);
     }

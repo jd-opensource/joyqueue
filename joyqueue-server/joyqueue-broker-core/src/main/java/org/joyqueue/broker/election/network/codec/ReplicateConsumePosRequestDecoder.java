@@ -17,6 +17,7 @@ package org.joyqueue.broker.election.network.codec;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.election.command.ReplicateConsumePosRequest;
@@ -25,7 +26,6 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadDecoder;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.Map;
 
@@ -38,19 +38,37 @@ import java.util.Map;
 public class ReplicateConsumePosRequestDecoder implements PayloadDecoder<JoyQueueHeader>, Type {
     @Override
     public Object decode(final JoyQueueHeader header, final ByteBuf buffer) throws Exception {
-        String consumePositions;
+        String consumePositionString;
+        Map<ConsumePartition, Position> consumePositionsMap = null;
+        int term = 0;
+        int leaderId = 0;
+        String topic = null;
+        int group = 0;
+
         if (header.getVersion() == JoyQueueHeader.VERSION_V1) {
-            consumePositions = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+            consumePositionString = Serializer.readString(buffer, Serializer.SHORT_SIZE);
         } else {
-            consumePositions = Serializer.readString(buffer, Serializer.INT_SIZE);
+            consumePositionString = Serializer.readString(buffer, Serializer.INT_SIZE);
         }
 
-        if (consumePositions != null) {
-            Map<ConsumePartition, Position> connections = JSON.parseObject(consumePositions, new TypeReference<Map<ConsumePartition, Position>>() {
-            });
-            return new ReplicateConsumePosRequest(connections);
+        if (consumePositionString != null) {
+            consumePositionsMap = JSON.parseObject(consumePositionString, new TypeReference<Map<ConsumePartition, Position>>() {});
         }
-        return new ReplicateConsumePosRequest();
+
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+            term = buffer.readInt();
+            leaderId = buffer.readInt();
+            topic = Serializer.readString(buffer);
+            group = buffer.readInt();
+        }
+
+        ReplicateConsumePosRequest replicateConsumePosRequest = new ReplicateConsumePosRequest();
+        replicateConsumePosRequest.setConsumePositions(consumePositionsMap);
+        replicateConsumePosRequest.setLeaderId(leaderId);
+        replicateConsumePosRequest.setTerm(term);
+        replicateConsumePosRequest.setTopic(topic);
+        replicateConsumePosRequest.setGroup(group);
+        return replicateConsumePosRequest;
     }
 
     @Override
