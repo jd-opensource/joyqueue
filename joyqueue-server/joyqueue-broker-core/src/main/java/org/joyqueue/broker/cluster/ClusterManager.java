@@ -15,6 +15,7 @@
  */
 package org.joyqueue.broker.cluster;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -41,6 +42,7 @@ import org.joyqueue.event.NameServerEvent;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.nsr.NameService;
+import org.joyqueue.nsr.event.UpdateBrokerEvent;
 import org.joyqueue.response.BooleanResponse;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -123,6 +125,7 @@ public class ClusterManager extends Service {
         super.doStart();
         register();
         clusterNameService.setBroker(broker);
+        nameService.addListener(new MetaDataListener());
         logger.info("clusterManager is started");
     }
 
@@ -948,5 +951,25 @@ public class ClusterManager extends Service {
 
     public NameService getNameService() {
         return nameService;
+    }
+
+    class MetaDataListener implements EventListener<NameServerEvent> {
+
+        @Override
+        public void onEvent(NameServerEvent event) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("onEvent, event: {}", JSON.toJSONString(event));
+            }
+            switch (event.getEventType()) {
+                case UPDATE_BROKER: {
+                    UpdateBrokerEvent updateBrokerEvent = (UpdateBrokerEvent) event.getMetaEvent();
+                    if (broker != null) {
+                        broker.setPermission(updateBrokerEvent.getNewBroker().getPermission());
+                        broker.setRetryType(updateBrokerEvent.getNewBroker().getRetryType());
+                    }
+                    break;
+                }
+            }
+        }
     }
 }
