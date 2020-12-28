@@ -64,6 +64,7 @@ import static org.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_MAX_D
 import static org.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_MAX_MESSAGE_LENGTH;
 import static org.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_WRITE_REQUEST_CACHE_SIZE;
 import static org.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_WRITE_TIMEOUT_MS;
+import static org.joyqueue.store.PartitionGroupStoreManager.Config.DEFAULT_ENQUEUE_TIMEOUT;
 
 /**
  * @author liyue25
@@ -175,7 +176,7 @@ public class PartitionGroupStoreManagerTest {
 
     @Test
     public void indexLengthTest() throws Exception {
-        int count = 1024 * 1024;
+        int count = 1024 * 10;
         long timeout = 500000L;
         long length = 0L;
 
@@ -430,7 +431,7 @@ public class PartitionGroupStoreManagerTest {
             bufferPool.addPreLoad(512 * 1024, 2, 4);
         }
         PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
-                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000, DEFAULT_ENQUEUE_TIMEOUT,
                 new PositioningStore.Config(128 * 1024 * 1024),
                 new PositioningStore.Config(512 * 1024));
 
@@ -479,7 +480,7 @@ public class PartitionGroupStoreManagerTest {
             bufferPool.addPreLoad(indexFileSize, 2, 4);
         }
         PartitionGroupStoreManager.Config config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
-                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,DEFAULT_ENQUEUE_TIMEOUT,
                 new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
                 new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
 
@@ -517,7 +518,7 @@ public class PartitionGroupStoreManagerTest {
         }
 
         config = new PartitionGroupStoreManager.Config(DEFAULT_MAX_MESSAGE_LENGTH, DEFAULT_WRITE_REQUEST_CACHE_SIZE, DEFAULT_FLUSH_INTERVAL_MS,
-                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000, DEFAULT_ENQUEUE_TIMEOUT,
                 new PositioningStore.Config(storeFileSize, storeLoadOnRead, flushForce),
                 new PositioningStore.Config(indexFileSize, indexLoadOnRead, flushForce));
 
@@ -1009,7 +1010,7 @@ public class PartitionGroupStoreManagerTest {
                 DEFAULT_MAX_MESSAGE_LENGTH,
                 DEFAULT_WRITE_REQUEST_CACHE_SIZE,
                 1L,
-                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000,
+                DEFAULT_WRITE_TIMEOUT_MS, DEFAULT_MAX_DIRTY_SIZE, 6000, DEFAULT_ENQUEUE_TIMEOUT,
                 new PositioningStore.Config(32 * 1024 * 1024),
                 new PositioningStore.Config(128 * 1024,true, false));
 

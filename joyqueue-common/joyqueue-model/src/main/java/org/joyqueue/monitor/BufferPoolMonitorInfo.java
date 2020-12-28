@@ -25,7 +25,13 @@ public class BufferPoolMonitorInfo {
     private String used;
     private String maxMemorySize;
     private String mmpUsed;
+    private String mmpFd;
     private String directUsed;
+    private String directFd;
+    private int directDestroy;
+    private int directAllocate;
+    private int mmapDestroy;
+    private int mmapAllocate;
 
     private List<PLMonitorInfo> plMonitorInfos;
 
@@ -61,6 +67,14 @@ public class BufferPoolMonitorInfo {
         this.mmpUsed = mmpUsed;
     }
 
+    public String getMmpFd() {
+        return mmpFd;
+    }
+
+    public void setMmpFd(String mmpFd) {
+        this.mmpFd = mmpFd;
+    }
+
     public String getDirectUsed() {
         return directUsed;
     }
@@ -69,12 +83,52 @@ public class BufferPoolMonitorInfo {
         this.directUsed = directUsed;
     }
 
+    public String getDirectFd() {
+        return directFd;
+    }
+
+    public void setDirectFd(String directFd) {
+        this.directFd = directFd;
+    }
+
     public List<PLMonitorInfo> getPlMonitorInfos() {
         return plMonitorInfos;
     }
 
     public void setPlMonitorInfos(List<PLMonitorInfo> plMonitorInfos) {
         this.plMonitorInfos = plMonitorInfos;
+    }
+
+    public int getDirectDestroy() {
+        return directDestroy;
+    }
+
+    public void setDirectDestroy(int directDestroy) {
+        this.directDestroy = directDestroy;
+    }
+
+    public int getDirectAllocate() {
+        return directAllocate;
+    }
+
+    public void setDirectAllocate(int directAllocate) {
+        this.directAllocate = directAllocate;
+    }
+
+    public int getMmapDestroy() {
+        return mmapDestroy;
+    }
+
+    public void setMmapDestroy(int mmapDestroy) {
+        this.mmapDestroy = mmapDestroy;
+    }
+
+    public int getMmapAllocate() {
+        return mmapAllocate;
+    }
+
+    public void setMmapAllocate(int mmapAllocate) {
+        this.mmapAllocate = mmapAllocate;
     }
 
     public static class PLMonitorInfo {

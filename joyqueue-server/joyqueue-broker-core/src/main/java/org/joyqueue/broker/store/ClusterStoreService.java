@@ -13,6 +13,7 @@ import org.joyqueue.domain.QosLevel;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.PartitionGroupStore;
+import org.joyqueue.store.RemovedPartitionGroupStore;
 import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreNode;
 import org.joyqueue.store.StoreNodes;
@@ -163,6 +164,16 @@ public class ClusterStoreService extends Service implements StoreService, LifeCy
     @Override
     public void removePartitionGroup(String topic, int partitionGroup) {
         storeService.removePartitionGroup(topic, partitionGroup);
+    }
+
+    @Override
+    public void physicalDeleteRemovedPartitionGroup(String topic, int partitionGroup) {
+        storeService.physicalDeleteRemovedPartitionGroup(topic, partitionGroup);
+    }
+
+    @Override
+    public List<RemovedPartitionGroupStore> getRemovedPartitionGroups() {
+        return storeService.getRemovedPartitionGroups();
     }
 
     @Override

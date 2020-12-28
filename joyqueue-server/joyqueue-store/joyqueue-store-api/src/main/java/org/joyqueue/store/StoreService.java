@@ -69,6 +69,19 @@ public interface StoreService {
     void removePartitionGroup(String topic, int partitionGroup);
 
     /**
+     * 物理删除已删除的group
+     * @param topic
+     * @param partitionGroup
+     */
+    void physicalDeleteRemovedPartitionGroup(String topic, int partitionGroup);
+
+    /**
+     * 获取已删除的group
+     * @return
+     */
+    List<RemovedPartitionGroupStore> getRemovedPartitionGroups();
+
+    /**
      * 从磁盘恢复partition group，系统启动时调用
      */
     void restorePartitionGroup(String topic, int partitionGroup) throws Exception;
