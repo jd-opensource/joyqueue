@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 
 import java.util.List;
@@ -36,14 +37,16 @@ public class ConsumeContext {
     private String topic;
     private String app;
     private NameServerConfig nameserver;
+    private TopicMetadata topicMetadata;
     private List<ConsumeMessage> messages;
     private Map<Object, Object> attributes;
     private Set<ConsumeMessage> messageFilter;
 
-    public ConsumeContext(String topic, String app, NameServerConfig nameserver, List<ConsumeMessage> messages) {
+    public ConsumeContext(String topic, String app, NameServerConfig nameserverConfig, TopicMetadata topicMetadata, List<ConsumeMessage> messages) {
         this.topic = topic;
         this.app = app;
-        this.nameserver = nameserver;
+        this.nameserver = nameserverConfig;
+        this.topicMetadata = topicMetadata;
         this.messages = messages;
     }
 
@@ -57,6 +60,10 @@ public class ConsumeContext {
 
     public NameServerConfig getNameserver() {
         return nameserver;
+    }
+
+    public TopicMetadata getTopicMetadata() {
+        return topicMetadata;
     }
 
     public List<ConsumeMessage> getMessages() {
