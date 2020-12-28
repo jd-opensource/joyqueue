@@ -15,16 +15,6 @@
  */
 package io.openmessaging.joyqueue;
 
-import org.joyqueue.client.internal.MessageAccessPoint;
-import org.joyqueue.client.internal.MessageAccessPointFactory;
-import org.joyqueue.client.internal.consumer.MessageConsumer;
-import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
-import org.joyqueue.client.internal.nameserver.NameServerConfig;
-import org.joyqueue.client.internal.producer.MessageProducer;
-import org.joyqueue.client.internal.producer.config.ProducerConfig;
-import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
-import org.joyqueue.client.internal.transport.config.TransportConfig;
-import org.joyqueue.exception.JoyQueueCode;
 import io.openmessaging.KeyValue;
 import io.openmessaging.MessagingAccessPoint;
 import io.openmessaging.consumer.Consumer;
@@ -43,6 +33,16 @@ import io.openmessaging.manager.ResourceManager;
 import io.openmessaging.message.MessageFactory;
 import io.openmessaging.producer.Producer;
 import io.openmessaging.producer.TransactionStateCheckListener;
+import org.joyqueue.client.internal.MessageAccessPoint;
+import org.joyqueue.client.internal.MessageAccessPointFactory;
+import org.joyqueue.client.internal.consumer.MessageConsumer;
+import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
+import org.joyqueue.client.internal.nameserver.NameServerConfig;
+import org.joyqueue.client.internal.producer.MessageProducer;
+import org.joyqueue.client.internal.producer.config.ProducerConfig;
+import org.joyqueue.client.internal.producer.feedback.config.TxFeedbackConfig;
+import org.joyqueue.client.internal.transport.config.TransportConfig;
+import org.joyqueue.exception.JoyQueueCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +104,7 @@ public class MessagingAccessPointImpl implements MessagingAccessPoint {
         MessageAccessPointHolder messageAccessPointHolder = getOrCreateMessageAccessPointHolder();
         MessageAccessPoint messageAccessPoint = messageAccessPointHolder.getMessageAccessPoint();
         MessageConsumer messageConsumer = messageAccessPoint.createConsumer(consumerConfig);
-        ConsumerImpl consumer = new ConsumerImpl(messageConsumer);
+        ConsumerImpl consumer = new ConsumerImpl(messageConsumer, consumerConfig);
         return new ConsumerWrapper(consumer, messageAccessPointHolder);
     }
 

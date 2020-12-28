@@ -36,6 +36,8 @@ import org.joyqueue.service.UserService;
 
 import java.util.Date;
 
+import static org.joyqueue.handler.Constants.ID;
+
 
 /**
  * Created by wangxiaofei1 on 2018/10/23.
@@ -114,6 +116,12 @@ public class ApplicationUserCommand extends CommandSupport<ApplicationUser, User
         qPageQuery.setQuery(qUser);
         qPageQuery.setPagination(Pagination.newPagination(0, Pagination.MAX_SIZE));
         return super.pageQuery(qPageQuery);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)Long id, @Body ApplicationUser model) throws Exception {
+        return super.update(id, model);
     }
 
     @Path("delete")

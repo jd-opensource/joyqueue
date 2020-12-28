@@ -51,6 +51,7 @@ public enum ElectionConfigKey implements PropertyDef {
     CONNECTION_TIMEOUT("election.connection.timeout", 100 * 1, Type.INT),
     CONNECTION_RETRY_DELAY("election.connection.retryDelay", 1000 * 10, Type.INT),
     ENABLE_SHARED_HEARTBEAT("election.enable.shared.heartbeat", false, Type.BOOLEAN),
+    ENABLE_REPLICATE_POSITION_V3_PROTOCOL("election.enable.replicate.position.v3.protocol", false, Type.BOOLEAN),
 
     ;
 

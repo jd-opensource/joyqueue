@@ -59,24 +59,6 @@ export default {
               }
               return h('div', {}, html)
             }
-          },
-          {
-            title: 'partition',
-            key: 'partitionGroupMetricList',
-            render: (h, params) => {
-              var list = params.item.partitionGroupMetricList;
-              if (list!= null && list.length > 0) {
-                list = list.slice().sort((a,b) => a.partitionGroup-b.partitionGroup)
-              }
-              var html = []
-              if (list != undefined) {
-                for (var i = 0; i < list.length; i++) {
-                  var p = h('div', {style: 'border-bottom: 1px solid #ECECEC;'}, mergePartitionGroup(JSON.parse('[' + list[i].partitions + ']')))
-                  html.push(p)
-                }
-              }
-              return h('div', {}, html)
-            }
           }
         ]
         // 表格操作，如果需要根据特定值隐藏显示， 设置bindKey对应的属性名和bindVal对应的属性值

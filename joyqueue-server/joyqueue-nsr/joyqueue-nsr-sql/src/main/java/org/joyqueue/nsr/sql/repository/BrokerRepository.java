@@ -15,12 +15,14 @@
  */
 package org.joyqueue.nsr.sql.repository;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.nsr.sql.domain.BrokerDTO;
 import org.joyqueue.nsr.model.BrokerQuery;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -63,6 +65,9 @@ public class BrokerRepository {
     }
 
     public List<BrokerDTO> getByIds(List ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
         StringBuilder idsSql = new StringBuilder();
         idsSql.append("(");
         for (int i = 0; i < ids.size(); i++) {
@@ -121,8 +126,15 @@ public class BrokerRepository {
                 sql.append(" AND `id` = ?");
                 params.add(query.getKeyword());
             } else {
-                sql.append(" AND `ip` = ?");
-                params.add(query.getKeyword());
+                if (query.getFuzzy() != null && query.getFuzzy()) {
+                    sql.append(" AND `ip` LIKE ?");
+                    params.add("%");
+                    params.add(query.getKeyword());
+                    params.add("%");
+                } else {
+                    sql.append(" AND `ip` = ?");
+                    params.add(query.getKeyword());
+                }
             }
         }
         return sql.toString();

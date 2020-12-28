@@ -88,6 +88,7 @@ public class ReplicationManager extends Service {
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.setIoThreadName("joyqueue-Replication-IO-EventLoop");
         clientConfig.setMaxAsync(1000);
+        clientConfig.setFastfailAsync(true);
         clientConfig.setIoThread(32);
         clientConfig.setSocketBufferSize(1024 * 1024 * 1);
         clientConfig.setConnectionTimeout(300 * 1);

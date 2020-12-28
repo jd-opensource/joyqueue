@@ -31,6 +31,7 @@ import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.model.BrokerMetadata;
 import org.joyqueue.model.PageResult;
+import org.joyqueue.model.Pagination;
 import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.BrokerClient;
 import org.joyqueue.model.domain.BrokerMonitorInfoWithDC;
@@ -244,7 +245,10 @@ public class BrokerMonitorCommand implements Command<Response>, Poolable {
     @Path("partitionGroupMonitor")
     public Response partitionGroupMonitor(@PageQuery QPageQuery<QMonitor> qPageQuery){
         try {
-            PageResult<BrokerTopicMonitor> pageResult = brokerTopicMonitorService.queryTopicsPartitionMointor(qPageQuery);
+            List<BrokerTopicMonitor> brokerTopicMonitors = brokerTopicMonitorService.queryTopicsPartitionMonitors(Integer.valueOf(String.valueOf(qPageQuery.getQuery().getBrokerId())));
+            PageResult<BrokerTopicMonitor> pageResult = new PageResult<>();
+            pageResult.setResult(brokerTopicMonitors);
+            pageResult.setPagination(new Pagination(0, brokerTopicMonitors.size() - 1));
             return new Response(pageResult.getResult(), pageResult.getPagination());
         } catch (Exception e) {
         logger.error("query broker monitor info error.", e);

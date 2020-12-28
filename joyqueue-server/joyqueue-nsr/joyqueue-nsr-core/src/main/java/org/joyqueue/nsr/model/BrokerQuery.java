@@ -42,6 +42,8 @@ public class BrokerQuery implements Query {
 
     private List<Integer> brokerList;
 
+    private Boolean fuzzy;
+
     public String getIp() {
         return ip;
     }
@@ -88,5 +90,13 @@ public class BrokerQuery implements Query {
 
     public void setBrokerList(List<Integer> brokerList) {
         this.brokerList = brokerList;
+    }
+
+    public Boolean getFuzzy() {
+        return fuzzy;
+    }
+
+    public void setFuzzy(Boolean fuzzy) {
+        this.fuzzy = fuzzy;
     }
 }

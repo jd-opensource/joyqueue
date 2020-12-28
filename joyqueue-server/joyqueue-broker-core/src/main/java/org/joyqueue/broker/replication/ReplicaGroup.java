@@ -259,6 +259,19 @@ public class ReplicaGroup extends Service {
         return this.state == ElectionNode.State.LEADER;
     }
 
+    public synchronized boolean addReplicaTask(int replicaId) {
+        if (!isLeader()) {
+            logger.error("add replica task error, not leader, partition: {}", topicPartitionGroup);
+            return false;
+        }
+        if (getReplica(replicaId) == null) {
+            logger.error("add replica task error, replica not exist, partition: {}", topicPartitionGroup);
+            return false;
+        }
+        replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, replicaId));
+        return true;
+    }
+
     /**
      * 是否需要复制，kafka的coordinators不需要复制
      * @return if topic need replicate
@@ -663,8 +676,17 @@ public class ReplicaGroup extends Service {
                         return;
                     }
 
-                    ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
+                    ReplicateConsumePosRequest request = new ReplicateConsumePosRequest();
+                    request.setConsumePositions(consumePositions);
+                    request.setTerm(currentTerm);
+                    request.setLeaderId(leaderId);
+                    request.setTopic(topicPartitionGroup.getTopic());
+                    request.setGroup(topicPartitionGroup.getPartitionGroupId());
                     JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
+
+                    if (electionConfig.enableReplicatePositionV3Protocol()) {
+                        header.setVersion(JoyQueueHeader.VERSION_V3);
+                    }
 
                     if (logger.isDebugEnabled() || electionConfig.getOutputConsumePos()) {
                         logger.debug("Partition group {}/node {} send consume position {} to node {}",

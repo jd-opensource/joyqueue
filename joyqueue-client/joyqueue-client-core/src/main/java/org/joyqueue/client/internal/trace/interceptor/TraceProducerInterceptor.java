@@ -40,7 +40,7 @@ public class TraceProducerInterceptor implements ProducerInterceptor, Ordered {
         TraceCaller caller = TraceBuilder.newInstance()
                 .topic(context.getTopic())
                 .app(context.getApp())
-                .namespace(context.getNameserver().getNamespace())
+                .namespace(context.getNameserverConfig().getNamespace())
                 .type(TraceType.PRODUCER_SEND)
                 .begin();
         context.putAttribute(CALLER_KEY, caller);

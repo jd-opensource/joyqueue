@@ -154,7 +154,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
         super.doStop();
 
-        logger.info("Raft leader election of partition group {}/node {} stoped",
+        logger.info("Raft leader election of partition group {}/node {} stopped",
                 topicPartitionGroup, localNode);
     }
 
@@ -263,6 +263,10 @@ public class RaftLeaderElection extends LeaderElection  {
         if (leaderId != INVALID_NODE_ID && this.leaderId != INVALID_NODE_ID) {
             transferLeadership(leaderId);
         }
+    }
+
+    public int getCurrentTerm() {
+        return currentTerm;
     }
 
     /**
@@ -812,14 +816,6 @@ public class RaftLeaderElection extends LeaderElection  {
         }
     }
 
-    private synchronized void maybeStartNewHeartbeat() {
-        if (electionConfig.enableSharedHeartbeat()) {
-            startNewHeartbeat();
-        } else {
-            resetHeartbeatTimer();
-        }
-    }
-
     /**
      * 开始新一轮心跳，向Follower节点发送心跳命令，重置心跳定时器
      */
@@ -941,7 +937,7 @@ public class RaftLeaderElection extends LeaderElection  {
             heartbeatTimerFuture.cancel(true);
             heartbeatTimerFuture = null;
         }
-        heartbeatTimerFuture = electionTimerExecutor.schedule(this::maybeStartNewHeartbeat,
+        heartbeatTimerFuture = electionTimerExecutor.schedule(this::startNewHeartbeat,
                 electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
     }
 

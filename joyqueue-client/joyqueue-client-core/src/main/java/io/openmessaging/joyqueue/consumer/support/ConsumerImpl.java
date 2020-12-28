@@ -35,6 +35,7 @@ import io.openmessaging.message.Message;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.client.internal.consumer.MessageConsumer;
+import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
 import org.joyqueue.client.internal.consumer.domain.FetchIndexData;
@@ -55,9 +56,11 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
 
     private MessageConsumer messageConsumer;
     private Optional<Extension> extension;
+    private ConsumerConfig consumerConfig;
 
-    public ConsumerImpl(MessageConsumer messageConsumer) {
+    public ConsumerImpl(MessageConsumer messageConsumer, ConsumerConfig consumerConfig) {
         this.messageConsumer = messageConsumer;
+        this.consumerConfig = consumerConfig;
     }
 
     @Override
@@ -128,7 +131,7 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
             Preconditions.checkArgument(StringUtils.isNotBlank(queueName), "queueName can not be null");
             Preconditions.checkArgument(listener != null, "listener can not be null");
 
-            messageConsumer.subscribe(queueName, new MessageListenerAdapter(listener));
+            messageConsumer.subscribe(queueName, new MessageListenerAdapter(listener, consumerConfig));
         } catch (Throwable cause) {
             throw handleConsumeException(cause);
         }
@@ -140,7 +143,7 @@ public class ConsumerImpl extends AbstractServiceLifecycle implements ExtensionC
             Preconditions.checkArgument(StringUtils.isNotBlank(queueName), "queueName can not be null");
             Preconditions.checkArgument(listener != null, "listener can not be null");
 
-            messageConsumer.subscribeBatch(queueName, new BatchMessageListenerAdapter(listener));
+            messageConsumer.subscribeBatch(queueName, new BatchMessageListenerAdapter(listener, consumerConfig));
         } catch (Throwable cause) {
             throw handleConsumeException(cause);
         }

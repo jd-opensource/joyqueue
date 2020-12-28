@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.annotation.Body;
 import com.jd.laf.web.vertx.annotation.Path;
+import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import org.apache.commons.collections.CollectionUtils;
@@ -44,6 +45,8 @@ import org.joyqueue.service.TopicService;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.joyqueue.handler.Constants.ID;
 
 /**
  * 主题 处理器
@@ -74,7 +77,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
             new ConfigException(ErrorCode.BadRequest);
         }
         if (topic.getReplica() > topic.getBrokers().size()) topic.setReplica(topic.getBrokers().size());
-        service.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
+        service.addWithBrokerGroup(topic);
         return Responses.success(topic);
     }
 
@@ -94,7 +97,7 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         Preconditions.checkArgument(null == brokerList || brokerList.size() < 1, topic.getBrokerGroup().getCode() + "分组暂时无可用broker");
         topic.setBrokers(brokerList);
         if (topic.getReplica() > brokerList.size()) topic.setReplica(brokerList.size());
-        service.addWithBrokerGroup(topic, topic.getBrokerGroup(), topic.getBrokers(), operator);
+        service.addWithBrokerGroup(topic);
         return Responses.success(topic);
     }
 
@@ -127,6 +130,18 @@ public class TopicCommand extends NsrCommandSupport<Topic, TopicService, QTopic>
         } catch (Exception e) {
             return Responses.error(e);
         }
+    }
+
+    @Path("add")
+    @Override
+    public Response add(@Body Topic model) throws Exception {
+        return super.add(model);
+    }
+
+    @Path("update")
+    @Override
+    public Response update(@QueryParam(ID)String id, @Body Topic model) throws Exception {
+        return super.update(id, model);
     }
 
 }

@@ -18,11 +18,13 @@ package org.joyqueue.nsr.impl;
 import com.alibaba.fastjson.JSON;
 import org.joyqueue.convert.NsrPartitionGroupConverter;
 import org.joyqueue.domain.PartitionGroup;
+import org.joyqueue.domain.Replica;
 import org.joyqueue.model.domain.OperLog;
 import org.joyqueue.model.domain.TopicPartitionGroup;
 import org.joyqueue.nsr.NameServerBase;
 import org.joyqueue.nsr.PartitionGroupServerService;
 import org.joyqueue.nsr.model.PartitionGroupQuery;
+import org.joyqueue.nsr.model.ReplicaQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,6 +41,8 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
     public static final String GETBYID_PARTITIONGROUP="/partitiongroup/getById";
     public static final String GETBYTOPIC_PARTITIONGROUP="/partitiongroup/getByTopic";
     public static final String GETBYTOPICANDGROUP_PARTITIONGROUP="/partitiongroup/getByTopicAndGroup";
+    public static final String POSTBY_REPLICA_BROKER = "/replica/getByBroker";
+
     private NsrPartitionGroupConverter nsrPartitionGroupConverter = new NsrPartitionGroupConverter();
 
     @Override
@@ -90,5 +94,13 @@ public class PartitionGroupServerServiceImpl extends NameServerBase implements P
         String result = post(GETBYTOPIC_PARTITIONGROUP, query);
         List<PartitionGroup> partitionGroups = JSON.parseArray(result, PartitionGroup.class);
         return partitionGroups.stream().map(partitionGroup -> nsrPartitionGroupConverter.revert(partitionGroup)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Replica> getByBrokerId(Integer brokerId) {
+        ReplicaQuery replicaQuery = new ReplicaQuery();
+        replicaQuery.setBrokerId(brokerId);
+        String result = post(POSTBY_REPLICA_BROKER, replicaQuery);
+        return JSON.parseArray(result, Replica.class);
     }
 }

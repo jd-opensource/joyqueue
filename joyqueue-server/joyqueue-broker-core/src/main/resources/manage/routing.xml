@@ -258,5 +258,7 @@
                handlers="brokerManageService.describeTopic"/>
         <route path="/manage/election/metadata/updateTerm/topic/:topic/partitionGroup/:partitionGroup/:term" inherit="get"
                handlers="brokerManageService.updateTerm"/>
+        <route path="/manage/election/topic/:topic/partitionGroup/:partitionGroup/replicaTask" inherit="post"
+               handlers="brokerManageService.addReplicaTask"/>
     </routes>
 </vertx>
