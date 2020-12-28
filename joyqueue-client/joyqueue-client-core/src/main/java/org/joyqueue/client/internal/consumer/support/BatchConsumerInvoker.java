@@ -82,11 +82,7 @@ public class BatchConsumerInvoker implements ConsumerInvoker {
                 if (logger.isDebugEnabled()) {
                     logger.debug("execute batchMessageListener, ignore ack, topic: {}, messages: {}, listeners: {}", topicMetadata.getTopic(), messages, listeners);
                 }
-                if (config.isForceAck()) {
-                    retryType = RetryType.OTHER;
-                } else {
-                    retryType = RetryType.NONE;
-                }
+                retryType = RetryType.OTHER;
             } else {
                 logger.error("execute batchMessageListener exception, topic: {}, messages: {}, listeners: {}", topicMetadata.getTopic(), messages, listeners, e);
                 retryType = RetryType.EXCEPTION;

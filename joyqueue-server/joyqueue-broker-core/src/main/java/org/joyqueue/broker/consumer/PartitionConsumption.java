@@ -523,6 +523,8 @@ class PartitionConsumption extends Service {
                         indexArr[0], indexArr[1], partition, lastMsgAckIndex, consumer);
             }
         } else {
+            logger.error("ack index : {} is not continue, partition: {}, currentIndex is : [{}], consumer info is : {}",
+                    locations, partition, consumer);
             throw new JoyQueueException(JoyQueueCode.FW_CONSUMER_ACK_FAIL, "ack index is not continue or repeatable!");
         }
 

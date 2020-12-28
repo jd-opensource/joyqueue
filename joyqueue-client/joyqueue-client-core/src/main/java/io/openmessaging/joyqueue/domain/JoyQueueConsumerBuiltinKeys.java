@@ -45,6 +45,8 @@ public interface JoyQueueConsumerBuiltinKeys extends OMSBuiltinKeys {
 
     String THREAD = "CONSUMER_THREAD";
 
+    String MAX_THREAD = "CONSUMER_MAX_THREAD";
+
     String FAILOVER = "CONSUMER_FAILOVER";
 
     String FORCE_ACK = "CONSUMER_FORCE_ACK";
@@ -62,4 +64,6 @@ public interface JoyQueueConsumerBuiltinKeys extends OMSBuiltinKeys {
     String BROADCAST_INDEX_EXPIRE_TIME = "CONSUMER_BROADCAST_INDEX_EXPIRE_TIME";
 
     String BROADCAST_INDEX_AUTO_RESET = "CONSUMER_BROADCAST_INDEX_AUTO_RESET";
+
+    String SCHEDULE_THREAD_NAME = "CONSUMER_SCHEDULE_THREAD_NAME";
 }
