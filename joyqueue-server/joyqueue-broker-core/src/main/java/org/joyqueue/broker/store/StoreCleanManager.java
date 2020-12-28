@@ -167,7 +167,7 @@ public class StoreCleanManager extends Service {
                             try {
                                 Set<Short> partitions = partitionGroup.getPartitions();
                                 if (CollectionUtils.isNotEmpty(partitions)) {
-                                    List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
+                                    List<String> appList = clusterManager.getConsumersByTopic(topicConfig.getName());
                                     Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
                                     for (Short partition : partitions) {
                                         long minAckIndex = Long.MAX_VALUE;

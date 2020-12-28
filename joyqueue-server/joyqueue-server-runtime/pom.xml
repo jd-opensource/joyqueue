@@ -96,7 +96,7 @@
         </dependency>
         <dependency>
             <groupId>org.joyqueue</groupId>
-            <artifactId>joyqueue-nsr-journalkeeper</artifactId>
+            <artifactId>joyqueue-nsr-sql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.joyqueue</groupId>

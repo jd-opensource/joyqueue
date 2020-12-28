@@ -163,9 +163,18 @@ public class BaseRepository {
     }
 
     protected String getTraceKey(String name) {
-        return "NameService." + sqlOperator.getClass().getSimpleName() + name.replace(" = ?", "_")
+        if (name.startsWith("SELECT")) {
+            name = name.substring(name.indexOf("FROM"));
+        }
+
+        String key = "NameService." + sqlOperator.getClass().getSimpleName() + "." + name.replace(" = ?", "_")
                 .replace(" ", "_")
                 .replace("`", "")
+                .replace("(", "")
+                .replace(")", "")
+                .replace("=", "-")
                 .replace(",", "");
+
+        return key;
     }
 }

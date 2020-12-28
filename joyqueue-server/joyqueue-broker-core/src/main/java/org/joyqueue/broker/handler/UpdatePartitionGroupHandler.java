@@ -69,9 +69,6 @@ public class UpdatePartitionGroupHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
-        if (!config.getMessengerIgniteEnable()) {
-            return BooleanAck.build();
-        }
         if (command == null) {
             logger.error("UpdatePartitionGroupHandler request command is null");
             return null;

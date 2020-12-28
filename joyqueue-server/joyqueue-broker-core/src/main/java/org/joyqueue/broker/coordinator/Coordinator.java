@@ -15,16 +15,21 @@
  */
 package org.joyqueue.broker.coordinator;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import org.joyqueue.broker.coordinator.domain.CoordinatorDetail;
 import org.joyqueue.broker.coordinator.support.CoordinatorInitializer;
 import org.joyqueue.broker.coordinator.support.CoordinatorResolver;
 import org.joyqueue.domain.Broker;
+import org.joyqueue.domain.Consumer;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.transport.session.session.TransportSessionManager;
+import org.joyqueue.nsr.NameService;
+
+import java.util.List;
 
 /**
  * Coordinator
@@ -36,6 +41,7 @@ public class Coordinator {
 
     private CoordinatorConfig config;
     private ClusterManager clusterManager;
+    private NameService nameService;
     private CoordinatorResolver coordinatorResolver;
     private CoordinatorInitializer coordinatorInitializer;
     private TransportSessionManager coordinatorSessionManager;
@@ -44,6 +50,7 @@ public class Coordinator {
                        CoordinatorInitializer coordinatorInitializer, TransportSessionManager coordinatorSessionManager) {
         this.config = config;
         this.clusterManager = clusterManager;
+        this.nameService = clusterManager.getNameService();
         this.coordinatorResolver = coordinatorResolver;
         this.coordinatorInitializer = coordinatorInitializer;
         this.coordinatorSessionManager = coordinatorSessionManager;
@@ -57,15 +64,25 @@ public class Coordinator {
     }
 
     public Broker findGroup(String group) {
-        return coordinatorResolver.findCoordinator(group, config.getGroupTopic());
+        String namespace = resolveGroupNamespace(group);
+        return coordinatorResolver.findCoordinator(group, config.getGroupTopic(namespace));
     }
 
     public CoordinatorDetail getGroupDetail(String group) {
-        return coordinatorResolver.getCoordinatorDetail(group, config.getGroupTopic());
+        String namespace = resolveGroupNamespace(group);
+        return coordinatorResolver.getCoordinatorDetail(group, config.getGroupTopic(namespace));
     }
 
-    public boolean isGroupTopic(TopicName topic) {
-        return config.getGroupTopic().getFullName().equals(topic.getFullName());
+    protected String resolveGroupNamespace(String group) {
+        List<Consumer> consumers = nameService.getConsumersByApp(group);
+        if (CollectionUtils.isEmpty(consumers)) {
+            return null;
+        }
+        Consumer consumer = consumers.get(0);
+        if (consumer.getConsumerPolicy() == null) {
+            return null;
+        }
+        return consumer.getConsumerPolicy().getRegion();
     }
 
     // transaction
@@ -83,16 +100,12 @@ public class Coordinator {
         return coordinatorResolver.getCoordinatorDetail(key, config.getTransactionTopic());
     }
 
-    public boolean isTransactionTopic(TopicName topic) {
-        return config.getTransactionTopic().getFullName().equals(topic.getFullName());
-    }
-
     public TopicName getTransactionTopic() {
         return config.getTransactionTopic();
     }
 
     public TopicConfig getTransactionTopicConfig() {
-        return clusterManager.getNameService().getTopicConfig(config.getTransactionTopic());
+        return nameService.getTopicConfig(config.getTransactionTopic());
     }
 
     public PartitionGroup getTransactionPartitionGroup(String key) {

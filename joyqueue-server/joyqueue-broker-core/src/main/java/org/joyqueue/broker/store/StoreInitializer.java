@@ -20,7 +20,6 @@ import com.google.common.collect.Sets;
 import com.google.common.primitives.Shorts;
 import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
-import org.joyqueue.broker.cluster.event.CompensateEvent;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.election.DefaultElectionNode;
 import org.joyqueue.broker.election.ElectionService;
@@ -173,7 +172,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
                     break;
                 }
                 case COMPENSATE: {
-                    CompensateEvent compensateEvent = (CompensateEvent) event;
+//                    CompensateEvent compensateEvent = (CompensateEvent) event;
 //                    onCompensate(compensateEvent.getTopics());
                     break;
                 }
@@ -285,18 +284,15 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
         int currentBrokerId = clusterManager.getBrokerId();
         Set<Integer> newReplicas = Sets.newHashSet(newPartitionGroup.getReplicas());
         Set<Integer> oldReplicas = Sets.newHashSet(oldPartitionGroup.getReplicas());
-        newReplicas.removeAll(oldReplicas);
-        oldReplicas.removeAll(newReplicas);
+        newReplicas.removeAll(oldPartitionGroup.getReplicas());
+        oldReplicas.removeAll(newPartitionGroup.getReplicas());
 
         List<Broker> brokers = Lists.newLinkedList();
         for (Integer newReplica : newPartitionGroup.getReplicas()) {
             brokers.add(nameService.getBroker(newReplica));
         }
 
-        for (Integer newReplica : newPartitionGroup.getReplicas()) {
-            if (oldPartitionGroup.getReplicas().contains(newReplica)) {
-                continue;
-            }
+        for (Integer newReplica : newReplicas) {
             if (newReplica.equals(currentBrokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", topicName, newPartitionGroup.getGroup());
                 storeService.createPartitionGroup(topicName.getFullName(), newPartitionGroup.getGroup(), Shorts.toArray(newPartitionGroup.getPartitions()));
@@ -318,10 +314,7 @@ public class StoreInitializer extends Service implements EventListener<MetaEvent
             }
         }
 
-        for (Integer oldReplica : oldPartitionGroup.getReplicas()) {
-            if (newPartitionGroup.getReplicas().contains(oldReplica)) {
-                continue;
-            }
+        for (Integer oldReplica : oldReplicas) {
             if (oldReplica.equals(currentBrokerId)) {
                 logger.info("topic[{}] add partitionGroup[{}]", topicName, newPartitionGroup.getGroup());
                 storeService.removePartitionGroup(topicName.getFullName(), newPartitionGroup.getGroup());

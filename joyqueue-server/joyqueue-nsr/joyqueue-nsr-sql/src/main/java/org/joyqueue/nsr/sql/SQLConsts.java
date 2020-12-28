@@ -23,4 +23,8 @@ package org.joyqueue.nsr.sql;
 public class SQLConsts {
 
     public static final String TYPE = "sql";
+
+    public static final String APPLICATION_PLACEHOLDER = "{application_path}";
+
+    public static final String DEFAULT_SCHEMA = "classpath:/metadata/sql/h2_schema.sql";
 }

@@ -157,8 +157,18 @@ public class ThinNameServer extends Service implements NameService, PropertySupp
     }
 
     @Override
+    public List<Consumer> getConsumersByApp(String app) {
+        return delegate.getConsumersByApp(app);
+    }
+
+    @Override
     public List<Producer> getProducerByTopic(TopicName topic) {
         return delegate.getProducerByTopic(topic);
+    }
+
+    @Override
+    public List<Producer> getProducersByApp(String app) {
+        return delegate.getProducersByApp(app);
     }
 
     @Override

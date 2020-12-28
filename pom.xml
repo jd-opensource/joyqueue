@@ -459,16 +459,6 @@
             </dependency>
             <dependency>
                 <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-nsr-ignite</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-nsr-composition</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-nsr-journalkeeper</artifactId>
                 <version>${project.version}</version>
             </dependency>

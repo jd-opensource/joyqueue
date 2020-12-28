@@ -15,7 +15,10 @@
  */
 package org.joyqueue.nsr.sql.config;
 
+import org.joyqueue.nsr.sql.SQLConsts;
 import org.joyqueue.toolkit.config.PropertyDef;
+
+import java.util.HashMap;
 
 /**
  * SQLConfigKey
@@ -25,8 +28,14 @@ import org.joyqueue.toolkit.config.PropertyDef;
 public enum SQLConfigKey implements PropertyDef {
 
     DATASOURCE_TYPE("nameserver.sql.datasource.type", null, Type.STRING),
-    DATASOURCE_CLASS("nameserver.sql.datasource.class", null, Type.STRING),
+    DATASOURCE_CLASS("nameserver.sql.datasource.class", "com.zaxxer.hikari.HikariDataSource", Type.STRING),
+
     DATASOURCE_PROPERTIES_PREFIX("nameserver.sql.datasource.property.", null, Type.STRING),
+    DATASOURCE_DEFAULT_PROPERTIES("nameserver.sql.datasource.properties.default", new HashMap<String, String>() {{
+        put("nameserver.sql.datasource.property.driverClassName", "org.h2.Driver");
+        put("nameserver.sql.datasource.property.jdbcUrl", String.format("jdbc:h2:file:%s/metadata/h2/data;" +
+                "AUTO_SERVER=TRUE;MVCC=TRUE;LOCK_TIMEOUT=30000;INIT=RUNSCRIPT FROM '%s'", SQLConsts.APPLICATION_PLACEHOLDER, SQLConsts.DEFAULT_SCHEMA));
+    }}, Type.OBJECT),
 
     ;
 
