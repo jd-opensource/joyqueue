@@ -167,10 +167,6 @@ public class RaftLeaderElection extends LeaderElection  {
         return allNodes.values();
     }
 
-    public int getCurrentTerm() {
-        return currentTerm;
-    }
-
     /**
      * 根据id获取节点
      * @param nodeId 节点id
