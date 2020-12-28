@@ -18,6 +18,7 @@ package org.joyqueue.broker.monitor.service;
 import org.joyqueue.broker.monitor.stat.BrokerStatExt;
 import org.joyqueue.broker.monitor.stat.JVMStat;
 import org.joyqueue.monitor.BrokerMonitorInfo;
+import org.joyqueue.monitor.BrokerMonitorInfoExt;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.toolkit.vm.GCEventListener;
 
@@ -34,7 +35,13 @@ public interface BrokerMonitorInternalService {
      *
      * @return broker信息
      */
-    BrokerMonitorInfo getBrokerInfo();
+    BrokerMonitorInfo getBrokerInfo(long timestamp);
+
+    /**
+     * 获取扩展监控信息
+     * @return
+     */
+    BrokerMonitorInfoExt getBrokerInfoExt(long timestamp);
 
     /**
      * 获取扩展监控信息，包括额外的积压信息等

@@ -15,11 +15,12 @@
  */
 package org.joyqueue.client.internal.consumer.interceptor;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
 import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
 import org.joyqueue.client.internal.consumer.domain.ConsumeReply;
+import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,22 +36,24 @@ public class ConsumerInvocation {
     private ConsumerConfig config;
     private String topic;
     private NameServerConfig nameServerConfig;
+    private TopicMetadata topicMetadata;
     private List<ConsumeMessage> messages;
     private ConsumerInterceptorManager consumerInterceptorManager;
     private ConsumerInvoker consumerInvoker;
 
-    public ConsumerInvocation(ConsumerConfig config, String topic, NameServerConfig nameServerConfig, List<ConsumeMessage> messages,
+    public ConsumerInvocation(ConsumerConfig config, String topic, NameServerConfig nameServerConfig, TopicMetadata topicMetadata, List<ConsumeMessage> messages,
                               ConsumerInterceptorManager consumerInterceptorManager, ConsumerInvoker consumerInvoker) {
         this.config = config;
         this.topic = topic;
         this.nameServerConfig = nameServerConfig;
+        this.topicMetadata = topicMetadata;
         this.messages = messages;
         this.consumerInterceptorManager = consumerInterceptorManager;
         this.consumerInvoker = consumerInvoker;
     }
 
     public List<ConsumeReply> invoke() {
-        ConsumeContext context = new ConsumeContext(topic, config.getApp(), nameServerConfig, Collections.unmodifiableList(messages));
+        ConsumeContext context = new ConsumeContext(topic, config.getApp(), nameServerConfig, topicMetadata, Collections.unmodifiableList(messages));
         List<ConsumerInterceptor> interceptors = consumerInterceptorManager.getSortedInterceptors();
 
         if (CollectionUtils.isEmpty(interceptors)) {

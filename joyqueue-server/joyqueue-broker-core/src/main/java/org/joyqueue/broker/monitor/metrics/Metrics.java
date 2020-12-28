@@ -104,7 +104,7 @@ public class Metrics {
     }
 
     public double getTp90() {
-        return this.getSnapshot().getMean();
+        return this.getSnapshot().getMedian();
     }
 
     public double getMax() {

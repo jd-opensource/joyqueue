@@ -15,6 +15,8 @@
  */
 package org.joyqueue.monitor;
 
+import java.util.List;
+
 /**
  * 分区组信息
  * @author lining11
@@ -30,10 +32,14 @@ public class PartitionGroupMonitorInfo extends BaseMonitorInfo {
     private long indexPosition;
     private long flushPosition;
     private long replicationPosition;
+    private long replicationPositionLag;
+    private int term;
+    private long pending;
 
     private EnQueueMonitorInfo enQueue;
     private DeQueueMonitorInfo deQueue;
     private ReplicationMonitorInfo replication;
+    private List<PartitionGroupNodeMonitorInfo> nodeInfos;
 
     public String getTopic() {
         return topic;
@@ -99,6 +105,30 @@ public class PartitionGroupMonitorInfo extends BaseMonitorInfo {
         this.replicationPosition = replicationPosition;
     }
 
+    public long getReplicationPositionLag() {
+        return replicationPositionLag;
+    }
+
+    public void setReplicationPositionLag(long replicationPositionLag) {
+        this.replicationPositionLag = replicationPositionLag;
+    }
+
+    public int getTerm() {
+        return term;
+    }
+
+    public void setTerm(int term) {
+        this.term = term;
+    }
+
+    public long getPending() {
+        return pending;
+    }
+
+    public void setPending(long pending) {
+        this.pending = pending;
+    }
+
     public EnQueueMonitorInfo getEnQueue() {
         return enQueue;
     }
@@ -121,5 +151,13 @@ public class PartitionGroupMonitorInfo extends BaseMonitorInfo {
 
     public ReplicationMonitorInfo getReplication() {
         return replication;
+    }
+
+    public List<PartitionGroupNodeMonitorInfo> getNodeInfos() {
+        return nodeInfos;
+    }
+
+    public void setNodeInfos(List<PartitionGroupNodeMonitorInfo> nodeInfos) {
+        this.nodeInfos = nodeInfos;
     }
 }

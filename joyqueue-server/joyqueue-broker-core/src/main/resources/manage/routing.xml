@@ -5,6 +5,8 @@
         <!-- broker -->
         <route path="/monitor/broker" inherit="get"
                handlers="brokerMonitorService.getBrokerInfo"/>
+        <route path="/monitor/broker/ext" inherit="get"
+               handlers="brokerMonitorService.getBrokerInfoExt"/>
 
         <!-- deprecated -->
         <route path="/startInfo" inherit="get"
@@ -126,8 +128,6 @@
         <!-- metadata -->
         <route path="/monitor/topic/:topic/metadata" inherit="get"
                handlers="brokerMonitorService.getTopicMetadata"/>
-        <route path="/monitor/topic/:topic/metadata" inherit="put"
-               handlers="brokerMonitorService.rebuildTopicMetadata"/>
         <route path="/monitor/topic/:topic/app/:app/readable" inherit="get"
                handlers="brokerMonitorService.getReadableResult"/>
         <route path="/monitor/topic/:topic/app/:app/writable" inherit="get"
@@ -258,5 +258,7 @@
                handlers="brokerManageService.describeTopic"/>
         <route path="/manage/election/metadata/updateTerm/topic/:topic/partitionGroup/:partitionGroup/:term" inherit="get"
                handlers="brokerManageService.updateTerm"/>
+        <route path="/manage/election/topic/:topic/partitionGroup/:partitionGroup/replicaTask" inherit="post"
+               handlers="brokerManageService.addReplicaTask"/>
     </routes>
 </vertx>

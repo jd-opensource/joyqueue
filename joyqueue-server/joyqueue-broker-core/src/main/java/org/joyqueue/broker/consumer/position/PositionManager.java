@@ -32,8 +32,10 @@ import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.nsr.event.AddConsumerEvent;
 import org.joyqueue.nsr.event.AddPartitionGroupEvent;
+import org.joyqueue.nsr.event.AddTopicEvent;
 import org.joyqueue.nsr.event.RemoveConsumerEvent;
 import org.joyqueue.nsr.event.RemovePartitionGroupEvent;
+import org.joyqueue.nsr.event.RemoveTopicEvent;
 import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
 import org.joyqueue.store.PartitionGroupStore;
 import org.joyqueue.store.StoreService;
@@ -301,6 +303,31 @@ public class PositionManager extends Service {
         return true;
     }
 
+    public boolean updateLastMsgAckIndex(TopicName topic, String app, short partition, long oldIndex, long index, boolean isUpdatePullIndex) throws JoyQueueException {
+        logger.debug("Update last ack index, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+        // 检查索引有效性
+        checkIndex(topic, partition, index);
+        // 标记最近一次更新应答位置时间
+        markLastAckTime(topic, app, partition);
+
+        ConsumePartition consumePartition = new ConsumePartition(topic.getFullName(), app, partition);
+        Position position = positionStore.get(consumePartition);
+        if (position != null) {
+            boolean result = position.setAckCurIndex(oldIndex, index);
+            if (!result) {
+                return false;
+            }
+            if (isUpdatePullIndex) {
+                position.setPullCurIndex(-1);
+            }
+        } else {
+            logger.error("Position is null, topic:{}, app:{}, partition:{}, index:{}", topic, app, partition, index);
+            // 补偿逻辑：如果当前broker是指定partition对应partitionGroup的leader，则按照给定index初始化Position，否则不处理
+            addAndUpdatePosition(topic, app, partition, index);
+        }
+        return true;
+    }
+
     /**
      * 检查更新的位置是否有效
      *
@@ -556,7 +583,7 @@ public class PositionManager extends Service {
      * @param partitionGroup 分区分组
      */
     private void addPartitionGroup(TopicName topic, PartitionGroup partitionGroup) {
-        List<String> appList = clusterManager.getAppByTopic(topic);
+        List<String> appList = clusterManager.getConsumersByTopic(topic);
         Set<Short> partitions = partitionGroup.getPartitions();
 
         logger.debug("add partitionGroup appList:[{}], partitions:[{}]", appList.toString(), partitions.toString());
@@ -690,6 +717,14 @@ public class PositionManager extends Service {
                     logger.info("listen add partition group event:[{}]", addPartitionGroupEvent.toString());
 
                     addPartitionGroup(addPartitionGroupEvent.getTopic(), addPartitionGroupEvent.getPartitionGroup());
+                } else if (event.getEventType() == EventType.ADD_TOPIC) {
+                    AddTopicEvent addTopicEvent = (AddTopicEvent) event;
+                    logger.info("listen add topic event:[{}]", addTopicEvent.toString());
+
+
+                    for (PartitionGroup partitionGroup : addTopicEvent.getPartitionGroups()) {
+                        addPartitionGroup(partitionGroup.getTopic(), partitionGroup);
+                    }
                 }
             } catch (Exception ex) {
                 logger.error("AddPartitionGroupListener error.", ex);
@@ -710,6 +745,13 @@ public class PositionManager extends Service {
                     logger.info("listen remove partition group event:[{}]", removePartitionGroupEvent.toString());
 
                     removePartitionGroup(removePartitionGroupEvent.getTopic(), removePartitionGroupEvent.getPartitionGroup());
+                } else if (event.getEventType() == EventType.REMOVE_TOPIC) {
+                    RemoveTopicEvent removeTopicEvent = (RemoveTopicEvent) event;
+                    logger.info("listen remove topic event:[{}]", removeTopicEvent.toString());
+
+                    for (PartitionGroup partitionGroup : removeTopicEvent.getPartitionGroups()) {
+                        removePartitionGroup(partitionGroup.getTopic(), partitionGroup);
+                    }
                 }
             } catch (Exception ex) {
                 logger.error("RemovePartitionGroupListener error.", ex);

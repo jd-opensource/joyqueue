@@ -60,7 +60,7 @@ public class DefaultTransportClientFactory implements TransportClientFactory {
     }
 
     public DefaultTransportClientFactory(Codec codec, CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler) {
-        this(codec, commandHandlerFactory, exceptionHandler, new EventBus());
+        this(codec, commandHandlerFactory, exceptionHandler, new EventBus("joyqueue-transport-client-eventBus"));
     }
 
     public DefaultTransportClientFactory(Codec codec, CommandHandlerFactory commandHandlerFactory, ExceptionHandler exceptionHandler, EventBus<TransportEvent> transportEventBus) {

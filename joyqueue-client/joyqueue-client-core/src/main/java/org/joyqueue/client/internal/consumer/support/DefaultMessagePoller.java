@@ -326,7 +326,7 @@ public class DefaultMessagePoller extends Service implements MessagePoller {
 
         JoyQueueCode result = consumerIndexManager.commitReply(topicMetadata.getTopic(), replyList, config.getAppFullName(), config.getTimeout());
         if (!result.equals(JoyQueueCode.SUCCESS)) {
-            logger.error("commit ack error, topic : {}, code: {}, error: {}", topic, result.getCode(), result.getMessage());
+            logger.error("commit ack error, topic : {}, code: {}, replies: {}, error: {}", topic, result.getCode(), replyList, result.getMessage());
         }
         return result;
     }

@@ -93,12 +93,6 @@ public class DefaultMetadataMonitorService implements MetadataMonitorService {
     }
 
     @Override
-    public TopicConfig rebuildTopicMetadata(String topic) {
-        TopicName topicName = TopicName.parse(topic);
-        return clusterManager.rebuildTopicConfigCache(topicName);
-    }
-
-    @Override
     public BooleanResponse getReadableResult(String topic, String app, String address) {
         TopicName topicName = TopicName.parse(topic);
         return clusterManager.checkReadable(topicName, app, address);

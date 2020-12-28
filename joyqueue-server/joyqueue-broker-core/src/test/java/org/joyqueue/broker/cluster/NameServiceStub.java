@@ -252,6 +252,11 @@ public class NameServiceStub extends Service implements NameService {
     }
 
     @Override
+    public List<Consumer> getConsumersByApp(String app) {
+        return null;
+    }
+
+    @Override
     public List<Producer> getProducerByTopic(TopicName topic) {
         List<Producer> result = Lists.newArrayList();
         for (Producer producer : allMetadata.getProducers()) {
@@ -260,6 +265,11 @@ public class NameServiceStub extends Service implements NameService {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<Producer> getProducersByApp(String app) {
+        return null;
     }
 
     @Override

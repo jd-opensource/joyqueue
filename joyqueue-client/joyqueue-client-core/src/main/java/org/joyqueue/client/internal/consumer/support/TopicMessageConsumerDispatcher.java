@@ -15,6 +15,7 @@
  */
 package org.joyqueue.client.internal.consumer.support;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.client.internal.consumer.BatchMessageListener;
 import org.joyqueue.client.internal.consumer.MessageListener;
 import org.joyqueue.client.internal.consumer.MessagePoller;
@@ -27,7 +28,6 @@ import org.joyqueue.client.internal.metadata.domain.TopicMetadata;
 import org.joyqueue.client.internal.nameserver.NameServerConfig;
 import org.joyqueue.domain.ConsumerPolicy;
 import org.joyqueue.toolkit.service.Service;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +65,17 @@ public class TopicMessageConsumerDispatcher extends Service {
             return false;
         }
 
+        TopicMetadata topicMetadata = messagePoller.getTopicMetadata(topic);
+        ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
+
+        if (consumerPolicy == null) {
+            logger.warn("consumer not exist, topic: {}, app: {}", topic, config.getAppFullName());
+            return false;
+        }
+        if (consumerPolicy.getPaused() != null && consumerPolicy.getPaused()) {
+            return false;
+        }
+
         List<ConsumeMessage> messages = messagePoller.poll(topic);
 
         if (logger.isDebugEnabled()) {
@@ -75,8 +86,6 @@ public class TopicMessageConsumerDispatcher extends Service {
             return false;
         }
 
-        TopicMetadata topicMetadata = messagePoller.getTopicMetadata(topic);
-        ConsumerPolicy consumerPolicy = topicMetadata.getConsumerPolicy();
         List<ConsumeReply> consumeReplies = doDispatch(topicMetadata, consumerPolicy, messages);
 
         if (logger.isDebugEnabled()) {
@@ -100,12 +109,12 @@ public class TopicMessageConsumerDispatcher extends Service {
 
     protected List<ConsumeReply> doBatchDispatch(TopicMetadata topicMetadata, ConsumerPolicy consumerPolicy,
                                                  List<ConsumeMessage> messages, List<BatchMessageListener> listeners) {
-        return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
+        return new ConsumerInvocation(config, topic, nameServerConfig, topicMetadata, messages, consumerInterceptorManager,
                 new BatchConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners)).invoke();
     }
 
     protected List<ConsumeReply> doOnceDispatch(TopicMetadata topicMetadata, final ConsumerPolicy consumerPolicy, final List<ConsumeMessage> messages, final List<MessageListener> listeners) {
-        return new ConsumerInvocation(config, topic, nameServerConfig, messages, consumerInterceptorManager,
+        return new ConsumerInvocation(config, topic, nameServerConfig, topicMetadata, messages, consumerInterceptorManager,
                 new OnceConsumerInvoker(config, topicMetadata, consumerPolicy, messages, listeners)).invoke();
     }
 }

@@ -42,7 +42,6 @@ public class MessageAccessPointHolder {
         maybeStop();
     }
 
-    /** start producer */
     public void startProducer() {
         producers++;
     }

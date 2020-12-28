@@ -30,6 +30,7 @@ public enum ElectionConfigKey implements PropertyDef {
     EXECUTOR_THREAD_NUM_MAX("election.executor.thread.num.max", 50, Type.INT),
     TIMER_SCHEDULE_THREAD_NUM("election.timer.schedule.thread.num", 10, Type.INT),
     HEARTBEAT_TIMEOUT("election.heartbeat.timeout", 1000, Type.INT),
+    HEARTBEAT_MAX_TIMEOUT("election.heartbeat.max.timeout", 1000 * 30, Type.INT),
     SEND_COMMAND_TIMEOUT("election.send.command.timeout", 1000 * 5, Type.INT),
     MAX_BATCH_REPLICATE_SIZE("election.max.replicate.length", 1024 * 1024 * 3, Type.INT),
     DISABLE_STORE_TIMEOUT("election.disable.store.timeout", 1000 * 5, Type.INT),
@@ -50,6 +51,7 @@ public enum ElectionConfigKey implements PropertyDef {
     CONNECTION_TIMEOUT("election.connection.timeout", 100 * 1, Type.INT),
     CONNECTION_RETRY_DELAY("election.connection.retryDelay", 1000 * 10, Type.INT),
     ENABLE_SHARED_HEARTBEAT("election.enable.shared.heartbeat", false, Type.BOOLEAN),
+    ENABLE_REPLICATE_POSITION_V3_PROTOCOL("election.enable.replicate.position.v3.protocol", false, Type.BOOLEAN),
 
     ;
 

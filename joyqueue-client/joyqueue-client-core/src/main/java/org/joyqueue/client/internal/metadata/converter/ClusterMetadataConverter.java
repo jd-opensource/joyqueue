@@ -149,7 +149,7 @@ public class ClusterMetadataConverter {
 
         return new TopicMetadata(code, topic.getProducerPolicy(), topic.getConsumerPolicy(), topic.getType(), partitionGroups, partitions, partitionMap, partitionGroupMap, brokers,
                 Lists.newArrayList(writableBrokers), Lists.newArrayList(readableBrokers), nearbyBrokers, Lists.newArrayList(writableNearbyBrokers), Lists.newArrayList(readableNearbyBrokers),
-                brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, topic.getCode());
+                brokerMap, brokerPartitions, brokerPartitionGroups, allAvailable, topic.getParams(), topic.getCode());
     }
 
     public static PartitionGroupMetadata convertPartitionGroupMetadata(String topic, TopicPartitionGroup partitionGroup, Map<Integer, BrokerNode> brokers) {

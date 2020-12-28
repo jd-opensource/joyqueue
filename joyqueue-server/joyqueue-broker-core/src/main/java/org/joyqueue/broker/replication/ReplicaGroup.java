@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -227,11 +228,15 @@ public class ReplicaGroup extends Service {
      * @param replicaId 副本id
      * @return replica
      */
-    private Replica getReplica(int replicaId) {
+    public Replica getReplica(int replicaId) {
         return replicas.stream()
                 .filter(r -> r.replicaId() == replicaId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<Replica> getReplicas() {
+        return Collections.unmodifiableList(replicas);
     }
 
 
@@ -252,6 +257,19 @@ public class ReplicaGroup extends Service {
      */
     public boolean isLeader(){
         return this.state == ElectionNode.State.LEADER;
+    }
+
+    public synchronized boolean addReplicaTask(int replicaId) {
+        if (!isLeader()) {
+            logger.error("add replica task error, not leader, partition: {}", topicPartitionGroup);
+            return false;
+        }
+        if (getReplica(replicaId) == null) {
+            logger.error("add replica task error, replica not exist, partition: {}", topicPartitionGroup);
+            return false;
+        }
+        replicateResponseQueue.put(new DelayedCommand(ONE_SECOND_NANO, replicaId));
+        return true;
     }
 
     /**
@@ -401,6 +419,7 @@ public class ReplicaGroup extends Service {
             delayTimeNs = ONE_SECOND_NANO;
         }
 
+        getReplica(localReplicaId).writePosition(replicableStore.rightPosition());
         replicateResponseQueue.put(new DelayedCommand(delayTimeNs, localReplicaId));
     }
 
@@ -416,12 +435,9 @@ public class ReplicaGroup extends Service {
 
                     AppendEntriesRequest request = generateAppendEntriesRequest(replica);
                     if (request == null) {
-                        if (!electionConfig.enableSharedHeartbeat()) {
-                            if (SystemClock.now() - replica.getLastAppendTime() >= electionConfig.getHeartbeatTimeout()) {
-                                request = generateHeartbeatRequest(replica);
-                            }
-                        }
-                        if (request == null) {
+                        if (SystemClock.now() - replica.getLastAppendTime() >= electionConfig.getElectionTimeout()) {
+                            request = generateHeartbeatRequest(replica);
+                        } else {
                             replicateResponseQueue.put(new DelayedCommand(ONE_MS_NANO, replica.replicaId()));
                             return;
                         }
@@ -566,7 +582,7 @@ public class ReplicaGroup extends Service {
                         1, entriesLength, usTime() - startTimeUs);
 
             } catch (Exception e) {
-                logger.info("Partition group {}/node {} process append entries reponse fail",
+                logger.info("Partition group {}/node {} process append entries response fail",
                         topicPartitionGroup, localReplicaId, e);
             } finally {
                 replicateResponseQueue.put(new DelayedCommand(0, replica.replicaId()));
@@ -660,8 +676,17 @@ public class ReplicaGroup extends Service {
                         return;
                     }
 
-                    ReplicateConsumePosRequest request = new ReplicateConsumePosRequest(consumePositions);
+                    ReplicateConsumePosRequest request = new ReplicateConsumePosRequest();
+                    request.setConsumePositions(consumePositions);
+                    request.setTerm(currentTerm);
+                    request.setLeaderId(leaderId);
+                    request.setTopic(topicPartitionGroup.getTopic());
+                    request.setGroup(topicPartitionGroup.getPartitionGroupId());
                     JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.REPLICATE_CONSUME_POS_REQUEST);
+
+                    if (electionConfig.enableReplicatePositionV3Protocol()) {
+                        header.setVersion(JoyQueueHeader.VERSION_V3);
+                    }
 
                     if (logger.isDebugEnabled() || electionConfig.getOutputConsumePos()) {
                         logger.debug("Partition group {}/node {} send consume position {} to node {}",

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NsrTransportServerFactory extends DefaultTransportServerFactory {
     private static NsrCommandHandlerFactory nsrCommandHandlerFactory = new NsrServerCommandHandlerFactory();
-    protected static EventBus<TransportEvent> eventBus = new EventBus<>();
+    protected static EventBus<TransportEvent> eventBus = new EventBus<>("joyqueue-transport-nsr-eventBus");
 
     public NsrTransportServerFactory(NameService nameService, PropertySupplier propertySupplier) {
         this(NsrCodecFactory.getInstance(), nsrCommandHandlerFactory, new NsrExceptionHandler(), eventBus);

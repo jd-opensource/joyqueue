@@ -32,6 +32,7 @@ public class BrokerMonitorInfo extends BaseMonitorInfo {
     private ElectionMonitorInfo election;
     private BufferPoolMonitorInfo bufferPoolMonitorInfo;
     private BrokerStartupInfo startupInfo;
+    private long timestamp;
 
     public ConnectionMonitorInfo getConnection() {
         return connection;
@@ -103,5 +104,13 @@ public class BrokerMonitorInfo extends BaseMonitorInfo {
 
     public void setStartupInfo(BrokerStartupInfo startupInfo) {
         this.startupInfo = startupInfo;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -20,14 +20,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.cluster.config.ClusterConfig;
 import org.joyqueue.broker.cluster.entry.ClusterNode;
-import org.joyqueue.broker.cluster.event.CompensateEvent;
 import org.joyqueue.broker.config.BrokerConfig;
 import org.joyqueue.broker.consumer.ConsumeConfigKey;
 import org.joyqueue.domain.AppToken;
@@ -39,34 +37,16 @@ import org.joyqueue.domain.Producer;
 import org.joyqueue.domain.Subscription;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
-import org.joyqueue.event.ConsumerEvent;
-import org.joyqueue.event.EventType;
 import org.joyqueue.event.MetaEvent;
 import org.joyqueue.event.NameServerEvent;
-import org.joyqueue.event.ProducerEvent;
 import org.joyqueue.exception.JoyQueueCode;
 import org.joyqueue.exception.JoyQueueException;
 import org.joyqueue.nsr.NameService;
-import org.joyqueue.nsr.event.AddConsumerEvent;
-import org.joyqueue.nsr.event.AddPartitionGroupEvent;
-import org.joyqueue.nsr.event.AddProducerEvent;
-import org.joyqueue.nsr.event.AddTopicEvent;
-import org.joyqueue.nsr.event.RemoveConsumerEvent;
-import org.joyqueue.nsr.event.RemovePartitionGroupEvent;
-import org.joyqueue.nsr.event.RemoveProducerEvent;
-import org.joyqueue.nsr.event.RemoveTopicEvent;
 import org.joyqueue.nsr.event.UpdateBrokerEvent;
-import org.joyqueue.nsr.event.UpdateConsumerEvent;
-import org.joyqueue.nsr.event.UpdatePartitionGroupEvent;
-import org.joyqueue.nsr.event.UpdateProducerEvent;
-import org.joyqueue.nsr.event.UpdateTopicEvent;
 import org.joyqueue.response.BooleanResponse;
-import org.joyqueue.toolkit.concurrent.EventBus;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
-import org.joyqueue.toolkit.lang.LifeCycle;
 import org.joyqueue.toolkit.service.Service;
-import org.joyqueue.toolkit.time.SystemClock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,17 +60,11 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 集群管理
@@ -110,14 +84,12 @@ public class ClusterManager extends Service {
     private volatile Broker broker;
     // 元数据管理
     private NameService nameService;
-    // 集群管理本地缓存
-    private MetaDataLocalCache localCache;
-    // 元数据事件
-    private EventBus<MetaEvent> eventBus = new EventBus("joyqueue-cluster-eventBus");
 
     private BrokerContext brokerContext;
     private ClusterNameService clusterNameService;
     private ClusterConfig config;
+
+    private Cache<TopicName, List<Short>> localPartitionCache;
 
     public ClusterManager(BrokerConfig brokerConfig, NameService nameService, ClusterNameService clusterNameService, BrokerContext brokerContext) {
         this.brokerConfig = brokerConfig;
@@ -125,6 +97,7 @@ public class ClusterManager extends Service {
         this.clusterNameService = clusterNameService;
         this.brokerContext = brokerContext;
         this.config = new ClusterConfig(brokerContext.getPropertySupplier());
+        this.localPartitionCache = CacheBuilder.newBuilder().expireAfterWrite(1000 * 1, TimeUnit.MILLISECONDS).build();
     }
 
 
@@ -144,20 +117,15 @@ public class ClusterManager extends Service {
         if (!brokerIdFile.exists()) {
             brokerIdFile.createNewFile();
         }
-        if (localCache == null) {
-            localCache = new MetaDataLocalCache(nameService);
-        }
     }
 
 
     @Override
     protected void doStart() throws Exception {
         super.doStart();
-        localCache.start();
-        eventBus.start();
         register();
         clusterNameService.setBroker(broker);
-        localCache.initCache();
+        nameService.addListener(new MetaDataListener());
         logger.info("clusterManager is started");
     }
 
@@ -186,7 +154,12 @@ public class ClusterManager extends Service {
      * @param listener 事件监听
      */
     public void addListener(EventListener<MetaEvent> listener) {
-        eventBus.addListener(listener);
+        nameService.addListener(new EventListener<NameServerEvent>() {
+            @Override
+            public void onEvent(NameServerEvent event) {
+                listener.onEvent(event.getMetaEvent());
+            }
+        });
     }
 
     /**
@@ -233,7 +206,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Broker getBrokerById(Integer brokerId) {
-        if(brokerId.equals(getBrokerId())){
+        if (brokerId.equals(getBrokerId())) {
             return broker;
         }
         return nameService.getBroker(brokerId);
@@ -261,7 +234,14 @@ public class ClusterManager extends Service {
      * @return
      */
     public TopicConfig getTopicConfig(TopicName topic) {
-        return localCache.getTopicConfig(topic);
+        TopicConfig topicConfig = nameService.getTopicConfig(topic);
+        if (topicConfig == null) {
+            return null;
+        }
+        if (!topicConfig.isReplica(getBrokerId())) {
+            return null;
+        }
+        return topicConfig;
     }
 
     /**
@@ -302,16 +282,28 @@ public class ClusterManager extends Service {
     }
 
     public List<Short> getLocalPartitions(TopicName topic) {
-        TopicConfig topicConfig = getTopicConfig(topic);
-        if (null == topicConfig) {
-            return null;
+        try {
+            return localPartitionCache.get(topic, () -> {
+                TopicConfig topicConfig = getTopicConfig(topic);
+                if (topicConfig == null) {
+                    return Collections.emptyList();
+                }
+                List<Short> result = Lists.newArrayListWithCapacity(topicConfig.getPartitions());
+                for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
+                    if (isLeader(entry.getValue())) {
+                        result.addAll(entry.getValue().getPartitions());
+                    }
+                }
+                return result;
+            });
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-        return getLocalPartitions(topicConfig);
     }
 
     public List<Short> getLocalPartitions(TopicConfig topicConfig) {
         try {
-            return localCache.getPartitionCache().get(topicConfig, () -> {
+            return localPartitionCache.get(topicConfig.getName(), () -> {
                 List<Short> result = Lists.newArrayListWithCapacity(topicConfig.getPartitions());
                 for (Map.Entry<Integer, PartitionGroup> entry : topicConfig.getPartitionGroups().entrySet()) {
                     if (isLeader(entry.getValue())) {
@@ -441,7 +433,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Consumer.ConsumerPolicy getConsumerPolicy(TopicName topic, String app) throws JoyQueueException {
-        Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
+        Consumer consumer = tryGetConsumer(topic, app);
         if (null == consumer) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getConsumerPolicy();
@@ -497,7 +489,11 @@ public class ClusterManager extends Service {
     }
 
     public Consumer tryGetConsumer(TopicName topic, String app) {
-        return localCache.getConsumerByTopicAndApp(topic, app);
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return null;
+        }
+        return nameService.getConsumerByTopicAndApp(topic, app);
     }
 
     /**
@@ -508,7 +504,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Consumer.ConsumerPolicy tryGetConsumerPolicy(TopicName topic, String app) {
-        Consumer consumer = localCache.getConsumerByTopicAndApp(topic, app);
+        Consumer consumer = tryGetConsumer(topic, app);
         if (consumer == null) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getConsumerPolicy();
@@ -526,7 +522,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Producer.ProducerPolicy tryGetProducerPolicy(TopicName topic, String app) {
-        Producer producer = localCache.getProducerByTopicAndApp(topic, app);
+        Producer producer = tryGetProducer(topic, app);
         if (producer == null) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getProducerPolicy();
@@ -549,7 +545,7 @@ public class ClusterManager extends Service {
         }
 
         // 顺序消息不支持长轮询
-        TopicConfig config = localCache.getTopicConfigCache().get(topic);
+        TopicConfig config = getTopicConfig(TopicName.parse(topic));
         return !(config != null && config.checkSequential());
     }
 
@@ -562,7 +558,11 @@ public class ClusterManager extends Service {
     }
 
     public Producer tryGetProducer(TopicName topic, String app) {
-        return localCache.getProducerByTopicAndApp(topic, app);
+        TopicConfig topicConfig = getTopicConfig(topic);
+        if (topicConfig == null) {
+            return null;
+        }
+        return nameService.getProducerByTopicAndApp(topic, app);
     }
 
     /**
@@ -573,7 +573,7 @@ public class ClusterManager extends Service {
      * @return
      */
     public Producer.ProducerPolicy getProducerPolicy(TopicName topic, String app) throws JoyQueueException {
-        Producer producer = localCache.getProducerByTopicAndApp(topic, app);
+        Producer producer = tryGetProducer(topic, app);
         if (null == producer) {
             if (StringUtils.equals(brokerConfig.getAdminUser(), app)) {
                 return brokerContext.getProducerPolicy();
@@ -836,10 +836,10 @@ public class ClusterManager extends Service {
      * @param topic 主题
      * @return
      */
-    public List<String> getAppByTopic(TopicName topic) {
+    public List<String> getConsumersByTopic(TopicName topic) {
         List<Consumer> consumerByTopic = nameService.getConsumerByTopic(topic);
         if (CollectionUtils.isEmpty(consumerByTopic)) {
-            return new ArrayList<>(0);
+            return Collections.emptyList();
         }
         List<String> appList = new ArrayList<>(consumerByTopic.size());
         consumerByTopic.stream().forEach(consume -> appList.add(consume.getApp()));
@@ -854,13 +854,11 @@ public class ClusterManager extends Service {
      * @return
      */
     public List<String> getLocalSubscribeAppByTopic(TopicName topic) {
-        List<String> result = Collections.emptyList();
+        List<Consumer> consumers = nameService.getConsumerByTopic(topic);
+        List<String> result = Lists.newArrayListWithCapacity(consumers.size());
 
-        if (topic != null) {
-            Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topic);
-            if (consumers != null) {
-                result = new ArrayList<>(consumers.keySet());
-            }
+        for (Consumer consumer : consumers) {
+            result.add(consumer.getApp());
         }
 
         return result;
@@ -879,20 +877,15 @@ public class ClusterManager extends Service {
     }
 
     public boolean checkArchiveable(TopicName topicName) {
-        Map<String, MetaDataLocalCache.CacheProducer> producers = localCache.getTopicProducers(topicName);
-        if (null != producers && producers.size() > 0) {
-            for (Iterator<MetaDataLocalCache.CacheProducer> it = producers.values().iterator(); it.hasNext(); ) {
-                if (getProducerPolicyOrDefault(it.next().getProducer()).getArchive()) {
-                    return true;
-                }
+        for (Producer producer : nameService.getProducerByTopic(topicName)) {
+            if (getProducerPolicyOrDefault(producer).getArchive()) {
+                return true;
             }
         }
-        Map<String, MetaDataLocalCache.CacheConsumer> consumers = localCache.getTopicConsumers(topicName);
-        if (null != consumers && consumers.size() > 0) {
-            for (Iterator<MetaDataLocalCache.CacheConsumer> it = consumers.values().iterator(); it.hasNext(); ) {
-                if (getConsumerPolicyOrDefault(it.next().getConsumer()).getArchive()) {
-                    return true;
-                }
+
+        for (Consumer consumer : nameService.getConsumerByTopic(topicName)) {
+            if (getConsumerPolicyOrDefault(consumer).getArchive()) {
+                return true;
             }
         }
         return false;
@@ -956,542 +949,27 @@ public class ClusterManager extends Service {
         return null != appToken && appToken.getEffectiveTime().before(now) && appToken.getExpirationTime().after(now);
     }
 
-    public TopicConfig rebuildTopicConfigCache(TopicName topicName) {
-        return localCache.buildTopicConfigCache(topicName);
-    }
-
     public NameService getNameService() {
         return nameService;
     }
 
-    /**
-     * 元数据本地缓存
-     * 1.本broker上所有的topic配置
-     * 2.broker.id
-     * <p>
-     * Created by chengzhiliang on 2018/9/4.
-     */
-    private class MetaDataLocalCache implements LifeCycle {
-        private AtomicBoolean start = new AtomicBoolean(false);
-        private final NameService nameService;
-        private ScheduledExecutorService timerUpdateAllExecutor;
-        private long cacheTime = 60 * 1000;
-
-        MetaDataLocalCache(NameService nameService) {
-            this.nameService = nameService;
-            nameService.addListener(new MetaDataListener());
-        }
-
-        // K=主题，V=主题配置; 缓存当前broker上的所有主题配置信息
-        private ConcurrentMap<String, TopicConfig> topicConfigCache = new ConcurrentHashMap<>();
-
-        // K=主题+应用, V=消费者; 缓存当前broker上接入者->消费者
-        private ConcurrentMap<String, ConcurrentHashMap<String, CacheConsumer>> consumerCache = new ConcurrentHashMap<>();
-        // K=主题+应用, V=生产者; 缓存当前broker上接入者->生产者
-        private ConcurrentMap<String, ConcurrentHashMap<String, CacheProducer>> producerCache = new ConcurrentHashMap<>();
-
-        private Cache<TopicConfig, List<Short>> partitionCache =
-                CacheBuilder.newBuilder()
-                        .expireAfterWrite(1000 * 5, TimeUnit.MILLISECONDS)
-                        .build();
-
-        /**
-         * 刷新缓存
-         */
-        protected void initCache() {
-            buildTopicConfigCaches();
-        }
-
-        /**
-         * 构建主题对于主题配置的K-V结构
-         */
-        protected void buildTopicConfigCaches() {
-            Map<TopicName, TopicConfig> topicConfigByBroker = nameService.getTopicConfigByBroker(brokerConfig.getBrokerId());
-            if (null != topicConfigByBroker) {
-                for (Map.Entry<TopicName, TopicConfig> entry : topicConfigByBroker.entrySet()) {
-                    logger.info("build topic config, topic: {}", entry.getKey());
-                    buildTopicConfigCache(entry.getValue());
-                }
-            }
-        }
-
-        protected TopicConfig getTopicConfig(TopicName topic) {
-            TopicConfig topicConfig = topicConfigCache.get(topic.getFullName());
-            if (null != topicConfig) {
-                return topicConfig;
-            }
-            return buildTopicConfigCache(topic);
-        }
-
-        /**
-         * 根据主题更新主题配置
-         *
-         * @param topic 主题
-         */
-        protected TopicConfig buildTopicConfigCache(TopicName topic) {
-            TopicConfig topicConfig = nameService.getTopicConfig(topic);
-            if (null != topicConfig) {
-                return buildTopicConfigCache(topicConfig);
-            }
-            return null;
-        }
-        private TopicConfig buildTopicConfigCache(TopicConfig topicConfig) {
-            logger.info("build topic cache, topic: {}", topicConfig.getName());
-            TopicName topic = topicConfig.getName();
-            topicConfigCache.put(topic.getFullName(), topicConfig);
-            if(!consumerCache.containsKey(topic.getFullName())){
-                consumerCache.put(topic.getFullName(),new ConcurrentHashMap<>());
-            }
-            if(!producerCache.containsKey(topic.getFullName())){
-                producerCache.put(topic.getFullName(),new ConcurrentHashMap<>());
-            }
-            return topicConfig;
-        }
-
-        /**
-         * 按接入对象更新消费策略
-         *
-         * @param topic 主题
-         * @param app   应用
-         */
-
-        protected Consumer buildConsumeCache(TopicName topic, String app) {
-            logger.info("build consumer cache, topic: {}, app: {}", topic, app);
-            Consumer consumerByTopic = nameService.getConsumerByTopicAndApp(topic, app);
-            if (null != consumerByTopic) {
-                consumerCache.get(topic.getFullName()).put(app, new CacheConsumer(consumerByTopic, SystemClock.now()));
-            }
-            return consumerByTopic;
-        }
-
-        protected Consumer buildConsumeCache(Consumer consumer) {
-            logger.info("build consumer cache, topic: {}, app: {}", consumer.getTopic(), consumer.getApp());
-            ConcurrentHashMap<String, CacheConsumer> consumers = consumerCache.get(consumer.getTopic().getFullName());
-            if (consumers == null) {
-                consumers = new ConcurrentHashMap<>();
-                consumerCache.putIfAbsent(consumer.getTopic().getFullName(), consumers);
-                consumers = consumerCache.get(consumer.getTopic().getFullName());
-            }
-            consumers.put(consumer.getApp(), new CacheConsumer(consumer, SystemClock.now()));
-            return consumer;
-        }
-
-        protected Consumer getConsumerByTopicAndApp(TopicName topic, String app) {
-            if (!consumerCache.containsKey(topic.getFullName())) {
-                logger.warn("topic {} does not exist on this broker", topic.getFullName());
-                return null;
-            }
-            CacheConsumer consumer = consumerCache.get(topic.getFullName()).get(app);
-            if (null == consumer) {
-                if (topicConfigCache.containsKey(topic.getFullName())) {
-                    return buildConsumeCache(topic, app);
-                }
-            }
-            return consumer.getConsumer();
-        }
-
-        protected Producer getProducerByTopicAndApp(TopicName topic, String app) {
-            if (!producerCache.containsKey(topic.getFullName())) {
-                logger.warn("topic {} does not exist on this broker", topic.getFullName());
-                return null;
-            }
-            CacheProducer producer = producerCache.get(topic.getFullName()).get(app);
-            if (null == producer) {
-                if (topicConfigCache.containsKey(topic.getFullName())) {
-                    return buildProduceCache(topic, app);
-                }
-            }
-            return producer.getProducer();
-        }
-
-        /**
-         * 按接入对象更新生产策略
-         *
-         * @param topic 主题
-         * @param app   应用
-         */
-        protected Producer buildProduceCache(TopicName topic, String app) {
-            logger.info("build producer cache, topic: {}, app: {}", topic, app);
-            Producer producerByTopic = nameService.getProducerByTopicAndApp(topic, app);
-            if (null != producerByTopic) {
-                producerCache.get(topic.getFullName()).put(app, new CacheProducer(producerByTopic));
-            }
-            return producerByTopic;
-        }
-
-        protected Producer buildProduceCache(Producer producer) {
-            logger.info("build producer cache, topic: {}, app: {}", producer.getTopic(), producer.getApp());
-            ConcurrentHashMap<String, CacheProducer> producers = producerCache.get(producer.getTopic().getFullName());
-            if (producers == null) {
-                producers = new ConcurrentHashMap<>();
-                producerCache.putIfAbsent(producer.getTopic().getFullName(), producers);
-                producers = producerCache.get(producer.getTopic().getFullName());
-            }
-            producers.put(producer.getApp(), new CacheProducer(producer));
-            return producer;
-        }
-
-
-        public ConcurrentMap<String, TopicConfig> getTopicConfigCache() {
-            return topicConfigCache;
-        }
-
-        public Map<String, CacheConsumer> getTopicConsumers(TopicName topic) {
-            return consumerCache.get(topic.getFullName());
-        }
-
-        public Map<String, CacheProducer> getTopicProducers(TopicName topic) {
-            return producerCache.get(topic.getFullName());
-        }
-
-        public Cache<TopicConfig, List<Short>> getPartitionCache() {
-            return partitionCache;
-        }
-
-        @Deprecated
-        private void clearConsumerCache(TopicName topicName) {
-            Map<String, CacheConsumer> cacheConsuemerMap = consumerCache.get(topicName.getFullName());
-            cacheConsuemerMap.values().forEach(cacheConsuemer -> {
-                if (SystemClock.now() > cacheConsuemer.getExpireTime()) {
-                    cacheConsuemerMap.remove(cacheConsuemer.getConsumer().getApp());
-                }
-            });
-        }
-        /**
-         * 更新消费者配置信息
-         * </br>
-         * 用本地缓存去查询远程nameserver，如果查到覆盖本地，查不到删除本地
-         * @param topicName
-         */
-        private void updateConsumerCache(TopicName topicName) {
-            Map<String, CacheConsumer> cacheConsumerMapOld = consumerCache.get(topicName.getFullName());
-            Iterator<Map.Entry<String, CacheConsumer>> iterator = cacheConsumerMapOld.entrySet().iterator();
-            while(iterator.hasNext()) {
-                Map.Entry<String, CacheConsumer> next = iterator.next();
-                String app = next.getKey();
-                Consumer consumerByTopicAndApp = nameService.getConsumerByTopicAndApp(topicName, app);
-                if (null != consumerByTopicAndApp) {
-                    cacheConsumerMapOld.put(app, new CacheConsumer(consumerByTopicAndApp));
-                } else {
-                    iterator.remove();
-                }
-            }
-        }
-
-        /**
-         * 补偿生产
-         * @param topicName
-         */
-        private void compensateAddProduceEvent(TopicName topicName) {
-            List<Producer> producerByTopic = nameService.getProducerByTopic(topicName);
-            ConcurrentHashMap<String, CacheProducer> localProducerCache = producerCache.get(topicName.getFullName());
-            producerByTopic.stream().forEach(producer -> {
-                if (producer != null) {
-                    String app = producer.getApp();
-                    if (!localProducerCache.contains(app)) {
-                        // 如果本地缓存不包含这个订阅关系，则补偿一个订阅关系事件
-                        ProducerEvent producerEvent = new ProducerEvent();
-                        producerEvent.setEventType(EventType.ADD_PRODUCER);
-                        producerEvent.setApp(app);
-                        producerEvent.setTopic(topicName);
-
-                        // 添加订阅事件
-                        eventBus.add(producerEvent);
-                    }
-
-                    // 添加到本地缓存
-                    localProducerCache.put(app, new CacheProducer(producer));
-                }
-            });
-        }
-
-        /**
-         * 补偿订阅事件
-         * </br>
-         * 远程拉取主题的所有订阅者和本地缓存对比，如果本地缓存没有，则补偿一个订阅事件
-         * @param topicName
-         */
-        private void compensateAddConsumeEvent(TopicName topicName) {
-            List<Consumer> consumerByTopic = nameService.getConsumerByTopic(topicName);
-            ConcurrentHashMap<String, CacheConsumer> localConsumeCache = consumerCache.get(topicName.getFullName());
-            consumerByTopic.stream().forEach(consumer -> {
-                if (consumer != null) {
-                    String app = consumer.getApp();
-                    if (!localConsumeCache.contains(app)) {
-                        // 如果本地缓存不包含这个订阅关系，则补偿一个订阅关系事件
-                        ConsumerEvent consumerEvent = new ConsumerEvent();
-                        consumerEvent.setEventType(EventType.ADD_CONSUMER);
-                        consumerEvent.setApp(app);
-                        consumerEvent.setTopic(topicName);
-
-                        // 添加订阅事件
-                        eventBus.add(consumerEvent);
-                    }
-
-                    // 添加到本地缓存
-                    localConsumeCache.put(app, new CacheConsumer(consumer));
-                }
-            });
-        }
-
-        @Deprecated
-        private void clearProducerCache(TopicName topicName) {
-            Map<String, CacheProducer> cacheProducerMap = producerCache.get(topicName.getFullName());
-            cacheProducerMap.values().forEach(cacheProducer -> {
-                if (SystemClock.now() > cacheProducer.getExpireTime()) {
-                    cacheProducerMap.remove(cacheProducer.getProducer().getApp());
-                }
-            });
-        }
-
-        /**
-         * 更新发送者配置信息
-         * </br>
-         * 用本地缓存去查询远程nameserver，如果查到覆盖本地，查不到删除本地
-         * @param topicName
-         */
-        private void updateProducerCache(TopicName topicName) {
-            Map<String, CacheProducer> cacheProducerMapOld = producerCache.get(topicName.getFullName());
-
-            Iterator<Map.Entry<String, CacheProducer>> iterator = cacheProducerMapOld.entrySet().iterator();
-            while(iterator.hasNext()) {
-                Map.Entry<String, CacheProducer> next = iterator.next();
-                String app = next.getKey();
-                Producer producerByTopic = nameService.getProducerByTopicAndApp(topicName, app);
-                if (null != producerByTopic) {
-                    cacheProducerMapOld.put(app, new CacheProducer(producerByTopic));
-                } else {
-                    iterator.remove();
-                }
-            }
-        }
+    class MetaDataListener implements EventListener<NameServerEvent> {
 
         @Override
-        public void start() throws Exception {
-            timerUpdateAllExecutor = Executors.newSingleThreadScheduledExecutor();
-            start.compareAndSet(false, true);
-        }
-
-        @Override
-        public void stop() {
-            timerUpdateAllExecutor.shutdown();
-            start.compareAndSet(true, false);
-        }
-
-        @Override
-        public boolean isStarted() {
-            return start.get();
-        }
-
-        protected void publishEvent(MetaEvent event) {
-            eventBus.inform(event);
-        }
-
-        /**
-         * 主题信息更新事件处理
-         */
-        class MetaDataListener implements EventListener<NameServerEvent> {
-
-            @Override
-            public void onEvent(NameServerEvent event) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("onEvent, event: {}", JSON.toJSONString(event));
-                }
-
-                switch (event.getEventType()) {
-                    case ADD_TOPIC: {
-                        AddTopicEvent addTopicEvent = (AddTopicEvent) event.getMetaEvent();
-                        TopicConfig topicConfig = TopicConfig.toTopicConfig(addTopicEvent.getTopic(), addTopicEvent.getPartitionGroups());
-                        buildTopicConfigCache(topicConfig);
-                        break;
+        public void onEvent(NameServerEvent event) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("onEvent, event: {}", JSON.toJSONString(event));
+            }
+            switch (event.getEventType()) {
+                case UPDATE_BROKER: {
+                    UpdateBrokerEvent updateBrokerEvent = (UpdateBrokerEvent) event.getMetaEvent();
+                    if (broker != null) {
+                        broker.setPermission(updateBrokerEvent.getNewBroker().getPermission());
+                        broker.setRetryType(updateBrokerEvent.getNewBroker().getRetryType());
                     }
-                    case UPDATE_TOPIC: {
-                        UpdateTopicEvent updateTopicEvent = (UpdateTopicEvent) event.getMetaEvent();
-                        TopicConfig oldTopicConfig = topicConfigCache.get(updateTopicEvent.getOldTopic().getName().getFullName());
-                        if (oldTopicConfig == null) {
-                            break;
-                        }
-                        TopicConfig newTopicConfig = TopicConfig.toTopicConfig(updateTopicEvent.getNewTopic());
-                        newTopicConfig.setPartitionGroups(oldTopicConfig.getPartitionGroups());
-                        buildTopicConfigCache(newTopicConfig);
-                        break;
-                    }
-                    case REMOVE_TOPIC: {
-                        RemoveTopicEvent removeTopicEvent = (RemoveTopicEvent) event.getMetaEvent();
-                        TopicConfig topicConfig = topicConfigCache.remove(removeTopicEvent.getTopic().getName().getFullName());
-                        if (topicConfig == null) {
-                            break;
-                        }
-                        consumerCache.remove(topicConfig.getName().getFullName());
-                        producerCache.remove(topicConfig.getName().getFullName());
-                        for (PartitionGroup partitionGroup : topicConfig.fetchTopicPartitionGroupsByBrokerId(brokerConfig.getBrokerId())) {
-                            publishEvent(new RemovePartitionGroupEvent(topicConfig.getName(), partitionGroup));
-                        }
-                        break;
-                    }
-                    case ADD_PARTITION_GROUP: {
-                        AddPartitionGroupEvent addPartitionGroupEvent = (AddPartitionGroupEvent) event.getMetaEvent();
-                        PartitionGroup partitionGroup = addPartitionGroupEvent.getPartitionGroup();
-                        TopicConfig oldTopicConfig = topicConfigCache.get(addPartitionGroupEvent.getTopic().getFullName());
-                        if (oldTopicConfig == null) {
-                            break;
-                        }
-
-                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
-                        topicPartitionGroups.put(addPartitionGroupEvent.getPartitionGroup().getGroup(), partitionGroup);
-                        oldTopicConfig.setPartitionGroups(topicPartitionGroups);
-                        buildTopicConfigCache(oldTopicConfig);
-                        break;
-                    }
-                    case UPDATE_PARTITION_GROUP: {
-                        UpdatePartitionGroupEvent updatePartitionGroupEvent = (UpdatePartitionGroupEvent) event.getMetaEvent();
-                        PartitionGroup oldPartitionGroup = updatePartitionGroupEvent.getOldPartitionGroup();
-                        PartitionGroup newPartitionGroup = updatePartitionGroupEvent.getNewPartitionGroup();
-                        TopicConfig oldTopicConfig = topicConfigCache.get(updatePartitionGroupEvent.getTopic().getFullName());
-                        if (oldTopicConfig == null) {
-                            break;
-                        }
-
-                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
-                        topicPartitionGroups.put(newPartitionGroup.getGroup(), newPartitionGroup);
-                        oldTopicConfig.setPartitionGroups(topicPartitionGroups);
-                        buildTopicConfigCache(oldTopicConfig);
-                        break;
-                    }
-                    case REMOVE_PARTITION_GROUP: {
-                        RemovePartitionGroupEvent removePartitionGroupEvent = (RemovePartitionGroupEvent) event.getMetaEvent();
-                        PartitionGroup partitionGroup = removePartitionGroupEvent.getPartitionGroup();
-                        TopicConfig oldTopicConfig = topicConfigCache.get(removePartitionGroupEvent.getTopic().getFullName());
-                        if (oldTopicConfig == null) {
-                            break;
-                        }
-
-                        Map<Integer, PartitionGroup> topicPartitionGroups = Maps.newHashMap(oldTopicConfig.getPartitionGroups());
-                        topicPartitionGroups.remove(partitionGroup.getGroup());
-                        oldTopicConfig.setPartitionGroups(topicPartitionGroups);
-                        TopicConfig newTopiConfig =  buildTopicConfigCache(oldTopicConfig);
-
-                        if (CollectionUtils.isEmpty(newTopiConfig.fetchTopicPartitionGroupsByBrokerId(getBrokerId()))) {
-                            consumerCache.remove(newTopiConfig.getName().getFullName());
-                            producerCache.remove(newTopiConfig.getName().getFullName());
-                        }
-
-                        break;
-                    }
-                    case ADD_CONSUMER: {
-                        AddConsumerEvent addConsumerEvent = (AddConsumerEvent) event.getMetaEvent();
-                        buildConsumeCache(addConsumerEvent.getConsumer());
-                        break;
-                    }
-                    case UPDATE_CONSUMER: {
-                        UpdateConsumerEvent updateConsumerEvent = (UpdateConsumerEvent) event.getMetaEvent();
-                        buildConsumeCache(updateConsumerEvent.getNewConsumer());
-                        break;
-                    }
-                    case REMOVE_CONSUMER: {
-                        RemoveConsumerEvent removeConsumerEvent = (RemoveConsumerEvent) event.getMetaEvent();
-                        ConcurrentHashMap<String, CacheConsumer> topicConsumerCache = consumerCache.get(removeConsumerEvent.getTopic().getFullName());
-                        if (topicConsumerCache != null) {
-                            topicConsumerCache.remove(removeConsumerEvent.getConsumer().getApp());
-                        }
-                        break;
-                    }
-                    case ADD_PRODUCER: {
-                        AddProducerEvent addProducerEvent = (AddProducerEvent) event.getMetaEvent();
-                        buildProduceCache(addProducerEvent.getProducer());
-                        break;
-                    }
-                    case UPDATE_PRODUCER: {
-                        UpdateProducerEvent updateProducerEvent = (UpdateProducerEvent) event.getMetaEvent();
-                        buildProduceCache(updateProducerEvent.getNewProducer());
-                        break;
-                    }
-                    case REMOVE_PRODUCER: {
-                        RemoveProducerEvent removeProducerEvent = (RemoveProducerEvent) event.getMetaEvent();
-                        ConcurrentHashMap<String, CacheProducer> topicProducerCache = producerCache.get(removeProducerEvent.getTopic().getFullName());
-                        if (topicProducerCache != null) {
-                            topicProducerCache.remove(removeProducerEvent.getProducer().getApp());
-                        }
-                        break;
-                    }
-                    case UPDATE_BROKER: {
-                        UpdateBrokerEvent updateBrokerEvent = (UpdateBrokerEvent) event.getMetaEvent();
-                        if (broker != null) {
-                            broker.setPermission(updateBrokerEvent.getNewBroker().getPermission());
-                            broker.setRetryType(updateBrokerEvent.getNewBroker().getRetryType());
-                        }
-                        break;
-                    }
-                    case COMPENSATE: {
-                        org.joyqueue.nsr.event.CompensateEvent compensateEvent = (org.joyqueue.nsr.event.CompensateEvent) event.getMetaEvent();
-                        publishEvent(new CompensateEvent(compensateEvent.getNewCache().getTopicConfigBrokerMap().get(getBrokerId())));
-                        break;
-                    }
-                }
-
-                if (!event.getEventType().equals(EventType.COMPENSATE)) {
-                    publishEvent(event.getMetaEvent());
+                    break;
                 }
             }
         }
-
-        private class CacheConsumer {
-            private Consumer consumer;
-            private long expireTime;
-
-
-            CacheConsumer(Consumer consumer) {
-                this.consumer = consumer;
-                this.expireTime = SystemClock.now() + cacheTime;
-            }
-
-            CacheConsumer(Consumer consumer, long expireTime) {
-                this.consumer = consumer;
-                this.expireTime = expireTime;
-            }
-
-            public Consumer getConsumer() {
-                return consumer;
-            }
-
-            public long getExpireTime() {
-                return expireTime;
-            }
-        }
-
-        private class CacheProducer {
-            private Producer producer;
-            private long expireTime;
-
-            CacheProducer(Producer producer) {
-                this.producer = producer;
-                this.expireTime = SystemClock.now() + cacheTime;
-            }
-
-            CacheProducer(Producer producer, long expireTime) {
-                this.producer = producer;
-                this.expireTime = expireTime;
-            }
-
-            public Producer getProducer() {
-                return producer;
-            }
-
-            public long getExpireTime() {
-                return expireTime;
-            }
-        }
-    }
-
-    @Override
-    protected void doStop() {
-        super.doStop();
-        if (eventBus.isStarted()){
-            eventBus.stop();
-        }
-        if (localCache.isStarted()) {
-            localCache.stop();
-        }
-        logger.info("clusterManager is stopped");
     }
 }

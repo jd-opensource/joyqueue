@@ -16,7 +16,10 @@
 package org.joyqueue.broker.manage.service.support;
 
 import org.joyqueue.broker.election.ElectionService;
+import org.joyqueue.broker.election.LeaderElection;
+import org.joyqueue.broker.election.RaftLeaderElection;
 import org.joyqueue.broker.manage.service.ElectionManageService;
+import org.joyqueue.domain.TopicName;
 
 public class DefaultElectionManageService implements ElectionManageService {
     private ElectionService electionService;
@@ -43,5 +46,14 @@ public class DefaultElectionManageService implements ElectionManageService {
     @Override
     public void updateTerm(String topic, int partitionGroup, int term) {
         electionService.updateTerm(topic, partitionGroup, term);
+    }
+
+    @Override
+    public boolean addReplicaTask(String topic, int partitionGroup, int replicaId) {
+        LeaderElection leaderElection = electionService.getLeaderElection(TopicName.parse(topic), partitionGroup);
+        if (leaderElection == null || !(leaderElection instanceof RaftLeaderElection)) {
+            return false;
+        }
+        return leaderElection.getReplicaGroup().addReplicaTask(replicaId);
     }
 }
