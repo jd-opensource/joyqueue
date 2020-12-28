@@ -27,6 +27,8 @@ public class StoreMonitorInfo {
 
     private String totalSpace;
     private String freeSpace;
+    private long totalSpaceBytes;
+    private long freeSpaceBytes;
 
     public void setStarted(boolean started) {
         this.started = started;
@@ -50,5 +52,21 @@ public class StoreMonitorInfo {
 
     public void setFreeSpace(String freeSpace) {
         this.freeSpace = freeSpace;
+    }
+
+    public long getTotalSpaceBytes() {
+        return totalSpaceBytes;
+    }
+
+    public void setTotalSpaceBytes(long totalSpaceBytes) {
+        this.totalSpaceBytes = totalSpaceBytes;
+    }
+
+    public long getFreeSpaceBytes() {
+        return freeSpaceBytes;
+    }
+
+    public void setFreeSpaceBytes(long freeSpaceBytes) {
+        this.freeSpaceBytes = freeSpaceBytes;
     }
 }
