@@ -41,14 +41,6 @@ public interface MetadataMonitorService {
     TopicConfig getTopicMetadata(String topic, boolean isCluster);
 
     /**
-     * 重建主题元数据
-     *
-     * @param topic 主题
-     * @return 主题元数据
-     */
-    TopicConfig rebuildTopicMetadata(String topic);
-
-    /**
      * 是否有读权限
      *
      * @param topic 主题

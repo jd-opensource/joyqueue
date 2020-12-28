@@ -15,11 +15,13 @@
  */
 package org.joyqueue.nsr.sql.config;
 
+import org.joyqueue.nsr.sql.SQLConsts;
 import org.joyqueue.toolkit.config.Property;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -50,6 +52,16 @@ public class SQLConfig {
         for (Property property : propertySupplier.getProperties()) {
             if (property.getKey().startsWith(SQLConfigKey.DATASOURCE_PROPERTIES_PREFIX.getName())) {
                 properties.put(property.getKey(), String.valueOf(property.getValue()));
+            }
+        }
+        if (properties.isEmpty()) {
+            Map<String, String> defaultProperties = (Map<String, String>) SQLConfigKey.DATASOURCE_DEFAULT_PROPERTIES.getValue();
+            String applicationDataPath = propertySupplier.getProperty(Property.APPLICATION_DATA_PATH).getString();
+
+            for (Map.Entry<String, String> entry : defaultProperties.entrySet()) {
+                String key = entry.getKey().replace(SQLConsts.APPLICATION_PLACEHOLDER, applicationDataPath);
+                String value = entry.getValue().replace(SQLConsts.APPLICATION_PLACEHOLDER, applicationDataPath);
+                properties.put(key, value);
             }
         }
         properties.put(SQLConfigKey.DATASOURCE_CLASS.getName(), getDataSourceClass());

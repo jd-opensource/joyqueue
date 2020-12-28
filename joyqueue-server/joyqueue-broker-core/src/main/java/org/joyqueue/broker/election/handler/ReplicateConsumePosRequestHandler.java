@@ -18,11 +18,13 @@ package org.joyqueue.broker.election.handler;
 import com.google.common.base.Preconditions;
 import org.joyqueue.broker.BrokerContext;
 import org.joyqueue.broker.consumer.Consume;
-import org.joyqueue.broker.consumer.model.ConsumePartition;
-import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.election.ElectionConfig;
+import org.joyqueue.broker.election.ElectionService;
+import org.joyqueue.broker.election.LeaderElection;
+import org.joyqueue.broker.election.RaftLeaderElection;
 import org.joyqueue.broker.election.command.ReplicateConsumePosRequest;
 import org.joyqueue.broker.election.command.ReplicateConsumePosResponse;
+import org.joyqueue.domain.TopicName;
 import org.joyqueue.network.command.CommandType;
 import org.joyqueue.network.transport.Transport;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
@@ -34,8 +36,6 @@ import org.joyqueue.network.transport.exception.TransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 /**
  * author: zhuduohui
  * email: zhuduohui@jd.com
@@ -46,6 +46,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
     private Consume consume;
     private ElectionConfig electionConfig;
+    private ElectionService electionService;
 
     public ReplicateConsumePosRequestHandler(ElectionConfig electionConfig, Consume consume) {
         Preconditions.checkArgument(consume != null, "consume is null");
@@ -60,6 +61,7 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
 
         this.consume = brokerContext.getConsume();
         this.electionConfig = new ElectionConfig(brokerContext.getPropertySupplier());
+        this.electionService = brokerContext.getElectionService();
     }
 
     @Override
@@ -81,16 +83,45 @@ public class ReplicateConsumePosRequestHandler implements CommandHandler, Type {
             logger.info("Receive consume pos request {}", request.getConsumePositions());
         }
 
-        try {
-            Map<ConsumePartition, Position> consumePositions = request.getConsumePositions();
-            consume.setConsumePosition(consumePositions);
-            response.setSuccess(true);
-        } catch (Exception e) {
-            logger.warn("Set consume info {} fail", request.getConsumePositions(), e);
-            response.setSuccess(false);
+        if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V4) {
+            handleV4Protocol(request, response);
+        } else {
+            try {
+                consume.setConsumePosition(request.getConsumePositions());
+                response.setSuccess(true);
+            } catch (Exception e) {
+                logger.warn("Set consume info {} fail", request.getConsumePositions(), e);
+                response.setSuccess(false);
+            }
         }
 
         return new Command(header, response);
+    }
+
+    protected void handleV4Protocol(ReplicateConsumePosRequest request, ReplicateConsumePosResponse response) {
+        LeaderElection leaderElection = electionService.getLeaderElection(TopicName.parse(request.getTopic()), request.getGroup());
+        if (leaderElection == null) {
+            logger.warn("Set consume info fail, election is null, topic: {}, group: {}, term: {}, leaderId: {}",
+                    request.getTopic(), request.getGroup(), request.getTerm(), request.getLeaderId());
+            response.setSuccess(false);
+            return;
+        }
+
+        if (!(leaderElection instanceof RaftLeaderElection)) {
+            consume.setConsumePosition(request.getConsumePositions());
+            response.setSuccess(true);
+            return;
+        }
+
+        RaftLeaderElection raftLeaderElection = (RaftLeaderElection) leaderElection;
+        if (raftLeaderElection.getCurrentTerm() == request.getTerm() && raftLeaderElection.getLeaderId() == request.getLeaderId()) {
+            consume.setConsumePosition(request.getConsumePositions());
+            response.setSuccess(true);
+        } else {
+            logger.warn("Set consume info fail, topic: {}, group: {}, term: {}, leaderId: {}, currentTerm: {}, currentLeaderId: {}",
+                    request.getTopic(), request.getGroup(), request.getTerm(), request.getLeaderId(), raftLeaderElection.getCurrentTerm(), raftLeaderElection.getLeaderId());
+            response.setSuccess(false);
+        }
     }
 
     @Override

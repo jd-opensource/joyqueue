@@ -31,16 +31,6 @@
         <name>Joyqueue Community</name>
         <url>http://www.joyqueue.org</url>
     </organization>
-    <developers>
-        <developer>
-            <name>Rudy Steiner</name>
-            <email>rudy_steiner@163.com</email>
-        </developer>
-        <developer>
-            <name>Li Yue</name>
-            <email>liyue2008@gmail.com</email>
-        </developer>
-    </developers>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -465,16 +455,6 @@
             <dependency>
                 <groupId>org.joyqueue</groupId>
                 <artifactId>joyqueue-nsr-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-nsr-ignite</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.joyqueue</groupId>
-                <artifactId>joyqueue-nsr-composition</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

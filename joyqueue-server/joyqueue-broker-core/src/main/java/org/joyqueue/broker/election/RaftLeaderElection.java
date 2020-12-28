@@ -23,6 +23,7 @@ import org.joyqueue.broker.election.command.TimeoutNowRequest;
 import org.joyqueue.broker.election.command.TimeoutNowResponse;
 import org.joyqueue.broker.election.command.VoteRequest;
 import org.joyqueue.broker.election.command.VoteResponse;
+import org.joyqueue.broker.replication.Replica;
 import org.joyqueue.broker.replication.ReplicaGroup;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
@@ -153,7 +154,7 @@ public class RaftLeaderElection extends LeaderElection  {
 
         super.doStop();
 
-        logger.info("Raft leader election of partition group {}/node {} stoped",
+        logger.info("Raft leader election of partition group {}/node {} stopped",
                 topicPartitionGroup, localNode);
     }
 
@@ -258,6 +259,10 @@ public class RaftLeaderElection extends LeaderElection  {
         if (leaderId != INVALID_NODE_ID && this.leaderId != INVALID_NODE_ID) {
             transferLeadership(leaderId);
         }
+    }
+
+    public int getCurrentTerm() {
+        return currentTerm;
     }
 
     /**
@@ -784,7 +789,7 @@ public class RaftLeaderElection extends LeaderElection  {
         if (request.getTerm() < currentTerm) {
             logger.info("Partition group {}/node {} receive append entries request from {}, current term {} " +
                             "is bigger than request term {}, length is {}",
-                    topicPartitionGroup, localNode, currentTerm, request.getLeaderId(),
+                    topicPartitionGroup, localNode, request.getLeaderId(), currentTerm,
                     request.getTerm(), request.getEntriesLength());
             return new Command(new JoyQueueHeader(Direction.RESPONSE, CommandType.RAFT_APPEND_ENTRIES_RESPONSE),
                     new AppendEntriesResponse.Build().success(false).term(currentTerm)
@@ -804,14 +809,6 @@ public class RaftLeaderElection extends LeaderElection  {
                     .term(currentTerm).writePosition(replicableStore.rightPosition()).nextPosition(replicableStore.rightPosition())
                     .replicaId(localNodeId).success(true).entriesTerm(request.getEntriesTerm())
                     .build());
-        }
-    }
-
-    private synchronized void maybeStartNewHeartbeat() {
-        if (electionConfig.enableSharedHeartbeat()) {
-            startNewHeartbeat();
-        } else {
-            resetHeartbeatTimer();
         }
     }
 
@@ -835,6 +832,15 @@ public class RaftLeaderElection extends LeaderElection  {
             if (node.equals(localNode)) {
                 continue;
             }
+
+            if (!electionConfig.enableSharedHeartbeat()) {
+                Replica replica = replicaGroup.getReplica(node.getNodeId());
+                if (replica != null && replica.getLastAppendTime() != 0
+                        && SystemClock.now() - replica.getLastAppendTime() > electionConfig.getHeartbeatMaxTimeout()) {
+                    continue;
+                }
+            }
+
             try {
                 electionExecutor.submit(() -> {
                     JoyQueueHeader header = new JoyQueueHeader(Direction.REQUEST, CommandType.RAFT_APPEND_ENTRIES_REQUEST);
@@ -927,7 +933,7 @@ public class RaftLeaderElection extends LeaderElection  {
             heartbeatTimerFuture.cancel(true);
             heartbeatTimerFuture = null;
         }
-        heartbeatTimerFuture = electionTimerExecutor.schedule(this::maybeStartNewHeartbeat,
+        heartbeatTimerFuture = electionTimerExecutor.schedule(this::startNewHeartbeat,
                 electionConfig.getHeartbeatTimeout(), TimeUnit.MILLISECONDS);
     }
 

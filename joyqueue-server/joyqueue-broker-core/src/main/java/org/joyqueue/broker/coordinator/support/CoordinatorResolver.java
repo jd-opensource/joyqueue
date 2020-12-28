@@ -18,6 +18,7 @@ package org.joyqueue.broker.coordinator.support;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.coordinator.config.CoordinatorConfig;
 import org.joyqueue.broker.coordinator.domain.CoordinatorDetail;
@@ -25,6 +26,7 @@ import org.joyqueue.domain.Broker;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.domain.TopicName;
+import org.joyqueue.nsr.NameService;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +46,11 @@ public class CoordinatorResolver extends Service {
     protected static final Logger logger = LoggerFactory.getLogger(CoordinatorResolver.class);
 
     private CoordinatorConfig config;
-    private ClusterManager clusterManager;
+    private NameService nameService;
 
     public CoordinatorResolver(CoordinatorConfig config, ClusterManager clusterManager) {
         this.config = config;
-        this.clusterManager = clusterManager;
+        this.nameService = clusterManager.getNameService();
     }
 
     public Broker findCoordinator(String key, TopicName topic) {
@@ -74,7 +76,18 @@ public class CoordinatorResolver extends Service {
     }
 
     public PartitionGroup resolveCoordinatorPartitionGroup(String key, TopicName topic) {
-        TopicConfig coordinatorTopic = clusterManager.getNameService().getTopicConfig(topic);
+        PartitionGroup partitionGroup = doResolveCoordinatorPartitionGroup(key, topic);
+        if (partitionGroup != null) {
+            return partitionGroup;
+        }
+        if (StringUtils.isNotBlank(topic.getNamespace())) {
+            topic = TopicName.parse(topic.getCode());
+        }
+        return doResolveCoordinatorPartitionGroup(key, topic);
+    }
+
+    public PartitionGroup doResolveCoordinatorPartitionGroup(String key, TopicName topic) {
+        TopicConfig coordinatorTopic = nameService.getTopicConfig(topic);
         if (coordinatorTopic == null) {
             return null;
         }

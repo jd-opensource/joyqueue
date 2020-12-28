@@ -154,6 +154,9 @@ public class FetchClusterRequestHandler implements JoyQueueCommandHandler, Type,
 
         result.setCode(JoyQueueCode.SUCCESS);
         result.setPartitionGroups(convertTopicPartitionGroups(connection, topicConfig.getPartitionGroups().values(), brokers));
+        if (topicConfig.getPolicy() != null) {
+            result.setParams(topicConfig.getPolicy().getParams());
+        }
         return result;
     }
 

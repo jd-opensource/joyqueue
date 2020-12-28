@@ -15,6 +15,8 @@
  */
 package org.joyqueue.store;
 
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.ArrayUtils;
 import org.joyqueue.domain.QosLevel;
 import org.joyqueue.monitor.BufferPoolMonitorInfo;
 import org.joyqueue.store.event.StoreEvent;
@@ -23,6 +25,7 @@ import org.joyqueue.store.index.IndexItem;
 import org.joyqueue.store.replication.ReplicableStore;
 import org.joyqueue.store.transaction.TransactionStore;
 import org.joyqueue.store.transaction.TransactionStoreManager;
+import org.joyqueue.store.utils.FileUtils;
 import org.joyqueue.store.utils.PreloadBufferPool;
 import org.joyqueue.toolkit.concurrent.EventListener;
 import org.joyqueue.toolkit.config.PropertySupplier;
@@ -36,6 +39,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +66,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     private static final String DEL_PREFIX = ".d.";
 
     private final Map<String /* Partition Group，格式为：[topic]/[group index] */, PartitionGroupStoreManager> storeMap = new HashMap<>();
+    private final Map<String  /* Partition Group，格式为：[topic]/[group index] */, RemovedPartitionGroupStoreManager> removedStoreMap = new HashMap<>();
     private final Map<String, TransactionStoreManager> txStoreMap = new HashMap<>();
     private StoreConfig config;
     private PreloadBufferPool bufferPool;
@@ -88,6 +93,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             base = new File(config.getPath());
         }
         checkOrCreateBase();
+        physicalDeleteRemoved();
         if (storeLock == null) {
             storeLock = new StoreLock(new File(base, "lock"));
             storeLock.lock();
@@ -150,6 +156,18 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
             logger.info("PHYSICAL DELETE {}...", base.getAbsolutePath());
             deleteFolder(base);
             return true;
+        }
+    }
+
+    private void physicalDeleteRemoved() {
+        File[] removedGroups = new File(base, TOPICS_DIR).listFiles((dir, name) -> dir.isDirectory() && name.startsWith(DEL_PREFIX));
+
+        if (ArrayUtils.isEmpty(removedGroups)) {
+            return;
+        }
+
+        for (File removed : removedGroups) {
+            deleteFolder(removed);
         }
     }
 
@@ -218,7 +236,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         }
         File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
 
-        if (groupBase.exists()) delete(groupBase);
+        if (groupBase.exists()) deletePartitionGroup(groupBase, topic, partitionGroup, partitionGroupStoreManger);
 
 
         File topicBase = new File(base, getTopicRelPath(topic));
@@ -233,11 +251,24 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
                     }
                 }
             }
-            delete(topicBase);
+            deleteFolder(topicBase);
         }
 
     }
 
+    @Override
+    public void physicalDeleteRemovedPartitionGroup(String topic, int partitionGroup) {
+        RemovedPartitionGroupStoreManager removedPartitionGroupStoreManager = removedStoreMap.remove(topic + "/" + partitionGroup);
+        removedPartitionGroupStoreManager.physicalDelete();
+    }
+
+    @Override
+    public List<RemovedPartitionGroupStore> getRemovedPartitionGroups() {
+        if (removedStoreMap.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return Lists.newArrayList(removedStoreMap.values());
+    }
 
     @Override
     public synchronized void restorePartitionGroup(String topic, int partitionGroup) throws Exception {
@@ -261,7 +292,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     public synchronized void createPartitionGroup(String topic, int partitionGroup, short[] partitions) throws Exception {
         if (!storeMap.containsKey(topic + "/" + partitionGroup)) {
             File groupBase = new File(base, getPartitionGroupRelPath(topic, partitionGroup));
-            if (groupBase.exists()) delete(groupBase);
+            if (groupBase.exists()) deletePartitionGroup(groupBase, topic, partitionGroup, null);
             PartitionGroupStoreSupport.init(groupBase, partitions);
 
             restorePartitionGroup(topic, partitionGroup);
@@ -276,7 +307,7 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
         return new PartitionGroupStoreManager.Config(
                 config.getMaxMessageLength(), config.getWriteRequestCacheSize(), config.getFlushIntervalMs(),
                 config.getWriteTimeoutMs(), config.getMaxDirtySize(),
-                config.getPrintMetricIntervalMs(), messageConfig, indexConfig);
+                config.getPrintMetricIntervalMs(), config.getEnqueueTimeout(), messageConfig, indexConfig);
     }
 
     private PositioningStore.Config getIndexStoreConfig(StoreConfig config) {
@@ -292,9 +323,21 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     /**
      * 并不真正删除，只是重命名
      */
-    private boolean delete(File file) {
-        File renamed = new File(file.getParent(), DEL_PREFIX + SystemClock.now() + "." + file.getName());
-        return file.renameTo(renamed);
+    private boolean deletePartitionGroup(File file, String topic, int partitionGroup, PartitionGroupStoreManager partitionGroupStoreManager) {
+        File renamed = new File(base, TOPICS_DIR + File.separator + DEL_PREFIX + SystemClock.now() +
+                "." + topic.replace('/', '@') + "." + partitionGroup);
+        boolean renameResult = file.renameTo(renamed);
+
+        if (partitionGroupStoreManager != null) {
+            RemovedPartitionGroupStoreManager removedPartitionGroupStoreManager = new RemovedPartitionGroupStoreManager(
+                    partitionGroupStoreManager.getTopic(), partitionGroupStoreManager.getPartitionGroup(),
+                    renamed, partitionGroupStoreManager.getStoreFiles(), partitionGroupStoreManager.getIndexStoreFiles());
+
+            removedStoreMap.put(partitionGroupStoreManager.getTopic() + "/" + partitionGroupStoreManager.getPartitionGroup(),
+                    removedPartitionGroupStoreManager);
+        }
+
+        return renameResult;
     }
 
     @Override
@@ -386,22 +429,8 @@ public class Store extends Service implements StoreService, Closeable, PropertyS
     }
 
     private void deleteFolder(File folder) {
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (File f : files) {
-                if (f.isDirectory()) {
-                    deleteFolder(f);
-                } else {
-                    if (!f.delete()) {
-                        logger.warn("Delete failed: {}", f.getAbsolutePath());
-                    }
-                }
-            }
-        }
-        if (!folder.delete()) {
-            logger.warn("Delete failed: {}", folder.getAbsolutePath());
-
-        }
+        logger.warn("Delete folder: {}", folder);
+        FileUtils.deleteFolder(folder);
     }
 
 

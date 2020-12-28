@@ -15,11 +15,12 @@
  */
 package io.openmessaging.joyqueue.consumer.support;
 
-import org.joyqueue.client.internal.consumer.BatchMessageListener;
-import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
-import org.joyqueue.client.internal.consumer.exception.IgnoreAckException;
 import io.openmessaging.joyqueue.consumer.message.MessageConverter;
 import io.openmessaging.message.Message;
+import org.joyqueue.client.internal.consumer.BatchMessageListener;
+import org.joyqueue.client.internal.consumer.config.ConsumerConfig;
+import org.joyqueue.client.internal.consumer.domain.ConsumeMessage;
+import org.joyqueue.client.internal.consumer.exception.IgnoreAckException;
 
 import java.util.List;
 
@@ -32,9 +33,11 @@ import java.util.List;
 public class BatchMessageListenerAdapter implements BatchMessageListener {
 
     private io.openmessaging.consumer.BatchMessageListener omsBatchMessageListener;
+    private ConsumerConfig consumerConfig;
 
-    public BatchMessageListenerAdapter(io.openmessaging.consumer.BatchMessageListener omsBatchMessageListener) {
+    public BatchMessageListenerAdapter(io.openmessaging.consumer.BatchMessageListener omsBatchMessageListener, ConsumerConfig consumerConfig) {
         this.omsBatchMessageListener = omsBatchMessageListener;
+        this.consumerConfig = consumerConfig;
     }
 
     @Override
@@ -43,7 +46,7 @@ public class BatchMessageListenerAdapter implements BatchMessageListener {
         List<Message> omsMessages = MessageConverter.convertMessages(messages);
         omsBatchMessageListener.onReceived(omsMessages, context);
 
-        if (!context.isAck()) {
+        if (consumerConfig.isForceAck() && !context.isAck()) {
             throw new IgnoreAckException();
         }
     }

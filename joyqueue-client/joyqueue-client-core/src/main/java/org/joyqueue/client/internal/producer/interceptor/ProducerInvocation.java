@@ -51,7 +51,7 @@ public class ProducerInvocation {
     }
 
     public List<SendResult> invoke() {
-        ProduceContext context = new ProduceContext(topicMetadata.getTopic(), config.getApp(), nameServerConfig, Collections.unmodifiableList(messages));
+        ProduceContext context = new ProduceContext(topicMetadata.getTopic(), config.getApp(), nameServerConfig, topicMetadata, Collections.unmodifiableList(messages));
         List<ProducerInterceptor> interceptors = producerInterceptorManager.getSortedInterceptors();
 
         if (CollectionUtils.isEmpty(interceptors)) {

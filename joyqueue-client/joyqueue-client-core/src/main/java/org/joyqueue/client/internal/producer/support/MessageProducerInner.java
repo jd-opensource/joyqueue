@@ -122,12 +122,30 @@ public class MessageProducerInner extends Service {
         return doBatchSend(messages, txId, timeout, timeoutUnit, isOneway, failover, callback);
     }
 
-    public List<SendResult> doBatchSend(List<ProduceMessage> messages, String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
+    protected List<SendResult> doBatchSend(List<ProduceMessage> messages, String txId, long timeout, TimeUnit timeoutUnit, boolean isOneway, boolean failover, AsyncBatchProduceCallback callback) {
         TopicMetadata topicMetadata = getAndCheckTopicMetadata(messages.get(0).getTopic());
-        List<BrokerNode> brokerNodes = getAvailableBrokers(topicMetadata);
 
-        return doBatchSend(messages, topicMetadata, brokerNodes,
-                txId, timeout, timeoutUnit, isOneway, failover, callback);
+        try {
+            return new ProducerInvocation(config, nameServerConfig, topicMetadata, messages, producerInterceptorManager, new ProducerInvoker() {
+                @Override
+                public List<SendResult> invoke(ProduceContext context) {
+                    TopicMetadata topicMetadata = getAndCheckTopicMetadata(messages.get(0).getTopic());
+                    List<BrokerNode> brokerNodes = getAvailableBrokers(topicMetadata);
+                    return doBatchSendInternal(messages, topicMetadata, brokerNodes, txId, timeout, timeoutUnit, isOneway, failover, callback);
+                }
+
+                @Override
+                public List<SendResult> reject(ProduceContext context) {
+                    throw new ProducerException("reject send", JoyQueueCode.CN_UNKNOWN_ERROR.getCode());
+                }
+            }).invoke();
+        } catch (Exception e) {
+            if (e instanceof ProducerException) {
+                throw (ProducerException) e;
+            } else {
+                throw new ProducerException(e);
+            }
+        }
     }
 
     public List<SendResult> doBatchSend(List<ProduceMessage> messages, TopicMetadata topicMetadata, List<BrokerNode> brokers,

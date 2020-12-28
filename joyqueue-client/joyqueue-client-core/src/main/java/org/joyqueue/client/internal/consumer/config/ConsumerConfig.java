@@ -15,8 +15,8 @@
  */
 package org.joyqueue.client.internal.consumer.config;
 
-import org.joyqueue.client.internal.consumer.support.RoundRobinBrokerLoadBalance;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.client.internal.consumer.support.BindThreadBrokerLoadBalance;
 
 /**
  * ConsumerConfig
@@ -40,22 +40,25 @@ public class ConsumerConfig {
     private long ackTimeout = NONE_ACK_TIMEOUT;
     private long timeout = 1000 * 10;
     private long pollTimeout = 1000 * 10;
-    private long longPollTimeout = 1000 * 1;
+    private long longPollTimeout = 1000 * 5;
     private long interval = 0;
     private long idleInterval = 1000 * 1;
     private long sessionTimeout = 1000 * 60 * 1;
     private int thread = NONE_THREAD;
+    private int maxThread = 50;
     private boolean failover = true;
     private boolean forceAck = false;
 
     private boolean loadBalance = true;
-    private String loadBalanceType = RoundRobinBrokerLoadBalance.NAME;
+    private String loadBalanceType = BindThreadBrokerLoadBalance.NAME;
 
     private String broadcastGroup;
     private String broadcastLocalPath;
     private int broadcastPersistInterval = 1000 * 10;
     private int broadcastIndexExpireTime = NONE_BROADCAST_INDEX_EXPIRE_TIME;
     private int broadcastIndexAutoReset = BROADCAST_AUTO_RESET_RIGHT_INDEX;
+
+    private String scheduleThreadName = "joyqueue-consumer-scheduler-%s";
 
     private volatile String appFullName;
 
@@ -72,6 +75,7 @@ public class ConsumerConfig {
         consumerConfig.setIdleInterval(idleInterval);
         consumerConfig.setSessionTimeout(sessionTimeout);
         consumerConfig.setThread(thread);
+        consumerConfig.setMaxThread(maxThread);
         consumerConfig.setFailover(failover);
         consumerConfig.setForceAck(forceAck);
         consumerConfig.setLoadBalance(loadBalance);
@@ -81,6 +85,7 @@ public class ConsumerConfig {
         consumerConfig.setBroadcastPersistInterval(broadcastPersistInterval);
         consumerConfig.setBroadcastIndexExpireTime(broadcastIndexExpireTime);
         consumerConfig.setBroadcastIndexAutoReset(broadcastIndexAutoReset);
+        consumerConfig.setScheduleThreadName(scheduleThreadName);
         return consumerConfig;
     }
 
@@ -187,6 +192,14 @@ public class ConsumerConfig {
         return thread;
     }
 
+    public void setMaxThread(int maxThread) {
+        this.maxThread = maxThread;
+    }
+
+    public int getMaxThread() {
+        return maxThread;
+    }
+
     public void setFailover(boolean failover) {
         this.failover = failover;
     }
@@ -257,5 +270,13 @@ public class ConsumerConfig {
 
     public int getBroadcastIndexAutoReset() {
         return broadcastIndexAutoReset;
+    }
+
+    public String getScheduleThreadName() {
+        return scheduleThreadName;
+    }
+
+    public void setScheduleThreadName(String scheduleThreadName) {
+        this.scheduleThreadName = scheduleThreadName;
     }
 }

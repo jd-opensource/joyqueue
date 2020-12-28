@@ -34,8 +34,9 @@ public class StoreConfig {
     public static final int DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT = 10;
     public static final long DEFAULT_PRINT_METRIC_INTERVAL_MS = 0;
     public static final boolean DEFAULT_MESSAGE_FILE_LOAD_ON_READ = false;
-    public static final boolean DEFAULT_INDEX_FILE_LOAD_ON_READ = true;
-    public static final boolean DEFAULT_FLUSH_FORCE = true;
+    public static final boolean DEFAULT_INDEX_FILE_LOAD_ON_READ = false;
+    public static final boolean DEFAULT_FLUSH_FORCE = false;
+    public static final int DEFAULT_ENQUEUE_TIMEOUT = 100;
 
     public static final String STORE_PATH = "/store";
     /**
@@ -61,6 +62,8 @@ public class StoreConfig {
     private int preLoadBufferMaxCount = DEFAULT_PRE_LOAD_BUFFER_MAX_COUNT;
 
     private long printMetricIntervalMs = DEFAULT_PRINT_METRIC_INTERVAL_MS;
+
+    private int enqueueTimeout = DEFAULT_ENQUEUE_TIMEOUT;
 
     /**
      * 最大消息长度
@@ -207,6 +210,10 @@ public class StoreConfig {
 
     public long getPrintMetricIntervalMs() {
         return PropertySupplier.getValue(propertySupplier, StoreConfigKey.PRINT_METRIC_INTERVAL_MS, printMetricIntervalMs);
+    }
+
+    public int getEnqueueTimeout() {
+        return PropertySupplier.getValue(propertySupplier, StoreConfigKey.ENQUEUE_TIMEOUT, enqueueTimeout);
     }
 
     public void setPrintMetricIntervalMs(long printMetricIntervalMs) {

@@ -17,18 +17,19 @@ package org.joyqueue.broker.store;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.jd.laf.extension.ExtensionManager;
+import org.apache.commons.collections.CollectionUtils;
 import org.joyqueue.broker.cluster.ClusterManager;
 import org.joyqueue.broker.config.BrokerStoreConfig;
 import org.joyqueue.broker.consumer.position.PositionManager;
 import org.joyqueue.domain.PartitionGroup;
 import org.joyqueue.domain.TopicConfig;
+import org.joyqueue.store.RemovedPartitionGroupStore;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.concurrent.NamedThreadFactory;
 import org.joyqueue.toolkit.config.PropertySupplier;
 import org.joyqueue.toolkit.service.Service;
 import org.joyqueue.toolkit.time.SystemClock;
-import com.jd.laf.extension.ExtensionManager;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,7 @@ public class StoreCleanManager extends Service {
     private PositionManager positionManager;
     private Map<String, StoreCleaningStrategy> cleaningStrategyMap;
     private final ScheduledExecutorService scheduledExecutorService;
+    private final ScheduledExecutorService physicalDeleteScheduledExecutorService;
     private ScheduledFuture cleanFuture;
 
     public StoreCleanManager(final PropertySupplier propertySupplier, final StoreService storeService, final ClusterManager clusterManager, final PositionManager positionManager) {
@@ -66,6 +68,7 @@ public class StoreCleanManager extends Service {
         this.clusterManager = clusterManager;
         this.positionManager = positionManager;
         this.scheduledExecutorService = Executors.newScheduledThreadPool(SCHEDULE_EXECUTOR_THREADS, new NamedThreadFactory("StoreCleaning-Scheduled-Executor"));
+        this.physicalDeleteScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("StoreCleaning-Physical-Scheduled-Executor"));
     }
 
     @Override
@@ -95,6 +98,11 @@ public class StoreCleanManager extends Service {
                 ThreadLocalRandom.current().nextLong(brokerStoreConfig.getStoreCleanScheduleBegin(), brokerStoreConfig.getStoreCleanScheduleEnd()),
                 ThreadLocalRandom.current().nextLong(brokerStoreConfig.getStoreCleanScheduleBegin(), brokerStoreConfig.getStoreCleanScheduleEnd()),
                 TimeUnit.MILLISECONDS);
+
+        physicalDeleteScheduledExecutorService.scheduleWithFixedDelay(this::physicalClean,
+                ThreadLocalRandom.current().nextLong(brokerStoreConfig.getStorePhysicalCleanScheduleBegin(), brokerStoreConfig.getStorePhysicalCleanScheduleEnd()),
+                ThreadLocalRandom.current().nextLong(brokerStoreConfig.getStorePhysicalCleanScheduleBegin(), brokerStoreConfig.getStorePhysicalCleanScheduleEnd()),
+                TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -119,6 +127,26 @@ public class StoreCleanManager extends Service {
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }
+
+        physicalDeleteScheduledExecutorService.shutdownNow();
+    }
+
+    private void physicalClean() {
+        for (RemovedPartitionGroupStore removedPartitionGroup : storeService.getRemovedPartitionGroups()) {
+            boolean interrupted = false;
+            while (removedPartitionGroup.physicalDeleteLeftFile()) {
+                try {
+                    Thread.currentThread().sleep(brokerStoreConfig.getStorePhysicalCleanInterval());
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                    break;
+                }
+            }
+            if (!interrupted) {
+                LOG.info("Store file deleted, topic: {}, partitionGroup: {}", removedPartitionGroup.getTopic(), removedPartitionGroup.getPartitionGroup());
+                storeService.physicalDeleteRemovedPartitionGroup(removedPartitionGroup.getTopic(), removedPartitionGroup.getPartitionGroup());
+            }
+        }
     }
 
     private void clean() {
@@ -139,7 +167,7 @@ public class StoreCleanManager extends Service {
                             try {
                                 Set<Short> partitions = partitionGroup.getPartitions();
                                 if (CollectionUtils.isNotEmpty(partitions)) {
-                                    List<String> appList = clusterManager.getAppByTopic(topicConfig.getName());
+                                    List<String> appList = clusterManager.getConsumersByTopic(topicConfig.getName());
                                     Map<Short, Long> partitionAckMap = new HashMap<>(partitions.size());
                                     for (Short partition : partitions) {
                                         long minAckIndex = Long.MAX_VALUE;
@@ -161,7 +189,7 @@ public class StoreCleanManager extends Service {
                                     }
                                 }
                             } catch (Throwable t) {
-                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, exception: {}", topicConfig, partitionGroup.getGroup(), t);
+                                LOG.error("Error to clean store for topic <{}>, partition group <{}>, exception: ", topicConfig, partitionGroup.getGroup(), t);
                             }
                         }
                     }

@@ -55,6 +55,9 @@ public class ClientManager extends Service {
         TransportConfigChecker.check(transportConfig);
         NameServerConfigChecker.check(nameServerConfig);
 
+        transportConfig.setIoThreads(Math.min(transportConfig.getIoThreads(), transportConfig.getMaxIoThreads()));
+        transportConfig.setCallbackThreads(Math.min(transportConfig.getCallbackThreads(), transportConfig.getMaxIoThreads()));
+
         this.transportConfig = transportConfig;
         this.nameServerConfig = nameServerConfig;
     }
@@ -177,7 +180,7 @@ public class ClientManager extends Service {
         clientConfig.setMaxAsync(transportConfig.getMaxAsync());
         clientConfig.setRetryPolicy(transportConfig.getRetryPolicy());
         clientConfig.setNonBlockOneway(transportConfig.isNonBlockOneway());
-        clientConfig.setIoThreadName("joyqueue-client-io-eventLoop");
+        clientConfig.setIoThreadName(transportConfig.getIoThreadName());
         return clientConfig;
     }
 }

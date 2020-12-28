@@ -16,6 +16,7 @@
 package org.joyqueue.broker.election.network.codec;
 
 import com.alibaba.fastjson.JSON;
+import io.netty.buffer.ByteBuf;
 import org.joyqueue.broker.consumer.model.ConsumePartition;
 import org.joyqueue.broker.consumer.position.model.Position;
 import org.joyqueue.broker.election.command.ReplicateConsumePosRequest;
@@ -24,7 +25,6 @@ import org.joyqueue.network.serializer.Serializer;
 import org.joyqueue.network.transport.codec.JoyQueueHeader;
 import org.joyqueue.network.transport.codec.PayloadEncoder;
 import org.joyqueue.network.transport.command.Type;
-import io.netty.buffer.ByteBuf;
 
 import java.util.Map;
 
@@ -47,6 +47,13 @@ public class ReplicateConsumePosRequestEncoder implements PayloadEncoder<Replica
             Serializer.write((String) null, buffer, bodyLength);
         } else {
             Serializer.write(JSON.toJSONString(request.getConsumePositions()), buffer, bodyLength);
+        }
+
+        if (request.getHeader().getVersion() >= JoyQueueHeader.VERSION_V4) {
+            buffer.writeInt(request.getTerm());
+            buffer.writeInt(request.getLeaderId());
+            Serializer.write(request.getTopic(), buffer);
+            buffer.writeInt(request.getGroup());
         }
     }
 

@@ -56,9 +56,6 @@ public class RemovePartitionGroupHandler implements CommandHandler, Type {
 
     @Override
     public Command handle(Transport transport, Command command) throws TransportException {
-        if (!config.getMessengerIgniteEnable()) {
-            return BooleanAck.build();
-        }
         if (command == null) {
             logger.error("CreatePartitionGroupHandler request command is null");
             return null;

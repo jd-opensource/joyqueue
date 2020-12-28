@@ -66,19 +66,7 @@ public class DefaultEncoder implements Encoder {
                 if (payload instanceof JoyQueuePayload) {
                     ((JoyQueuePayload) payload).setHeader(header);
                 }
-
-                int oldVersion = header.getVersion();
-                if (payload.getClass().getName().equals("org.joyqueue.nsr.network.command.CreatePartitionGroup")
-                        || payload.getClass().getName().equals("org.joyqueue.nsr.network.command.RemovePartitionGroup")
-                        || payload.getClass().getName().equals("org.joyqueue.nsr.network.command.UpdatePartitionGroup")) {
-                    header.setVersion(JoyQueueHeader.VERSION_V2);
-                    oldVersion = JoyQueueHeader.VERSION_V2;
-                } else {
-                    header.setVersion(JoyQueueHeader.CURRENT_VERSION);
-                }
                 headerCodec.encode(header, buffer);
-
-                header.setVersion(oldVersion);
                 encoder.encode((Payload) payload, buffer);
             } else {
                 header.setVersion(JoyQueueHeader.CURRENT_VERSION);
