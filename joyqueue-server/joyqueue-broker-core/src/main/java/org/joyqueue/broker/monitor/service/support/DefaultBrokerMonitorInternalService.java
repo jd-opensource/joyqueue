@@ -33,6 +33,7 @@ import org.joyqueue.broker.monitor.stat.TopicPendingStat;
 import org.joyqueue.broker.monitor.stat.TopicStat;
 import org.joyqueue.domain.TopicConfig;
 import org.joyqueue.monitor.BrokerMonitorInfo;
+import org.joyqueue.monitor.BrokerMonitorInfoExt;
 import org.joyqueue.monitor.BrokerStartupInfo;
 import org.joyqueue.monitor.ElectionMonitorInfo;
 import org.joyqueue.monitor.NameServerMonitorInfo;
@@ -44,6 +45,7 @@ import org.joyqueue.store.StoreManagementService;
 import org.joyqueue.store.StoreService;
 import org.joyqueue.toolkit.format.Format;
 import org.joyqueue.toolkit.lang.Online;
+import org.joyqueue.toolkit.time.SystemClock;
 import org.joyqueue.toolkit.vm.DefaultGCNotificationParser;
 import org.joyqueue.toolkit.vm.GCEvent;
 import org.joyqueue.toolkit.vm.GCEventListener;
@@ -78,6 +80,7 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
     private JVMMonitorService jvmMonitorService;
     private ArchiveManager archiveManager;
     private DefaultGCNotificationParser gcNotificationParser;
+    private BrokerMonitorInfoExtService brokerMonitorInfoExtService;
 
 
     public DefaultBrokerMonitorInternalService(BrokerStat brokerStat, Consume consume,
@@ -97,11 +100,12 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         this.gcNotificationParser.addListener(new DefaultGCEventListener(brokerStat.getJvmStat()));
         this.jvmMonitorService.addGCEventListener(gcNotificationParser);
         this.archiveManager = archiveManager;
+        this.brokerMonitorInfoExtService = new BrokerMonitorInfoExtService(consume, storeManagementService, electionService, clusterManager, archiveManager, brokerStat);
 
     }
 
     @Override
-    public BrokerMonitorInfo getBrokerInfo() {
+    public BrokerMonitorInfo getBrokerInfo(long timestamp) {
         BrokerMonitorInfo brokerMonitorInfo = new BrokerMonitorInfo();
         brokerMonitorInfo.setConnection(BrokerMonitorConverter.convertConnectionMonitorInfo(brokerStat.getConnectionStat()));
         brokerMonitorInfo.setEnQueue(BrokerMonitorConverter.convertEnQueueMonitorInfo(brokerStat.getEnQueueStat()));
@@ -112,6 +116,8 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         storeMonitorInfo.setStarted(storeService instanceof Online ? ((Online) storeService).isStarted() : true);
         storeMonitorInfo.setFreeSpace(Format.formatSize(storeManagementService.freeSpace()));
         storeMonitorInfo.setTotalSpace(Format.formatSize(storeManagementService.totalSpace()));
+        storeMonitorInfo.setFreeSpaceBytes(storeManagementService.freeSpace());
+        storeMonitorInfo.setTotalSpaceBytes(storeManagementService.totalSpace());
 
         NameServerMonitorInfo nameServerMonitorInfo = new NameServerMonitorInfo();
         nameServerMonitorInfo.setStarted(nameService.isStarted());
@@ -120,15 +126,22 @@ public class DefaultBrokerMonitorInternalService implements BrokerMonitorInterna
         boolean electionStarted = electionService instanceof Online ? ((Online) electionService).isStarted() : true;
         electionMonitorInfo.setStarted(electionStarted);
 
-        brokerMonitorInfo.getReplication().setStarted(electionStarted);
-
         brokerMonitorInfo.setStore(storeMonitorInfo);
         brokerMonitorInfo.setNameServer(nameServerMonitorInfo);
         brokerMonitorInfo.setElection(electionMonitorInfo);
 
+        brokerStartupInfo.setBrokerId(clusterManager.getBrokerId());
+        brokerStartupInfo.setUpTime(SystemClock.now() - brokerStartupInfo.getStartupTime());
         brokerMonitorInfo.setBufferPoolMonitorInfo(storeService.monitorInfo());
         brokerMonitorInfo.setStartupInfo(brokerStartupInfo);
+        brokerMonitorInfo.setTimestamp(timestamp);
         return brokerMonitorInfo;
+    }
+
+    @Override
+    public BrokerMonitorInfoExt getBrokerInfoExt(long timestamp) {
+        BrokerMonitorInfo brokerMonitorInfo = getBrokerInfo(timestamp);
+        return brokerMonitorInfoExtService.getBrokerInfoExt(brokerMonitorInfo);
     }
 
     // BrokerStatExt里所有对象单独生成bean，不能复用monitor的bean
