@@ -67,8 +67,8 @@ public abstract class AbstractSubscribeRateLimiterManager implements SubscribeRa
     public void onEvent(MetaEvent event) {
         switch (event.getEventType()) {
             case ADD_CONFIG: {
-                UpdateConfigEvent updateConfigEvent = (UpdateConfigEvent) event;
-                Config config = updateConfigEvent.getNewConfig();
+                AddConfigEvent addConfigEvent = (AddConfigEvent) event;
+                Config config = addConfigEvent.getConfig();
                 cleanRateLimiter(config);
                 break;
             }

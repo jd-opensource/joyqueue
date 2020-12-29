@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentMap;
 public class ArchiveRateLimiterManager extends AbstractSubscribeRateLimiterManager {
     protected static final Logger logger = LoggerFactory.getLogger(ArchiveRateLimiterManager.class);
 
+    private static final int DEFAULT_LIMIT_RATE = 1000;
+
     private ClusterManager clusterManager;
     private ArchiveConfig archiveConfig;
 
@@ -54,8 +56,10 @@ public class ArchiveRateLimiterManager extends AbstractSubscribeRateLimiterManag
             case PRODUCTION:
                 if (topicConfig != null) {
                     Topic.TopicPolicy policy = topicConfig.getPolicy();
-                    Integer tps = policy.getProduceArchiveTps();
-                    if (tps == null) {
+                    Integer tps = DEFAULT_LIMIT_RATE;
+                    if (policy != null && policy.getProduceArchiveTps() != null) {
+                        tps = policy.getProduceArchiveTps();
+                    } else {
                         tps = defaultProducerLimitRate(topic, app);
                     }
                     if (tps <= 0) {
@@ -67,8 +71,10 @@ public class ArchiveRateLimiterManager extends AbstractSubscribeRateLimiterManag
             case CONSUMPTION:
                 if (topicConfig != null) {
                     Topic.TopicPolicy policy = topicConfig.getPolicy();
-                    Integer tps = policy.getConsumeArchiveTps();
-                    if (tps == null) {
+                    Integer tps = DEFAULT_LIMIT_RATE;
+                    if (policy != null && policy.getConsumeArchiveTps() != null) {
+                        tps = policy.getConsumeArchiveTps();
+                    } else {
                         tps = defaultConsumerLimitRate(topic, app);
                     }
                     if (tps <= 0) {
