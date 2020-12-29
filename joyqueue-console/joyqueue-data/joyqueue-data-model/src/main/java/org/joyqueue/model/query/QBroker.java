@@ -37,6 +37,8 @@ public class QBroker implements Query {
 
     private String keyword;
 
+    private Boolean fuzzy;
+
     @Deprecated
     private List<Integer> brokerGroupIds;
 
@@ -116,4 +118,11 @@ public class QBroker implements Query {
         this.inBrokerIds = inBrokerIds;
     }
 
+    public Boolean getFuzzy() {
+        return fuzzy;
+    }
+
+    public void setFuzzy(Boolean fuzzy) {
+        this.fuzzy = fuzzy;
+    }
 }
