@@ -7,6 +7,7 @@
 [![Travis](https://img.shields.io/travis/chubaostream/joyqueue)](https://travis-ci.org/chubaostream/joyqueue)
 [![Coverage Status](https://coveralls.io/repos/github/chubaostream/joyqueue/badge.svg)](https://coveralls.io/github/chubaostream/joyqueue)
 
+
 [阅读中文版](docs/cn/README.md)
 
 JoyQueue -- A cloud-native production-ready messaging platform with excellent performance. 
