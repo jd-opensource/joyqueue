@@ -17,6 +17,7 @@ package org.joyqueue.nsr.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.joyqueue.convert.CodeConverter;
 import org.joyqueue.convert.NsrConsumerConverter;
 import org.joyqueue.domain.ClientType;
@@ -26,7 +27,6 @@ import org.joyqueue.model.query.QConsumer;
 import org.joyqueue.nsr.ConsumerNameServerService;
 import org.joyqueue.nsr.NameServerBase;
 import org.joyqueue.nsr.model.ConsumerQuery;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,7 +55,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
      */
     public int add(Consumer consumer) throws Exception {
         org.joyqueue.domain.Consumer nsrConsumer = nsrConsumerConverter.convert(consumer);
-        String result = postWithLog(ADD_CONSUMER, nsrConsumer, OperLog.Type.CONSUMER.value(),OperLog.OperType.ADD.value(),consumer.getTopic().getCode());
+        String result = postWithLog(ADD_CONSUMER, nsrConsumer, OperLog.Type.CONSUMER.value(), OperLog.OperType.ADD.value(),consumer.getTopic().getCode());
         return isSuccess(result);
     }
 
@@ -66,7 +66,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
      */
     public int update(Consumer consumer) throws Exception {
         org.joyqueue.domain.Consumer nsrConsumer = nsrConsumerConverter.convert(consumer);
-        String result1 = postWithLog(UPDATE_CONSUMER, nsrConsumer,OperLog.Type.CONSUMER.value(),OperLog.OperType.UPDATE.value(),consumer.getTopic().getCode());
+        String result1 = postWithLog(UPDATE_CONSUMER, nsrConsumer, OperLog.Type.CONSUMER.value(), OperLog.OperType.UPDATE.value(),consumer.getTopic().getCode());
         return isSuccess(result1);
     }
 
@@ -82,7 +82,7 @@ public class ConsumerNameServerServiceImpl extends NameServerBase implements Con
         nsrConsumer.setApp(CodeConverter.convertApp(consumer.getApp(), consumer.getSubscribeGroup()));
         nsrConsumer.setClientType(ClientType.valueOf(consumer.getClientType()));
         nsrConsumer.setTopic(CodeConverter.convertTopic(consumer.getNamespace(),consumer.getTopic()));
-        String result = postWithLog(REMOVE_CONSUMER, nsrConsumer,OperLog.Type.CONSUMER.value(),OperLog.OperType.DELETE.value(),consumer.getTopic().getCode());
+        String result = postWithLog(REMOVE_CONSUMER, nsrConsumer, OperLog.Type.CONSUMER.value(), OperLog.OperType.DELETE.value(),consumer.getTopic().getCode());
         return isSuccess(result);
     }
 

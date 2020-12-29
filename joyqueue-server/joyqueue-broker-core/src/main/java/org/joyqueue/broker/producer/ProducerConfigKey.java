@@ -27,7 +27,7 @@ public enum ProducerConfigKey implements PropertyDef {
     BROKER_QOS_LEVEL("broker.qos.level", -1, Type.INT),
     TOPIC_QOS_LEVEL_PREFIX("produce.topic.qos.level.", -1, Type.INT),
     APP_QOS_LEVEL_PREFIX("produce.app.qos.level.", -1, Type.INT),
-    PRINT_METRIC_INTERVAL_MS("print.metric.interval", 0L ,Type.LONG),
+    PRINT_METRIC_INTERVAL_MS("print.metric.interval", 0L , Type.LONG),
 
     // businessId长度
     PRODUCE_BUSINESSID_LENGTH("produce.businessId.length", 100, PropertyDef.Type.INT),

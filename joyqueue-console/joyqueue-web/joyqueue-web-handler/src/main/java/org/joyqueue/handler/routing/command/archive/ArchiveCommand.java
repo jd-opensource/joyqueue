@@ -16,23 +16,6 @@
 package org.joyqueue.handler.routing.command.archive;
 
 import com.alibaba.fastjson.JSON;
-import org.joyqueue.broker.archive.ArchiveUtils;
-import org.joyqueue.broker.buffer.Serializer;
-import org.joyqueue.exception.ServiceException;
-import org.joyqueue.handler.error.ErrorCode;
-import org.joyqueue.message.SourceType;
-import org.joyqueue.server.archive.store.HBaseSerializer;
-import org.joyqueue.server.retry.model.RetryMessageModel;
-import org.joyqueue.handler.Constants;
-import org.joyqueue.service.MessagePreviewService;
-import org.joyqueue.broker.consumer.MessageConvertSupport;
-import org.joyqueue.message.BrokerMessage;
-import org.joyqueue.model.domain.Archive;
-import org.joyqueue.model.domain.User;
-import org.joyqueue.model.query.QArchive;
-import org.joyqueue.server.archive.store.model.SendLog;
-import org.joyqueue.service.ArchiveService;
-import org.joyqueue.service.RetryService;
 import com.google.common.base.Strings;
 import com.jd.laf.binding.annotation.Value;
 import com.jd.laf.web.vertx.Command;
@@ -45,9 +28,26 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.joyqueue.broker.archive.ArchiveUtils;
+import org.joyqueue.broker.consumer.MessageConvertSupport;
+import org.joyqueue.exception.ServiceException;
+import org.joyqueue.handler.Constants;
+import org.joyqueue.handler.error.ErrorCode;
+import org.joyqueue.message.BrokerMessage;
+import org.joyqueue.message.SourceType;
+import org.joyqueue.model.domain.Archive;
+import org.joyqueue.model.domain.User;
+import org.joyqueue.model.query.QArchive;
+import org.joyqueue.server.archive.store.model.SendLog;
+import org.joyqueue.server.archive.store.utils.ArchiveSerializer;
+import org.joyqueue.server.retry.model.RetryMessageModel;
+import org.joyqueue.service.ArchiveService;
+import org.joyqueue.service.MessagePreviewService;
+import org.joyqueue.service.RetryService;
+import org.joyqueue.util.serializer.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -199,11 +199,11 @@ public class ArchiveCommand implements Command<Response>, Poolable {
                     Base64.getEncoder().encodeToString(sendLog.getBytesMessageId()), sendLog.getMessageId());
         }
         for(BrokerMessage m:msgs){
-            String msgId=ArchiveUtils.messageId(brokerMessage.getTopic(),m.getPartition(),m.getMsgIndexNo());
-            byte[] msgIdMd5Bytes=HBaseSerializer.md5(msgId,null);
+            String msgId= ArchiveUtils.messageId(brokerMessage.getTopic(),m.getPartition(),m.getMsgIndexNo());
+            byte[] msgIdMd5Bytes= ArchiveSerializer.md5(msgId,null);
             if(logger.isDebugEnabled()) {
                 logger.debug("current message business id {},message id {},md5 length {},base 64 bytes {},hex {}", m.getBusinessId(), msgId, msgIdMd5Bytes.length,
-                        Base64.getEncoder().encodeToString(msgIdMd5Bytes), HBaseSerializer.byteArrayToHexStr(msgIdMd5Bytes));
+                        Base64.getEncoder().encodeToString(msgIdMd5Bytes), ArchiveSerializer.byteArrayToHexStr(msgIdMd5Bytes));
             }
             if(Arrays.equals(msgIdMd5Bytes,sendLog.getBytesMessageId())){
                 return m;
@@ -216,12 +216,12 @@ public class ArchiveCommand implements Command<Response>, Poolable {
      *  Parse broker message to message type
      *
      **/
-    public String preview(BrokerMessage brokerMessage,String messageType){
+    public String preview(BrokerMessage brokerMessage, String messageType){
             try {
                return messagePreviewService.preview(messageType, brokerMessage.getDecompressedBody());
             } catch (Throwable e) {
                 logger.error("parse error",e);
-               return Bytes.toString(brokerMessage.getDecompressedBody());
+                return Serializer.readString(brokerMessage.getDecompressedBody());
             }
     }
 
@@ -289,7 +289,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         return builder.toString();
     }
 
-    private RetryMessageModel convertMessageLog(final SendLog sendLog,String app) throws Exception {
+    private RetryMessageModel convertMessageLog(final SendLog sendLog, String app) throws Exception {
         //sendLog 转brokermessage
 //        BrokerMessage brokerMessage = brokerMessageConvert(sendLog);
 //        int size = Serializer.sizeOf(brokerMessage);
@@ -301,7 +301,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         return retry;
     }
 
-    private RetryMessageModel retryConvert(final SendLog sendLog,String app){
+    private RetryMessageModel retryConvert(final SendLog sendLog, String app){
         RetryMessageModel retry = new RetryMessageModel();
         retry.setApp(app);
         retry.setTopic(sendLog.getTopic());

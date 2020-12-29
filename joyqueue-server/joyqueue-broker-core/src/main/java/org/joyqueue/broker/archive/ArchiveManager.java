@@ -16,6 +16,7 @@
 package org.joyqueue.broker.archive;
 
 import org.joyqueue.broker.BrokerContext;
+import org.joyqueue.broker.limit.SubscribeRateLimiter;
 import org.joyqueue.toolkit.lang.Close;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -40,6 +41,9 @@ public class ArchiveManager extends Service {
 
     // 归档配置
     private ArchiveConfig archiveConfig;
+
+    // 归档限流器
+    private SubscribeRateLimiter rateLimiterManager;
 
     public ArchiveManager(BrokerContext context) {
         this.context = context;
@@ -73,11 +77,14 @@ public class ArchiveManager extends Service {
         if (archiveConfig == null) {
             archiveConfig = new ArchiveConfig(context == null ? null : context.getPropertySupplier());
         }
+        if (rateLimiterManager == null) {
+            rateLimiterManager = new ArchiveRateLimiterManager(context);
+        }
         if (sendArchiveService == null) {
-            this.sendArchiveService = new ProduceArchiveService(archiveConfig, context.getClusterManager(), context.getConsume(), context.getMessageConvertSupport());
+            this.sendArchiveService = new ProduceArchiveService(archiveConfig, context, rateLimiterManager);
         }
         if (consumeArchiveService == null) {
-            this.consumeArchiveService = new ConsumeArchiveService(archiveConfig, context.getClusterManager());
+            this.consumeArchiveService = new ConsumeArchiveService(archiveConfig, context, rateLimiterManager);
         }
     }
 
@@ -133,5 +140,13 @@ public class ArchiveManager extends Service {
             return Collections.emptyMap();
         }
         return sendArchiveService.getArchivePosition();
+    }
+
+    public ArchiveConfig getArchiveConfig() {
+        return archiveConfig;
+    }
+
+    public void setArchiveConfig(ArchiveConfig archiveConfig) {
+        this.archiveConfig = archiveConfig;
     }
 }

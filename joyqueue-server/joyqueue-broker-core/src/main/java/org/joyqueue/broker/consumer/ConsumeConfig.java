@@ -76,8 +76,8 @@ public class ConsumeConfig {
      *
      **/
     public int getRetryRate(String topic,String app){
-        return PropertySupplier.getValue(propertySupplier,ConsumeConfigKey.RETRY_RATE_PREFIX.getName()+String.format("%s.%s",topic,app),
-                ConsumeConfigKey.RETRY_RATE_PREFIX.getType(),ConsumeConfigKey.RETRY_RATE_PREFIX.getValue());
+        return PropertySupplier.getValue(propertySupplier, ConsumeConfigKey.RETRY_RATE_PREFIX.getName()+String.format("%s.%s",topic,app),
+                ConsumeConfigKey.RETRY_RATE_PREFIX.getType(), ConsumeConfigKey.RETRY_RATE_PREFIX.getValue());
     }
 
     public boolean getRetryForceAck(String topic, String app) {

@@ -15,10 +15,10 @@
  */
 package org.joyqueue.toolkit.serialize;
 
-import org.joyqueue.toolkit.io.Compressors;
-import org.joyqueue.toolkit.io.Zip;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
+import org.joyqueue.toolkit.io.Compressors;
+import org.joyqueue.toolkit.io.Zip;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -227,6 +227,18 @@ public abstract class AbstractSerializer {
         properties.load(new StringReader(text));
 
         return new HashMap(properties);
+    }
+
+    public static String readString(final byte[] bytes) {
+        return bytes == null ? null : readString(bytes, 0, bytes.length);
+    }
+
+    public static String readString(byte[] bytes, int offset, int length) {
+        if (bytes == null) {
+            return null;
+        } else {
+            return length == 0 ? "" : new String(bytes, offset, length, Charset.forName("UTF-8"));
+        }
     }
 
     /**

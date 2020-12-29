@@ -35,11 +35,7 @@ import org.joyqueue.network.session.Connection;
 import org.joyqueue.network.session.Consumer;
 import org.joyqueue.server.retry.api.MessageRetry;
 import org.joyqueue.server.retry.model.RetryMessageModel;
-import org.joyqueue.store.PartitionGroupStore;
-import org.joyqueue.store.PositionOverflowException;
-import org.joyqueue.store.PositionUnderflowException;
-import org.joyqueue.store.ReadResult;
-import org.joyqueue.store.StoreService;
+import org.joyqueue.store.*;
 import org.joyqueue.toolkit.network.IpUtil;
 import org.joyqueue.toolkit.service.Service;
 import org.slf4j.Logger;
@@ -82,8 +78,8 @@ class PartitionConsumption extends Service {
     private String monitorKey = "Read-Message";
 
     PartitionConsumption(ClusterManager clusterManager, StoreService storeService, PartitionManager partitionManager,
-                                PositionManager positionManager, MessageRetry messageRetry,
-                                FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager, ConsumeConfig config) {
+                         PositionManager positionManager, MessageRetry messageRetry,
+                         FilterMessageSupport filterMessageSupport, ArchiveManager archiveManager, ConsumeConfig config) {
         this.clusterManager = clusterManager;
         this.storeService = storeService;
         this.partitionManager = partitionManager;
@@ -213,7 +209,7 @@ class PartitionConsumption extends Service {
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         try {
             PullResult readResult = getMsgByPartitionAndIndex(consumer.getTopic(), group, partition, index, count);
-            if (readResult.getBuffers() == null) {
+            if (readResult.getBuffers() == null || readResult.getBuffers().size() == 0) {
                 // 没有拉到消息直接返回
                 return pullResult;
             }
@@ -249,8 +245,16 @@ class PartitionConsumption extends Service {
 
     protected PullResult getMsgByPartitionAndIndex(String topic, int group, short partition, long index, int count) throws JoyQueueException, IOException {
         long startTime = System.nanoTime();
-        PullResult result = new PullResult(topic, null, partition, null);
+        PullResult result = new PullResult(topic, null, partition, new ArrayList<>(0));
         PartitionGroupStore store = storeService.getStore(topic, group);
+
+        if (index == store.getRightIndex(partition)) {
+            return result;
+        }
+
+        /*if (index < store.getLeftIndex(partition) || index >= store.getRightIndex(partition)) {
+            return result;
+        }*/
 
         ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
 

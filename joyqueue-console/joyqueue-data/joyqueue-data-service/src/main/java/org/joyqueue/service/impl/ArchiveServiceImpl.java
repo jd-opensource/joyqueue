@@ -24,10 +24,10 @@ import org.joyqueue.model.domain.Application;
 import org.joyqueue.model.domain.User;
 import org.joyqueue.model.query.QApplication;
 import org.joyqueue.model.query.QArchive;
-import org.joyqueue.server.archive.store.QueryCondition;
 import org.joyqueue.server.archive.store.api.ArchiveStore;
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.server.archive.store.model.SendLog;
+import org.joyqueue.server.archive.store.query.QueryCondition;
 import org.joyqueue.service.ApplicationService;
 import org.joyqueue.service.ArchiveService;
 import org.joyqueue.service.TopicService;
@@ -106,7 +106,7 @@ public class ArchiveServiceImpl implements ArchiveService {
     }
 
     @Override
-    public SendLog findSendLog(String topic,Long time,String businessId,String messageId) throws JoyQueueException {
+    public SendLog findSendLog(String topic, Long time, String businessId, String messageId) throws JoyQueueException {
         check();
         QueryCondition queryCondition = new QueryCondition();
         QueryCondition.RowKey startRow = new QueryCondition.RowKey();

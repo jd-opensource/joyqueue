@@ -21,6 +21,7 @@ import com.jd.laf.web.vertx.annotation.Path;
 import com.jd.laf.web.vertx.annotation.QueryParam;
 import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
+import org.apache.commons.net.telnet.TelnetClient;
 import org.joyqueue.handler.annotation.PageQuery;
 import org.joyqueue.handler.error.ConfigException;
 import org.joyqueue.handler.routing.command.NsrCommandSupport;
@@ -29,7 +30,6 @@ import org.joyqueue.model.QPageQuery;
 import org.joyqueue.model.domain.Broker;
 import org.joyqueue.model.query.QBroker;
 import org.joyqueue.service.BrokerService;
-import org.apache.commons.net.telnet.TelnetClient;
 
 import static org.joyqueue.handler.Constants.ID;
 
@@ -37,7 +37,7 @@ import static org.joyqueue.handler.Constants.ID;
  * @author wylixiaobin
  * Date: 2018/10/17
  */
-public class BrokerCommand extends NsrCommandSupport<Broker,BrokerService,QBroker> {
+public class BrokerCommand extends NsrCommandSupport<Broker, BrokerService, QBroker> {
 
     @Path("search")
     public Response pageQuery(@PageQuery QPageQuery<QBroker> qPageQuery) throws Exception {
