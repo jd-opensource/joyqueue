@@ -33,6 +33,7 @@
         <module>openmessaging-samples</module>
         <module>openmessaging-spring</module>
         <module>openmessaging-spring-boot</module>
+        <module>openmessaging-spring-cloud-stream-binder</module>
     </modules>
 
     <properties>
