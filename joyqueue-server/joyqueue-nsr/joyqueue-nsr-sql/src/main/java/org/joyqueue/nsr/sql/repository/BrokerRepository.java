@@ -128,9 +128,7 @@ public class BrokerRepository {
             } else {
                 if (query.getFuzzy() != null && query.getFuzzy()) {
                     sql.append(" AND `ip` LIKE ?");
-                    params.add("%");
-                    params.add(query.getKeyword());
-                    params.add("%");
+                    params.add("%" + query.getKeyword() + "%");
                 } else {
                     sql.append(" AND `ip` = ?");
                     params.add(query.getKeyword());
