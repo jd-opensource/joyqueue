@@ -36,10 +36,10 @@ public enum ArchiveConfigKey implements PropertyDef {
     ARCHIVE_BACKLOG_ENABLE("archive.backlog.enable", false, Type.BOOLEAN),
     ARCHIVE_TRACE_LOG("archive.trace.log.", false, Type.BOOLEAN),
     ARCHIVE_LOG_RETAIN_DURATION("archive.log.retain.duration", 24, Type.INT),
-    ARCHIVE_PRODUCE_RATE("archive.rate.produce", 1000, Type.INT),
-    ARCHIVE_PRODUCE_RATE_PREFIX("archive.rate.produce.", 1000, Type.INT),
-    ARCHIVE_CONSUME_RATE("archive.rate.consume", 1000, Type.INT),
-    ARCHIVE_CONSUME_RATE_PREFIX("archive.rate.consume.", 1000, Type.INT),
+    ARCHIVE_PRODUCE_RATE("archive.rate.produce", -1, Type.INT),
+    ARCHIVE_PRODUCE_RATE_PREFIX("archive.rate.produce.", -1, Type.INT),
+    ARCHIVE_CONSUME_RATE("archive.rate.consume", -1, Type.INT),
+    ARCHIVE_CONSUME_RATE_PREFIX("archive.rate.consume.", -1, Type.INT),
     ;
 
     private String name;

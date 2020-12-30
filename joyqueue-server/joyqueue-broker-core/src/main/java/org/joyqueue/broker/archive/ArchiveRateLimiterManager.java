@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ArchiveRateLimiterManager extends AbstractSubscribeRateLimiterManager {
     protected static final Logger logger = LoggerFactory.getLogger(ArchiveRateLimiterManager.class);
 
-    private static final int DEFAULT_LIMIT_RATE = 1000;
+    private static final int DEFAULT_LIMIT_RATE = -1;
 
     private ClusterManager clusterManager;
     private ArchiveConfig archiveConfig;
