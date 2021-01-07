@@ -96,7 +96,21 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
             }
 
             int timeout = buffer.readInt();
-            topic.setProducerPolicy(new ProducerPolicy(isNearBy, isSingle, isArchive, weight, blackList, timeout));
+
+            Map<String, String> params = null;
+            if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+                int paramSize = buffer.readShort();
+                if (paramSize > 0) {
+                    params = Maps.newHashMap();
+                    for (int i = 0; i < paramSize; i++) {
+                        String key = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+                        String value = Serializer.readString(buffer, Serializer.SHORT_SIZE);
+                        params.put(key, value);
+                    }
+                }
+            }
+
+            topic.setProducerPolicy(new ProducerPolicy(isNearBy, isSingle, isArchive, weight, blackList, timeout, params));
         }
 
         boolean isExistConsumerPolicy = buffer.readBoolean();
@@ -228,6 +242,18 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
             }
 
             buffer.writeInt(producerPolicy.getTimeOut());
+
+            if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
+                if (MapUtils.isEmpty(producerPolicy.getParams())) {
+                    buffer.writeShort(0);
+                } else {
+                    buffer.writeShort(producerPolicy.getParams().size());
+                    for (Map.Entry<String, String> entry : producerPolicy.getParams().entrySet()) {
+                        Serializer.write(entry.getKey(), buffer, Serializer.SHORT_SIZE);
+                        Serializer.write(entry.getValue(), buffer, Serializer.SHORT_SIZE);
+                    }
+                }
+            }
         }
 
         if (consumerPolicy == null) {
@@ -283,7 +309,7 @@ public class FetchClusterResponseCodec implements PayloadCodec<JoyQueueHeader, F
 
         buffer.writeInt(topic.getCode().getCode());
 
-        if (header.getVersion() >= JoyQueueHeader.VERSION_V4 && buffer.isReadable()) {
+        if (header.getVersion() >= JoyQueueHeader.VERSION_V4) {
             if (MapUtils.isEmpty(topic.getParams())) {
                 buffer.writeShort(0);
             } else {

@@ -30,7 +30,7 @@ public class PolicyConverter {
 
     public static ProducerPolicy convertProducer(Producer.ProducerPolicy policy) {
         return new ProducerPolicy(policy.getNearby(), policy.isSingle(), policy.getArchive(),
-                policy.getWeight(), policy.getBlackList(), policy.getTimeOut());
+                policy.getWeight(), policy.getBlackList(), policy.getTimeOut(), policy.getParams());
     }
 
     public static ConsumerPolicy convertConsumer(Consumer.ConsumerPolicy policy) {
