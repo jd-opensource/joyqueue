@@ -36,18 +36,20 @@ public class ProducerPolicy {
     private Map<String, Short> weight;
     private Set<String> blackList;
     private Integer timeOut;
+    private Map<String, String> params;
 
     public ProducerPolicy() {
 
     }
 
-    public ProducerPolicy(Boolean nearby, Boolean single, Boolean archive, Map<String, Short> weight, Set<String> blackList, Integer timeOut) {
+    public ProducerPolicy(Boolean nearby, Boolean single, Boolean archive, Map<String, Short> weight, Set<String> blackList, Integer timeOut, Map<String, String> params) {
         this.nearby = nearby;
         this.single = single;
         this.archive = archive;
         this.weight = weight;
         this.blackList = blackList;
         this.timeOut = timeOut;
+        this.params = params;
     }
 
     public Boolean getNearby() {
@@ -98,6 +100,14 @@ public class ProducerPolicy {
         this.timeOut = timeOut;
     }
 
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
     @Override
     public String toString() {
         return "ProducerPolicy{" +
@@ -107,6 +117,7 @@ public class ProducerPolicy {
                 ", weight=" + weight +
                 ", blackList=" + blackList +
                 ", timeOut=" + timeOut +
+                ", params=" + params +
                 '}';
     }
 }
