@@ -28,5 +28,5 @@ import java.util.List;
 public interface ApplicationUserService extends PageService<ApplicationUser, QApplicationUser>, Uniqueable<ApplicationUser> {
     ApplicationUser findByUserApp(String user, String app);
     int deleteByAppId(long appId);
-    List<String> findAppByUser(String user);
+    List<ApplicationUser> findAppByUser(String user);
 }
