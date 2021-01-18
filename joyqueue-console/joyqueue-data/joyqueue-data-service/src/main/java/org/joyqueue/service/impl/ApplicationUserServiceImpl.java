@@ -45,7 +45,7 @@ public class ApplicationUserServiceImpl extends PageServiceSupport<ApplicationUs
     }
 
     @Override
-    public List<String> findAppByUser(String user) {
+    public List<ApplicationUser> findAppByUser(String user) {
         return repository.findAppByUser(user);
     }
 }
