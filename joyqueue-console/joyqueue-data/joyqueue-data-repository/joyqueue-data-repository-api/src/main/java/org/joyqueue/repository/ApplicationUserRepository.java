@@ -31,5 +31,5 @@ import java.util.List;
 public interface ApplicationUserRepository extends PageRepository<ApplicationUser, QApplicationUser>, Uniqueable<ApplicationUser> {
     ApplicationUser findByUserApp(ApplicationUser applicationUser);
     int deleteByAppId(long appId);
-    List<String> findAppByUser(@Param("user") String user);
+    List<ApplicationUser> findAppByUser(@Param("user") String user);
 }

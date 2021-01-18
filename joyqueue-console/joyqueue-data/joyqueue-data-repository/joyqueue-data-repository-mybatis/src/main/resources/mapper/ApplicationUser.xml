@@ -126,7 +126,7 @@
 
     <select id="findAppByUser" resultMap="baseResultMap" parameterType="java.lang.String">
         SELECT
-        app_code
+        <include refid="baseColumn"/>
         FROM
         application_user
         WHERE user_code=#{user} and status != -1
