@@ -17,11 +17,11 @@ package org.joyqueue.handler.routing.command.archive;
 
 import com.alibaba.fastjson.JSON;
 import org.joyqueue.broker.archive.ArchiveUtils;
-import org.joyqueue.broker.buffer.Serializer;
+import org.joyqueue.util.serializer.Serializer;
 import org.joyqueue.exception.ServiceException;
 import org.joyqueue.handler.error.ErrorCode;
 import org.joyqueue.message.SourceType;
-import org.joyqueue.server.archive.store.HBaseSerializer;
+import org.joyqueue.server.archive.store.utils.ArchiveSerializer;
 import org.joyqueue.server.retry.model.RetryMessageModel;
 import org.joyqueue.handler.Constants;
 import org.joyqueue.service.MessagePreviewService;
@@ -45,7 +45,6 @@ import com.jd.laf.web.vertx.response.Response;
 import com.jd.laf.web.vertx.response.Responses;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
@@ -200,10 +199,10 @@ public class ArchiveCommand implements Command<Response>, Poolable {
         }
         for(BrokerMessage m:msgs){
             String msgId=ArchiveUtils.messageId(brokerMessage.getTopic(),m.getPartition(),m.getMsgIndexNo());
-            byte[] msgIdMd5Bytes=HBaseSerializer.md5(msgId,null);
+            byte[] msgIdMd5Bytes= ArchiveSerializer.md5(msgId,null);
             if(logger.isDebugEnabled()) {
                 logger.debug("current message business id {},message id {},md5 length {},base 64 bytes {},hex {}", m.getBusinessId(), msgId, msgIdMd5Bytes.length,
-                        Base64.getEncoder().encodeToString(msgIdMd5Bytes), HBaseSerializer.byteArrayToHexStr(msgIdMd5Bytes));
+                        Base64.getEncoder().encodeToString(msgIdMd5Bytes), ArchiveSerializer.byteArrayToHexStr(msgIdMd5Bytes));
             }
             if(Arrays.equals(msgIdMd5Bytes,sendLog.getBytesMessageId())){
                 return m;
@@ -221,7 +220,7 @@ public class ArchiveCommand implements Command<Response>, Poolable {
                return messagePreviewService.preview(messageType, brokerMessage.getDecompressedBody());
             } catch (Throwable e) {
                 logger.error("parse error",e);
-               return Bytes.toString(brokerMessage.getDecompressedBody());
+                return Serializer.readString(brokerMessage.getDecompressedBody());
             }
     }
 

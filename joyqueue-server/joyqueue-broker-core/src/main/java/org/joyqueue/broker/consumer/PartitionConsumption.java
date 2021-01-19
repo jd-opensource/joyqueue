@@ -213,7 +213,7 @@ class PartitionConsumption extends Service {
         PullResult pullResult = new PullResult(consumer, (short) -1, new ArrayList<>(0));
         try {
             PullResult readResult = getMsgByPartitionAndIndex(consumer.getTopic(), group, partition, index, count);
-            if (readResult.getBuffers() == null) {
+            if (readResult.getBuffers() == null || readResult.getBuffers().size() == 0) {
                 // 没有拉到消息直接返回
                 return pullResult;
             }
@@ -249,8 +249,16 @@ class PartitionConsumption extends Service {
 
     protected PullResult getMsgByPartitionAndIndex(String topic, int group, short partition, long index, int count) throws JoyQueueException, IOException {
         long startTime = System.nanoTime();
-        PullResult result = new PullResult(topic, null, partition, null);
+        PullResult result = new PullResult(topic, null, partition, new ArrayList<>(0));
         PartitionGroupStore store = storeService.getStore(topic, group);
+
+        if (index == store.getRightIndex(partition)) {
+            return result;
+        }
+
+        /*if (index < store.getLeftIndex(partition) || index >= store.getRightIndex(partition)) {
+            return result;
+        }*/
 
         ReadResult readRst = store.read(partition, index, count, Long.MAX_VALUE);
 

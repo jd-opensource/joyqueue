@@ -1,32 +1,15 @@
-/**
- * Copyright 2019 The JoyQueue Authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.joyqueue.server.archive.store;
+package org.joyqueue.server.archive.store.utils;
 
 import org.joyqueue.server.archive.store.model.ConsumeLog;
 import org.joyqueue.server.archive.store.model.SendLog;
 import org.joyqueue.toolkit.lang.Pair;
 import org.joyqueue.toolkit.security.Md5;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 
-/**
- * Created by chengzhiliang on 2018/12/12.
- */
-public class HBaseSerializer {
+public class ArchiveSerializer {
 
     public static ConsumeLog readConsumeLog(Pair<byte[], byte[]> pair) {
         ConsumeLog log = new ConsumeLog();
@@ -247,7 +230,7 @@ public class HBaseSerializer {
      *
      **/
     public static byte[] md5(String content,byte[] key) throws GeneralSecurityException {
-       return Md5.INSTANCE.encrypt(content.getBytes(Charset.forName("utf-8")), key);
+        return Md5.INSTANCE.encrypt(content.getBytes(Charset.forName("utf-8")), key);
     }
 
     public static String byteArrayToHexStr(byte[] byteArray) {
@@ -277,5 +260,24 @@ public class HBaseSerializer {
             byteArray[i] = ((byte)Integer.parseInt(subStr, 16));
         }
         return byteArray;
+    }
+
+    public static byte[] reverse(byte[] byteArray) {
+        if (byteArray == null || byteArray.length == 0) {
+            return byteArray;
+        }
+        byte[] reverseArray = new byte[byteArray.length];
+        for (int i = 0; i < byteArray.length; i++) {
+            reverseArray[i] = byteArray[byteArray.length - i - 1];
+        }
+        return reverseArray;
+    }
+
+    public static byte[] reverse(ByteBuffer buffer) {
+        return reverse(buffer.array());
+    }
+
+    public static String reverse(String reverseStr) {
+        return new StringBuffer(reverseStr).reverse().toString();
     }
 }

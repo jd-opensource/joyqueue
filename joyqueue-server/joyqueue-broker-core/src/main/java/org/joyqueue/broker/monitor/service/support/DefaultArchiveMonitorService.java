@@ -53,7 +53,7 @@ public class DefaultArchiveMonitorService implements ArchiveMonitorService {
         long sendBackLogNum = getSendBackLogNum();
         ArchiveMonitorInfo info = new ArchiveMonitorInfo();
         info.setConsumeBacklog(consumeBacklogNum);
-        info.setConsumeBacklog(sendBackLogNum);
+        info.setProduceBacklog(sendBackLogNum);
         info.setTopicProduceBacklog(archiveManager.getSendBacklogNumByTopic());
 
         return info;

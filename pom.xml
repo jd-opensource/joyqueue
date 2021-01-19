@@ -68,6 +68,7 @@
         <commons-collections.version>3.2.2</commons-collections.version>
         <commons-collections4.version>4.1</commons-collections4.version>
         <commons-cli.version>1.4</commons-cli.version>
+        <commons-net.version>3.1</commons-net.version>
         <httpclient.version>4.5.12</httpclient.version>
         <httpasyncclient.version>4.1.4</httpasyncclient.version>
         <jackson-databind.version>2.9.10.4</jackson-databind.version>
@@ -559,6 +560,11 @@
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>${commons-beanutils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>

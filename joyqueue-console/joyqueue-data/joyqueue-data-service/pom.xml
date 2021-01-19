@@ -112,9 +112,13 @@
             <artifactId>commons-beanutils</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+        </dependency>
+        <!--<dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-hbase</artifactId>
-        </dependency>
+        </dependency>-->
        <dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-nsr-core</artifactId>
@@ -124,10 +128,10 @@
             <artifactId>joyqueue-archive-api</artifactId>
         </dependency>
 <!--        FIXME: 应该依赖joyqueue-archive-api 而不是这个joyqueue-archive-hbase实现-->
-        <dependency>
+        <!--<dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-archive-hbase</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.joyqueue</groupId>
             <artifactId>joyqueue-client-all</artifactId>

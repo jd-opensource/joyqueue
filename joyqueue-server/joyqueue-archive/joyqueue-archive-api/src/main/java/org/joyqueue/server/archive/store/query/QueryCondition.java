@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.joyqueue.server.archive.store;
+package org.joyqueue.server.archive.store.query;
 
 import org.joyqueue.server.archive.store.model.Query;
+import org.joyqueue.server.archive.store.utils.ArchiveSerializer;
+
+import java.util.Arrays;
 
 /**
  * Created by chengzhiliang on 2018/12/4.
@@ -72,8 +75,19 @@ public class QueryCondition implements Query {
     }
 
     public void setStartRowKeyByteArr(String startRowKeyByteArr) {
-        byte[] bytes = HBaseSerializer.hexStrToByteArray(startRowKeyByteArr);
+        byte[] bytes = ArchiveSerializer.hexStrToByteArray(startRowKeyByteArr);
         this.startRowKeyByteArr = bytes;
+    }
+
+    @Override
+    public String toString() {
+        return "QueryCondition{" +
+                "startRowKey=" + startRowKey +
+                ", stopRowKey=" + stopRowKey +
+                ", count=" + count +
+                ", rowKey=" + rowKey +
+                ", startRowKeyByteArr=" + Arrays.toString(startRowKeyByteArr) +
+                '}';
     }
 
     /**
@@ -117,5 +131,14 @@ public class QueryCondition implements Query {
             this.messageId = messageId;
         }
 
+        @Override
+        public String toString() {
+            return "RowKey{" +
+                    "topic='" + topic + '\'' +
+                    ", time=" + time +
+                    ", businessId='" + businessId + '\'' +
+                    ", messageId='" + messageId + '\'' +
+                    '}';
+        }
     }
 }

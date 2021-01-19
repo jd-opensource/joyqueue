@@ -25,15 +25,21 @@ import org.joyqueue.toolkit.config.PropertyDef;
 public enum ArchiveConfigKey implements PropertyDef {
     CONSUME_BATCH_NUM("archive.consume.batch.num", 1000, Type.INT),
     CONSUME_WRITE_DELAY("archive.consume.write.delay", 1, Type.INT),
-    PRODUCE_BATCH_NUM("archive.produce.batch.num", 10, Type.INT),
-    LOG_QUEUE_SIZE("archive.send.log.queue.size", 1000, Type.INT),
-    WRITE_THREAD_NUM("archive.thread.num", 5, Type.INT),
+    PRODUCE_BATCH_NUM("archive.produce.batch.num", 50, Type.INT),
+    LOG_QUEUE_SIZE("archive.send.log.queue.size", 10000, Type.INT),
+    WRITE_THREAD_NUM("archive.thread.num", 10, Type.INT),
     ARCHIVE_SWITCH("archive.switch", false, Type.BOOLEAN),
     ARCHIVE_THREAD_POOL_QUEUE_SIZE("archive.thread.pool.queue.size", 10, Type.INT),
     ARCHIVE_STORE_NAMESPACE("archive.store.namespace", "joyqueue", Type.STRING),
-    ARCHIVE_REAMING_ENABLE("archive.reaming.enable", false, Type.BOOLEAN),
+    ARCHIVE_STORE_RETRY_COUNT("archive.store.retry.count", 3, Type.INT),
+    ARCHIVE_REAMING_ENABLE("archive.reaming.enable", true, Type.BOOLEAN),
     ARCHIVE_BACKLOG_ENABLE("archive.backlog.enable", false, Type.BOOLEAN),
-
+    ARCHIVE_TRACE_LOG("archive.trace.log.", false, Type.BOOLEAN),
+    ARCHIVE_LOG_RETAIN_DURATION("archive.log.retain.duration", 24, Type.INT),
+    ARCHIVE_PRODUCE_RATE("archive.rate.produce", -1, Type.INT),
+    ARCHIVE_PRODUCE_RATE_PREFIX("archive.rate.produce.", -1, Type.INT),
+    ARCHIVE_CONSUME_RATE("archive.rate.consume", -1, Type.INT),
+    ARCHIVE_CONSUME_RATE_PREFIX("archive.rate.consume.", -1, Type.INT),
     ;
 
     private String name;
