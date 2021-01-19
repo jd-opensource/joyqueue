@@ -443,7 +443,7 @@ public class HBaseStore implements ArchiveStore {
             logger.error("hBaseClient is null,archive no service");
             throw new JoyQueueException(JoyQueueCode.CN_SERVICE_NOT_AVAILABLE, "hBaseClient is null");
         }
-        // 查询消费日志(rowkey=messageId+appId)
+        // 查询消费日志(rowkey = messageId+appId)
         List<ConsumeLog> logList = new LinkedList<>();
         // 查询发送日志（rowkey=topicId+sendTime+businessId）
         try {

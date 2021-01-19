@@ -252,6 +252,7 @@ public class ConsumeArchiveService extends Service {
             ConsumeLog log = new ConsumeLog();
 
             byte[] bytesMsgId = buildMessageId(location);
+
             log.setBytesMessageId(bytesMsgId);
 
             log.setApp(connection.getApp());
@@ -265,7 +266,7 @@ public class ConsumeArchiveService extends Service {
     }
 
     /**
-     * 构造消息Id
+     * 构造消息Id md5 定长
      *
      * @param location 应答位置信息
      * @return
@@ -293,7 +294,7 @@ public class ConsumeArchiveService extends Service {
     /**
      * 本地日志日志文件存储
      */
-    static class ArchiveMappedFileRepository implements Closeable {
+    public static class ArchiveMappedFileRepository implements Closeable {
         // 消费归档文件本地根存储路径
         private String baseDir;
 
@@ -322,7 +323,7 @@ public class ConsumeArchiveService extends Service {
         // 单个归档文件的大小
         private final long pageSize = 1024 * 1024 * 16; // 16M
 
-        ArchiveMappedFileRepository(String baseDir) {
+        public ArchiveMappedFileRepository(String baseDir) {
             this.baseDir = baseDir;
             recover();
         }
