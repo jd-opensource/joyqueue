@@ -34,7 +34,8 @@ public class RegisterCodec implements NsrPayloadCodec<Register>, Type {
         return new Register().brokerId(brokerId>0?brokerId:null)
                 .brokerIp(Serializer.readString(buffer))
                 .brokerHost(Serializer.readString(buffer))
-                .port(buffer.readInt());
+                .port(buffer.readInt())
+                .node(Serializer.readString(buffer));
     }
 
     @Override
@@ -43,6 +44,7 @@ public class RegisterCodec implements NsrPayloadCodec<Register>, Type {
         Serializer.write(payload.getBrokerIp(),buffer);
         Serializer.write(payload.getBrokerHost(), buffer);
         buffer.writeInt(payload.getPort());
+        Serializer.write(payload.getNode(), buffer);
     }
 
     @Override

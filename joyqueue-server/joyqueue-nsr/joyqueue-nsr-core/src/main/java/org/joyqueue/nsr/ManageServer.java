@@ -520,6 +520,7 @@ public class ManageServer extends Service {
                 Broker broker = brokerService.getByIpAndPort(query.getIp(), query.getPort());
                 broker.setExternalIp(query.getExternalIp());
                 broker.setExternalPort(query.getExternalPort());
+                broker.setNode(query.getNode());
                 brokerService.update(broker);
                 routingContext.response().end("success");
             }catch (Exception e){

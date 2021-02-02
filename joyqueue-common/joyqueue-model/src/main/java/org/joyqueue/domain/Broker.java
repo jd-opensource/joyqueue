@@ -72,6 +72,11 @@ public class Broker implements Serializable {
      */
     protected Integer externalPort;
 
+    /**
+     * 宿主机
+     */
+    protected String node;
+
 
     public Integer getId() {
         return id;
@@ -266,6 +271,14 @@ public class Broker implements Serializable {
             return externalPort;
         }
         return port;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
 }

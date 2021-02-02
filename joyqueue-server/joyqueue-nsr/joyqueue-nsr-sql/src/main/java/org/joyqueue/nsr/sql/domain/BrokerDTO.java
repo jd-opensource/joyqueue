@@ -36,6 +36,8 @@ public class BrokerDTO extends BaseDTO {
     private String externalIp;
     @Column(alias = "external_port")
     private Integer externalPort;
+    @Column(alias = "node")
+    private String node;
 
     public Long getId() {
         return id;
@@ -99,5 +101,13 @@ public class BrokerDTO extends BaseDTO {
 
     public void setExternalPort(Integer externalPort) {
         this.externalPort = externalPort;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 }

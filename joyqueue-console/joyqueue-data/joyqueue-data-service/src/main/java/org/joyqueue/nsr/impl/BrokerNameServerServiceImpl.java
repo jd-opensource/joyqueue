@@ -115,6 +115,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
         nsrBroker.setId(Long.valueOf(broker.getId()).intValue());
         nsrBroker.setExternalIp(broker.getExternalIp());
         nsrBroker.setExternalPort(broker.getExternalPort());
+        nsrBroker.setNode(broker.getNode());
         //nsrBroker.setDataCenter(broker.getDataCenter().getCode());
         String result1 = postWithLog(UPDATE_BROKER, nsrBroker,OperLog.Type.BROKER.value(),OperLog.OperType.UPDATE.value(),String.valueOf(broker.getId()));
         return isSuccess(result1);
@@ -145,6 +146,7 @@ public class BrokerNameServerServiceImpl extends NameServerBase implements Broke
             broker.setRetryType(jsonObject.getString("retryType"));
             broker.setExternalIp(jsonObject.getString("externalIp"));
             broker.setExternalPort(Integer.parseInt(jsonObject.getString("externalPort")));
+            broker.setNode(jsonObject.getString("node"));
             nsrBrokers.add(broker);
         }
         return nsrBrokers;

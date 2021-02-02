@@ -43,6 +43,7 @@ public class BrokerConverter {
         brokerDTO.setPermission(broker.getPermission().getName());
         brokerDTO.setExternalIp(broker.getExternalIp());
         brokerDTO.setExternalPort(broker.getExternalPort());
+        brokerDTO.setNode(broker.getNode());
         return brokerDTO;
     }
 
@@ -59,6 +60,7 @@ public class BrokerConverter {
         broker.setPermission(Broker.PermissionEnum.value(brokerDTO.getPermission()));
         broker.setExternalIp(brokerDTO.getExternalIp());
         broker.setExternalPort(brokerDTO.getExternalPort());
+        broker.setNode(brokerDTO.getNode());
         return broker;
     }
 

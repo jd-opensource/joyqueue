@@ -207,8 +207,8 @@ export default {
       }
     },
     handlerBrokerGroupChange (data) {
-        let brokers = this.brokerGroupList.filter(group => group.id === this.formData.brokerGroup.id)
-        this.$refs.brokers.getBrokerByQueryGroup(data,brokers)
+      let brokers = this.brokerGroupList.filter(group => group.id === this.formData.brokerGroup.id)
+      this.$refs.brokers.getBrokerByQueryGroup(data, brokers)
     },
     getNamespaces () {
       apiRequest.get(this.urls.findAllNamespace).then((data) => {
@@ -234,7 +234,7 @@ export default {
           this.brokerGroupList.push(item)
         })
         // set default value
-        if(this.brokerGroupList.length > 0){
+        if (this.brokerGroupList.length > 0) {
           this.formData.brokerGroup.id = this.brokerGroupList[0].id
           this.formData.brokerGroup.code = this.brokerGroupList[0].code
           this.formData.brokerGroup.name = this.brokerGroupList[0].name
@@ -255,6 +255,14 @@ export default {
       // Validate
       if (this.formData.brokers.length === 0) {
         this.$Message.error('请选择有broker的分组')
+        return
+      }
+      let set = new Set()
+      for (let broker of this.formData.brokers) {
+        set.add(broker.node)
+      }
+      if (set.size < this.formData.brokers.length) {
+        this.$Message.error('选择的Broker云主机不能重复')
         return
       }
       this.$refs.form.validate((valid) => {

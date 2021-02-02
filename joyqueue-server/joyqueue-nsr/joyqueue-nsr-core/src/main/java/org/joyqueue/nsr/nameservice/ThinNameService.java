@@ -333,9 +333,9 @@ public class ThinNameService extends Service implements NameService, PropertySup
     }
 
     @Override
-    public Broker register(Integer brokerId, String brokerHost, String brokerIp, Integer port) {
+    public Broker register(Integer brokerId, String brokerHost, String brokerIp, Integer port, String node) {
         Command request = new Command(new JoyQueueHeader(Direction.REQUEST, NsrCommandType.REGISTER),
-                new Register().brokerId(brokerId).brokerIp(brokerIp).brokerHost(brokerHost).port(port));
+                new Register().brokerId(brokerId).brokerIp(brokerIp).brokerHost(brokerHost).port(port).node(node));
         Command response = send(request);
         if (!response.isSuccess()) {
             logger.error("register error request {},response {}", request, response);

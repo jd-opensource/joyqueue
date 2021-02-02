@@ -109,6 +109,22 @@ CREATE TABLE IF NOT EXISTS `broker_group_related` (
   `id` bigint(20) unsigned NOT NULL COMMENT 'brokerId',
   `group_id` bigint(20) DEFAULT NULL COMMENT 'Broker分组id',
   `group_code` varchar(128) DEFAULT NULL COMMENT 'Broker分组code',
+  `node_name` varchar(128) DEFAULT NULL COMMENT '主机名',
+  `node_ip` varchar(20) DEFAULT NULL COMMENT '主机IP',
+  `create_time` datetime NOT NULL COMMENT '创建时间',
+  `create_by` bigint(20) NOT NULL COMMENT '创建人',
+  `update_time` datetime NOT NULL COMMENT '修改时间',
+  `update_by` bigint(20) NOT NULL COMMENT '修改人',
+  `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态: -1 删除，0 禁用，1 启用',
+  PRIMARY KEY (`id`)
+) ENGINE = InnoDB CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `broker_related` (
+  `id` bigint(20) unsigned NOT NULL COMMENT 'brokerId',
+  `group_id` bigint(20) DEFAULT NULL COMMENT 'Broker分组id',
+  `group_code` varchar(128) DEFAULT NULL COMMENT 'Broker分组code',
+  `node_name` varchar(128) DEFAULT NULL COMMENT '主机名',
+  `node_ip` varchar(20) DEFAULT NULL COMMENT '主机IP',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `create_by` bigint(20) NOT NULL COMMENT '创建人',
   `update_time` datetime NOT NULL COMMENT '修改时间',

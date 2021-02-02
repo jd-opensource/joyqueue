@@ -115,6 +115,11 @@ export default {
             width: '20%'
           },
           {
+            title: '宿主机',
+            key: 'node',
+            width: '20%'
+          },
+          {
             title: '端口',
             key: 'port',
             width: '20%'

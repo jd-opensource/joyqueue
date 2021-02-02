@@ -359,12 +359,12 @@ public class NameServerInternal extends Service implements NameService, Property
     }
 
     @Override
-    public Broker register(Integer brokerId, String brokerHost, String brokerIp, Integer port) {
+    public Broker register(Integer brokerId, String brokerHost, String brokerIp, Integer port, String node) {
         Broker broker;
         if (null == brokerId) {
             broker = metaManager.getBrokerByIpAndPort(brokerHost, port);
             if (null == broker) {
-                broker = addNewBroker(generateBrokerId(), brokerHost, brokerIp, port);
+                broker = addNewBroker(generateBrokerId(), brokerHost, brokerIp, port, node);
             } else {
                 brokerId = broker.getId();
             }
@@ -377,21 +377,23 @@ public class NameServerInternal extends Service implements NameService, Property
             broker.setPort(port);
             broker.setExternalPort(port);
             broker.setDataCenter(getDataCenter(brokerIp).getCode());
+            broker.setNode(node);
             metaManager.updateBroker(broker);
         } else {
-            broker = addNewBroker(brokerId, brokerHost, brokerIp, port);
+            broker = addNewBroker(brokerId, brokerHost, brokerIp, port, node);
         }
 
         return broker;
     }
 
-    protected Broker addNewBroker(Integer brokerId, String brokerHost, String brokerIp, Integer port) {
+    protected Broker addNewBroker(Integer brokerId, String brokerHost, String brokerIp, Integer port, String node) {
         Broker broker = new Broker();
         broker.setId(brokerId);
         broker.setIp(brokerHost);
         broker.setExternalIp(brokerIp);
         broker.setPort(port);
         broker.setExternalPort(port);
+        broker.setNode(node);
 
         broker.setDataCenter(getDataCenter(brokerIp).getCode());
         broker.setRetryType(Broker.DEFAULT_RETRY_TYPE);

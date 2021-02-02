@@ -47,6 +47,12 @@
         </grid-col>
       </grid-row>
       <grid-row class="mb10">
+        <grid-col :span="8" class="label">云主机:</grid-col>
+        <grid-col :span="16" class="val">
+          <d-input v-model="editData.node" oninput="value = value.trim()"></d-input>
+        </grid-col>
+      </grid-row>
+      <grid-row class="mb10">
         <grid-col :span="8" class="label">重试方式:</grid-col>
         <grid-col :span="16" class="val">
           <d-select v-model="editData.retryType" style="width:40%" >
@@ -168,7 +174,7 @@ export default {
           {
             title: 'ID',
             key: 'id',
-            width: '9%'
+            width: '7%'
           },
           {
             title: 'Broker分组编码',
@@ -208,7 +214,7 @@ export default {
           {
             title: '对外Ip:端口',
             key: 'externalIp',
-            width: '15%',
+            width: '12%',
             formatter (row) {
               if (row.externalIp) {
                 return row.externalIp + ':' + row.externalPort
@@ -217,9 +223,14 @@ export default {
             }
           },
           {
+            title: '宿主机',
+            key: 'node',
+            width: '11%'
+          },
+          {
             title: '机房 (编码/名称)',
             key: 'dataCenter.code',
-            width: '9%',
+            width: '7%',
             formatter (item) {
               if (item.dataCenter) {
                 return item.dataCenter.code + '/' + item.dataCenter.name
@@ -539,6 +550,7 @@ export default {
           externalIp: this.editData.externalIp,
           port: this.editData.port,
           externalPort: this.editData.externalPort,
+          node: this.editData.node,
           // dataCenter: this.editData['dataCenter'].id,
           retryType: this.editData.retryType,
           permission: this.editData.permission

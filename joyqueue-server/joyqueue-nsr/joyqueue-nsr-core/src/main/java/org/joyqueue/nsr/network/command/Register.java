@@ -26,6 +26,7 @@ public class Register extends JoyQueuePayload {
     private String brokerHost;
     private String brokerIp;
     private Integer port;
+    private String node;
 
     public Register brokerId(Integer brokerId) {
         this.brokerId = brokerId;
@@ -44,6 +45,11 @@ public class Register extends JoyQueuePayload {
         return this;
     }
 
+    public Register node(String node){
+        this.node = node;
+        return this;
+    }
+
     public Integer getBrokerId() {
         return brokerId;
     }
@@ -58,6 +64,14 @@ public class Register extends JoyQueuePayload {
 
     public Integer getPort() {
         return port;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
     @Override

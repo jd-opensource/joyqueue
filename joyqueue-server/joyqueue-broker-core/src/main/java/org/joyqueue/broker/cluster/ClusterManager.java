@@ -116,6 +116,8 @@ public class ClusterManager extends Service {
     // 元数据事件
     private EventBus<MetaEvent> eventBus = new EventBus("joyqueue-cluster-eventBus");
 
+    protected String NODE_NAME_ENV = "NODE_NAME";
+
     private BrokerContext brokerContext;
     private ClusterNameService clusterNameService;
     private ClusterConfig config;
@@ -172,7 +174,9 @@ public class ClusterManager extends Service {
         String localIp = IpUtil.getDefaultLocalIp();
         long port = brokerConfig.getFrontendConfig().getPort();
         Integer brokerId = readBroker();
-        broker = nameService.register(brokerId, localHost, localIp, (int) port);
+        String node = IpUtil.getNode();
+        System.getenv(NODE_NAME_ENV);
+        broker = nameService.register(brokerId, localHost, localIp, (int) port, node);
         // brokerId
         if (broker == null) {
             logger.error("brokerId[{}] [{}:{}:{}] 注册失败", brokerId, localHost, localIp, port);

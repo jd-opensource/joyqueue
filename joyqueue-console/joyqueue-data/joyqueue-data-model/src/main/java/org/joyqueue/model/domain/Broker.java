@@ -83,6 +83,10 @@ public class Broker extends BaseModel {
      * 对外端口
      */
     private Integer externalPort;
+    /**
+     * 宿主机
+     */
+    protected String node;
 
     public Broker() {
         super();
@@ -207,6 +211,14 @@ public class Broker extends BaseModel {
 
     public void setExternalPort(Integer externalPort) {
         this.externalPort = externalPort;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
     }
 
     @Override

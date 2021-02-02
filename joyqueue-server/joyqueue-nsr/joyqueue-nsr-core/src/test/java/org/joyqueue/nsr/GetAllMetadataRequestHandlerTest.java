@@ -214,7 +214,7 @@ public class GetAllMetadataRequestHandlerTest {
         }
 
         @Override
-        public Broker register(Integer brokerId, String brokerHost, String brokerIp, Integer port) {
+        public Broker register(Integer brokerId, String brokerHost, String brokerIp, Integer port, String node) {
             check();
             Broker broker = new Broker();
             broker.setId(brokerId);
@@ -222,6 +222,7 @@ public class GetAllMetadataRequestHandlerTest {
             broker.setExternalIp(brokerIp);
             broker.setPort(port);
             broker.setExternalPort(port);
+            broker.setNode(node);
             allMetadata.getBrokers().put(brokerId, broker);
             return broker;
         }
