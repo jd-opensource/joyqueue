@@ -60,7 +60,7 @@
         <journalkeeper.version>0.1.7</journalkeeper.version>
         <fastjson.version>1.2.74</fastjson.version>
         <netty.version>4.1.27.Final</netty.version>
-        <log4j.version>2.13.3</log4j.version>
+        <log4j.version>2.15.0</log4j.version>
         <commons-logging.version>1.2</commons-logging.version>
         <commons-io.version>2.3</commons-io.version>
         <commons-lang3.version>3.8.1</commons-lang3.version>
