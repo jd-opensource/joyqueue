@@ -117,7 +117,7 @@
         <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
 
-        <h2database.version>1.4.195</h2database.version>
+        <h2database.version>2.0.206</h2database.version>
         <hadoop.version>2.7.6</hadoop.version>
         <hbase.version>1.4.8</hbase.version>
         <mockito2.version>2.8.9</mockito2.version>
