@@ -91,7 +91,7 @@
         <spring-boot.version>2.1.1.RELEASE</spring-boot.version>
         <HikariCP.version>2.3.13</HikariCP.version>
         <aspectj.version>1.9.2</aspectj.version>
-        <mysql.version>5.1.41</mysql.version>
+        <mysql.version>8.0.28</mysql.version>
         <laf-binding.version>1.0.9</laf-binding.version>
         <laf-vertx.version>1.0.18</laf-vertx.version>
         <laf-extention.version>1.0.16</laf-extention.version>
